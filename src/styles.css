@@ -471,6 +471,23 @@ select {
   background: #dfe8e4;
   font-family: inherit;
 }
+.map-recenter {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 500;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(80, 50, 30, 0.22);
+}
+.map-recenter:active {
+  background: #f4ede6;
+}
 
 /* ---- Detalle ---- */
 .dhero {

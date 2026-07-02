@@ -33,6 +33,7 @@ export default function MapaLeaflet({
   marcadores = [],
   linea = null, // array de [lat,lng] para dibujar un recorrido
   interactivo = true,
+  recentrar = false, // muestra un botón para volver al centro (pin)
   onMarcadorClick,
   onMapaClick,
   style,
@@ -100,5 +101,21 @@ export default function MapaLeaflet({
     })
   }, [marcadores, linea, onMarcadorClick])
 
-  return <div ref={contRef} style={{ width: '100%', height: '100%', ...style }} />
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100%', ...style }}>
+      <div ref={contRef} style={{ width: '100%', height: '100%' }} />
+      {recentrar && (
+        <button
+          type="button"
+          className="map-recenter"
+          onClick={() => mapRef.current && center && mapRef.current.setView(center, mapRef.current.getZoom())}
+          aria-label="Centrar el mapa"
+        >
+          <span className="mi" style={{ fontSize: 22, color: '#1f9d8f' }}>
+            my_location
+          </span>
+        </button>
+      )}
+    </div>
+  )
 }

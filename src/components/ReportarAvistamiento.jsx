@@ -51,9 +51,13 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
             center={[punto.lat, punto.lng]}
             zoom={15}
             interactivo
+            recentrar
             onMapaClick={setPunto}
             marcadores={[{ id: 'p', lat: punto.lat, lng: punto.lng, tipo: 'avistamiento' }]}
           />
+        </div>
+        <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--faint)', marginTop: 7 }}>
+          Tocá el mapa para mover el pin. Si te perdés, usá el botón <span className="mi" style={{ fontSize: 15, color: '#1f9d8f', verticalAlign: 'middle' }}>my_location</span> para volver al pin.
         </div>
 
         <div className="flabel">¿Cómo lo viste? (opcional)</div>
