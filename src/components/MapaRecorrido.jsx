@@ -22,7 +22,7 @@ export default function MapaRecorrido({ reporte, onCerrar }) {
 
   const centro = coordsDeBarrio(reporte.zona)
   const marcadores = [
-    { id: 'zona', lat: centro[0], lng: centro[1], tipo: reporte.tipo },
+    { id: 'zona', lat: centro[0], lng: centro[1], tipo: reporte.tipo, especie: reporte.especie },
     ...avist.map((a, i) => ({
       id: a.id,
       lat: a.lat,

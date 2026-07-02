@@ -59,6 +59,7 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
                 lat: c[0],
                 lng: c[1],
                 tipo: reporte.tipo,
+                especie: reporte.especie,
                 popup: `<b style="font-family:Nunito,sans-serif">${reporte.tipo === 'perdido' ? 'Se perdió acá' : 'Se encontró acá'}</b><br><span style="font-family:Nunito,sans-serif;font-size:12px;color:#8a807a">${reporte.zona}</span>`,
               },
               { id: 'p', lat: punto.lat, lng: punto.lng, tipo: 'avistamiento' },

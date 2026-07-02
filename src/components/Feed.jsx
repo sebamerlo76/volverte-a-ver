@@ -19,7 +19,7 @@ const TABS = [
   { k: 'todos', t: 'Todos' },
   { k: 'perdido', t: 'Perdidos' },
   { k: 'encontrado', t: 'Encontrados' },
-  { k: 'finales', t: '🎉 Reencontrados' },
+  { k: 'finales', t: 'En casa', icono: 'home' },
 ]
 
 // Desplazamiento determinístico para que no se superpongan los pines del barrio.
@@ -72,7 +72,7 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, user, onL
     () =>
       filtrados.map((r) => {
         const [lat, lng] = jitter(coordsDeBarrio(r.zona), r.id)
-        return { id: r.id, lat, lng, tipo: r.estado === 'resuelto' ? 'avistamiento' : r.tipo }
+        return { id: r.id, lat, lng, tipo: r.estado === 'resuelto' ? 'avistamiento' : r.tipo, especie: r.especie }
       }),
     [filtrados]
   )
@@ -118,6 +118,11 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, user, onL
         <div className="tabs">
           {TABS.map((tab) => (
             <button key={tab.k} className={'tab' + (filtros.estado === tab.k ? ' on' : '')} onClick={() => setFiltro('estado', tab.k)}>
+              {tab.icono ? (
+                <span className={'mi' + (filtros.estado === tab.k ? ' fill' : '')} style={{ fontSize: 16, marginRight: 3, verticalAlign: '-3px' }}>
+                  {tab.icono}
+                </span>
+              ) : null}
               {tab.t}
             </button>
           ))}

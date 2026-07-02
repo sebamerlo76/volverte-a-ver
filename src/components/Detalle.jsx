@@ -34,7 +34,7 @@ export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorra
 
   // Marcadores del mapa: la zona del aviso + cada avistamiento numerado.
   const marcadores = [
-    { id: 'zona', lat: centro[0], lng: centro[1], tipo: r.tipo },
+    { id: 'zona', lat: centro[0], lng: centro[1], tipo: r.tipo, especie: r.especie },
     ...avist.map((a, i) => ({
       id: a.id,
       lat: a.lat,

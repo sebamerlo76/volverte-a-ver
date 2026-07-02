@@ -2,17 +2,23 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
-// Ícono de pin dibujado con CSS (divIcon). Si tiene label (número), lo muestra.
-function pin(color, label) {
-  const centro =
-    label != null
-      ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(45deg);color:#fff;font:800 12px Nunito,sans-serif">${label}</div>`
-      : `<div style="width:9px;height:9px;border-radius:50%;background:#fff;position:absolute;top:5px;left:5px"></div>`
+const EMOJI_ESPECIE = { perro: '🐕', gato: '🐈', otro: '🐾' }
+
+// Ícono de pin (divIcon). Muestra: emoji de especie, o número (label), o punto.
+function pin(color, label, especie) {
+  let centro
+  if (especie) {
+    centro = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(45deg);font-size:15px;line-height:1">${EMOJI_ESPECIE[especie] || '🐾'}</div>`
+  } else if (label != null) {
+    centro = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(45deg);color:#fff;font:800 12px Nunito,sans-serif">${label}</div>`
+  } else {
+    centro = `<div style="width:9px;height:9px;border-radius:50%;background:#fff;position:absolute;top:5px;left:5px"></div>`
+  }
   return L.divIcon({
     className: '',
-    html: `<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:3px solid #fff;box-shadow:0 3px 9px rgba(0,0,0,.4);position:relative">${centro}</div>`,
-    iconSize: [28, 28],
-    iconAnchor: [14, 27],
+    html: `<div style="width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:3px solid #fff;box-shadow:0 3px 9px rgba(0,0,0,.4);position:relative">${centro}</div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 29],
   })
 }
 
@@ -96,7 +102,7 @@ export default function MapaLeaflet({
       L.polyline(linea, { color: '#ff5747', weight: 3, dashArray: '6,8', opacity: 0.85 }).addTo(capa)
     }
     marcadores.forEach((mk) => {
-      const marker = L.marker([mk.lat, mk.lng], { icon: pin(mk.color || COLOR[mk.tipo] || '#ff5747', mk.label) })
+      const marker = L.marker([mk.lat, mk.lng], { icon: pin(mk.color || COLOR[mk.tipo] || '#ff5747', mk.label, mk.especie) })
       if (mk.popup) marker.bindPopup(mk.popup, { closeButton: false, offset: [0, -8] })
       if (onMarcadorClick) marker.on('click', () => onMarcadorClick(mk.id))
       capa.addLayer(marker)
