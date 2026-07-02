@@ -332,6 +332,43 @@ select {
   background: #fff3d6;
   color: #a97400;
 }
+/* Chips seleccionables (carga rápida sin escribir) */
+.chipsel-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chipsel {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #6b6058;
+}
+.chipsel.on {
+  background: var(--coral);
+  border-color: var(--coral);
+  color: #fff;
+}
+.chipsel-otro {
+  flex-basis: 100%;
+  height: 48px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  padding: 0 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  outline: none;
+  margin-top: 2px;
+}
+.chipsel-otro:focus {
+  border-color: var(--teal);
+}
 .empty {
   text-align: center;
   color: var(--muted);

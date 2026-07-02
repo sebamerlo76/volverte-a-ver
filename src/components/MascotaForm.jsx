@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { addMascota, actualizarMascota, eliminarMascota, subirFoto } from '../data/store.js'
-
-const TAMANOS = ['Chico', 'Mediano', 'Grande']
+import SelectChips from './SelectChips.jsx'
+import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS } from '../lib/opciones.js'
 
 export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast }) {
   const editando = !!inicial
@@ -113,43 +113,19 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast }) 
         </div>
 
         <div className="flabel">Sexo</div>
-        <div className="seg" style={{ background: 'transparent', padding: 0, gap: 9 }}>
-          <button className={'specb' + (sexo === 'macho' ? ' on' : '')} style={{ height: 46, flexDirection: 'row' }} onClick={() => setSexo(sexo === 'macho' ? '' : 'macho')}>
-            ♂ Macho
-          </button>
-          <button className={'specb' + (sexo === 'hembra' ? ' on' : '')} style={{ height: 46, flexDirection: 'row' }} onClick={() => setSexo(sexo === 'hembra' ? '' : 'hembra')}>
-            ♀ Hembra
-          </button>
-        </div>
+        <SelectChips opciones={SEXOS} valor={sexo} onChange={setSexo} />
 
         <div className="flabel">Edad (aprox.)</div>
-        <div className="inp">
-          <input value={edad} onChange={(e) => setEdad(e.target.value)} placeholder="Ej: 3 años" />
-        </div>
+        <SelectChips opciones={EDADES} valor={edad} onChange={setEdad} otro placeholder="Ej: 2 años" />
 
         <div className="flabel">Collar / chapita</div>
-        <div className="inp">
-          <input value={collar} onChange={(e) => setCollar(e.target.value)} placeholder="Ej: Collar azul con chapita" />
-        </div>
+        <SelectChips opciones={COLLAR} valor={collar} onChange={setCollar} otro placeholder="Detalle, ej: rojo con chapita" />
 
         <div className="flabel">Color</div>
-        <div className="inp">
-          <input value={color} onChange={(e) => setColor(e.target.value)} placeholder="Ej: Marrón y blanco" />
-        </div>
+        <SelectChips opciones={COLORES} valor={color} onChange={setColor} otro placeholder="Otro color" />
 
         <div className="flabel">Tamaño</div>
-        <div className="seg" style={{ background: 'transparent', padding: 0, gap: 9 }}>
-          {TAMANOS.map((t) => (
-            <button
-              key={t}
-              className={'specb' + (tamano === t ? ' on' : '')}
-              style={{ height: 46, flexDirection: 'row' }}
-              onClick={() => setTamano(tamano === t ? '' : t)}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
+        <SelectChips opciones={TAMANOS} valor={tamano} onChange={setTamano} />
 
         <div className="flabel">Raza</div>
         <div className="inp">

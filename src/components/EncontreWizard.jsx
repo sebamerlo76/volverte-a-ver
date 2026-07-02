@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
+import SelectChips from './SelectChips.jsx'
 import { NOMBRES_BARRIOS, coordsDeBarrio } from '../lib/parana.js'
+import { COLORES, SEXOS, COLLAR, TAMANOS } from '../lib/opciones.js'
 import { addReporte, subirFoto } from '../data/store.js'
 
-const TAMANOS = ['Chico', 'Mediano', 'Grande']
 const TOTAL = 5
 const TITULOS = [
   '¿Qué animal es?',
@@ -122,35 +123,13 @@ export default function EncontreWizard({ onCerrar, onPublicado, onToast }) {
         {paso === 2 && (
           <>
             <div className="flabel">Color</div>
-            <div className="inp">
-              <input value={color} onChange={(e) => setColor(e.target.value)} placeholder="Ej: Marrón con blanco" />
-            </div>
+            <SelectChips opciones={COLORES} valor={color} onChange={setColor} otro placeholder="Otro color" />
             <div className="flabel">Tamaño</div>
-            <div className="seg" style={{ background: 'transparent', padding: 0, gap: 9 }}>
-              {TAMANOS.map((t) => (
-                <button
-                  key={t}
-                  className={'specb' + (tamano === t ? ' on' : '')}
-                  style={{ height: 46, flexDirection: 'row' }}
-                  onClick={() => setTamano(tamano === t ? '' : t)}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
+            <SelectChips opciones={TAMANOS} valor={tamano} onChange={setTamano} />
             <div className="flabel">Sexo</div>
-            <div className="seg" style={{ background: 'transparent', padding: 0, gap: 9 }}>
-              <button className={'specb' + (sexo === 'macho' ? ' on' : '')} style={{ height: 46, flexDirection: 'row' }} onClick={() => setSexo(sexo === 'macho' ? '' : 'macho')}>
-                ♂ Macho
-              </button>
-              <button className={'specb' + (sexo === 'hembra' ? ' on' : '')} style={{ height: 46, flexDirection: 'row' }} onClick={() => setSexo(sexo === 'hembra' ? '' : 'hembra')}>
-                ♀ Hembra
-              </button>
-            </div>
+            <SelectChips opciones={SEXOS} valor={sexo} onChange={setSexo} />
             <div className="flabel">Collar / chapita</div>
-            <div className="inp">
-              <input value={collar} onChange={(e) => setCollar(e.target.value)} placeholder="Ej: Collar rojo" />
-            </div>
+            <SelectChips opciones={COLLAR} valor={collar} onChange={setCollar} otro placeholder="Detalle, ej: collar rojo" />
             <div className="flabel">Señas particulares</div>
             <textarea
               className="ta"

@@ -44,7 +44,7 @@ export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorra
 
           <div className="tags" style={{ marginTop: 14 }}>
             <span className="tag">{r.especie === 'perro' ? 'Perro' : r.especie === 'gato' ? 'Gato' : 'Otro'}</span>
-            {r.sexo ? <span className="tag">{r.sexo === 'macho' ? '♂ Macho' : '♀ Hembra'}</span> : null}
+            {r.sexo && r.sexo !== 'No sé' ? <span className="tag">{r.sexo}</span> : null}
             {r.color ? <span className="tag">{r.color}</span> : null}
             {r.tamano ? <span className="tag">{r.tamano}</span> : null}
             {r.raza ? <span className="tag">{r.raza}</span> : null}

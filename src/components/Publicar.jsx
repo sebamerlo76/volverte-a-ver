@@ -2,6 +2,8 @@ import { useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { NOMBRES_BARRIOS, coordsDeBarrio } from '../lib/parana.js'
 import { addReporte, actualizarReporte, addMascota, subirFoto } from '../data/store.js'
+import SelectChips from './SelectChips.jsx'
+import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS } from '../lib/opciones.js'
 
 export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar, onPublicado, onToast }) {
   const editando = !!inicial
@@ -12,6 +14,8 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
   const [foto, setFoto] = useState(base?.foto || '') // vista previa / foto actual
   const [fotoFile, setFotoFile] = useState(null) // archivo nuevo a subir (si cambia)
   const [nombre, setNombre] = useState(base?.nombre || '')
+  const [color, setColor] = useState(base?.color || '')
+  const [tamano, setTamano] = useState(base?.tamano || '')
   const [sexo, setSexo] = useState(base?.sexo || '')
   const [edad, setEdad] = useState(base?.edad || '')
   const [collar, setCollar] = useState(base?.collar || '')
@@ -47,8 +51,8 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
         nombre: nombre.trim() || null,
         zona,
         referencia: zona,
-        color: base?.color || '',
-        tamano: base?.tamano || '',
+        color,
+        tamano,
         raza: base?.raza || '',
         sexo,
         edad: edad.trim(),
@@ -148,25 +152,20 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
           <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej: Rocco" />
         </div>
 
+        <div className="flabel">Color</div>
+        <SelectChips opciones={COLORES} valor={color} onChange={setColor} otro placeholder="Otro color" />
+
+        <div className="flabel">Tamaño</div>
+        <SelectChips opciones={TAMANOS} valor={tamano} onChange={setTamano} />
+
         <div className="flabel">Sexo</div>
-        <div className="seg" style={{ background: 'transparent', padding: 0, gap: 9 }}>
-          <button className={'specb' + (sexo === 'macho' ? ' on' : '')} style={{ height: 46, flexDirection: 'row' }} onClick={() => setSexo(sexo === 'macho' ? '' : 'macho')}>
-            ♂ Macho
-          </button>
-          <button className={'specb' + (sexo === 'hembra' ? ' on' : '')} style={{ height: 46, flexDirection: 'row' }} onClick={() => setSexo(sexo === 'hembra' ? '' : 'hembra')}>
-            ♀ Hembra
-          </button>
-        </div>
+        <SelectChips opciones={SEXOS} valor={sexo} onChange={setSexo} />
 
         <div className="flabel">Edad (aprox.)</div>
-        <div className="inp">
-          <input value={edad} onChange={(e) => setEdad(e.target.value)} placeholder="Ej: 2 años / cachorro" />
-        </div>
+        <SelectChips opciones={EDADES} valor={edad} onChange={setEdad} otro placeholder="Ej: 2 años" />
 
         <div className="flabel">Collar / chapita</div>
-        <div className="inp">
-          <input value={collar} onChange={(e) => setCollar(e.target.value)} placeholder="Ej: Collar rojo con chapita" />
-        </div>
+        <SelectChips opciones={COLLAR} valor={collar} onChange={setCollar} otro placeholder="Detalle, ej: rojo con chapita" />
 
         <div className="flabel">Zona / barrio</div>
         <div className="inp">
