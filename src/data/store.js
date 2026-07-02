@@ -303,6 +303,48 @@ export async function eliminarMascota(id) {
   guardarMascotasLocal(leerMascotasLocal().filter((m) => m.id !== id))
 }
 
+// ---------------------------------------------------------------------------
+// Avistamientos ("¡Lo vi acá!") — sin login, cualquiera puede dejar uno
+// ---------------------------------------------------------------------------
+const CLAVE_AVIST = 'vav_avistamientos_v1'
+
+function avistDesdeFila(a) {
+  return { id: a.id, reporteId: a.reporte_id, lat: a.lat, lng: a.lng, nota: a.nota, autor: a.autor, creadoEn: a.creado_en }
+}
+
+// Avistamientos de un aviso, del más viejo al más nuevo (para ver el recorrido).
+export async function getAvistamientos(reporteId) {
+  if (!reporteId) return []
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase
+      .from('avistamientos')
+      .select('*')
+      .eq('reporte_id', reporteId)
+      .order('creado_en', { ascending: true })
+    if (error) throw error
+    return data.map(avistDesdeFila)
+  }
+  const all = JSON.parse(localStorage.getItem(CLAVE_AVIST) || '[]')
+  return all.filter((a) => a.reporteId === reporteId).sort((a, b) => (a.creadoEn < b.creadoEn ? -1 : 1))
+}
+
+export async function addAvistamiento({ reporteId, lat, lng, nota, autor }) {
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase
+      .from('avistamientos')
+      .insert({ reporte_id: reporteId, lat, lng, nota, autor })
+      .select()
+      .single()
+    if (error) throw error
+    return avistDesdeFila(data)
+  }
+  const all = JSON.parse(localStorage.getItem(CLAVE_AVIST) || '[]')
+  const nuevo = { id: 'a-' + Date.now().toString(36), reporteId, lat, lng, nota, autor, creadoEn: new Date().toISOString() }
+  all.push(nuevo)
+  localStorage.setItem(CLAVE_AVIST, JSON.stringify(all))
+  return nuevo
+}
+
 // Sube una foto y devuelve su URL. En la nube va al Storage; en local, un data URL.
 export async function subirFoto(file) {
   if (!file) return ''

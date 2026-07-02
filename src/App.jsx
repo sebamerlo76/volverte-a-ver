@@ -9,6 +9,7 @@ import MascotaForm from './components/MascotaForm.jsx'
 import IntentPublicar from './components/IntentPublicar.jsx'
 import ElegirMascota from './components/ElegirMascota.jsx'
 import EncontreWizard from './components/EncontreWizard.jsx'
+import ReportarAvistamiento from './components/ReportarAvistamiento.jsx'
 import BottomNav from './components/BottomNav.jsx'
 import { getReportes, marcarResuelto, reactivarReporte, eliminarReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
@@ -215,6 +216,18 @@ export default function App() {
             onBorrar={borrar}
             onResuelto={resolver}
             onReactivar={reactivar}
+            onAvistar={() => setVista('avistamiento')}
+          />
+        )}
+        {vista === 'avistamiento' && seleccionado && (
+          <ReportarAvistamiento
+            reporte={seleccionado}
+            onCerrar={() => setVista('detalle')}
+            onEnviado={() => {
+              setVista('detalle')
+              mostrarToast('👀 ¡Gracias! Tu avistamiento se sumó al recorrido')
+            }}
+            onToast={mostrarToast}
           />
         )}
         {vista === 'post-intent' && (

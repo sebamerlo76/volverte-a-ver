@@ -2,17 +2,21 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
-// Ícono de pin dibujado con CSS (divIcon), así no dependemos de imágenes.
-function pin(color) {
+// Ícono de pin dibujado con CSS (divIcon). Si tiene label (número), lo muestra.
+function pin(color, label) {
+  const centro =
+    label != null
+      ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(45deg);color:#fff;font:800 12px Nunito,sans-serif">${label}</div>`
+      : `<div style="width:9px;height:9px;border-radius:50%;background:#fff;position:absolute;top:5px;left:5px"></div>`
   return L.divIcon({
     className: '',
-    html: `<div style="width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:3px solid #fff;box-shadow:0 3px 9px rgba(0,0,0,.4)"><div style="width:9px;height:9px;border-radius:50%;background:#fff;position:absolute;top:5px;left:5px"></div></div>`,
-    iconSize: [26, 26],
-    iconAnchor: [13, 25],
+    html: `<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:3px solid #fff;box-shadow:0 3px 9px rgba(0,0,0,.4);position:relative">${centro}</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 27],
   })
 }
 
-const COLOR = { perdido: '#ff5747', encontrado: '#17a06b' }
+const COLOR = { perdido: '#ff5747', encontrado: '#17a06b', avistamiento: '#1f9d8f' }
 
 /**
  * Mapa reutilizable.
@@ -27,6 +31,7 @@ export default function MapaLeaflet({
   center,
   zoom = 14,
   marcadores = [],
+  linea = null, // array de [lat,lng] para dibujar un recorrido
   interactivo = true,
   onMarcadorClick,
   onMapaClick,
@@ -79,17 +84,21 @@ export default function MapaLeaflet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [center?.[0], center?.[1]])
 
-  // Redibujar marcadores cuando cambian.
+  // Redibujar marcadores y el recorrido cuando cambian.
   useEffect(() => {
     const capa = capaRef.current
     if (!capa) return
     capa.clearLayers()
+    // Línea del recorrido (punteada) primero, para que quede debajo de los pines.
+    if (linea && linea.length > 1) {
+      L.polyline(linea, { color: '#ff5747', weight: 3, dashArray: '6,8', opacity: 0.85 }).addTo(capa)
+    }
     marcadores.forEach((mk) => {
-      const marker = L.marker([mk.lat, mk.lng], { icon: pin(COLOR[mk.tipo] || '#ff5747') })
+      const marker = L.marker([mk.lat, mk.lng], { icon: pin(mk.color || COLOR[mk.tipo] || '#ff5747', mk.label) })
       if (onMarcadorClick) marker.on('click', () => onMarcadorClick(mk.id))
       capa.addLayer(marker)
     })
-  }, [marcadores, onMarcadorClick])
+  }, [marcadores, linea, onMarcadorClick])
 
   return <div ref={contRef} style={{ width: '100%', height: '100%', ...style }} />
 }

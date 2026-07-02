@@ -1,12 +1,34 @@
+import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { coordsDeBarrio } from '../lib/parana.js'
+import { getAvistamientos } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, linkWhatsApp } from '../lib/formato.js'
 
-export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar }) {
+export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar }) {
+  const [avist, setAvist] = useState([])
+
+  useEffect(() => {
+    if (!r?.id) return
+    let vivo = true
+    getAvistamientos(r.id)
+      .then((a) => vivo && setAvist(a))
+      .catch(() => {})
+    return () => {
+      vivo = false
+    }
+  }, [r?.id])
+
   if (!r) return null
   const perdido = r.tipo === 'perdido'
   const clr = perdido ? '#ff6b5e' : '#1f9d8f'
   const centro = coordsDeBarrio(r.zona)
+
+  // Marcadores del mapa: la zona del aviso + cada avistamiento numerado.
+  const marcadores = [
+    { id: 'zona', lat: centro[0], lng: centro[1], tipo: r.tipo },
+    ...avist.map((a, i) => ({ id: a.id, lat: a.lat, lng: a.lng, tipo: 'avistamiento', label: i + 1 })),
+  ]
+  const linea = [centro, ...avist.map((a) => [a.lat, a.lng])]
 
   return (
     <div className="view">
@@ -84,15 +106,44 @@ export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorra
             </div>
           </div>
 
-          <div className="minimap">
-            <MapaLeaflet center={centro} zoom={15} interactivo={false} marcadores={[{ id: r.id, lat: centro[0], lng: centro[1], tipo: r.tipo }]} />
+          <div className="sec-t" style={{ marginTop: 18, color: 'var(--teal)' }}>
+            {avist.length > 0 ? `Recorrido · ${avist.length} avistamiento${avist.length === 1 ? '' : 's'}` : 'Última zona conocida'}
+          </div>
+          <div className="minimap" style={{ height: 200 }}>
+            <MapaLeaflet center={centro} zoom={14} interactivo={false} marcadores={marcadores} linea={linea} />
             <div className="lbl">
               <span className="mi" style={{ fontSize: 16, color: clr }}>
                 location_on
               </span>
-              Zona aproximada · {r.zona}
+              {r.zona}
+              {avist.length > 0 ? ` → ${avist.length} visto${avist.length === 1 ? '' : 's'}` : ''}
             </div>
           </div>
+
+          {r.estado !== 'resuelto' && (
+            <button className="btn-avistar" onClick={() => onAvistar(r)}>
+              <span className="mi" style={{ fontSize: 22 }}>
+                visibility
+              </span>
+              ¡Lo vi acá!
+            </button>
+          )}
+
+          {avist.length > 0 && (
+            <div className="avist-lista">
+              {avist.map((a, i) => (
+                <div className="avist-row" key={a.id}>
+                  <div className="avist-num">{i + 1}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="avist-nota">{a.nota || 'Avistamiento'}</div>
+                    <div className="avist-meta">
+                      {a.autor || 'Anónimo'} · {tiempoRelativo(a.creadoEn)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <div style={{ height: 18 }} />
       </div>
