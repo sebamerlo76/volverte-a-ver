@@ -3,19 +3,35 @@ import Feed from './components/Feed.jsx'
 import Detalle from './components/Detalle.jsx'
 import Publicar from './components/Publicar.jsx'
 import Mapa from './components/Mapa.jsx'
+import Auth from './components/Auth.jsx'
 import BottomNav from './components/BottomNav.jsx'
-import { getReportes } from './data/store.js'
+import { getReportes, marcarResuelto, eliminarReporte } from './data/store.js'
+import { supabase, supabaseConfigurado } from './lib/supabase.js'
 
 export default function App() {
-  const [vista, setVista] = useState('feed') // feed | detalle | post | map
+  const [vista, setVista] = useState('feed') // feed | detalle | post | map | auth
   const [selId, setSelId] = useState(null)
   const [reportes, setReportes] = useState([])
   const [toast, setToast] = useState('')
+  const [user, setUser] = useState(null)
+  const [editando, setEditando] = useState(null) // aviso en edición, o null
+  const [authProximo, setAuthProximo] = useState('feed') // adónde ir tras iniciar sesión
 
-  // Cargar reportes del almacenamiento al iniciar.
+  const authActivo = supabaseConfigurado
+  const logueado = !authActivo || !!user
+
+  // Cargar reportes al iniciar.
   useEffect(() => {
     cargar()
   }, [])
+
+  // Seguir el estado de la sesión (solo si hay Supabase).
+  useEffect(() => {
+    if (!authActivo) return
+    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null))
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setUser(session?.user ?? null))
+    return () => sub.subscription.unsubscribe()
+  }, [authActivo])
 
   async function cargar() {
     try {
@@ -33,6 +49,16 @@ export default function App() {
   }
 
   function navegar(tab) {
+    if (tab === 'post') {
+      if (logueado) {
+        setEditando(null)
+        setVista('post')
+      } else {
+        setAuthProximo('post')
+        setVista('auth')
+      }
+      return
+    }
     setVista(tab)
   }
 
@@ -42,25 +68,104 @@ export default function App() {
   }
 
   async function alPublicar() {
+    const eraEdicion = !!editando
     await cargar()
+    setEditando(null)
     setVista('feed')
-    mostrarToast('✅ ¡Reporte publicado! Ya aparece en el inicio.')
+    mostrarToast(eraEdicion ? '✅ Aviso actualizado' : '✅ ¡Reporte publicado! Ya aparece en el inicio.')
+  }
+
+  // --- Sesión ---
+  function pedirLogin() {
+    setAuthProximo('feed')
+    setVista('auth')
+  }
+  async function salir() {
+    if (authActivo) await supabase.auth.signOut()
+    setVista('feed')
+    mostrarToast('Sesión cerrada')
+  }
+  function trasAuth() {
+    mostrarToast('¡Bienvenido! 🐾')
+    if (authProximo === 'post') {
+      setEditando(null)
+      setVista('post')
+    } else {
+      setVista('feed')
+    }
+  }
+
+  // --- Gestión de mis avisos ---
+  function editar(reporte) {
+    setEditando(reporte)
+    setVista('post')
+  }
+  async function resolver(id) {
+    try {
+      await marcarResuelto(id)
+      await cargar()
+      setVista('feed')
+      mostrarToast('🎉 ¡Marcado como reencontrado!')
+    } catch (e) {
+      console.error(e)
+      mostrarToast('No se pudo actualizar 😕')
+    }
+  }
+  async function borrar(id) {
+    if (!window.confirm('¿Seguro que querés borrar este aviso? No se puede deshacer.')) return
+    try {
+      await eliminarReporte(id)
+      await cargar()
+      setVista('feed')
+      mostrarToast('Aviso borrado')
+    } catch (e) {
+      console.error(e)
+      mostrarToast('No se pudo borrar 😕')
+    }
   }
 
   const tabActual = vista === 'map' ? 'map' : 'feed'
   const seleccionado = selId ? reportes.find((r) => r.id === selId) : null
+  const esMio = seleccionado ? !authActivo || (user && seleccionado.userId === user.id) : false
 
   return (
     <div className="app-shell">
       <div className="app">
-        {vista === 'feed' && <Feed reportes={reportes} onOpen={abrirDetalle} />}
-        {vista === 'detalle' && <Detalle r={seleccionado} onVolver={() => setVista('feed')} onToast={mostrarToast} />}
-        {vista === 'post' && (
-          <Publicar onCerrar={() => setVista('feed')} onPublicado={alPublicar} onToast={mostrarToast} />
+        {vista === 'feed' && (
+          <Feed
+            reportes={reportes}
+            onOpen={abrirDetalle}
+            authActivo={authActivo}
+            logueado={logueado}
+            onLogin={pedirLogin}
+            onLogout={salir}
+          />
         )}
+        {vista === 'detalle' && (
+          <Detalle
+            r={seleccionado}
+            esMio={esMio}
+            onVolver={() => setVista('feed')}
+            onToast={mostrarToast}
+            onEditar={editar}
+            onBorrar={borrar}
+            onResuelto={resolver}
+          />
+        )}
+        {vista === 'post' && (
+          <Publicar
+            inicial={editando}
+            onCerrar={() => {
+              setEditando(null)
+              setVista('feed')
+            }}
+            onPublicado={alPublicar}
+            onToast={mostrarToast}
+          />
+        )}
+        {vista === 'auth' && <Auth onCerrar={() => setVista('feed')} onAuth={trasAuth} onToast={mostrarToast} />}
         {vista === 'map' && <Mapa reportes={reportes} onAbrir={abrirDetalle} onToast={mostrarToast} />}
 
-        {/* La barra inferior se muestra en las vistas principales, no en detalle/publicar. */}
         {(vista === 'feed' || vista === 'map') && <BottomNav tab={tabActual} onNav={navegar} />}
       </div>
 

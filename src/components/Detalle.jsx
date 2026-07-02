@@ -2,7 +2,7 @@ import MapaLeaflet from './MapaLeaflet.jsx'
 import { coordsDeBarrio } from '../lib/parana.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, linkWhatsApp } from '../lib/formato.js'
 
-export default function Detalle({ r, onVolver, onToast }) {
+export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorrar, onResuelto }) {
   if (!r) return null
   const perdido = r.tipo === 'perdido'
   const clr = perdido ? '#ff6b5e' : '#1f9d8f'
@@ -80,40 +80,61 @@ export default function Detalle({ r, onVolver, onToast }) {
         <div style={{ height: 18 }} />
       </div>
 
-      <div className="cta">
-        <a
-          className="btn-wa"
-          href={linkWhatsApp(r)}
-          target="_blank"
-          rel="noreferrer"
-          onClick={() => onToast('Abriendo WhatsApp…')}
-        >
-          <span className="mi fill" style={{ fontSize: 24 }}>
-            chat
-          </span>
-          Contactar por WhatsApp
-        </a>
-        <button
-          className="btn-share"
-          onClick={async () => {
-            const url = window.location.href
-            const texto = `${nombreMostrado(r)} — ${r.tipo} en ${r.zona}, Paraná. Mirá en Volverte a ver.`
-            if (navigator.share) {
-              try {
-                await navigator.share({ title: 'Volverte a ver', text: texto, url })
-              } catch (e) {
-                /* el usuario canceló */
+      {esMio ? (
+        <div className="cta">
+          <button className="btn-wa" style={{ background: 'var(--green)' }} onClick={() => onResuelto(r.id)}>
+            <span className="mi fill" style={{ fontSize: 24 }}>
+              check_circle
+            </span>
+            {r.tipo === 'perdido' ? 'Marcar reencontrado' : 'Marcar resuelto'}
+          </button>
+          <button className="btn-share" onClick={() => onEditar(r)} aria-label="Editar aviso">
+            <span className="mi" style={{ fontSize: 24 }}>
+              edit
+            </span>
+          </button>
+          <button className="btn-share" onClick={() => onBorrar(r.id)} aria-label="Borrar aviso">
+            <span className="mi" style={{ fontSize: 24, color: '#d33' }}>
+              delete
+            </span>
+          </button>
+        </div>
+      ) : (
+        <div className="cta">
+          <a
+            className="btn-wa"
+            href={linkWhatsApp(r)}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => onToast('Abriendo WhatsApp…')}
+          >
+            <span className="mi fill" style={{ fontSize: 24 }}>
+              chat
+            </span>
+            Contactar por WhatsApp
+          </a>
+          <button
+            className="btn-share"
+            onClick={async () => {
+              const url = window.location.href
+              const texto = `${nombreMostrado(r)} — ${r.tipo} en ${r.zona}, Paraná. Mirá en Volverte a ver.`
+              if (navigator.share) {
+                try {
+                  await navigator.share({ title: 'Volverte a ver', text: texto, url })
+                } catch (e) {
+                  /* el usuario canceló */
+                }
+              } else {
+                onToast('🔗 Compartir disponible en el celular')
               }
-            } else {
-              onToast('🔗 Compartir disponible en el celular')
-            }
-          }}
-        >
-          <span className="mi" style={{ fontSize: 24 }}>
-            ios_share
-          </span>
-        </button>
-      </div>
+            }}
+          >
+            <span className="mi" style={{ fontSize: 24 }}>
+              ios_share
+            </span>
+          </button>
+        </div>
+      )}
     </div>
   )
 }

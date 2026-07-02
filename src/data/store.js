@@ -2,10 +2,8 @@
 // Capa de datos de "Volverte a ver".
 //
 // Funciona en DOS modos, automáticamente:
-//   - Si hay claves de Supabase (.env)  -> guarda en la nube (compartido entre
-//     todos los usuarios) y sube las fotos al Storage.
-//   - Si NO hay claves                  -> guarda en localStorage (solo en este
-//     navegador). Útil para desarrollo sin backend.
+//   - Con claves de Supabase (.env) -> nube (compartido) + fotos en Storage.
+//   - Sin claves                    -> localStorage (solo este navegador).
 //
 // Toda la app usa estas funciones y no sabe en qué modo está. Todas son async.
 // ---------------------------------------------------------------------------
@@ -14,7 +12,7 @@ import { SEED_REPORTES } from './seed.js'
 
 const CLAVE = 'vav_reportes_v1'
 
-// --- Mapeo entre el objeto de la app (camelCase) y la fila de la base (snake_case) ---
+// --- Mapeo entre el objeto de la app (camelCase) y la fila de la base ---
 function desdeFila(row) {
   return {
     id: row.id,
@@ -33,9 +31,12 @@ function desdeFila(row) {
     fechaEvento: row.fecha_evento,
     creadoEn: row.creado_en,
     estado: row.estado,
+    userId: row.user_id, // dueño del aviso (para editar/borrar)
   }
 }
 function haciaFila(r) {
+  // No incluye user_id: en altas lo pone la base (default auth.uid());
+  // en ediciones no se toca el dueño.
   return {
     tipo: r.tipo,
     especie: r.especie,
@@ -48,7 +49,6 @@ function haciaFila(r) {
     descripcion: r.descripcion,
     foto: r.foto,
     whatsapp: r.whatsapp,
-    autor: r.autor,
     fecha_evento: r.fechaEvento,
   }
 }
@@ -70,17 +70,20 @@ function guardarLocal(reportes) {
 
 // --- API pública ---
 
-// Devuelve todos los reportes, del más nuevo al más viejo.
+// Reportes activos (los resueltos/reencontrados no se muestran), más nuevo primero.
 export async function getReportes() {
   if (supabaseConfigurado) {
     const { data, error } = await supabase
       .from('reportes')
       .select('*')
+      .eq('estado', 'activo')
       .order('creado_en', { ascending: false })
     if (error) throw error
     return data.map(desdeFila)
   }
-  return leerLocal().sort((a, b) => (a.creadoEn < b.creadoEn ? 1 : -1))
+  return leerLocal()
+    .filter((r) => r.estado !== 'resuelto')
+    .sort((a, b) => (a.creadoEn < b.creadoEn ? 1 : -1))
 }
 
 // Crea un reporte nuevo. Devuelve el reporte creado.
@@ -96,11 +99,52 @@ export async function addReporte(datos) {
     estado: 'activo',
     creadoEn: new Date().toISOString(),
     autor: 'Vos',
+    userId: 'local',
     ...datos,
   }
   reportes.push(nuevo)
   guardarLocal(reportes)
   return nuevo
+}
+
+// Edita un aviso existente (solo el dueño, por las políticas de Supabase).
+export async function actualizarReporte(id, datos) {
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase.from('reportes').update(haciaFila(datos)).eq('id', id).select().single()
+    if (error) throw error
+    return desdeFila(data)
+  }
+  let actualizado = null
+  const reportes = leerLocal().map((r) => {
+    if (r.id === id) {
+      actualizado = { ...r, ...datos }
+      return actualizado
+    }
+    return r
+  })
+  guardarLocal(reportes)
+  return actualizado
+}
+
+// Marca un aviso como reencontrado/resuelto (sale del listado).
+export async function marcarResuelto(id) {
+  if (supabaseConfigurado) {
+    const { error } = await supabase.from('reportes').update({ estado: 'resuelto' }).eq('id', id)
+    if (error) throw error
+    return
+  }
+  const reportes = leerLocal().map((r) => (r.id === id ? { ...r, estado: 'resuelto' } : r))
+  guardarLocal(reportes)
+}
+
+// Borra un aviso (solo el dueño).
+export async function eliminarReporte(id) {
+  if (supabaseConfigurado) {
+    const { error } = await supabase.from('reportes').delete().eq('id', id)
+    if (error) throw error
+    return
+  }
+  guardarLocal(leerLocal().filter((r) => r.id !== id))
 }
 
 // Sube una foto y devuelve su URL. En la nube va al Storage; en local, un data URL.

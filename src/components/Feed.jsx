@@ -3,7 +3,7 @@ import PetCard from './PetCard.jsx'
 
 const ZONAS_RAPIDAS = ['Parque Urquiza', 'Centro', 'San Agustín']
 
-export default function Feed({ reportes, onOpen }) {
+export default function Feed({ reportes, onOpen, authActivo, logueado, onLogin, onLogout }) {
   const [q, setQ] = useState('')
   const [estado, setEstado] = useState('todos') // todos | perdido | encontrado
   const [especie, setEspecie] = useState(null) // perro | gato
@@ -49,9 +49,20 @@ export default function Feed({ reportes, onOpen }) {
               <div className="bname">Volverte a ver</div>
               <div className="bsub">Paraná · Entre Ríos</div>
             </div>
-            <span className="mi" style={{ fontSize: 26, color: '#c3b8b0' }}>
-              notifications
-            </span>
+            {authActivo ? (
+              <button
+                onClick={logueado ? onLogout : onLogin}
+                aria-label={logueado ? 'Cerrar sesión' : 'Iniciar sesión'}
+              >
+                <span className="mi" style={{ fontSize: 26, color: logueado ? '#ff6b5e' : '#c3b8b0' }}>
+                  {logueado ? 'logout' : 'login'}
+                </span>
+              </button>
+            ) : (
+              <span className="mi" style={{ fontSize: 26, color: '#c3b8b0' }}>
+                notifications
+              </span>
+            )}
           </div>
           <div className="search">
             <span className="mi" style={{ fontSize: 21, color: '#c9beb6' }}>

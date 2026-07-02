@@ -1,18 +1,19 @@
 import { useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { NOMBRES_BARRIOS, coordsDeBarrio } from '../lib/parana.js'
-import { addReporte, subirFoto } from '../data/store.js'
+import { addReporte, actualizarReporte, subirFoto } from '../data/store.js'
 
-export default function Publicar({ onCerrar, onPublicado, onToast }) {
-  const [tipo, setTipo] = useState('perdido')
-  const [especie, setEspecie] = useState('perro')
-  const [foto, setFoto] = useState('') // vista previa (data URL)
-  const [fotoFile, setFotoFile] = useState(null) // archivo real a subir
-  const [nombre, setNombre] = useState('')
-  const [zona, setZona] = useState('Centro')
-  const [fecha, setFecha] = useState('')
-  const [descripcion, setDescripcion] = useState('')
-  const [whatsapp, setWhatsapp] = useState('')
+export default function Publicar({ inicial, onCerrar, onPublicado, onToast }) {
+  const editando = !!inicial
+  const [tipo, setTipo] = useState(inicial?.tipo || 'perdido')
+  const [especie, setEspecie] = useState(inicial?.especie || 'perro')
+  const [foto, setFoto] = useState(inicial?.foto || '') // vista previa / foto actual
+  const [fotoFile, setFotoFile] = useState(null) // archivo nuevo a subir (si cambia)
+  const [nombre, setNombre] = useState(inicial?.nombre || '')
+  const [zona, setZona] = useState(inicial?.zona || 'Centro')
+  const [fecha, setFecha] = useState(inicial?.fechaEvento || '')
+  const [descripcion, setDescripcion] = useState(inicial?.descripcion || '')
+  const [whatsapp, setWhatsapp] = useState(inicial?.whatsapp || '')
   const [guardando, setGuardando] = useState(false)
 
   const centro = coordsDeBarrio(zona)
@@ -31,25 +32,28 @@ export default function Publicar({ onCerrar, onPublicado, onToast }) {
     }
     setGuardando(true)
     try {
-      const fotoUrl = await subirFoto(fotoFile)
-      const nuevo = await addReporte({
+      // Si no eligió foto nueva, se conserva la actual (importante al editar).
+      const fotoUrl = fotoFile ? await subirFoto(fotoFile) : foto
+      const datos = {
         tipo,
         especie,
         nombre: nombre.trim() || null,
         zona,
         referencia: zona,
-        color: '',
-        tamano: '',
-        raza: '',
+        color: inicial?.color || '',
+        tamano: inicial?.tamano || '',
+        raza: inicial?.raza || '',
         descripcion: descripcion.trim(),
         foto: fotoUrl,
         whatsapp: whatsapp.trim(),
         fechaEvento: fecha || new Date().toISOString().slice(0, 10),
-      })
-      onPublicado(nuevo)
+      }
+      if (editando) await actualizarReporte(inicial.id, datos)
+      else await addReporte(datos)
+      onPublicado()
     } catch (e) {
-      console.error('No se pudo publicar:', e)
-      onToast('No se pudo publicar 😕 revisá la conexión')
+      console.error('No se pudo guardar:', e)
+      onToast('No se pudo guardar 😕 revisá la conexión')
       setGuardando(false)
     }
   }
@@ -60,7 +64,7 @@ export default function Publicar({ onCerrar, onPublicado, onToast }) {
         <button className="mi close" onClick={onCerrar}>
           close
         </button>
-        <div className="ftitle">Publicar reporte</div>
+        <div className="ftitle">{editando ? 'Editar aviso' : 'Publicar reporte'}</div>
       </div>
 
       <div className="body form-body">
@@ -162,9 +166,9 @@ export default function Publicar({ onCerrar, onPublicado, onToast }) {
       <div className="fsubmit">
         <button className="btn-pub" onClick={publicar} disabled={guardando}>
           <span className="mi" style={{ fontSize: 23 }}>
-            campaign
+            {editando ? 'save' : 'campaign'}
           </span>
-          {guardando ? 'Publicando…' : 'Publicar reporte'}
+          {guardando ? 'Guardando…' : editando ? 'Guardar cambios' : 'Publicar reporte'}
         </button>
       </div>
     </div>
