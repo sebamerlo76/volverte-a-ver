@@ -28,10 +28,10 @@ En vivo: https://volverte-a-ver.vercel.app · Código: https://github.com/sebame
 - [x] **Mapa como pantalla principal** — el inicio tiene toggle Lista/Mapa. ✅
 - [x] **Filtros sobre el mapa** — los chips aplican a lista y mapa (compartidos). ✅
 - [x] **#3 Filtros progresivos** — fila única + panel "Filtros" colapsable (Especie/Barrio). ✅
-- [ ] **Filtro por tiempo** — "esta semana", "este mes" (útil con muchos avisos). *(Iría en el panel Filtros.)*
-- [ ] **Pines siempre visibles** en el mapa del inicio (encuadre automático a los resultados).
-- [ ] Achicar un poco más la cabecera del inicio (el toggle Lista/Mapa podría ir flotante sobre el mapa).
-- [ ] Los filtros se **resetean al abrir un aviso y volver** (Feed se re-monta). Estaría bueno conservarlos.
+- [x] **Filtro por tiempo** (Siempre/Esta semana/Este mes) + **Orden** (recientes/perdidos primero). ✅
+- [x] **Pines siempre visibles** — encuadre automático (fitBounds) en el mapa del inicio. ✅
+- [x] **Conservar filtros** al abrir un aviso y volver. ✅
+- [x] **Home rediseñada** — pestañas con color, buscador flotante, cabecera mínima (357→~144px). ✅
 - [ ] En el mapa del inicio los pines usan la coord del barrio (+ jitter). A futuro: **ubicación exacta** al publicar.
 
 ---

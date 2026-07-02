@@ -3,12 +3,6 @@ export default function BottomNav({ modo, onNav }) {
   const enMapa = modo === 'mapa'
   return (
     <div className="nav">
-      <button className="ni" onClick={() => onNav('inicio')}>
-        <span className="mi" style={{ fontSize: 24 }}>
-          home
-        </span>
-        Inicio
-      </button>
       <button className="ni" onClick={() => onNav('buscar')}>
         <span className="mi" style={{ fontSize: 24 }}>
           search
