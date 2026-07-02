@@ -12,7 +12,13 @@ export default function Detalle({ r, onVolver, onToast }) {
     <div className="view">
       <div className="body">
         <div className={'dhero' + (perdido ? '' : ' g')}>
-          {r.foto ? <img src={r.foto} alt={nombreMostrado(r)} onError={(e) => (e.target.style.display = 'none')} /> : null}
+          {r.foto ? (
+            <img src={r.foto} alt={nombreMostrado(r)} onError={(e) => (e.target.style.display = 'none')} />
+          ) : (
+            <span className="ph-pet mi fill" style={{ fontSize: 96 }}>
+              pets
+            </span>
+          )}
           <button className="dback" onClick={onVolver}>
             <span className="mi" style={{ fontSize: 23, color: '#2a2320' }}>
               arrow_back

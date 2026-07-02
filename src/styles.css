@@ -237,6 +237,15 @@ select {
   object-fit: cover;
   display: block;
 }
+/* Placeholder cuando el aviso no tiene foto: una huella tenue centrada. */
+.ph-pet {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.7);
+}
 .badge {
   position: absolute;
   top: 13px;

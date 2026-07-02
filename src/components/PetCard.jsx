@@ -6,7 +6,13 @@ export default function PetCard({ r, onClick }) {
   return (
     <button className="card" onClick={onClick}>
       <div className={'ci' + (perdido ? '' : ' g')}>
-        {r.foto ? <img src={r.foto} alt={nombreMostrado(r)} onError={(e) => (e.target.style.display = 'none')} /> : null}
+        {r.foto ? (
+          <img src={r.foto} alt={nombreMostrado(r)} onError={(e) => (e.target.style.display = 'none')} />
+        ) : (
+          <span className="ph-pet mi fill" style={{ fontSize: 52 }}>
+            pets
+          </span>
+        )}
         <span className={'badge ' + (perdido ? 'lost' : 'found')}>
           <span className="mi" style={{ fontSize: 16 }}>
             {perdido ? 'error_outline' : 'check_circle'}
