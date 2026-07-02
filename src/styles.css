@@ -330,6 +330,18 @@ select {
   font-size: 14px;
   font-weight: 700;
 }
+.btn-limpiar {
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 800;
+}
 
 /* ---- Bottom nav ---- */
 .nav {

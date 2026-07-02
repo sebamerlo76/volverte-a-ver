@@ -119,7 +119,15 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, user, onL
           <div className="empty">
             🔍 No hay resultados con esos filtros.
             <br />
-            Probá quitar alguno.
+            Quizás tenés más de un filtro puesto.
+            <div>
+              <button className="btn-limpiar" onClick={irInicio}>
+                <span className="mi" style={{ fontSize: 18 }}>
+                  filter_alt_off
+                </span>
+                Limpiar filtros
+              </button>
+            </div>
           </div>
         ) : (
           filtrados.map((r) => <PetCard key={r.id} r={r} onClick={() => onOpen(r)} />)
