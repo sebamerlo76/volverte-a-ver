@@ -1341,6 +1341,124 @@ select {
   border-color: var(--coral);
 }
 
+/* ---- Chapita QR ---- */
+.btn-qr {
+  width: 100%;
+  margin-top: 18px;
+  height: 50px;
+  border-radius: 14px;
+  background: #eef3ff;
+  border: 1.5px solid #d5e0ff;
+  color: #3a56b0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 800;
+}
+.qr-box {
+  margin: 16px auto 0;
+  max-width: 280px;
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  padding: 18px 18px 12px;
+  box-shadow: 0 8px 22px rgba(90, 55, 35, 0.08);
+}
+.qr-box img {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+}
+.qr-pie {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink);
+}
+.qr-url {
+  margin-top: 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--faint);
+  word-break: break-all;
+}
+
+/* ---- Página pública del QR ---- */
+.app.pub {
+  background: var(--cream);
+}
+.pub-scroll {
+  flex: 1;
+  overflow-y: auto;
+}
+.pub-scroll::-webkit-scrollbar {
+  display: none;
+}
+.pub-top {
+  padding: 16px 20px 4px;
+}
+.pub-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+}
+.pub-brand {
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  text-align: center;
+  margin-top: 8px;
+}
+.pub-alerta {
+  margin: 10px 16px 0;
+  background: var(--coral-strong);
+  color: #fff;
+  border-radius: 16px;
+  padding: 13px 15px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  box-shadow: 0 8px 20px rgba(255, 87, 71, 0.35);
+}
+.pub-foto {
+  margin: 14px 0 0;
+  height: 300px;
+  background: linear-gradient(135deg, #ffd9d3, #ffb3a8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pub-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pub-body {
+  padding: 16px 20px 0;
+}
+.pub-nombre {
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 27px;
+  text-align: center;
+}
+.pub-cta {
+  flex: none;
+  padding: 12px 16px 20px;
+  background: #fff;
+  border-top: 1px solid #f4ede6;
+}
+
 /* ---- Mapa ---- */
 .mapwrap {
   flex: 1;

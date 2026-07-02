@@ -5,6 +5,7 @@ import Publicar from './components/Publicar.jsx'
 import Auth from './components/Auth.jsx'
 import MiCuenta from './components/MiCuenta.jsx'
 import MascotaForm from './components/MascotaForm.jsx'
+import ChapitaQR from './components/ChapitaQR.jsx'
 import IntentPublicar from './components/IntentPublicar.jsx'
 import ElegirMascota from './components/ElegirMascota.jsx'
 import EncontreWizard from './components/EncontreWizard.jsx'
@@ -299,7 +300,14 @@ export default function App() {
             onCerrar={() => setVista('cuenta')}
             onGuardado={mascotaGuardada}
             onToast={mostrarToast}
+            onVerQR={(m) => {
+              setMascotaEditando(m)
+              setVista('qr')
+            }}
           />
+        )}
+        {vista === 'qr' && mascotaEditando && (
+          <ChapitaQR mascota={mascotaEditando} onCerrar={() => setVista('mascota')} onToast={mostrarToast} />
         )}
         {vista === 'feed' && <BottomNav tab={tabActual} onNav={navegar} />}
       </div>

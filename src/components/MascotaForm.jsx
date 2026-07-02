@@ -3,9 +3,10 @@ import { addMascota, actualizarMascota, eliminarMascota, subirFoto } from '../da
 import SelectChips from './SelectChips.jsx'
 import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS } from '../lib/opciones.js'
 
-export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast }) {
+export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, onVerQR }) {
   const editando = !!inicial
   const [especie, setEspecie] = useState(inicial?.especie || 'perro')
+  const [whatsapp, setWhatsapp] = useState(inicial?.whatsapp || '')
   const [foto, setFoto] = useState(inicial?.foto || '')
   const [fotoFile, setFotoFile] = useState(null)
   const [nombre, setNombre] = useState(inicial?.nombre || '')
@@ -44,6 +45,7 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast }) 
         raza: raza.trim(),
         descripcion: descripcion.trim(),
         foto: fotoUrl,
+        whatsapp: whatsapp.trim(),
       }
       if (editando) await actualizarMascota(inicial.id, datos)
       else await addMascota(datos)
@@ -140,8 +142,25 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast }) 
           placeholder="Collar, cicatrices, comportamiento, algo que lo distinga…"
         />
 
+        <div className="flabel">WhatsApp de contacto (para el QR)</div>
+        <div className="inp">
+          <span className="mi" style={{ fontSize: 20, color: '#25D366' }}>
+            chat
+          </span>
+          <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="Ej: 343 412 3456" inputMode="tel" />
+        </div>
+
         {editando && (
-          <button className="btn-logout" style={{ marginTop: 18 }} onClick={borrar}>
+          <button className="btn-qr" onClick={() => onVerQR(inicial)}>
+            <span className="mi" style={{ fontSize: 21 }}>
+              qr_code_2
+            </span>
+            Ver chapita QR para el collar
+          </button>
+        )}
+
+        {editando && (
+          <button className="btn-logout" style={{ marginTop: 12 }} onClick={borrar}>
             <span className="mi" style={{ fontSize: 20 }}>
               heart_broken
             </span>

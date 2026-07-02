@@ -294,6 +294,18 @@ export async function actualizarMascota(id, datos) {
   return out
 }
 
+// Perfil público de una mascota (para el QR del collar, sin login).
+export async function getPerfilPublico(id) {
+  if (!id) return null
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase.rpc('perfil_publico', { m_id: id })
+    if (error) throw error
+    return (data && data[0]) || null
+  }
+  const m = leerMascotasLocal().find((x) => x.id === id)
+  return m ? { ...m, perdido: false } : null
+}
+
 export async function eliminarMascota(id) {
   if (supabaseConfigurado) {
     const { error } = await supabase.from('mascotas').delete().eq('id', id)
