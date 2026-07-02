@@ -10,6 +10,7 @@ import IntentPublicar from './components/IntentPublicar.jsx'
 import ElegirMascota from './components/ElegirMascota.jsx'
 import EncontreWizard from './components/EncontreWizard.jsx'
 import ReportarAvistamiento from './components/ReportarAvistamiento.jsx'
+import MapaRecorrido from './components/MapaRecorrido.jsx'
 import BottomNav from './components/BottomNav.jsx'
 import { getReportes, marcarResuelto, reactivarReporte, eliminarReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
@@ -217,6 +218,7 @@ export default function App() {
             onResuelto={resolver}
             onReactivar={reactivar}
             onAvistar={() => setVista('avistamiento')}
+            onMaximizar={() => setVista('recorrido')}
           />
         )}
         {vista === 'avistamiento' && seleccionado && (
@@ -229,6 +231,9 @@ export default function App() {
             }}
             onToast={mostrarToast}
           />
+        )}
+        {vista === 'recorrido' && seleccionado && (
+          <MapaRecorrido reporte={seleccionado} onCerrar={() => setVista('detalle')} />
         )}
         {vista === 'post-intent' && (
           <IntentPublicar

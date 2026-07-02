@@ -34,6 +34,7 @@ export default function MapaLeaflet({
   linea = null, // array de [lat,lng] para dibujar un recorrido
   interactivo = true,
   recentrar = false, // muestra un botón para volver al centro (pin)
+  ajustar = false, // encuadra el mapa para que entren todos los pines
   onMarcadorClick,
   onMapaClick,
   style,
@@ -99,7 +100,18 @@ export default function MapaLeaflet({
       if (onMarcadorClick) marker.on('click', () => onMarcadorClick(mk.id))
       capa.addLayer(marker)
     })
-  }, [marcadores, linea, onMarcadorClick])
+    // Encuadrar para que entren todos los pines (cuando hay más de uno).
+    if (ajustar && mapRef.current && marcadores.length > 1) {
+      try {
+        mapRef.current.fitBounds(
+          marcadores.map((mk) => [mk.lat, mk.lng]),
+          { padding: [45, 45], maxZoom: 16 }
+        )
+      } catch (e) {
+        /* ignore */
+      }
+    }
+  }, [marcadores, linea, ajustar, onMarcadorClick])
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', ...style }}>

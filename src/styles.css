@@ -488,6 +488,34 @@ select {
 .map-recenter:active {
   background: #f4ede6;
 }
+.map-expand {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 500;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(80, 50, 30, 0.2);
+}
+.ver-recorrido {
+  width: 100%;
+  margin-top: 10px;
+  height: 46px;
+  border-radius: 13px;
+  background: #f4ede6;
+  color: #5a5049;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 800;
+}
 
 /* ---- Detalle ---- */
 .dhero {

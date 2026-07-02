@@ -4,7 +4,7 @@ import { coordsDeBarrio } from '../lib/parana.js'
 import { getAvistamientos } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, linkWhatsApp } from '../lib/formato.js'
 
-export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar }) {
+export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar }) {
   const [avist, setAvist] = useState([])
 
   useEffect(() => {
@@ -118,7 +118,18 @@ export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorra
               {r.zona}
               {avist.length > 0 ? ` → ${avist.length} visto${avist.length === 1 ? '' : 's'}` : ''}
             </div>
+            <button className="map-expand" onClick={() => onMaximizar(r)} aria-label="Ver el mapa completo">
+              <span className="mi" style={{ fontSize: 20, color: '#2a2320' }}>
+                open_in_full
+              </span>
+            </button>
           </div>
+          <button className="ver-recorrido" onClick={() => onMaximizar(r)}>
+            <span className="mi" style={{ fontSize: 19 }}>
+              map
+            </span>
+            Ver el mapa completo (mover y hacer zoom)
+          </button>
 
           {r.estado !== 'resuelto' && (
             <button className="btn-avistar" onClick={() => onAvistar(r)}>
