@@ -41,6 +41,7 @@ export default function MapaLeaflet({
   interactivo = true,
   recentrar = false, // muestra un botón para volver al centro (pin)
   ajustar = false, // encuadra el mapa para que entren todos los pines
+  miUbi = null, // [lat,lng] de "mi ubicación" (punto azul)
   onMarcadorClick,
   onMapaClick,
   style,
@@ -48,6 +49,7 @@ export default function MapaLeaflet({
   const contRef = useRef(null)
   const mapRef = useRef(null)
   const capaRef = useRef(null)
+  const ubiRef = useRef(null)
 
   // Crear el mapa una sola vez.
   useEffect(() => {
@@ -119,6 +121,30 @@ export default function MapaLeaflet({
       }
     }
   }, [marcadores, linea, ajustar, onMarcadorClick])
+
+  // "Mi ubicación": punto azul + centrar cuando llega.
+  useEffect(() => {
+    const m = mapRef.current
+    if (!m) return
+    if (!miUbi) {
+      if (ubiRef.current) {
+        ubiRef.current.remove()
+        ubiRef.current = null
+      }
+      return
+    }
+    const icon = L.divIcon({
+      className: '',
+      html:
+        '<div style="width:18px;height:18px;border-radius:50%;background:#2f80ed;border:3px solid #fff;box-shadow:0 0 0 5px rgba(47,128,237,.22)"></div>',
+      iconSize: [18, 18],
+      iconAnchor: [9, 9],
+    })
+    if (ubiRef.current) ubiRef.current.setLatLng(miUbi)
+    else ubiRef.current = L.marker(miUbi, { icon }).addTo(m)
+    m.setView(miUbi, 15)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [miUbi && miUbi[0], miUbi && miUbi[1]])
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', ...style }}>

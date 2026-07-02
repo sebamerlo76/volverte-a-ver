@@ -224,6 +224,7 @@ export default function App() {
           <Feed
             reportes={reportes}
             onOpen={abrirDetalle}
+            onToast={mostrarToast}
             authActivo={authActivo}
             logueado={logueado}
             user={user}

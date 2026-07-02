@@ -4,7 +4,7 @@ export default function BottomNav({ modo, onNav }) {
   return (
     <div className="nav">
       <button className="ni" onClick={() => onNav('buscar')}>
-        <span className="mi" style={{ fontSize: 24 }}>
+        <span className="mi" style={{ fontSize: 27 }}>
           search
         </span>
         Buscar
@@ -15,7 +15,7 @@ export default function BottomNav({ modo, onNav }) {
         </span>
       </button>
       <button className={'ni' + (enMapa ? ' on' : '')} onClick={() => onNav('toggle')}>
-        <span className={'mi' + (enMapa ? ' fill' : '')} style={{ fontSize: 24 }}>
+        <span className={'mi' + (enMapa ? ' fill' : '')} style={{ fontSize: 27 }}>
           {enMapa ? 'view_list' : 'map'}
         </span>
         {enMapa ? 'Lista' : 'Mapa'}

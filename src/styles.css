@@ -739,14 +739,14 @@ select {
 /* ---- Bottom nav ---- */
 .nav {
   flex: none;
-  height: 78px;
+  height: 70px;
   background: #fff;
   border-top: 1px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 0 30px 14px;
-  padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  padding: 0 30px 8px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
   position: relative;
   z-index: 1000; /* la barra (y la patita que sobresale) siempre al frente */
 }
@@ -754,10 +754,10 @@ select {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
+  gap: 3px;
+  font-size: 12.5px;
   font-weight: 800;
-  color: #bcb2aa;
+  color: #4a4038;
   flex: 1;
 }
 .ni.on {

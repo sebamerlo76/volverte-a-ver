@@ -31,11 +31,24 @@ function jitter(base, id = '') {
   return [base[0] + dy, base[1] + dx]
 }
 
-export default function Feed({ reportes, onOpen, authActivo, logueado, user, onLogin, onCuenta, modo, filtros, setFiltro, resetInicio }) {
+export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, user, onLogin, onCuenta, modo, filtros, setFiltro, resetInicio }) {
   const avatar = avatarDe(user)
   const [finales, setFinales] = useState(null)
   const [sel, setSel] = useState(null)
   const [panelAbierto, setPanelAbierto] = useState(false)
+  const [miUbi, setMiUbi] = useState(null)
+
+  function ubicarme() {
+    if (!navigator.geolocation) {
+      onToast && onToast('Tu navegador no permite ubicación')
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      (p) => setMiUbi([p.coords.latitude, p.coords.longitude]),
+      () => onToast && onToast('No pudimos acceder a tu ubicación 📍'),
+      { enableHighAccuracy: true, timeout: 8000 }
+    )
+  }
 
   const verFinales = filtros.estado === 'finales'
   const enMapa = modo === 'mapa'
@@ -199,17 +212,35 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, user, onL
             zoom={13}
             marcadores={marcadores}
             ajustar
+            miUbi={miUbi}
             onMarcadorClick={setSel}
             style={{ position: 'absolute', inset: 0 }}
           />
           <div className="mlegend">
-            <div className="l" style={{ background: '#ff5747' }}>
-              Perdidos · {perdidos}
-            </div>
-            <div className="l" style={{ background: '#17a06b' }}>
-              Encontrados · {encontrados}
-            </div>
+            {verFinales ? (
+              <div className="l" style={{ background: '#17a06b' }}>
+                En casa · {filtrados.length}
+              </div>
+            ) : (
+              <>
+                {filtros.estado !== 'encontrado' && (
+                  <div className="l" style={{ background: '#ff5747' }}>
+                    Perdidos · {perdidos}
+                  </div>
+                )}
+                {filtros.estado !== 'perdido' && (
+                  <div className="l" style={{ background: '#17a06b' }}>
+                    Encontrados · {encontrados}
+                  </div>
+                )}
+              </>
+            )}
           </div>
+          <button className="mloc" onClick={ubicarme} aria-label="Mi ubicación">
+            <span className="mi" style={{ fontSize: 24, color: '#2f80ed' }}>
+              my_location
+            </span>
+          </button>
           {seleccionado ? (
             <button className="mcard" onClick={() => onOpen(seleccionado)}>
               {seleccionado.foto ? (
