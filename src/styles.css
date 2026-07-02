@@ -488,6 +488,27 @@ select {
 .map-recenter:active {
   background: #f4ede6;
 }
+.avist-ref {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 9px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #6b6058;
+}
+.avist-ref span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.avist-ref .dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
 .map-expand {
   position: absolute;
   right: 10px;

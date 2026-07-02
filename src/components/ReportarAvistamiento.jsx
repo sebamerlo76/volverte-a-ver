@@ -53,11 +53,28 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
             interactivo
             recentrar
             onMapaClick={setPunto}
-            marcadores={[{ id: 'p', lat: punto.lat, lng: punto.lng, tipo: 'avistamiento' }]}
+            marcadores={[
+              {
+                id: 'zona',
+                lat: c[0],
+                lng: c[1],
+                tipo: reporte.tipo,
+                popup: `<b style="font-family:Nunito,sans-serif">${reporte.tipo === 'perdido' ? 'Se perdió acá' : 'Se encontró acá'}</b><br><span style="font-family:Nunito,sans-serif;font-size:12px;color:#8a807a">${reporte.zona}</span>`,
+              },
+              { id: 'p', lat: punto.lat, lng: punto.lng, tipo: 'avistamiento' },
+            ]}
           />
         </div>
+        <div className="avist-ref">
+          <span>
+            <span className="dot" style={{ background: '#ff5747' }} /> Donde se {reporte.tipo === 'perdido' ? 'perdió' : 'encontró'}
+          </span>
+          <span>
+            <span className="dot" style={{ background: '#1f9d8f' }} /> Donde lo viste (movés vos)
+          </span>
+        </div>
         <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--faint)', marginTop: 7 }}>
-          Tocá el mapa para mover el pin. Si te perdés, usá el botón <span className="mi" style={{ fontSize: 15, color: '#1f9d8f', verticalAlign: 'middle' }}>my_location</span> para volver al pin.
+          Tocá el mapa para poner tu pin donde lo viste. El botón <span className="mi" style={{ fontSize: 15, color: '#1f9d8f', verticalAlign: 'middle' }}>my_location</span> te vuelve a tu pin.
         </div>
 
         <div className="flabel">¿Cómo lo viste? (opcional)</div>
