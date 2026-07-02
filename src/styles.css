@@ -937,6 +937,112 @@ select {
   background: #ffe3dd;
 }
 
+/* ---- Publicar: dos caminos ---- */
+.intent-lead {
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  margin: 10px 2px 16px;
+}
+.intent-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 22px rgba(90, 55, 35, 0.07);
+}
+.intent-card:active {
+  transform: scale(0.99);
+}
+.intent-ic {
+  width: 58px;
+  height: 58px;
+  border-radius: 17px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.intent-tx {
+  flex: 1;
+  min-width: 0;
+}
+.intent-t {
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 19px;
+}
+.intent-s {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+.intent-arrow {
+  font-size: 24px;
+  color: #c3b8b0;
+  flex: none;
+}
+
+/* ---- Wizard "Encontré" ---- */
+.wiz-prog {
+  flex: none;
+  display: flex;
+  gap: 6px;
+  padding: 4px 20px 10px;
+}
+.wiz-dot {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--line);
+  transition: 0.2s;
+}
+.wiz-dot.on {
+  background: var(--coral);
+}
+.wiz-titulo {
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 22px;
+  margin: 8px 0 6px;
+}
+
+/* ---- Casilla (guardar en mis mascotas) ---- */
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  text-align: left;
+  margin-top: 18px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #5a5049;
+}
+.check-box {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  border: 2px solid var(--line);
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+.check-box.on {
+  background: var(--coral);
+  border-color: var(--coral);
+}
+
 /* ---- Mapa ---- */
 .mapwrap {
   flex: 1;

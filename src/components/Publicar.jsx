@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { NOMBRES_BARRIOS, coordsDeBarrio } from '../lib/parana.js'
-import { addReporte, actualizarReporte, subirFoto } from '../data/store.js'
+import { addReporte, actualizarReporte, addMascota, subirFoto } from '../data/store.js'
 
-export default function Publicar({ inicial, plantilla, onCerrar, onPublicado, onToast }) {
+export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar, onPublicado, onToast }) {
   const editando = !!inicial
   // base = datos para prellenar: un aviso a editar, o una mascota guardada ("Se me perdió").
   const base = inicial || plantilla || null
@@ -16,6 +16,7 @@ export default function Publicar({ inicial, plantilla, onCerrar, onPublicado, on
   const [fecha, setFecha] = useState(base?.fechaEvento || '')
   const [descripcion, setDescripcion] = useState(base?.descripcion || '')
   const [whatsapp, setWhatsapp] = useState(base?.whatsapp || '')
+  const [guardarMasc, setGuardarMasc] = useState(true) // guardar en "Mis mascotas"
   const [guardando, setGuardando] = useState(false)
 
   const centro = coordsDeBarrio(zona)
@@ -53,6 +54,23 @@ export default function Publicar({ inicial, plantilla, onCerrar, onPublicado, on
       }
       if (editando) await actualizarReporte(inicial.id, datos)
       else await addReporte(datos)
+
+      // Si vino de "cargar y publicar", guardamos también la mascota en el perfil.
+      if (ofrecerGuardar && guardarMasc) {
+        try {
+          await addMascota({
+            nombre: nombre.trim() || null,
+            especie,
+            color: '',
+            tamano: '',
+            raza: '',
+            descripcion: descripcion.trim(),
+            foto: fotoUrl,
+          })
+        } catch (e) {
+          console.warn('No se pudo guardar la mascota en el perfil:', e)
+        }
+      }
       onPublicado()
     } catch (e) {
       console.error('No se pudo guardar:', e)
@@ -163,6 +181,20 @@ export default function Publicar({ inicial, plantilla, onCerrar, onPublicado, on
           </span>
           <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="Ej: 343 412 3456" inputMode="tel" />
         </div>
+
+        {ofrecerGuardar && (
+          <button className="check-row" onClick={() => setGuardarMasc(!guardarMasc)}>
+            <span className={'check-box' + (guardarMasc ? ' on' : '')}>
+              {guardarMasc && (
+                <span className="mi" style={{ fontSize: 16, color: '#fff' }}>
+                  check
+                </span>
+              )}
+            </span>
+            <span>Guardar en <b>Mis mascotas</b> para la próxima</span>
+          </button>
+        )}
+
         <div style={{ height: 24 }} />
       </div>
 

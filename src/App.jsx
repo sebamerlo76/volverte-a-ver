@@ -6,6 +6,9 @@ import Mapa from './components/Mapa.jsx'
 import Auth from './components/Auth.jsx'
 import MiCuenta from './components/MiCuenta.jsx'
 import MascotaForm from './components/MascotaForm.jsx'
+import IntentPublicar from './components/IntentPublicar.jsx'
+import ElegirMascota from './components/ElegirMascota.jsx'
+import EncontreWizard from './components/EncontreWizard.jsx'
 import BottomNav from './components/BottomNav.jsx'
 import { getReportes, marcarResuelto, reactivarReporte, eliminarReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
@@ -19,6 +22,7 @@ export default function App() {
   const [editando, setEditando] = useState(null) // aviso en edición, o null
   const [mascotaEditando, setMascotaEditando] = useState(null) // mascota en edición, o null (nueva)
   const [plantilla, setPlantilla] = useState(null) // mascota para prellenar un aviso nuevo
+  const [ofrecerGuardar, setOfrecerGuardar] = useState(false) // ofrecer guardar la mascota al publicar
   const [authProximo, setAuthProximo] = useState('feed') // adónde ir tras iniciar sesión
 
   const authActivo = supabaseConfigurado
@@ -56,7 +60,9 @@ export default function App() {
     if (tab === 'post') {
       if (logueado) {
         setEditando(null)
-        setVista('post')
+        setPlantilla(null)
+        setOfrecerGuardar(false)
+        setVista('post-intent')
       } else {
         setAuthProximo('post')
         setVista('auth')
@@ -76,6 +82,7 @@ export default function App() {
     await cargar()
     setEditando(null)
     setPlantilla(null)
+    setOfrecerGuardar(false)
     setVista('feed')
     mostrarToast(eraEdicion ? '✅ Aviso actualizado' : '✅ ¡Reporte publicado! Ya aparece en el inicio.')
   }
@@ -94,10 +101,30 @@ export default function App() {
     mostrarToast('¡Bienvenido! 🐾')
     if (authProximo === 'post') {
       setEditando(null)
-      setVista('post')
+      setPlantilla(null)
+      setOfrecerGuardar(false)
+      setVista('post-intent')
     } else {
       setVista('feed')
     }
+  }
+
+  // --- Flujo de publicar (dos caminos) ---
+  function elegirMascotaPerdida(m) {
+    setPlantilla({ ...m, tipo: 'perdido', mascotaId: m.id })
+    setOfrecerGuardar(false)
+    setVista('post')
+  }
+  function perdidoNueva() {
+    setPlantilla({ tipo: 'perdido' })
+    setOfrecerGuardar(true) // ofrecer guardarla en el perfil
+    setVista('post')
+  }
+  function cerrarPublicar() {
+    setEditando(null)
+    setPlantilla(null)
+    setOfrecerGuardar(false)
+    setVista('feed')
   }
 
   // --- Gestión de mis avisos ---
@@ -190,15 +217,34 @@ export default function App() {
             onReactivar={reactivar}
           />
         )}
+        {vista === 'post-intent' && (
+          <IntentPublicar
+            onPerdido={() => setVista('perdido-pick')}
+            onEncontre={() => setVista('post-encontre')}
+            onCerrar={() => setVista('feed')}
+          />
+        )}
+        {vista === 'perdido-pick' && (
+          <ElegirMascota
+            user={user}
+            onElegir={elegirMascotaPerdida}
+            onOtra={perdidoNueva}
+            onVolver={() => setVista('post-intent')}
+          />
+        )}
+        {vista === 'post-encontre' && (
+          <EncontreWizard
+            onCerrar={() => setVista('post-intent')}
+            onPublicado={alPublicar}
+            onToast={mostrarToast}
+          />
+        )}
         {vista === 'post' && (
           <Publicar
             inicial={editando}
             plantilla={plantilla}
-            onCerrar={() => {
-              setEditando(null)
-              setPlantilla(null)
-              setVista('feed')
-            }}
+            ofrecerGuardar={ofrecerGuardar}
+            onCerrar={cerrarPublicar}
             onPublicado={alPublicar}
             onToast={mostrarToast}
           />
