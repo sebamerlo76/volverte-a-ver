@@ -342,6 +342,8 @@ select {
   justify-content: space-around;
   padding: 0 30px 14px;
   padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  position: relative;
+  z-index: 1000; /* la barra (y la patita que sobresale) siempre al frente */
 }
 .ni {
   display: flex;
