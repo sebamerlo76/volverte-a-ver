@@ -86,6 +86,23 @@ export async function getReportes() {
     .sort((a, b) => (a.creadoEn < b.creadoEn ? 1 : -1))
 }
 
+// Trae SOLO los avisos de un usuario (activos y resueltos), más nuevo primero.
+export async function getMisReportes(userId) {
+  if (!userId) return []
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase
+      .from('reportes')
+      .select('*')
+      .eq('user_id', userId)
+      .order('creado_en', { ascending: false })
+    if (error) throw error
+    return data.map(desdeFila)
+  }
+  return leerLocal()
+    .filter((r) => r.userId === userId)
+    .sort((a, b) => (a.creadoEn < b.creadoEn ? 1 : -1))
+}
+
 // Crea un reporte nuevo. Devuelve el reporte creado.
 export async function addReporte(datos) {
   if (supabaseConfigurado) {
@@ -134,6 +151,17 @@ export async function marcarResuelto(id) {
     return
   }
   const reportes = leerLocal().map((r) => (r.id === id ? { ...r, estado: 'resuelto' } : r))
+  guardarLocal(reportes)
+}
+
+// Vuelve a activar un aviso que estaba resuelto.
+export async function reactivarReporte(id) {
+  if (supabaseConfigurado) {
+    const { error } = await supabase.from('reportes').update({ estado: 'activo' }).eq('id', id)
+    if (error) throw error
+    return
+  }
+  const reportes = leerLocal().map((r) => (r.id === id ? { ...r, estado: 'activo' } : r))
   guardarLocal(reportes)
 }
 

@@ -3,7 +3,7 @@ import PetCard from './PetCard.jsx'
 
 const ZONAS_RAPIDAS = ['Parque Urquiza', 'Centro', 'San Agustín']
 
-export default function Feed({ reportes, onOpen, authActivo, logueado, onLogin, onLogout }) {
+export default function Feed({ reportes, onOpen, authActivo, logueado, onLogin, onCuenta }) {
   const [q, setQ] = useState('')
   const [estado, setEstado] = useState('todos') // todos | perdido | encontrado
   const [especie, setEspecie] = useState(null) // perro | gato
@@ -51,11 +51,14 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, onLogin, 
             </div>
             {authActivo ? (
               <button
-                onClick={logueado ? onLogout : onLogin}
-                aria-label={logueado ? 'Cerrar sesión' : 'Iniciar sesión'}
+                onClick={logueado ? onCuenta : onLogin}
+                aria-label={logueado ? 'Mi cuenta' : 'Iniciar sesión'}
               >
-                <span className="mi" style={{ fontSize: 26, color: logueado ? '#ff6b5e' : '#c3b8b0' }}>
-                  {logueado ? 'logout' : 'login'}
+                <span
+                  className={'mi' + (logueado ? ' fill' : '')}
+                  style={{ fontSize: 28, color: logueado ? '#ff6b5e' : '#c3b8b0' }}
+                >
+                  {logueado ? 'account_circle' : 'login'}
                 </span>
               </button>
             ) : (
@@ -113,7 +116,7 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, onLogin, 
             Probá quitar alguno.
           </div>
         ) : (
-          filtrados.map((r) => <PetCard key={r.id} r={r} onClick={() => onOpen(r.id)} />)
+          filtrados.map((r) => <PetCard key={r.id} r={r} onClick={() => onOpen(r)} />)
         )}
         <div style={{ height: 18 }} />
       </div>

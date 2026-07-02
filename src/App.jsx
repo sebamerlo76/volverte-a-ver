@@ -4,13 +4,14 @@ import Detalle from './components/Detalle.jsx'
 import Publicar from './components/Publicar.jsx'
 import Mapa from './components/Mapa.jsx'
 import Auth from './components/Auth.jsx'
+import MiCuenta from './components/MiCuenta.jsx'
 import BottomNav from './components/BottomNav.jsx'
-import { getReportes, marcarResuelto, eliminarReporte } from './data/store.js'
+import { getReportes, marcarResuelto, reactivarReporte, eliminarReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 
 export default function App() {
-  const [vista, setVista] = useState('feed') // feed | detalle | post | map | auth
-  const [selId, setSelId] = useState(null)
+  const [vista, setVista] = useState('feed') // feed | detalle | post | map | auth | cuenta
+  const [selReporte, setSelReporte] = useState(null) // aviso abierto en el detalle
   const [reportes, setReportes] = useState([])
   const [toast, setToast] = useState('')
   const [user, setUser] = useState(null)
@@ -62,8 +63,8 @@ export default function App() {
     setVista(tab)
   }
 
-  function abrirDetalle(id) {
-    setSelId(id)
+  function abrirDetalle(reporte) {
+    setSelReporte(reporte)
     setVista('detalle')
   }
 
@@ -111,6 +112,17 @@ export default function App() {
       mostrarToast('No se pudo actualizar 😕')
     }
   }
+  async function reactivar(id) {
+    try {
+      await reactivarReporte(id)
+      await cargar()
+      setVista('feed')
+      mostrarToast('Aviso reactivado')
+    } catch (e) {
+      console.error(e)
+      mostrarToast('No se pudo reactivar 😕')
+    }
+  }
   async function borrar(id) {
     if (!window.confirm('¿Seguro que querés borrar este aviso? No se puede deshacer.')) return
     try {
@@ -125,7 +137,7 @@ export default function App() {
   }
 
   const tabActual = vista === 'map' ? 'map' : 'feed'
-  const seleccionado = selId ? reportes.find((r) => r.id === selId) : null
+  const seleccionado = selReporte
   const esMio = seleccionado ? !authActivo || (user && seleccionado.userId === user.id) : false
 
   return (
@@ -138,7 +150,7 @@ export default function App() {
             authActivo={authActivo}
             logueado={logueado}
             onLogin={pedirLogin}
-            onLogout={salir}
+            onCuenta={() => setVista('cuenta')}
           />
         )}
         {vista === 'detalle' && (
@@ -150,6 +162,7 @@ export default function App() {
             onEditar={editar}
             onBorrar={borrar}
             onResuelto={resolver}
+            onReactivar={reactivar}
           />
         )}
         {vista === 'post' && (
@@ -164,6 +177,9 @@ export default function App() {
           />
         )}
         {vista === 'auth' && <Auth onCerrar={() => setVista('feed')} onAuth={trasAuth} onToast={mostrarToast} />}
+        {vista === 'cuenta' && (
+          <MiCuenta user={user} onVolver={() => setVista('feed')} onAbrir={abrirDetalle} onLogout={salir} />
+        )}
         {vista === 'map' && <Mapa reportes={reportes} onAbrir={abrirDetalle} onToast={mostrarToast} />}
 
         {(vista === 'feed' || vista === 'map') && <BottomNav tab={tabActual} onNav={navegar} />}

@@ -72,7 +72,7 @@ export default function Mapa({ reportes, onAbrir, onToast }) {
         </button>
 
         {seleccionado ? (
-          <button className="mcard" onClick={() => onAbrir(seleccionado.id)}>
+          <button className="mcard" onClick={() => onAbrir(seleccionado)}>
             {seleccionado.foto ? (
               <img src={seleccionado.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
             ) : (

@@ -2,7 +2,7 @@ import MapaLeaflet from './MapaLeaflet.jsx'
 import { coordsDeBarrio } from '../lib/parana.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, linkWhatsApp } from '../lib/formato.js'
 
-export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorrar, onResuelto }) {
+export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar }) {
   if (!r) return null
   const perdido = r.tipo === 'perdido'
   const clr = perdido ? '#ff6b5e' : '#1f9d8f'
@@ -82,12 +82,21 @@ export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorra
 
       {esMio ? (
         <div className="cta">
-          <button className="btn-wa" style={{ background: 'var(--green)' }} onClick={() => onResuelto(r.id)}>
-            <span className="mi fill" style={{ fontSize: 24 }}>
-              check_circle
-            </span>
-            {r.tipo === 'perdido' ? 'Marcar reencontrado' : 'Marcar resuelto'}
-          </button>
+          {r.estado === 'resuelto' ? (
+            <button className="btn-wa" style={{ background: 'var(--coral)' }} onClick={() => onReactivar(r.id)}>
+              <span className="mi" style={{ fontSize: 24 }}>
+                undo
+              </span>
+              Volver a activar
+            </button>
+          ) : (
+            <button className="btn-wa" style={{ background: 'var(--green)' }} onClick={() => onResuelto(r.id)}>
+              <span className="mi fill" style={{ fontSize: 24 }}>
+                check_circle
+              </span>
+              {r.tipo === 'perdido' ? 'Marcar reencontrado' : 'Marcar resuelto'}
+            </button>
+          )}
           <button className="btn-share" onClick={() => onEditar(r)} aria-label="Editar aviso">
             <span className="mi" style={{ fontSize: 24 }}>
               edit
