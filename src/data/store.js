@@ -175,6 +175,101 @@ export async function eliminarReporte(id) {
   guardarLocal(leerLocal().filter((r) => r.id !== id))
 }
 
+// ---------------------------------------------------------------------------
+// Mis mascotas (perfiles guardados para publicar rápido si se pierden)
+// ---------------------------------------------------------------------------
+const CLAVE_MASCOTAS = 'vav_mascotas_v1'
+
+function mascotaDesdeFila(row) {
+  return {
+    id: row.id,
+    nombre: row.nombre,
+    especie: row.especie,
+    color: row.color,
+    tamano: row.tamano,
+    raza: row.raza,
+    descripcion: row.descripcion,
+    foto: row.foto,
+  }
+}
+function mascotaHaciaFila(m) {
+  return {
+    nombre: m.nombre,
+    especie: m.especie,
+    color: m.color,
+    tamano: m.tamano,
+    raza: m.raza,
+    descripcion: m.descripcion,
+    foto: m.foto,
+  }
+}
+function leerMascotasLocal() {
+  try {
+    const raw = localStorage.getItem(CLAVE_MASCOTAS)
+    if (raw) return JSON.parse(raw)
+  } catch (e) {
+    /* ignore */
+  }
+  return []
+}
+function guardarMascotasLocal(m) {
+  localStorage.setItem(CLAVE_MASCOTAS, JSON.stringify(m))
+}
+
+export async function getMisMascotas(userId) {
+  if (!userId) return []
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase
+      .from('mascotas')
+      .select('*')
+      .eq('user_id', userId)
+      .order('creado_en', { ascending: false })
+    if (error) throw error
+    return data.map(mascotaDesdeFila)
+  }
+  return leerMascotasLocal()
+}
+
+export async function addMascota(datos) {
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase.from('mascotas').insert(mascotaHaciaFila(datos)).select().single()
+    if (error) throw error
+    return mascotaDesdeFila(data)
+  }
+  const ms = leerMascotasLocal()
+  const nueva = { id: 'm-' + Date.now().toString(36), ...datos }
+  ms.push(nueva)
+  guardarMascotasLocal(ms)
+  return nueva
+}
+
+export async function actualizarMascota(id, datos) {
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase.from('mascotas').update(mascotaHaciaFila(datos)).eq('id', id).select().single()
+    if (error) throw error
+    return mascotaDesdeFila(data)
+  }
+  let out = null
+  const ms = leerMascotasLocal().map((m) => {
+    if (m.id === id) {
+      out = { ...m, ...datos }
+      return out
+    }
+    return m
+  })
+  guardarMascotasLocal(ms)
+  return out
+}
+
+export async function eliminarMascota(id) {
+  if (supabaseConfigurado) {
+    const { error } = await supabase.from('mascotas').delete().eq('id', id)
+    if (error) throw error
+    return
+  }
+  guardarMascotasLocal(leerMascotasLocal().filter((m) => m.id !== id))
+}
+
 // Sube una foto y devuelve su URL. En la nube va al Storage; en local, un data URL.
 export async function subirFoto(file) {
   if (!file) return ''

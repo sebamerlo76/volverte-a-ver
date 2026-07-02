@@ -5,6 +5,7 @@ import Publicar from './components/Publicar.jsx'
 import Mapa from './components/Mapa.jsx'
 import Auth from './components/Auth.jsx'
 import MiCuenta from './components/MiCuenta.jsx'
+import MascotaForm from './components/MascotaForm.jsx'
 import BottomNav from './components/BottomNav.jsx'
 import { getReportes, marcarResuelto, reactivarReporte, eliminarReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
@@ -16,6 +17,8 @@ export default function App() {
   const [toast, setToast] = useState('')
   const [user, setUser] = useState(null)
   const [editando, setEditando] = useState(null) // aviso en edición, o null
+  const [mascotaEditando, setMascotaEditando] = useState(null) // mascota en edición, o null (nueva)
+  const [plantilla, setPlantilla] = useState(null) // mascota para prellenar un aviso nuevo
   const [authProximo, setAuthProximo] = useState('feed') // adónde ir tras iniciar sesión
 
   const authActivo = supabaseConfigurado
@@ -72,6 +75,7 @@ export default function App() {
     const eraEdicion = !!editando
     await cargar()
     setEditando(null)
+    setPlantilla(null)
     setVista('feed')
     mostrarToast(eraEdicion ? '✅ Aviso actualizado' : '✅ ¡Reporte publicado! Ya aparece en el inicio.')
   }
@@ -136,6 +140,26 @@ export default function App() {
     }
   }
 
+  // --- Mis mascotas ---
+  function nuevaMascota() {
+    setMascotaEditando(null)
+    setVista('mascota')
+  }
+  function editarMascota(m) {
+    setMascotaEditando(m)
+    setVista('mascota')
+  }
+  function mascotaGuardada() {
+    setVista('cuenta')
+    mostrarToast('🐾 Mascota guardada')
+  }
+  function publicarMascota(m) {
+    // Prellena un aviso "perdido" con los datos de la mascota. Solo falta zona/fecha.
+    setPlantilla({ ...m, tipo: 'perdido' })
+    setEditando(null)
+    setVista('post')
+  }
+
   const tabActual = vista === 'map' ? 'map' : 'feed'
   const seleccionado = selReporte
   const esMio = seleccionado ? !authActivo || (user && seleccionado.userId === user.id) : false
@@ -168,8 +192,10 @@ export default function App() {
         {vista === 'post' && (
           <Publicar
             inicial={editando}
+            plantilla={plantilla}
             onCerrar={() => {
               setEditando(null)
+              setPlantilla(null)
               setVista('feed')
             }}
             onPublicado={alPublicar}
@@ -178,7 +204,23 @@ export default function App() {
         )}
         {vista === 'auth' && <Auth onCerrar={() => setVista('feed')} onAuth={trasAuth} onToast={mostrarToast} />}
         {vista === 'cuenta' && (
-          <MiCuenta user={user} onVolver={() => setVista('feed')} onAbrir={abrirDetalle} onLogout={salir} />
+          <MiCuenta
+            user={user}
+            onVolver={() => setVista('feed')}
+            onAbrir={abrirDetalle}
+            onLogout={salir}
+            onNuevaMascota={nuevaMascota}
+            onEditarMascota={editarMascota}
+            onPublicarMascota={publicarMascota}
+          />
+        )}
+        {vista === 'mascota' && (
+          <MascotaForm
+            inicial={mascotaEditando}
+            onCerrar={() => setVista('cuenta')}
+            onGuardado={mascotaGuardada}
+            onToast={mostrarToast}
+          />
         )}
         {vista === 'map' && <Mapa reportes={reportes} onAbrir={abrirDetalle} onToast={mostrarToast} />}
 

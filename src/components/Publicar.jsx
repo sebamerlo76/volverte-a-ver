@@ -3,17 +3,19 @@ import MapaLeaflet from './MapaLeaflet.jsx'
 import { NOMBRES_BARRIOS, coordsDeBarrio } from '../lib/parana.js'
 import { addReporte, actualizarReporte, subirFoto } from '../data/store.js'
 
-export default function Publicar({ inicial, onCerrar, onPublicado, onToast }) {
+export default function Publicar({ inicial, plantilla, onCerrar, onPublicado, onToast }) {
   const editando = !!inicial
-  const [tipo, setTipo] = useState(inicial?.tipo || 'perdido')
-  const [especie, setEspecie] = useState(inicial?.especie || 'perro')
-  const [foto, setFoto] = useState(inicial?.foto || '') // vista previa / foto actual
+  // base = datos para prellenar: un aviso a editar, o una mascota guardada ("Se me perdió").
+  const base = inicial || plantilla || null
+  const [tipo, setTipo] = useState(base?.tipo || 'perdido')
+  const [especie, setEspecie] = useState(base?.especie || 'perro')
+  const [foto, setFoto] = useState(base?.foto || '') // vista previa / foto actual
   const [fotoFile, setFotoFile] = useState(null) // archivo nuevo a subir (si cambia)
-  const [nombre, setNombre] = useState(inicial?.nombre || '')
-  const [zona, setZona] = useState(inicial?.zona || 'Centro')
-  const [fecha, setFecha] = useState(inicial?.fechaEvento || '')
-  const [descripcion, setDescripcion] = useState(inicial?.descripcion || '')
-  const [whatsapp, setWhatsapp] = useState(inicial?.whatsapp || '')
+  const [nombre, setNombre] = useState(base?.nombre || '')
+  const [zona, setZona] = useState(base?.zona || 'Centro')
+  const [fecha, setFecha] = useState(base?.fechaEvento || '')
+  const [descripcion, setDescripcion] = useState(base?.descripcion || '')
+  const [whatsapp, setWhatsapp] = useState(base?.whatsapp || '')
   const [guardando, setGuardando] = useState(false)
 
   const centro = coordsDeBarrio(zona)
@@ -40,9 +42,9 @@ export default function Publicar({ inicial, onCerrar, onPublicado, onToast }) {
         nombre: nombre.trim() || null,
         zona,
         referencia: zona,
-        color: inicial?.color || '',
-        tamano: inicial?.tamano || '',
-        raza: inicial?.raza || '',
+        color: base?.color || '',
+        tamano: base?.tamano || '',
+        raza: base?.raza || '',
         descripcion: descripcion.trim(),
         foto: fotoUrl,
         whatsapp: whatsapp.trim(),
