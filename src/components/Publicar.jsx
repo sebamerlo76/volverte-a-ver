@@ -49,6 +49,7 @@ export default function Publicar({ inicial, plantilla, onCerrar, onPublicado, on
         foto: fotoUrl,
         whatsapp: whatsapp.trim(),
         fechaEvento: fecha || new Date().toISOString().slice(0, 10),
+        mascotaId: base?.mascotaId ?? null,
       }
       if (editando) await actualizarReporte(inicial.id, datos)
       else await addReporte(datos)

@@ -50,7 +50,7 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast }) 
   }
 
   async function borrar() {
-    if (!window.confirm('¿Borrar esta mascota de tu perfil?')) return
+    if (!window.confirm('¿Sacar esta mascota de tu perfil? Se puede volver a cargar cuando quieras.')) return
     try {
       await eliminarMascota(inicial.id)
       onGuardado()
@@ -141,9 +141,9 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast }) 
         {editando && (
           <button className="btn-logout" style={{ marginTop: 18 }} onClick={borrar}>
             <span className="mi" style={{ fontSize: 20 }}>
-              delete
+              heart_broken
             </span>
-            Borrar esta mascota
+            Ya no lo tengo
           </button>
         )}
         <div style={{ height: 24 }} />

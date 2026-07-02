@@ -32,6 +32,16 @@ export function fechaLegible(iso) {
   return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+// Foto de perfil del usuario (Google la trae en user_metadata).
+export function avatarDe(user) {
+  return user?.user_metadata?.avatar_url || user?.user_metadata?.picture || ''
+}
+
+// Nombre del usuario si lo tenemos (Google), si no vacío.
+export function nombreUsuario(user) {
+  return user?.user_metadata?.full_name || user?.user_metadata?.name || ''
+}
+
 // Arma el link de WhatsApp con un mensaje ya escrito.
 export function linkWhatsApp(r) {
   const nombre = nombreMostrado(r)

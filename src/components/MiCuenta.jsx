@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import PetCard from './PetCard.jsx'
-import { getMisReportes, getMisMascotas } from '../data/store.js'
+import { getMisReportes, getMisMascotas, marcarResuelto } from '../data/store.js'
+import { avatarDe, nombreUsuario } from '../lib/formato.js'
 
 const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
 
@@ -12,24 +13,42 @@ export default function MiCuenta({
   onNuevaMascota,
   onEditarMascota,
   onPublicarMascota,
+  onToast,
 }) {
   const [mios, setMios] = useState(null)
   const [mascotas, setMascotas] = useState(null)
 
-  useEffect(() => {
-    let vivo = true
-    getMisReportes(user?.id)
-      .then((r) => vivo && setMios(r))
-      .catch(() => vivo && setMios([]))
-    getMisMascotas(user?.id)
-      .then((m) => vivo && setMascotas(m))
-      .catch(() => vivo && setMascotas([]))
-    return () => {
-      vivo = false
-    }
+  const cargar = useCallback(async () => {
+    const [r, m] = await Promise.all([
+      getMisReportes(user?.id).catch(() => []),
+      getMisMascotas(user?.id).catch(() => []),
+    ])
+    setMios(r)
+    setMascotas(m)
   }, [user?.id])
 
+  useEffect(() => {
+    cargar()
+  }, [cargar])
+
+  // Aviso activo vinculado a una mascota = está publicada como perdida.
+  function avisoActivoDe(m) {
+    return (mios || []).find((r) => r.mascotaId === m.id && r.estado === 'activo') || null
+  }
+  async function aparecio(avisoId) {
+    try {
+      await marcarResuelto(avisoId)
+      await cargar()
+      onToast?.('🎉 ¡Qué alegría! Tu mascota volvió a casa')
+    } catch (e) {
+      console.error(e)
+      onToast?.('No se pudo actualizar 😕')
+    }
+  }
+
   const email = user?.email || 'Tu cuenta'
+  const nombre = nombreUsuario(user)
+  const avatar = avatarDe(user)
   const activos = (mios || []).filter((r) => r.estado === 'activo').length
 
   return (
@@ -44,14 +63,19 @@ export default function MiCuenta({
       <div className="body">
         <div className="perfil">
           <div className="perfil-av">
-            <span className="mi fill" style={{ fontSize: 30 }}>
-              account_circle
-            </span>
+            {avatar ? (
+              <img src={avatar} alt="" referrerPolicy="no-referrer" />
+            ) : (
+              <span className="mi fill" style={{ fontSize: 30 }}>
+                account_circle
+              </span>
+            )}
           </div>
           <div style={{ minWidth: 0 }}>
-            <div className="perfil-mail">{email}</div>
+            <div className="perfil-mail">{nombre || email}</div>
             <div className="perfil-sub">
-              {activos} aviso{activos === 1 ? '' : 's'} activo{activos === 1 ? '' : 's'}
+              {nombre ? email + ' · ' : ''}
+              {activos} activo{activos === 1 ? '' : 's'}
             </div>
           </div>
         </div>
@@ -76,31 +100,47 @@ export default function MiCuenta({
             Cargá tu perro o gato acá 🐾 Si algún día se pierde, lo publicás al toque, sin llenar todo de nuevo.
           </div>
         ) : (
-          mascotas.map((m) => (
-            <div className="masc-row" key={m.id}>
-              <button className="masc-info" onClick={() => onEditarMascota(m)}>
-                <div className="masc-foto">
-                  {m.foto ? (
-                    <img src={m.foto} alt={m.nombre} onError={(e) => (e.target.style.display = 'none')} />
-                  ) : (
-                    <span className="mi fill" style={{ fontSize: 26, color: '#c9a58f' }}>
-                      pets
-                    </span>
-                  )}
-                </div>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div className="masc-nombre">{m.nombre || 'Sin nombre'}</div>
-                  <div className="masc-sub">
-                    {ESPECIE_LBL[m.especie] || 'Mascota'}
-                    {m.color ? ` · ${m.color}` : ''}
+          mascotas.map((m) => {
+            const aviso = avisoActivoDe(m)
+            const perdido = !!aviso
+            return (
+              <div className="masc-row" key={m.id}>
+                <button className="masc-info" onClick={() => onEditarMascota(m)}>
+                  <div className="masc-foto">
+                    {m.foto ? (
+                      <img src={m.foto} alt={m.nombre} onError={(e) => (e.target.style.display = 'none')} />
+                    ) : (
+                      <span className="mi fill" style={{ fontSize: 26, color: '#c9a58f' }}>
+                        pets
+                      </span>
+                    )}
                   </div>
-                </div>
-              </button>
-              <button className="masc-perdi" onClick={() => onPublicarMascota(m)}>
-                Se me perdió
-              </button>
-            </div>
-          ))
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div className="masc-nombre">
+                      {m.nombre || 'Sin nombre'}
+                      {perdido && <span className="masc-estado">Perdido</span>}
+                    </div>
+                    <div className="masc-sub">
+                      {ESPECIE_LBL[m.especie] || 'Mascota'}
+                      {m.color ? ` · ${m.color}` : ''}
+                    </div>
+                  </div>
+                </button>
+                {perdido ? (
+                  <button className="masc-aparecio" onClick={() => aparecio(aviso.id)}>
+                    <span className="mi" style={{ fontSize: 17 }}>
+                      celebration
+                    </span>
+                    ¡Apareció!
+                  </button>
+                ) : (
+                  <button className="masc-perdi" onClick={() => onPublicarMascota(m)}>
+                    Se me perdió
+                  </button>
+                )}
+              </div>
+            )
+          })
         )}
 
         {/* ---- Mis avisos ---- */}

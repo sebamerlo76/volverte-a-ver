@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import PetCard from './PetCard.jsx'
+import { avatarDe } from '../lib/formato.js'
 
 const ZONAS_RAPIDAS = ['Parque Urquiza', 'Centro', 'San Agustín']
 
-export default function Feed({ reportes, onOpen, authActivo, logueado, onLogin, onCuenta }) {
+export default function Feed({ reportes, onOpen, authActivo, logueado, user, onLogin, onCuenta }) {
+  const avatar = avatarDe(user)
   const [q, setQ] = useState('')
   const [estado, setEstado] = useState('todos') // todos | perdido | encontrado
   const [especie, setEspecie] = useState(null) // perro | gato
@@ -54,12 +56,16 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, onLogin, 
                 onClick={logueado ? onCuenta : onLogin}
                 aria-label={logueado ? 'Mi cuenta' : 'Iniciar sesión'}
               >
-                <span
-                  className={'mi' + (logueado ? ' fill' : '')}
-                  style={{ fontSize: 28, color: logueado ? '#ff6b5e' : '#c3b8b0' }}
-                >
-                  {logueado ? 'account_circle' : 'login'}
-                </span>
+                {logueado && avatar ? (
+                  <img className="hd-av" src={avatar} alt="Mi cuenta" referrerPolicy="no-referrer" />
+                ) : (
+                  <span
+                    className={'mi' + (logueado ? ' fill' : '')}
+                    style={{ fontSize: 28, color: logueado ? '#ff6b5e' : '#c3b8b0' }}
+                  >
+                    {logueado ? 'account_circle' : 'login'}
+                  </span>
+                )}
               </button>
             ) : (
               <span className="mi" style={{ fontSize: 26, color: '#c3b8b0' }}>

@@ -32,6 +32,7 @@ function desdeFila(row) {
     creadoEn: row.creado_en,
     estado: row.estado,
     userId: row.user_id, // dueño del aviso (para editar/borrar)
+    mascotaId: row.mascota_id, // mascota del perfil vinculada (o null)
   }
 }
 function haciaFila(r) {
@@ -50,6 +51,7 @@ function haciaFila(r) {
     foto: r.foto,
     whatsapp: r.whatsapp,
     fecha_evento: r.fechaEvento,
+    mascota_id: r.mascotaId ?? null,
   }
 }
 

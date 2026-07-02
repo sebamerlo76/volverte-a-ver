@@ -154,8 +154,8 @@ export default function App() {
     mostrarToast('🐾 Mascota guardada')
   }
   function publicarMascota(m) {
-    // Prellena un aviso "perdido" con los datos de la mascota. Solo falta zona/fecha.
-    setPlantilla({ ...m, tipo: 'perdido' })
+    // Prellena un aviso "perdido" con los datos de la mascota (y la deja vinculada).
+    setPlantilla({ ...m, tipo: 'perdido', mascotaId: m.id })
     setEditando(null)
     setVista('post')
   }
@@ -173,6 +173,7 @@ export default function App() {
             onOpen={abrirDetalle}
             authActivo={authActivo}
             logueado={logueado}
+            user={user}
             onLogin={pedirLogin}
             onCuenta={() => setVista('cuenta')}
           />
@@ -212,6 +213,7 @@ export default function App() {
             onNuevaMascota={nuevaMascota}
             onEditarMascota={editarMascota}
             onPublicarMascota={publicarMascota}
+            onToast={mostrarToast}
           />
         )}
         {vista === 'mascota' && (

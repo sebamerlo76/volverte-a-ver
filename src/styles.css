@@ -753,6 +753,50 @@ select {
   align-items: center;
   justify-content: center;
   flex: none;
+  overflow: hidden;
+}
+.perfil-av img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Foto de perfil en el header */
+.hd-av {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffd9d3;
+  display: block;
+}
+/* Chip "Perdido" al lado del nombre de la mascota */
+.masc-estado {
+  display: inline-block;
+  margin-left: 7px;
+  vertical-align: middle;
+  background: var(--coral-strong);
+  color: #fff;
+  font-family: Nunito, sans-serif;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 2px 7px;
+  border-radius: 7px;
+}
+.masc-aparecio {
+  flex: none;
+  height: 38px;
+  padding: 0 13px;
+  border-radius: 12px;
+  background: var(--green);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 4px 10px rgba(23, 160, 107, 0.35);
 }
 .perfil-mail {
   font-family: Fredoka, sans-serif;
