@@ -9,6 +9,9 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast }) 
   const [foto, setFoto] = useState(inicial?.foto || '')
   const [fotoFile, setFotoFile] = useState(null)
   const [nombre, setNombre] = useState(inicial?.nombre || '')
+  const [sexo, setSexo] = useState(inicial?.sexo || '')
+  const [edad, setEdad] = useState(inicial?.edad || '')
+  const [collar, setCollar] = useState(inicial?.collar || '')
   const [color, setColor] = useState(inicial?.color || '')
   const [tamano, setTamano] = useState(inicial?.tamano || '')
   const [raza, setRaza] = useState(inicial?.raza || '')
@@ -33,6 +36,9 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast }) 
       const datos = {
         nombre: nombre.trim(),
         especie,
+        sexo,
+        edad: edad.trim(),
+        collar: collar.trim(),
         color: color.trim(),
         tamano,
         raza: raza.trim(),
@@ -104,6 +110,26 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast }) 
         <div className="flabel">Nombre</div>
         <div className="inp">
           <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej: Rocco" />
+        </div>
+
+        <div className="flabel">Sexo</div>
+        <div className="seg" style={{ background: 'transparent', padding: 0, gap: 9 }}>
+          <button className={'specb' + (sexo === 'macho' ? ' on' : '')} style={{ height: 46, flexDirection: 'row' }} onClick={() => setSexo(sexo === 'macho' ? '' : 'macho')}>
+            ♂ Macho
+          </button>
+          <button className={'specb' + (sexo === 'hembra' ? ' on' : '')} style={{ height: 46, flexDirection: 'row' }} onClick={() => setSexo(sexo === 'hembra' ? '' : 'hembra')}>
+            ♀ Hembra
+          </button>
+        </div>
+
+        <div className="flabel">Edad (aprox.)</div>
+        <div className="inp">
+          <input value={edad} onChange={(e) => setEdad(e.target.value)} placeholder="Ej: 3 años" />
+        </div>
+
+        <div className="flabel">Collar / chapita</div>
+        <div className="inp">
+          <input value={collar} onChange={(e) => setCollar(e.target.value)} placeholder="Ej: Collar azul con chapita" />
         </div>
 
         <div className="flabel">Color</div>

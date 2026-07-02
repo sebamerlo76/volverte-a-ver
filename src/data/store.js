@@ -33,6 +33,10 @@ function desdeFila(row) {
     estado: row.estado,
     userId: row.user_id, // dueño del aviso (para editar/borrar)
     mascotaId: row.mascota_id, // mascota del perfil vinculada (o null)
+    sexo: row.sexo,
+    edad: row.edad,
+    collar: row.collar,
+    recompensa: row.recompensa,
   }
 }
 function haciaFila(r) {
@@ -52,6 +56,10 @@ function haciaFila(r) {
     whatsapp: r.whatsapp,
     fecha_evento: r.fechaEvento,
     mascota_id: r.mascotaId ?? null,
+    sexo: r.sexo ?? null,
+    edad: r.edad ?? null,
+    collar: r.collar ?? null,
+    recompensa: r.recompensa ?? null,
   }
 }
 
@@ -209,6 +217,9 @@ function mascotaDesdeFila(row) {
     raza: row.raza,
     descripcion: row.descripcion,
     foto: row.foto,
+    sexo: row.sexo,
+    edad: row.edad,
+    collar: row.collar,
   }
 }
 function mascotaHaciaFila(m) {
@@ -220,6 +231,9 @@ function mascotaHaciaFila(m) {
     raza: m.raza,
     descripcion: m.descripcion,
     foto: m.foto,
+    sexo: m.sexo ?? null,
+    edad: m.edad ?? null,
+    collar: m.collar ?? null,
   }
 }
 function leerMascotasLocal() {

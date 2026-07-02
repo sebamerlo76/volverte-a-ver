@@ -18,6 +18,9 @@ export default function EncontreWizard({ onCerrar, onPublicado, onToast }) {
   const [especie, setEspecie] = useState('perro')
   const [color, setColor] = useState('')
   const [tamano, setTamano] = useState('')
+  const [sexo, setSexo] = useState('')
+  const [edad, setEdad] = useState('')
+  const [collar, setCollar] = useState('')
   const [descripcion, setDescripcion] = useState('')
   const [foto, setFoto] = useState('')
   const [fotoFile, setFotoFile] = useState(null)
@@ -60,6 +63,9 @@ export default function EncontreWizard({ onCerrar, onPublicado, onToast }) {
         color: color.trim(),
         tamano,
         raza: '',
+        sexo,
+        edad: edad.trim(),
+        collar: collar.trim(),
         descripcion: descripcion.trim(),
         foto: fotoUrl,
         whatsapp: whatsapp.trim(),
@@ -131,6 +137,19 @@ export default function EncontreWizard({ onCerrar, onPublicado, onToast }) {
                   {t}
                 </button>
               ))}
+            </div>
+            <div className="flabel">Sexo</div>
+            <div className="seg" style={{ background: 'transparent', padding: 0, gap: 9 }}>
+              <button className={'specb' + (sexo === 'macho' ? ' on' : '')} style={{ height: 46, flexDirection: 'row' }} onClick={() => setSexo(sexo === 'macho' ? '' : 'macho')}>
+                ♂ Macho
+              </button>
+              <button className={'specb' + (sexo === 'hembra' ? ' on' : '')} style={{ height: 46, flexDirection: 'row' }} onClick={() => setSexo(sexo === 'hembra' ? '' : 'hembra')}>
+                ♀ Hembra
+              </button>
+            </div>
+            <div className="flabel">Collar / chapita</div>
+            <div className="inp">
+              <input value={collar} onChange={(e) => setCollar(e.target.value)} placeholder="Ej: Collar rojo" />
             </div>
             <div className="flabel">Señas particulares</div>
             <textarea

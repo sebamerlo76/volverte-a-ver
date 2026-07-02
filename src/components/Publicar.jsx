@@ -12,6 +12,10 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
   const [foto, setFoto] = useState(base?.foto || '') // vista previa / foto actual
   const [fotoFile, setFotoFile] = useState(null) // archivo nuevo a subir (si cambia)
   const [nombre, setNombre] = useState(base?.nombre || '')
+  const [sexo, setSexo] = useState(base?.sexo || '')
+  const [edad, setEdad] = useState(base?.edad || '')
+  const [collar, setCollar] = useState(base?.collar || '')
+  const [recompensa, setRecompensa] = useState(base?.recompensa || '')
   const [zona, setZona] = useState(base?.zona || 'Centro')
   const [fecha, setFecha] = useState(base?.fechaEvento || '')
   const [descripcion, setDescripcion] = useState(base?.descripcion || '')
@@ -46,6 +50,10 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
         color: base?.color || '',
         tamano: base?.tamano || '',
         raza: base?.raza || '',
+        sexo,
+        edad: edad.trim(),
+        collar: collar.trim(),
+        recompensa: tipo === 'perdido' ? recompensa.trim() : '',
         descripcion: descripcion.trim(),
         foto: fotoUrl,
         whatsapp: whatsapp.trim(),
@@ -140,6 +148,26 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
           <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej: Rocco" />
         </div>
 
+        <div className="flabel">Sexo</div>
+        <div className="seg" style={{ background: 'transparent', padding: 0, gap: 9 }}>
+          <button className={'specb' + (sexo === 'macho' ? ' on' : '')} style={{ height: 46, flexDirection: 'row' }} onClick={() => setSexo(sexo === 'macho' ? '' : 'macho')}>
+            ♂ Macho
+          </button>
+          <button className={'specb' + (sexo === 'hembra' ? ' on' : '')} style={{ height: 46, flexDirection: 'row' }} onClick={() => setSexo(sexo === 'hembra' ? '' : 'hembra')}>
+            ♀ Hembra
+          </button>
+        </div>
+
+        <div className="flabel">Edad (aprox.)</div>
+        <div className="inp">
+          <input value={edad} onChange={(e) => setEdad(e.target.value)} placeholder="Ej: 2 años / cachorro" />
+        </div>
+
+        <div className="flabel">Collar / chapita</div>
+        <div className="inp">
+          <input value={collar} onChange={(e) => setCollar(e.target.value)} placeholder="Ej: Collar rojo con chapita" />
+        </div>
+
         <div className="flabel">Zona / barrio</div>
         <div className="inp">
           <span className="mi" style={{ fontSize: 20, color: '#ff6b5e' }}>
@@ -173,6 +201,23 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
           onChange={(e) => setDescripcion(e.target.value)}
           placeholder="Color, tamaño, raza, collar, señas particulares…"
         />
+
+        {tipo === 'perdido' && (
+          <>
+            <div className="flabel">Recompensa (opcional)</div>
+            <div className="inp">
+              <span className="mi" style={{ fontSize: 20, color: '#e0a300' }}>
+                paid
+              </span>
+              <input value={recompensa} onChange={(e) => setRecompensa(e.target.value)} placeholder="Ej: $50.000" />
+            </div>
+            {recompensa.trim() && (
+              <div className="aviso-estafa">
+                ⚠️ Ojo: la recompensa puede atraer estafadores. Nunca pagues por adelantado ni des datos sensibles.
+              </div>
+            )}
+          </>
+        )}
 
         <div className="flabel">WhatsApp de contacto</div>
         <div className="inp">

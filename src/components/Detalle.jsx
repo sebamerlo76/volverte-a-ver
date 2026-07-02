@@ -44,10 +44,27 @@ export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorra
 
           <div className="tags" style={{ marginTop: 14 }}>
             <span className="tag">{r.especie === 'perro' ? 'Perro' : r.especie === 'gato' ? 'Gato' : 'Otro'}</span>
+            {r.sexo ? <span className="tag">{r.sexo === 'macho' ? '♂ Macho' : '♀ Hembra'}</span> : null}
             {r.color ? <span className="tag">{r.color}</span> : null}
             {r.tamano ? <span className="tag">{r.tamano}</span> : null}
             {r.raza ? <span className="tag">{r.raza}</span> : null}
+            {r.edad ? <span className="tag">{r.edad}</span> : null}
+            {r.collar ? <span className="tag">🦮 {r.collar}</span> : null}
           </div>
+
+          {r.recompensa ? (
+            <div className="recompensa-box">
+              <div className="recompensa-top">
+                <span className="mi fill" style={{ fontSize: 20 }}>
+                  paid
+                </span>
+                Recompensa: {r.recompensa}
+              </div>
+              <div className="recompensa-nota">
+                Nunca pagues por adelantado ni des datos sensibles. Cuidado con las estafas.
+              </div>
+            </div>
+          ) : null}
 
           {r.descripcion ? (
             <div className="signs">
