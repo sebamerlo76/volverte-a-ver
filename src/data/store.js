@@ -220,6 +220,7 @@ function mascotaDesdeFila(row) {
     sexo: row.sexo,
     edad: row.edad,
     collar: row.collar,
+    whatsapp: row.whatsapp,
   }
 }
 function mascotaHaciaFila(m) {
@@ -230,6 +231,7 @@ function mascotaHaciaFila(m) {
     tamano: m.tamano,
     raza: m.raza,
     descripcion: m.descripcion,
+    whatsapp: m.whatsapp ?? null,
     foto: m.foto,
     sexo: m.sexo ?? null,
     edad: m.edad ?? null,

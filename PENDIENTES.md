@@ -44,7 +44,7 @@ En vivo: https://volverte-a-ver.vercel.app · Código: https://github.com/sebame
 - [ ] **Acciones rápidas**: marcar reencontrado desde la lista sin abrir el aviso.
 - [ ] **Buscar dentro de "Mis avisos"** (si alguien tiene muchos).
 - [ ] **Notificaciones de coincidencias** (avisar cuando aparece una parecida).
-- [ ] **QR para el collar** (escanear y ver el perfil / avisar).
+- [x] **QR para el collar** — chapita imprimible que abre el perfil público (`/m/<id>`) con WhatsApp. ✅ (requiere `schema-qr.sql`)
 - [ ] **Reconocimiento facial** de mascotas (cruzar perdidos con encontrados).
 - [ ] **Compartir a Facebook** (además de WhatsApp).
 - [ ] **Dominio propio** (ej: volverteaver.com.ar).
