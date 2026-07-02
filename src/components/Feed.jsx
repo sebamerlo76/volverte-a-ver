@@ -11,6 +11,16 @@ export default function Feed({ reportes, onOpen }) {
 
   const toggle = (valor, actual, setter) => setter(actual === valor ? null : valor)
 
+  // Tocar el logo vuelve al inicio "fresco": limpia filtros y sube al tope.
+  function irInicio() {
+    setQ('')
+    setEstado('todos')
+    setEspecie(null)
+    setZona(null)
+    const b = document.querySelector('.body')
+    if (b) b.scrollTop = 0
+  }
+
   const filtrados = useMemo(() => {
     const texto = q.trim().toLowerCase()
     return reportes.filter((r) => {
@@ -30,11 +40,11 @@ export default function Feed({ reportes, onOpen }) {
       <div className="body">
         <div className="hd">
           <div className="brand">
-            <div className="logo">
+            <button className="logo" onClick={irInicio} aria-label="Ir al inicio">
               <span className="mi fill" style={{ fontSize: 21 }}>
                 pets
               </span>
-            </div>
+            </button>
             <div style={{ flex: 1 }}>
               <div className="bname">Volverte a ver</div>
               <div className="bsub">Paraná · Entre Ríos</div>
