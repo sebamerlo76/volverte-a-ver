@@ -251,6 +251,240 @@ select {
   box-shadow: 0 6px 16px rgba(80, 50, 30, 0.14);
 }
 
+/* ===== Home rediseñada: tema por pestaña ===== */
+.view.home-todos {
+  --acento: #6b6058;
+  --acento-bg: #f5f1ec;
+}
+.view.home-perdido {
+  --acento: #ff5747;
+  --acento-bg: #fff2ef;
+}
+.view.home-encontrado {
+  --acento: #1f9d8f;
+  --acento-bg: #ecf7f4;
+}
+.view.home-finales {
+  --acento: #17a06b;
+  --acento-bg: #ecf7f0;
+}
+
+/* Fila mini: logo + avatar */
+.hmini {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 4px;
+}
+.hmini-logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--ink);
+}
+.hmini-logo .mi {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: var(--coral);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 5px 12px rgba(255, 107, 94, 0.4);
+}
+
+/* Pestañas de estado */
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 4px 10px 0;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+}
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+.tab {
+  flex: none;
+  padding: 11px 13px 12px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--faint);
+  position: relative;
+  white-space: nowrap;
+}
+.tab.on {
+  color: var(--acento);
+}
+.tab.on::after {
+  content: '';
+  position: absolute;
+  left: 13px;
+  right: 13px;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--acento);
+}
+
+/* Barra de filtros (breadcrumb) */
+.fbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 9px 16px;
+  background: var(--acento-bg);
+}
+.fbar-tune {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 13px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1.5px solid var(--line);
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #6b6058;
+}
+.fbar-tune.on {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.fchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 9px 0 12px;
+  border-radius: 10px;
+  background: var(--acento);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 800;
+}
+.fbar-count {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--faint);
+}
+.fp-listo {
+  margin-top: 14px;
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+/* ===== Buscador flotante ===== */
+.buscador {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+  animation: fade 0.2s ease;
+}
+.buscador-top {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 16px 10px;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+.bus-back {
+  font-size: 24px;
+  color: var(--ink);
+}
+.buscador-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--cream);
+  border: 1.5px solid var(--line2);
+  padding: 0 13px;
+}
+.buscador-input input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--ink);
+}
+.buscador-res {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0 20px;
+}
+.bres-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.bres-foto {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  flex: none;
+  background: #f6efe9;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bres-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.bres-nombre {
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+}
+.bres-sub {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--muted);
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bres-badge {
+  flex: none;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #fff;
+  padding: 4px 9px;
+  border-radius: 8px;
+}
+
 /* ---- Chips de filtro ---- */
 .chips {
   display: flex;

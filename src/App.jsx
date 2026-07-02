@@ -11,6 +11,7 @@ import ElegirMascota from './components/ElegirMascota.jsx'
 import EncontreWizard from './components/EncontreWizard.jsx'
 import ReportarAvistamiento from './components/ReportarAvistamiento.jsx'
 import MapaRecorrido from './components/MapaRecorrido.jsx'
+import BuscadorOverlay from './components/BuscadorOverlay.jsx'
 import BottomNav from './components/BottomNav.jsx'
 import { getReportes, marcarResuelto, reactivarReporte, eliminarReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
@@ -18,6 +19,9 @@ import { supabase, supabaseConfigurado } from './lib/supabase.js'
 export default function App() {
   const [vista, setVista] = useState('feed') // feed | detalle | post | auth | cuenta | avistamiento | recorrido
   const [homeModo, setHomeModo] = useState('lista') // lista | mapa (vista del inicio)
+  const FILTROS_INI = { q: '', estado: 'todos', especie: null, zona: null, tiempo: 'todos', orden: 'recientes' }
+  const [filtros, setFiltros] = useState(FILTROS_INI) // filtros del inicio (se conservan entre vistas)
+  const [buscadorAbierto, setBuscadorAbierto] = useState(false)
   const [selReporte, setSelReporte] = useState(null) // aviso abierto en el detalle
   const [reportes, setReportes] = useState([])
   const [toast, setToast] = useState('')
@@ -72,18 +76,27 @@ export default function App() {
       }
       return
     }
-    // Inicio y Mapa son el mismo inicio en dos modos (con los mismos filtros).
-    if (tab === 'map') {
-      setHomeModo('mapa')
-      setVista('feed')
-      return
-    }
-    if (tab === 'feed') {
-      setHomeModo('lista')
-      setVista('feed')
-      return
-    }
     setVista(tab)
+  }
+
+  // --- Inicio / filtros ---
+  function setFiltro(campo, valor) {
+    setFiltros((f) => ({ ...f, [campo]: valor }))
+  }
+  function resetInicio() {
+    setFiltros(FILTROS_INI)
+    setHomeModo('lista')
+    setVista('feed')
+    const b = document.querySelector('.body')
+    if (b) b.scrollTop = 0
+  }
+
+  // Barra inferior: Inicio · Buscar · Publicar · Mapa/Lista
+  function navBarra(accion) {
+    if (accion === 'post') return navegar('post')
+    if (accion === 'buscar') return setBuscadorAbierto(true)
+    if (accion === 'inicio') return resetInicio()
+    if (accion === 'toggle') return setHomeModo((m) => (m === 'mapa' ? 'lista' : 'mapa'))
   }
 
   function abrirDetalle(reporte) {
@@ -201,7 +214,6 @@ export default function App() {
     setVista('post')
   }
 
-  const tabActual = vista === 'feed' && homeModo === 'mapa' ? 'map' : 'feed'
   const seleccionado = selReporte
   const esMio = seleccionado ? !authActivo || (user && seleccionado.userId === user.id) : false
 
@@ -218,7 +230,9 @@ export default function App() {
             onLogin={pedirLogin}
             onCuenta={() => setVista('cuenta')}
             modo={homeModo}
-            onModo={setHomeModo}
+            filtros={filtros}
+            setFiltro={setFiltro}
+            resetInicio={resetInicio}
           />
         )}
         {vista === 'detalle' && (
@@ -309,7 +323,20 @@ export default function App() {
         {vista === 'qr' && mascotaEditando && (
           <ChapitaQR mascota={mascotaEditando} onCerrar={() => setVista('mascota')} onToast={mostrarToast} />
         )}
-        {vista === 'feed' && <BottomNav tab={tabActual} onNav={navegar} />}
+        {vista === 'feed' && <BottomNav modo={homeModo} onNav={navBarra} />}
+
+        {buscadorAbierto && (
+          <BuscadorOverlay
+            reportes={reportes}
+            q={filtros.q}
+            onQ={(v) => setFiltro('q', v)}
+            onOpen={(r) => {
+              setBuscadorAbierto(false)
+              abrirDetalle(r)
+            }}
+            onCerrar={() => setBuscadorAbierto(false)}
+          />
+        )}
       </div>
 
       <div className={'toast' + (toast ? ' show' : '')}>{toast}</div>

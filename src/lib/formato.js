@@ -41,6 +41,17 @@ export function fechaHora(iso) {
   return `${f} · ${h}`
 }
 
+// ¿La fecha está dentro del rango? ('todos' | 'semana' | 'mes')
+export function dentroDeRango(iso, rango) {
+  if (!rango || rango === 'todos') return true
+  const d = new Date(iso)
+  if (isNaN(d)) return true
+  const dias = (Date.now() - d.getTime()) / 86400000
+  if (rango === 'semana') return dias <= 7
+  if (rango === 'mes') return dias <= 31
+  return true
+}
+
 // Foto de perfil del usuario (Google la trae en user_metadata).
 export function avatarDe(user) {
   return user?.user_metadata?.avatar_url || user?.user_metadata?.picture || ''

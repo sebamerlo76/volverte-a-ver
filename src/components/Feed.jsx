@@ -2,11 +2,27 @@ import { useEffect, useMemo, useState } from 'react'
 import PetCard from './PetCard.jsx'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { getReencontrados } from '../data/store.js'
-import { avatarDe, nombreMostrado, tiempoRelativo } from '../lib/formato.js'
+import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
 import { coordsDeBarrio, PARANA_CENTER, NOMBRES_BARRIOS } from '../lib/parana.js'
 
-// Pequeño desplazamiento determinístico para que no se superpongan los pines
-// del mismo barrio (no tenemos calle exacta, solo la zona).
+const ESPECIE_LBL = { perro: 'Perros', gato: 'Gatos', otro: 'Otros' }
+const TIEMPOS = [
+  { k: 'todos', t: 'Siempre' },
+  { k: 'semana', t: 'Esta semana' },
+  { k: 'mes', t: 'Este mes' },
+]
+const ORDENES = [
+  { k: 'recientes', t: 'Más recientes' },
+  { k: 'perdidos', t: 'Perdidos primero' },
+]
+const TABS = [
+  { k: 'todos', t: 'Todos' },
+  { k: 'perdido', t: 'Perdidos' },
+  { k: 'encontrado', t: 'Encontrados' },
+  { k: 'finales', t: '🎉 Reencontrados' },
+]
+
+// Desplazamiento determinístico para que no se superpongan los pines del barrio.
 function jitter(base, id = '') {
   let h = 0
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 100000
@@ -15,56 +31,42 @@ function jitter(base, id = '') {
   return [base[0] + dy, base[1] + dx]
 }
 
-export default function Feed({ reportes, onOpen, authActivo, logueado, user, onLogin, onCuenta, modo = 'lista', onModo }) {
+export default function Feed({ reportes, onOpen, authActivo, logueado, user, onLogin, onCuenta, modo, filtros, setFiltro, resetInicio }) {
   const avatar = avatarDe(user)
-  const [q, setQ] = useState('')
-  const [estado, setEstado] = useState('todos') // todos | perdido | encontrado | finales
-  const [especie, setEspecie] = useState(null)
-  const [zona, setZona] = useState(null)
   const [finales, setFinales] = useState(null)
-  const [sel, setSel] = useState(null) // pin seleccionado en el mapa
-  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false)
+  const [sel, setSel] = useState(null)
+  const [panelAbierto, setPanelAbierto] = useState(false)
+
+  const verFinales = filtros.estado === 'finales'
+  const enMapa = modo === 'mapa'
 
   useEffect(() => {
-    if (estado === 'finales' && finales === null) {
+    if (verFinales && finales === null) {
       getReencontrados().then(setFinales).catch(() => setFinales([]))
     }
-  }, [estado, finales])
-
-  const toggle = (valor, actual, setter) => setter(actual === valor ? null : valor)
-
-  function irInicio() {
-    setQ('')
-    setEstado('todos')
-    setEspecie(null)
-    setZona(null)
-    setFiltrosAbiertos(false)
-    const b = document.querySelector('.body')
-    if (b) b.scrollTop = 0
-  }
-
-  const secundariosActivos = (especie ? 1 : 0) + (zona ? 1 : 0)
-
-  const verFinales = estado === 'finales'
+  }, [verFinales, finales])
 
   const filtrados = useMemo(() => {
-    const texto = q.trim().toLowerCase()
+    const texto = (filtros.q || '').trim().toLowerCase()
     const fuente = verFinales ? finales || [] : reportes
-    return fuente.filter((r) => {
-      if (estado === 'perdido' || estado === 'encontrado') {
-        if (r.tipo !== estado) return false
+    let arr = fuente.filter((r) => {
+      if (filtros.estado === 'perdido' || filtros.estado === 'encontrado') {
+        if (r.tipo !== filtros.estado) return false
       }
-      if (especie && r.especie !== especie) return false
-      if (zona && r.zona !== zona) return false
+      if (filtros.especie && r.especie !== filtros.especie) return false
+      if (filtros.zona && r.zona !== filtros.zona) return false
+      if (!dentroDeRango(r.creadoEn, filtros.tiempo)) return false
       if (texto) {
         const hay = `${r.nombre || ''} ${r.raza || ''} ${r.color || ''} ${r.zona || ''} ${r.especie}`.toLowerCase()
         if (!hay.includes(texto)) return false
       }
       return true
     })
-  }, [reportes, finales, verFinales, q, estado, especie, zona])
-
-  const enMapa = modo === 'mapa'
+    if (filtros.orden === 'perdidos') {
+      arr = [...arr].sort((a, b) => (a.tipo === 'perdido' ? 0 : 1) - (b.tipo === 'perdido' ? 0 : 1))
+    }
+    return arr
+  }, [reportes, finales, verFinales, filtros])
 
   const marcadores = useMemo(
     () =>
@@ -79,127 +81,119 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, user, onL
   const perdidos = filtrados.filter((r) => r.tipo === 'perdido').length
   const encontrados = filtrados.filter((r) => r.tipo === 'encontrado').length
 
+  // Chips de filtros activos (breadcrumb removible)
+  const chips = []
+  if (filtros.q) chips.push({ key: 'q', label: `“${filtros.q}”`, clear: () => setFiltro('q', '') })
+  if (filtros.especie) chips.push({ key: 'especie', label: ESPECIE_LBL[filtros.especie], clear: () => setFiltro('especie', null) })
+  if (filtros.zona) chips.push({ key: 'zona', label: filtros.zona, clear: () => setFiltro('zona', null) })
+  if (filtros.tiempo !== 'todos')
+    chips.push({ key: 'tiempo', label: filtros.tiempo === 'semana' ? 'Esta semana' : 'Este mes', clear: () => setFiltro('tiempo', 'todos') })
+  if (filtros.orden !== 'recientes') chips.push({ key: 'orden', label: 'Perdidos primero', clear: () => setFiltro('orden', 'recientes') })
+
   return (
-    <div className="view">
-      {/* ---- Cabecera fija: marca, buscador, filtros y modo ---- */}
+    <div className={'view home-' + filtros.estado}>
       <div className="home-top">
-        <div className="hd">
-          <div className="brand">
-            <button className="logo" onClick={irInicio} aria-label="Ir al inicio">
-              <span className="mi fill" style={{ fontSize: 21 }}>
-                pets
-              </span>
-            </button>
-            <div style={{ flex: 1 }}>
-              <div className="bname">Volverte a ver</div>
-              <div className="bsub">Paraná · Entre Ríos</div>
-            </div>
-            {authActivo ? (
-              <button onClick={logueado ? onCuenta : onLogin} aria-label={logueado ? 'Mi cuenta' : 'Iniciar sesión'}>
-                {logueado && avatar ? (
-                  <img className="hd-av" src={avatar} alt="Mi cuenta" referrerPolicy="no-referrer" />
-                ) : (
-                  <span className={'mi' + (logueado ? ' fill' : '')} style={{ fontSize: 28, color: logueado ? '#ff6b5e' : '#c3b8b0' }}>
-                    {logueado ? 'account_circle' : 'login'}
-                  </span>
-                )}
-              </button>
-            ) : (
-              <span className="mi" style={{ fontSize: 26, color: '#c3b8b0' }}>
-                notifications
-              </span>
-            )}
-          </div>
-          <div className="search">
-            <span className="mi" style={{ fontSize: 21, color: '#c9beb6' }}>
-              search
+        {/* Fila mini: logo + avatar */}
+        <div className="hmini">
+          <button className="hmini-logo" onClick={resetInicio} aria-label="Ir al inicio">
+            <span className="mi fill" style={{ fontSize: 19 }}>
+              pets
             </span>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nombre, barrio o color…" />
-          </div>
+            Volverte a ver
+          </button>
+          {authActivo ? (
+            <button onClick={logueado ? onCuenta : onLogin} aria-label={logueado ? 'Mi cuenta' : 'Iniciar sesión'}>
+              {logueado && avatar ? (
+                <img className="hd-av" src={avatar} alt="Mi cuenta" referrerPolicy="no-referrer" />
+              ) : (
+                <span className={'mi' + (logueado ? ' fill' : '')} style={{ fontSize: 27, color: logueado ? '#ff6b5e' : '#c3b8b0' }}>
+                  {logueado ? 'account_circle' : 'login'}
+                </span>
+              )}
+            </button>
+          ) : null}
         </div>
 
-        {/* Fila principal: estado (una sola fila que scrollea) + botón Filtros */}
-        <div className="chips chips-row">
-          <button className={'chip' + (estado === 'todos' ? ' on' : '')} onClick={() => setEstado('todos')}>
-            Todos
-          </button>
-          <button className={'chip lost' + (estado === 'perdido' ? ' on' : '')} onClick={() => setEstado('perdido')}>
-            Perdidos
-          </button>
-          <button className={'chip found' + (estado === 'encontrado' ? ' on' : '')} onClick={() => setEstado('encontrado')}>
-            Encontrados
-          </button>
-          <button className={'chip finales' + (verFinales ? ' on' : '')} onClick={() => setEstado('finales')}>
-            🎉 Reencontrados
-          </button>
-          <button
-            className={'chip filtros-btn' + (filtrosAbiertos || secundariosActivos ? ' on' : '')}
-            onClick={() => setFiltrosAbiertos((v) => !v)}
-          >
-            <span className="mi" style={{ fontSize: 17 }}>
+        {/* Pestañas de estado (con acento de color) */}
+        <div className="tabs">
+          {TABS.map((tab) => (
+            <button key={tab.k} className={'tab' + (filtros.estado === tab.k ? ' on' : '')} onClick={() => setFiltro('estado', tab.k)}>
+              {tab.t}
+            </button>
+          ))}
+        </div>
+
+        {/* Barra de filtros (breadcrumb) */}
+        <div className="fbar">
+          <button className={'fbar-tune' + (panelAbierto ? ' on' : '')} onClick={() => setPanelAbierto((v) => !v)}>
+            <span className="mi" style={{ fontSize: 18 }}>
               tune
             </span>
-            Filtros{secundariosActivos ? ` (${secundariosActivos})` : ''}
+            Filtrar
           </button>
+          {chips.map((c) => (
+            <button key={c.key} className="fchip" onClick={c.clear}>
+              {c.label}
+              <span className="mi" style={{ fontSize: 15 }}>
+                close
+              </span>
+            </button>
+          ))}
+          <span className="fbar-count">
+            {filtrados.length} {filtrados.length === 1 ? 'resultado' : 'resultados'}
+          </span>
         </div>
 
-        {/* Panel de filtros secundarios (se abre y cierra) */}
-        {filtrosAbiertos && (
+        {/* Panel de filtros que se despliega */}
+        {panelAbierto && (
           <div className="filtros-panel">
             <div className="fp-label">Especie</div>
             <div className="chipsel-wrap">
-              <button className={'chip' + (especie === 'perro' ? ' on' : '')} onClick={() => toggle('perro', especie, setEspecie)}>
-                Perros
-              </button>
-              <button className={'chip' + (especie === 'gato' ? ' on' : '')} onClick={() => toggle('gato', especie, setEspecie)}>
-                Gatos
-              </button>
-              <button className={'chip' + (especie === 'otro' ? ' on' : '')} onClick={() => toggle('otro', especie, setEspecie)}>
-                Otros
-              </button>
+              {['perro', 'gato', 'otro'].map((e) => (
+                <button key={e} className={'chip' + (filtros.especie === e ? ' on' : '')} onClick={() => setFiltro('especie', filtros.especie === e ? null : e)}>
+                  {ESPECIE_LBL[e]}
+                </button>
+              ))}
             </div>
             <div className="fp-label">Barrio</div>
             <div className="chipsel-wrap">
               {NOMBRES_BARRIOS.map((z) => (
-                <button key={z} className={'chip' + (zona === z ? ' on' : '')} onClick={() => toggle(z, zona, setZona)}>
+                <button key={z} className={'chip' + (filtros.zona === z ? ' on' : '')} onClick={() => setFiltro('zona', filtros.zona === z ? null : z)}>
                   {z}
                 </button>
               ))}
             </div>
-            {secundariosActivos > 0 && (
-              <button className="fp-limpiar" onClick={() => { setEspecie(null); setZona(null) }}>
-                Quitar filtros de especie y barrio
-              </button>
-            )}
+            <div className="fp-label">Cuándo</div>
+            <div className="chipsel-wrap">
+              {TIEMPOS.map((t) => (
+                <button key={t.k} className={'chip' + (filtros.tiempo === t.k ? ' on' : '')} onClick={() => setFiltro('tiempo', t.k)}>
+                  {t.t}
+                </button>
+              ))}
+            </div>
+            <div className="fp-label">Orden</div>
+            <div className="chipsel-wrap">
+              {ORDENES.map((o) => (
+                <button key={o.k} className={'chip' + (filtros.orden === o.k ? ' on' : '')} onClick={() => setFiltro('orden', o.k)}>
+                  {o.t}
+                </button>
+              ))}
+            </div>
+            <button className="fp-listo" onClick={() => setPanelAbierto(false)}>
+              Listo
+            </button>
           </div>
         )}
-
-        <div className="modo-toggle">
-          <button className={'modo-btn' + (!enMapa ? ' on' : '')} onClick={() => onModo && onModo('lista')}>
-            <span className="mi" style={{ fontSize: 18 }}>
-              view_list
-            </span>
-            Lista
-          </button>
-          <button className={'modo-btn' + (enMapa ? ' on' : '')} onClick={() => onModo && onModo('mapa')}>
-            <span className="mi" style={{ fontSize: 18 }}>
-              map
-            </span>
-            Mapa
-          </button>
-          <span className="modo-count">
-            {filtrados.length} {filtrados.length === 1 ? 'resultado' : 'resultados'}
-          </span>
-        </div>
       </div>
 
-      {/* ---- Contenido: lista o mapa (mismos filtros) ---- */}
+      {/* Contenido: lista o mapa */}
       {enMapa ? (
         <div className="mapwrap">
           <MapaLeaflet
             center={PARANA_CENTER}
             zoom={13}
             marcadores={marcadores}
+            ajustar
             onMarcadorClick={setSel}
             style={{ position: 'absolute', inset: 0 }}
           />
@@ -250,14 +244,12 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, user, onL
               ) : (
                 <>
                   🔍 No hay resultados con esos filtros.
-                  <br />
-                  Quizás tenés más de un filtro puesto.
                   <div>
-                    <button className="btn-limpiar" onClick={irInicio}>
+                    <button className="btn-limpiar" onClick={resetInicio}>
                       <span className="mi" style={{ fontSize: 18 }}>
                         filter_alt_off
                       </span>
-                      Limpiar filtros
+                      Limpiar todo
                     </button>
                   </div>
                 </>

@@ -1,23 +1,30 @@
-// Barra inferior: Inicio · Publicar (centro) · Mapa
-export default function BottomNav({ tab, onNav }) {
+// Barra inferior: Inicio · Buscar · Publicar (centro) · Mapa/Lista (alterna)
+export default function BottomNav({ modo, onNav }) {
+  const enMapa = modo === 'mapa'
   return (
     <div className="nav">
-      <button className={'ni' + (tab === 'feed' ? ' on' : '')} onClick={() => onNav('feed')}>
-        <span className={'mi' + (tab === 'feed' ? ' fill' : '')} style={{ fontSize: 25 }}>
+      <button className="ni" onClick={() => onNav('inicio')}>
+        <span className="mi" style={{ fontSize: 24 }}>
           home
         </span>
         Inicio
+      </button>
+      <button className="ni" onClick={() => onNav('buscar')}>
+        <span className="mi" style={{ fontSize: 24 }}>
+          search
+        </span>
+        Buscar
       </button>
       <button className="navc" onClick={() => onNav('post')} aria-label="Publicar reporte">
         <span className="mi fill" style={{ fontSize: 32 }}>
           pets
         </span>
       </button>
-      <button className={'ni' + (tab === 'map' ? ' on' : '')} onClick={() => onNav('map')}>
-        <span className={'mi' + (tab === 'map' ? ' fill' : '')} style={{ fontSize: 25 }}>
-          map
+      <button className={'ni' + (enMapa ? ' on' : '')} onClick={() => onNav('toggle')}>
+        <span className={'mi' + (enMapa ? ' fill' : '')} style={{ fontSize: 24 }}>
+          {enMapa ? 'view_list' : 'map'}
         </span>
-        Mapa
+        {enMapa ? 'Lista' : 'Mapa'}
       </button>
     </div>
   )
