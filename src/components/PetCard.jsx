@@ -2,6 +2,7 @@ import { nombreMostrado, tiempoRelativo } from '../lib/formato.js'
 
 export default function PetCard({ r, onClick }) {
   const perdido = r.tipo === 'perdido'
+  const resuelto = r.estado === 'resuelto'
   const clr = perdido ? '#ff6b5e' : '#1f9d8f'
   return (
     <button className="card" onClick={onClick}>
@@ -13,12 +14,21 @@ export default function PetCard({ r, onClick }) {
             pets
           </span>
         )}
-        <span className={'badge ' + (perdido ? 'lost' : 'found')}>
-          <span className="mi" style={{ fontSize: 16 }}>
-            {perdido ? 'error_outline' : 'check_circle'}
+        {resuelto ? (
+          <span className="badge found">
+            <span className="mi fill" style={{ fontSize: 16 }}>
+              celebration
+            </span>
+            Reencontrado
           </span>
-          {perdido ? 'Perdido' : 'Encontrado'}
-        </span>
+        ) : (
+          <span className={'badge ' + (perdido ? 'lost' : 'found')}>
+            <span className="mi" style={{ fontSize: 16 }}>
+              {perdido ? 'error_outline' : 'check_circle'}
+            </span>
+            {perdido ? 'Perdido' : 'Encontrado'}
+          </span>
+        )}
         <span className="time">{tiempoRelativo(r.creadoEn)}</span>
       </div>
       <div className="cbody">

@@ -105,6 +105,23 @@ export async function getMisReportes(userId) {
     .sort((a, b) => (a.creadoEn < b.creadoEn ? 1 : -1))
 }
 
+// Reencontrados (finales felices): avisos ya resueltos, más nuevo primero.
+export async function getReencontrados() {
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase
+      .from('reportes')
+      .select('*')
+      .eq('estado', 'resuelto')
+      .order('creado_en', { ascending: false })
+      .limit(50)
+    if (error) throw error
+    return data.map(desdeFila)
+  }
+  return leerLocal()
+    .filter((r) => r.estado === 'resuelto')
+    .sort((a, b) => (a.creadoEn < b.creadoEn ? 1 : -1))
+}
+
 // Crea un reporte nuevo. Devuelve el reporte creado.
 export async function addReporte(datos) {
   if (supabaseConfigurado) {

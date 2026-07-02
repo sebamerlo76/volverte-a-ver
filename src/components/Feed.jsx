@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import PetCard from './PetCard.jsx'
+import { getReencontrados } from '../data/store.js'
 import { avatarDe } from '../lib/formato.js'
 
 const ZONAS_RAPIDAS = ['Parque Urquiza', 'Centro', 'San Agustín']
@@ -7,9 +8,19 @@ const ZONAS_RAPIDAS = ['Parque Urquiza', 'Centro', 'San Agustín']
 export default function Feed({ reportes, onOpen, authActivo, logueado, user, onLogin, onCuenta }) {
   const avatar = avatarDe(user)
   const [q, setQ] = useState('')
-  const [estado, setEstado] = useState('todos') // todos | perdido | encontrado
+  const [estado, setEstado] = useState('todos') // todos | perdido | encontrado | finales
   const [especie, setEspecie] = useState(null) // perro | gato
   const [zona, setZona] = useState(null)
+  const [finales, setFinales] = useState(null) // reencontrados (lazy)
+
+  // Traer los reencontrados solo cuando se abre esa pestaña.
+  useEffect(() => {
+    if (estado === 'finales' && finales === null) {
+      getReencontrados()
+        .then(setFinales)
+        .catch(() => setFinales([]))
+    }
+  }, [estado, finales])
 
   const toggle = (valor, actual, setter) => setter(actual === valor ? null : valor)
 
@@ -23,10 +34,16 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, user, onL
     if (b) b.scrollTop = 0
   }
 
+  const verFinales = estado === 'finales'
+
   const filtrados = useMemo(() => {
     const texto = q.trim().toLowerCase()
-    return reportes.filter((r) => {
-      if (estado !== 'todos' && r.tipo !== estado) return false
+    const fuente = verFinales ? finales || [] : reportes
+    return fuente.filter((r) => {
+      // "finales" y "todos" no filtran por tipo; perdido/encontrado sí.
+      if (estado === 'perdido' || estado === 'encontrado') {
+        if (r.tipo !== estado) return false
+      }
       if (especie && r.especie !== especie) return false
       if (zona && r.zona !== zona) return false
       if (texto) {
@@ -35,7 +52,7 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, user, onL
       }
       return true
     })
-  }, [reportes, q, estado, especie, zona])
+  }, [reportes, finales, verFinales, q, estado, especie, zona])
 
   return (
     <div className="view">
@@ -95,6 +112,9 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, user, onL
           <button className={'chip found' + (estado === 'encontrado' ? ' on' : '')} onClick={() => setEstado('encontrado')}>
             Encontrados
           </button>
+          <button className={'chip finales' + (verFinales ? ' on' : '')} onClick={() => setEstado('finales')}>
+            🎉 Reencontrados
+          </button>
           <button className={'chip' + (especie === 'perro' ? ' on' : '')} onClick={() => toggle('perro', especie, setEspecie)}>
             Perros
           </button>
@@ -112,22 +132,36 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, user, onL
         </div>
 
         <div className="count">
-          {filtrados.length} {filtrados.length === 1 ? 'mascota' : 'mascotas'} en Paraná
+          {verFinales
+            ? `${filtrados.length} ${filtrados.length === 1 ? 'reencuentro' : 'reencuentros'} 🎉`
+            : `${filtrados.length} ${filtrados.length === 1 ? 'mascota' : 'mascotas'} en Paraná`}
         </div>
 
-        {filtrados.length === 0 ? (
+        {verFinales && finales === null ? (
+          <div className="empty">Cargando finales felices…</div>
+        ) : filtrados.length === 0 ? (
           <div className="empty">
-            🔍 No hay resultados con esos filtros.
-            <br />
-            Quizás tenés más de un filtro puesto.
-            <div>
-              <button className="btn-limpiar" onClick={irInicio}>
-                <span className="mi" style={{ fontSize: 18 }}>
-                  filter_alt_off
-                </span>
-                Limpiar filtros
-              </button>
-            </div>
+            {verFinales ? (
+              <>
+                🐾 Todavía no hay reencuentros publicados.
+                <br />
+                ¡Ojalá pronto haya muchos finales felices!
+              </>
+            ) : (
+              <>
+                🔍 No hay resultados con esos filtros.
+                <br />
+                Quizás tenés más de un filtro puesto.
+                <div>
+                  <button className="btn-limpiar" onClick={irInicio}>
+                    <span className="mi" style={{ fontSize: 18 }}>
+                      filter_alt_off
+                    </span>
+                    Limpiar filtros
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         ) : (
           filtrados.map((r) => <PetCard key={r.id} r={r} onClick={() => onOpen(r)} />)
