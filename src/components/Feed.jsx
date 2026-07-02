@@ -3,9 +3,7 @@ import PetCard from './PetCard.jsx'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo } from '../lib/formato.js'
-import { coordsDeBarrio, PARANA_CENTER } from '../lib/parana.js'
-
-const ZONAS_RAPIDAS = ['Parque Urquiza', 'Centro', 'San Agustín']
+import { coordsDeBarrio, PARANA_CENTER, NOMBRES_BARRIOS } from '../lib/parana.js'
 
 // Pequeño desplazamiento determinístico para que no se superpongan los pines
 // del mismo barrio (no tenemos calle exacta, solo la zona).
@@ -25,6 +23,7 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, user, onL
   const [zona, setZona] = useState(null)
   const [finales, setFinales] = useState(null)
   const [sel, setSel] = useState(null) // pin seleccionado en el mapa
+  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false)
 
   useEffect(() => {
     if (estado === 'finales' && finales === null) {
@@ -39,9 +38,12 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, user, onL
     setEstado('todos')
     setEspecie(null)
     setZona(null)
+    setFiltrosAbiertos(false)
     const b = document.querySelector('.body')
     if (b) b.scrollTop = 0
   }
+
+  const secundariosActivos = (especie ? 1 : 0) + (zona ? 1 : 0)
 
   const verFinales = estado === 'finales'
 
@@ -116,7 +118,8 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, user, onL
           </div>
         </div>
 
-        <div className="chips">
+        {/* Fila principal: estado (una sola fila que scrollea) + botón Filtros */}
+        <div className="chips chips-row">
           <button className={'chip' + (estado === 'todos' ? ' on' : '')} onClick={() => setEstado('todos')}>
             Todos
           </button>
@@ -129,21 +132,47 @@ export default function Feed({ reportes, onOpen, authActivo, logueado, user, onL
           <button className={'chip finales' + (verFinales ? ' on' : '')} onClick={() => setEstado('finales')}>
             🎉 Reencontrados
           </button>
-          <button className={'chip' + (especie === 'perro' ? ' on' : '')} onClick={() => toggle('perro', especie, setEspecie)}>
-            Perros
+          <button
+            className={'chip filtros-btn' + (filtrosAbiertos || secundariosActivos ? ' on' : '')}
+            onClick={() => setFiltrosAbiertos((v) => !v)}
+          >
+            <span className="mi" style={{ fontSize: 17 }}>
+              tune
+            </span>
+            Filtros{secundariosActivos ? ` (${secundariosActivos})` : ''}
           </button>
-          <button className={'chip' + (especie === 'gato' ? ' on' : '')} onClick={() => toggle('gato', especie, setEspecie)}>
-            Gatos
-          </button>
-          {ZONAS_RAPIDAS.map((z) => (
-            <button key={z} className={'chip' + (zona === z ? ' on' : '')} onClick={() => toggle(z, zona, setZona)}>
-              <span className="mi" style={{ fontSize: 17, color: zona === z ? '#fff' : '#ff6b5e' }}>
-                location_on
-              </span>
-              {z}
-            </button>
-          ))}
         </div>
+
+        {/* Panel de filtros secundarios (se abre y cierra) */}
+        {filtrosAbiertos && (
+          <div className="filtros-panel">
+            <div className="fp-label">Especie</div>
+            <div className="chipsel-wrap">
+              <button className={'chip' + (especie === 'perro' ? ' on' : '')} onClick={() => toggle('perro', especie, setEspecie)}>
+                Perros
+              </button>
+              <button className={'chip' + (especie === 'gato' ? ' on' : '')} onClick={() => toggle('gato', especie, setEspecie)}>
+                Gatos
+              </button>
+              <button className={'chip' + (especie === 'otro' ? ' on' : '')} onClick={() => toggle('otro', especie, setEspecie)}>
+                Otros
+              </button>
+            </div>
+            <div className="fp-label">Barrio</div>
+            <div className="chipsel-wrap">
+              {NOMBRES_BARRIOS.map((z) => (
+                <button key={z} className={'chip' + (zona === z ? ' on' : '')} onClick={() => toggle(z, zona, setZona)}>
+                  {z}
+                </button>
+              ))}
+            </div>
+            {secundariosActivos > 0 && (
+              <button className="fp-limpiar" onClick={() => { setEspecie(null); setZona(null) }}>
+                Quitar filtros de especie y barrio
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="modo-toggle">
           <button className={'modo-btn' + (!enMapa ? ' on' : '')} onClick={() => onModo && onModo('lista')}>

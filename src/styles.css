@@ -207,6 +207,34 @@ select {
   font-weight: 800;
   color: var(--faint);
 }
+/* Fila principal de filtros: una sola línea que scrollea */
+.chips-row {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+.chips-row::-webkit-scrollbar {
+  display: none;
+}
+/* Panel de filtros que se abre/cierra */
+.filtros-panel {
+  padding: 2px 20px 12px;
+  animation: fade 0.2s ease;
+}
+.fp-label {
+  font-size: 12px;
+  font-weight: 900;
+  color: #7a6f66;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin: 10px 0 8px;
+}
+.fp-limpiar {
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--coral);
+}
 .map-hint {
   position: absolute;
   left: 16px;
@@ -1349,8 +1377,8 @@ select {
 }
 .mlegend {
   position: absolute;
-  top: 70px;
-  left: 16px;
+  top: 12px;
+  left: 12px;
   z-index: 500;
   display: flex;
   gap: 8px;

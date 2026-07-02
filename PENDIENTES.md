@@ -25,11 +25,13 @@ En vivo: https://volverte-a-ver.vercel.app · Código: https://github.com/sebame
 
 ## 🔜 Próximo / priorizado
 
-- [ ] **Mapa como pantalla principal** — el inicio puede ser el mapa con todos los avisos activos (tarjetas como vista alternativa).
-- [ ] **Filtros sobre el mapa** — que los chips (perdido/encontrado, especie, zona) apliquen también al mapa.
+- [x] **Mapa como pantalla principal** — el inicio tiene toggle Lista/Mapa. ✅
+- [x] **Filtros sobre el mapa** — los chips aplican a lista y mapa (compartidos). ✅
 - [ ] **#3 Filtros progresivos** — panel "Filtrar" para que no se sature al crecer (en vez de muchos chips).
 - [ ] **Filtro por tiempo** — "esta semana", "este mes" (útil con muchos avisos).
-- [ ] **Pines siempre visibles** en todos los mapas (encuadre automático).
+- [ ] **Pines siempre visibles** en el mapa del inicio (encuadre automático a los resultados).
+- [ ] Los filtros se **resetean al abrir un aviso y volver** (Feed se re-monta). Estaría bueno conservarlos.
+- [ ] En el mapa del inicio los pines usan la coord del barrio (+ jitter). A futuro: **ubicación exacta** al publicar.
 
 ---
 
