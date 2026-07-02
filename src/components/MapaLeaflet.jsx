@@ -97,6 +97,7 @@ export default function MapaLeaflet({
     }
     marcadores.forEach((mk) => {
       const marker = L.marker([mk.lat, mk.lng], { icon: pin(mk.color || COLOR[mk.tipo] || '#ff5747', mk.label) })
+      if (mk.popup) marker.bindPopup(mk.popup, { closeButton: false, offset: [0, -8] })
       if (onMarcadorClick) marker.on('click', () => onMarcadorClick(mk.id))
       capa.addLayer(marker)
     })

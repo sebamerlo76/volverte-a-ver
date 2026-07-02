@@ -2,7 +2,16 @@ import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { coordsDeBarrio } from '../lib/parana.js'
 import { getAvistamientos } from '../data/store.js'
-import { nombreMostrado, tiempoRelativo, fechaLegible, linkWhatsApp } from '../lib/formato.js'
+import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp } from '../lib/formato.js'
+
+// Escapa texto del usuario para meterlo seguro en el HTML del globito.
+function esc(s = '') {
+  return String(s).replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]))
+}
+// Globito de un avistamiento.
+export function popupAvist(a, n) {
+  return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:130px;line-height:1.45"><b style="font-size:13px;color:#1f9d8f">👀 Avistamiento ${n}</b><br><span style="font-size:12.5px;color:#2a2320">${esc(a.nota) || 'Sin detalle'}</span><br><span style="font-size:11.5px;color:#8a807a">${esc(a.autor) || 'Anónimo'} · ${fechaHora(a.creadoEn)}</span></div>`
+}
 
 export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar }) {
   const [avist, setAvist] = useState([])
@@ -26,7 +35,14 @@ export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorra
   // Marcadores del mapa: la zona del aviso + cada avistamiento numerado.
   const marcadores = [
     { id: 'zona', lat: centro[0], lng: centro[1], tipo: r.tipo },
-    ...avist.map((a, i) => ({ id: a.id, lat: a.lat, lng: a.lng, tipo: 'avistamiento', label: i + 1 })),
+    ...avist.map((a, i) => ({
+      id: a.id,
+      lat: a.lat,
+      lng: a.lng,
+      tipo: 'avistamiento',
+      label: i + 1,
+      popup: popupAvist(a, i + 1),
+    })),
   ]
   const linea = [centro, ...avist.map((a) => [a.lat, a.lng])]
 

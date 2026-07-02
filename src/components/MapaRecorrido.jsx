@@ -3,6 +3,7 @@ import MapaLeaflet from './MapaLeaflet.jsx'
 import { coordsDeBarrio } from '../lib/parana.js'
 import { getAvistamientos } from '../data/store.js'
 import { nombreMostrado } from '../lib/formato.js'
+import { popupAvist } from './Detalle.jsx'
 
 // Mapa a pantalla completa para explorar el recorrido (movible y con zoom).
 export default function MapaRecorrido({ reporte, onCerrar }) {
@@ -22,7 +23,14 @@ export default function MapaRecorrido({ reporte, onCerrar }) {
   const centro = coordsDeBarrio(reporte.zona)
   const marcadores = [
     { id: 'zona', lat: centro[0], lng: centro[1], tipo: reporte.tipo },
-    ...avist.map((a, i) => ({ id: a.id, lat: a.lat, lng: a.lng, tipo: 'avistamiento', label: i + 1 })),
+    ...avist.map((a, i) => ({
+      id: a.id,
+      lat: a.lat,
+      lng: a.lng,
+      tipo: 'avistamiento',
+      label: i + 1,
+      popup: popupAvist(a, i + 1),
+    })),
   ]
   const linea = [centro, ...avist.map((a) => [a.lat, a.lng])]
 

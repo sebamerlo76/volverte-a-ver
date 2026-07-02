@@ -32,6 +32,15 @@ export function fechaLegible(iso) {
   return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+// Fecha y hora corta: "28 jun · 21:30".
+export function fechaHora(iso) {
+  const d = new Date(iso)
+  if (isNaN(d)) return ''
+  const f = d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })
+  const h = d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+  return `${f} · ${h}`
+}
+
 // Foto de perfil del usuario (Google la trae en user_metadata).
 export function avatarDe(user) {
   return user?.user_metadata?.avatar_url || user?.user_metadata?.picture || ''
