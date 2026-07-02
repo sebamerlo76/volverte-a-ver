@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import Feed from './components/Feed.jsx'
 import Detalle from './components/Detalle.jsx'
 import Publicar from './components/Publicar.jsx'
-import Mapa from './components/Mapa.jsx'
 import Auth from './components/Auth.jsx'
 import MiCuenta from './components/MiCuenta.jsx'
 import MascotaForm from './components/MascotaForm.jsx'
@@ -16,7 +15,8 @@ import { getReportes, marcarResuelto, reactivarReporte, eliminarReporte } from '
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 
 export default function App() {
-  const [vista, setVista] = useState('feed') // feed | detalle | post | map | auth | cuenta
+  const [vista, setVista] = useState('feed') // feed | detalle | post | auth | cuenta | avistamiento | recorrido
+  const [homeModo, setHomeModo] = useState('lista') // lista | mapa (vista del inicio)
   const [selReporte, setSelReporte] = useState(null) // aviso abierto en el detalle
   const [reportes, setReportes] = useState([])
   const [toast, setToast] = useState('')
@@ -69,6 +69,17 @@ export default function App() {
         setAuthProximo('post')
         setVista('auth')
       }
+      return
+    }
+    // Inicio y Mapa son el mismo inicio en dos modos (con los mismos filtros).
+    if (tab === 'map') {
+      setHomeModo('mapa')
+      setVista('feed')
+      return
+    }
+    if (tab === 'feed') {
+      setHomeModo('lista')
+      setVista('feed')
       return
     }
     setVista(tab)
@@ -189,7 +200,7 @@ export default function App() {
     setVista('post')
   }
 
-  const tabActual = vista === 'map' ? 'map' : 'feed'
+  const tabActual = vista === 'feed' && homeModo === 'mapa' ? 'map' : 'feed'
   const seleccionado = selReporte
   const esMio = seleccionado ? !authActivo || (user && seleccionado.userId === user.id) : false
 
@@ -205,6 +216,8 @@ export default function App() {
             user={user}
             onLogin={pedirLogin}
             onCuenta={() => setVista('cuenta')}
+            modo={homeModo}
+            onModo={setHomeModo}
           />
         )}
         {vista === 'detalle' && (
@@ -288,9 +301,7 @@ export default function App() {
             onToast={mostrarToast}
           />
         )}
-        {vista === 'map' && <Mapa reportes={reportes} onAbrir={abrirDetalle} onToast={mostrarToast} />}
-
-        {(vista === 'feed' || vista === 'map') && <BottomNav tab={tabActual} onNav={navegar} />}
+        {vista === 'feed' && <BottomNav tab={tabActual} onNav={navegar} />}
       </div>
 
       <div className={'toast' + (toast ? ' show' : '')}>{toast}</div>

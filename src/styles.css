@@ -168,6 +168,61 @@ select {
   color: #b7aca4;
 }
 
+/* ---- Cabecera fija del inicio (marca + buscador + filtros + modo) ---- */
+.home-top {
+  flex: none;
+  background: var(--card);
+  position: relative;
+  z-index: 5;
+  box-shadow: 0 3px 10px rgba(90, 55, 35, 0.05);
+}
+.home-top .chips {
+  border-bottom: none;
+}
+.modo-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px 12px;
+}
+.modo-btn {
+  height: 34px;
+  padding: 0 15px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+  background: #f4ede6;
+}
+.modo-btn.on {
+  background: var(--ink);
+  color: #fff;
+}
+.modo-count {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--faint);
+}
+.map-hint {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 20px;
+  z-index: 500;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(80, 50, 30, 0.14);
+}
+
 /* ---- Chips de filtro ---- */
 .chips {
   display: flex;
