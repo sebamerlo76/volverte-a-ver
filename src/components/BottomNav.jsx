@@ -8,11 +8,10 @@ export default function BottomNav({ tab, onNav }) {
         </span>
         Inicio
       </button>
-      <button className="navc" onClick={() => onNav('post')}>
-        <span className="mi" style={{ fontSize: 25 }}>
-          add
+      <button className="navc" onClick={() => onNav('post')} aria-label="Publicar reporte">
+        <span className="mi fill" style={{ fontSize: 32 }}>
+          pets
         </span>
-        Publicar
       </button>
       <button className={'ni' + (tab === 'map' ? ' on' : '')} onClick={() => onNav('map')}>
         <span className={'mi' + (tab === 'map' ? ' fill' : '')} style={{ fontSize: 25 }}>
