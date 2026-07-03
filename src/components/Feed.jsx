@@ -12,10 +12,6 @@ const TIEMPOS = [
   { k: 'semana', t: 'Esta semana' },
   { k: 'mes', t: 'Este mes' },
 ]
-const ORDENES = [
-  { k: 'recientes', t: 'Más recientes' },
-  { k: 'perdidos', t: 'Perdidos primero' },
-]
 const TABS = [
   { k: 'todos', t: 'Todos' },
   { k: 'perdido', t: 'Perdidos' },
@@ -76,9 +72,6 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
       }
       return true
     })
-    if (filtros.orden === 'perdidos') {
-      arr = [...arr].sort((a, b) => (a.tipo === 'perdido' ? 0 : 1) - (b.tipo === 'perdido' ? 0 : 1))
-    }
     return arr
   }, [reportes, finales, verFinales, filtros])
 
@@ -102,8 +95,11 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
   if (filtros.especie) chips.push({ key: 'especie', label: ESPECIE_LBL[filtros.especie], clear: () => setFiltro('especie', null) })
   if (filtros.zona) chips.push({ key: 'zona', label: filtros.zona, clear: () => setFiltro('zona', null) })
   if (filtros.tiempo !== 'todos')
-    chips.push({ key: 'tiempo', label: filtros.tiempo === 'semana' ? 'Esta semana' : 'Este mes', clear: () => setFiltro('tiempo', 'todos') })
-  if (filtros.orden !== 'recientes') chips.push({ key: 'orden', label: 'Perdidos primero', clear: () => setFiltro('orden', 'recientes') })
+    chips.push({
+      key: 'tiempo',
+      label: filtros.tiempo === 'hoy' ? 'Hoy' : filtros.tiempo === 'semana' ? 'Esta semana' : 'Este mes',
+      clear: () => setFiltro('tiempo', 'todos'),
+    })
 
   return (
     <div className={'view home-' + filtros.estado}>
@@ -188,14 +184,6 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
             {TIEMPOS.map((t) => (
               <button key={t.k} className={'chip' + (filtros.tiempo === t.k ? ' on' : '')} onClick={() => setFiltro('tiempo', t.k)}>
                 {t.t}
-              </button>
-            ))}
-          </div>
-          <div className="fp-label">Orden</div>
-          <div className="chipsel-wrap">
-            {ORDENES.map((o) => (
-              <button key={o.k} className={'chip' + (filtros.orden === o.k ? ' on' : '')} onClick={() => setFiltro('orden', o.k)}>
-                {o.t}
               </button>
             ))}
           </div>
