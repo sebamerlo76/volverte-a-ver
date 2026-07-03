@@ -3,6 +3,7 @@ import PetCard from './PetCard.jsx'
 import { getMisReportes, getMisMascotas, marcarResuelto } from '../data/store.js'
 import { avatarDe, nombreUsuario } from '../lib/formato.js'
 import { soportado as pushSoportado, yaSuscripto, activarPush, desactivarPush } from '../lib/push.js'
+import NotifPrefs from './NotifPrefs.jsx'
 
 const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
 
@@ -133,6 +134,7 @@ export default function MiCuenta({
                 <span className="switch-k" />
               </button>
             </div>
+            {pushOn && <NotifPrefs user={user} />}
           </div>
         )}
 

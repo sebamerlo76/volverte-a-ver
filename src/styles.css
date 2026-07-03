@@ -472,6 +472,61 @@ select {
 .switch.on .switch-k {
   transform: translateX(20px);
 }
+.notif-prefs {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cerca-box {
+  margin-top: 6px;
+  background: var(--cream);
+  border-radius: 12px;
+  padding: 12px;
+}
+.cerca-lbl {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.cerca-radio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.cerca-radio input[type='range'] {
+  flex: 1;
+  accent-color: #ff6b5e;
+}
+.cerca-esp {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.esp-chip {
+  flex: 1;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line2);
+  background: #fff;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  color: #6b6058;
+}
+.esp-chip.on {
+  border-color: #ff6b5e;
+  background: #fff1ee;
+  color: #ff5747;
+}
 
 /* Estado "analizando la foto" en el paso 3 (reconocimiento visual) */
 .analizando {
