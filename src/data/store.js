@@ -108,6 +108,17 @@ export async function getReportes() {
     .sort((a, b) => (a.creadoEn < b.creadoEn ? 1 : -1))
 }
 
+// Trae un aviso puntual por id (activo o resuelto), para abrir un link directo.
+export async function getReportePorId(id) {
+  if (!id) return null
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase.from('reportes').select('*').eq('id', id).maybeSingle()
+    if (error) throw error
+    return data ? desdeFila(data) : null
+  }
+  return leerLocal().find((r) => r.id === id) || null
+}
+
 // Trae SOLO los avisos de un usuario (activos y resueltos), más nuevo primero.
 export async function getMisReportes(userId) {
   if (!userId) return []

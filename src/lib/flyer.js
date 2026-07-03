@@ -224,7 +224,8 @@ export async function compartirFlyer(r, onToast) {
     const blob = await generarFlyer(r)
     const file = new File([blob], `chicho-${r.id || 'aviso'}.png`, { type: 'image/png' })
     const estado = r.estado === 'resuelto' ? 'apareció' : r.tipo === 'perdido' ? 'PERDIDO' : 'ENCONTRADO'
-    const texto = `${nombreMostrado(r)} — ${estado} en ${r.zona || ''}, ${r.localidad || 'Paraná'}. Mirá y ayudá en chicho.ar 🐾`
+    const link = r.id ? `https://chicho.ar/r/${r.id}` : 'https://chicho.ar'
+    const texto = `${nombreMostrado(r)} — ${estado} en ${r.zona || ''}, ${r.localidad || 'Paraná'}. Mirá y ayudá 🐾\n${link}`
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({ files: [file], title: 'Chicho', text: texto })

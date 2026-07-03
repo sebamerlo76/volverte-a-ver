@@ -13,7 +13,7 @@ import ReportarAvistamiento from './components/ReportarAvistamiento.jsx'
 import MapaRecorrido from './components/MapaRecorrido.jsx'
 import BuscadorOverlay from './components/BuscadorOverlay.jsx'
 import BottomNav from './components/BottomNav.jsx'
-import { getReportes, marcarResuelto, reactivarReporte, eliminarReporte, seguirReporte, dejarDeSeguir, getSeguidos } from './data/store.js'
+import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, seguirReporte, dejarDeSeguir, getSeguidos } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { nombreMostrado } from './lib/formato.js'
 
@@ -43,6 +43,16 @@ export default function App() {
   // Cargar reportes al iniciar.
   useEffect(() => {
     cargar()
+  }, [])
+
+  // Link directo a un aviso: chicho.ar/r/<id> abre el detalle de ese aviso.
+  useEffect(() => {
+    const m = window.location.pathname.match(/^\/r\/([\w-]+)/)
+    if (!m) return
+    getReportePorId(m[1])
+      .then((r) => r && abrirDetalle(r, 'feed'))
+      .catch(() => {})
+      .finally(() => window.history.replaceState({}, '', '/'))
   }, [])
 
   // Seguir el estado de la sesión (solo si hay Supabase).
