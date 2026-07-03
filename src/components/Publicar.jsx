@@ -195,7 +195,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
             center={[punto.lat, punto.lng]}
             zoom={15}
             interactivo
-            recentrar
+            onGps={setPunto}
             onMapaClick={setPunto}
             marcadores={[{ id: 'nuevo', lat: punto.lat, lng: punto.lng, tipo, especie }]}
           />

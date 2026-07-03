@@ -190,7 +190,7 @@ export default function EncontreWizard({ onCerrar, onPublicado, onToast }) {
                 center={[punto.lat, punto.lng]}
                 zoom={15}
                 interactivo
-                recentrar
+                onGps={setPunto}
                 onMapaClick={setPunto}
                 marcadores={[{ id: 'nuevo', lat: punto.lat, lng: punto.lng, tipo: 'encontrado', especie }]}
               />

@@ -42,6 +42,7 @@ export default function MapaLeaflet({
   recentrar = false, // muestra un botón para volver al centro (pin)
   ajustar = false, // encuadra el mapa para que entren todos los pines
   miUbi = null, // [lat,lng] de "mi ubicación" (punto azul)
+  onGps = null, // botón GPS que deja el pin en mi ubicación (al publicar)
   onMarcadorClick,
   onMapaClick,
   style,
@@ -157,6 +158,29 @@ export default function MapaLeaflet({
           aria-label="Centrar el mapa"
         >
           <span className="mi" style={{ fontSize: 22, color: '#1f9d8f' }}>
+            my_location
+          </span>
+        </button>
+      )}
+      {onGps && (
+        <button
+          type="button"
+          className="map-recenter"
+          onClick={() => {
+            if (!navigator.geolocation) return
+            navigator.geolocation.getCurrentPosition(
+              (p) => {
+                const c = { lat: p.coords.latitude, lng: p.coords.longitude }
+                onGps(c)
+                if (mapRef.current) mapRef.current.setView([c.lat, c.lng], 16)
+              },
+              () => {},
+              { enableHighAccuracy: true, timeout: 8000 }
+            )
+          }}
+          aria-label="Usar mi ubicación"
+        >
+          <span className="mi" style={{ fontSize: 22, color: '#2f80ed' }}>
             my_location
           </span>
         </button>

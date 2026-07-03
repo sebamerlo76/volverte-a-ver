@@ -51,7 +51,7 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
             center={[punto.lat, punto.lng]}
             zoom={15}
             interactivo
-            recentrar
+            onGps={setPunto}
             onMapaClick={setPunto}
             marcadores={[
               {
