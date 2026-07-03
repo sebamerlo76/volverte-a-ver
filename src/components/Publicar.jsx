@@ -5,6 +5,7 @@ import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, coordsDeBarri
 import { addReporte, actualizarReporte, addMascota, subirFotos } from '../data/store.js'
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
+import FechaPicker from './FechaPicker.jsx'
 import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
 
 export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar, onPublicado, onToast }) {
@@ -244,13 +245,8 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
           <div className="hint">Tocá el mapa para marcar el lugar exacto</div>
         </div>
 
-        <div className="flabel">Fecha</div>
-        <div className="inp">
-          <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
-            calendar_today
-          </span>
-          <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
-        </div>
+        <div className="flabel">¿Cuándo fue?</div>
+        <FechaPicker value={fecha} onChange={setFecha} />
 
         <div className="flabel">Descripción y señas</div>
         <textarea

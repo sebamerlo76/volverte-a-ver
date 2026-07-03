@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
+import FechaPicker from './FechaPicker.jsx'
 import { coordsDeBarrio } from '../lib/parana.js'
 import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, coordsDeBarrioEn } from '../lib/localidades.js'
 import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
@@ -330,13 +331,8 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
               />
               <div className="hint">Tocá el mapa para marcar el lugar exacto</div>
             </div>
-            <div className="flabel">Fecha</div>
-            <div className="inp">
-              <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
-                calendar_today
-              </span>
-              <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
-            </div>
+            <div className="flabel">¿Cuándo lo encontraste?</div>
+            <FechaPicker value={fecha} onChange={setFecha} />
           </>
         )}
 
