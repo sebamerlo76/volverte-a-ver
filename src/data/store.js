@@ -369,6 +369,36 @@ export async function addAvistamiento({ reporteId, lat, lng, nota, autor }) {
   return nuevo
 }
 
+// ---------------------------------------------------------------------------
+// Notificaciones push (suscripciones de dispositivos + preferencias)
+// ---------------------------------------------------------------------------
+export async function guardarSuscripcion(sub) {
+  if (!supabaseConfigurado) return null
+  const { data, error } = await supabase.from('push_subs').upsert(sub, { onConflict: 'endpoint' }).select().single()
+  if (error) throw error
+  return data
+}
+
+export async function borrarSuscripcion(endpoint) {
+  if (!supabaseConfigurado) return
+  const { error } = await supabase.from('push_subs').delete().eq('endpoint', endpoint)
+  if (error) throw error
+}
+
+export async function getNotifPrefs(userId) {
+  if (!supabaseConfigurado || !userId) return null
+  const { data, error } = await supabase.from('notif_prefs').select('*').eq('user_id', userId).maybeSingle()
+  if (error) throw error
+  return data
+}
+
+export async function guardarNotifPrefs(prefs) {
+  if (!supabaseConfigurado) return null
+  const { data, error } = await supabase.from('notif_prefs').upsert(prefs, { onConflict: 'user_id' }).select().single()
+  if (error) throw error
+  return data
+}
+
 // Sube una foto y devuelve su URL. En la nube va al Storage; en local, un data URL.
 export async function subirFoto(file) {
   if (!file) return ''

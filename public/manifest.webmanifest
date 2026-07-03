@@ -1,0 +1,15 @@
+{
+  "name": "Volverte a ver — Mascotas perdidas en Paraná",
+  "short_name": "Volverte a ver",
+  "description": "Buscá y reportá mascotas perdidas y encontradas en Paraná.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fbf6f0",
+  "theme_color": "#ff6b5e",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

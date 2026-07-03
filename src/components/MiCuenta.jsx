@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import PetCard from './PetCard.jsx'
 import { getMisReportes, getMisMascotas, marcarResuelto } from '../data/store.js'
 import { avatarDe, nombreUsuario } from '../lib/formato.js'
+import { soportado as pushSoportado, yaSuscripto, activarPush, desactivarPush } from '../lib/push.js'
 
 const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
 
@@ -17,6 +18,9 @@ export default function MiCuenta({
 }) {
   const [mios, setMios] = useState(null)
   const [mascotas, setMascotas] = useState(null)
+  const [pushOk, setPushOk] = useState(false)
+  const [pushOn, setPushOn] = useState(false)
+  const [pushBusy, setPushBusy] = useState(false)
 
   const cargar = useCallback(async () => {
     const [r, m] = await Promise.all([
@@ -43,6 +47,34 @@ export default function MiCuenta({
     } catch (e) {
       console.error(e)
       onToast?.('No se pudo actualizar 😕')
+    }
+  }
+
+  useEffect(() => {
+    setPushOk(pushSoportado())
+    yaSuscripto()
+      .then(setPushOn)
+      .catch(() => {})
+  }, [])
+
+  async function togglePush() {
+    if (pushBusy) return
+    setPushBusy(true)
+    try {
+      if (pushOn) {
+        await desactivarPush()
+        setPushOn(false)
+        onToast?.('Notificaciones desactivadas')
+      } else {
+        const ok = await activarPush()
+        setPushOn(ok)
+        onToast?.(ok ? '🔔 ¡Notificaciones activadas!' : 'Necesitás permitir las notificaciones')
+      }
+    } catch (e) {
+      console.error(e)
+      onToast?.(e.message || 'No se pudo cambiar 😕')
+    } finally {
+      setPushBusy(false)
     }
   }
 
@@ -79,6 +111,30 @@ export default function MiCuenta({
             </div>
           </div>
         </div>
+
+        {pushOk && (
+          <div className="notif-box">
+            <div className="notif-row">
+              <div style={{ minWidth: 0 }}>
+                <div className="notif-t">
+                  <span className="mi" style={{ fontSize: 19, color: '#ff6b5e' }}>
+                    notifications
+                  </span>
+                  Notificaciones
+                </div>
+                <div className="notif-sub">Te aviso cuando aparezca una parecida o la vean. 🐾</div>
+              </div>
+              <button
+                className={'switch' + (pushOn ? ' on' : '')}
+                onClick={togglePush}
+                disabled={pushBusy}
+                aria-label="Activar notificaciones"
+              >
+                <span className="switch-k" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ---- Mis mascotas ---- */}
         <div className="sec-head">
