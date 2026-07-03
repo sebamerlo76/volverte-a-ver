@@ -65,3 +65,4 @@ En vivo: https://volverte-a-ver.vercel.app · Código: https://github.com/sebame
 
 - [ ] Compartir el link en grupos de Facebook/WhatsApp de mascotas de Paraná.
 - [ ] Sumar veterinarias y refugios locales.
+- [ ] **Publicar en Play Store** (más adelante, cuando esté validado). NO hay que reprogramar: se "envuelve" la PWA en una TWA con **PWABuilder** (genera el `.aab`). Requiere: cuenta de desarrollador de Google (**US$25** único), **política de privacidad** (URL), **`assetlinks.json`** en el dominio, material de tienda (ícono/capturas/descripción), y —para cuentas personales nuevas— **prueba cerrada con 20 testers × 14 días**. Por ahora la PWA "instalable" (Agregar a pantalla de inicio) alcanza y es sin fricción; la tienda suma credibilidad/alcance cuando la app ya tenga uso.
