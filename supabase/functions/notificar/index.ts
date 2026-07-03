@@ -167,13 +167,41 @@ async function manejarAvistamiento(rec: any) {
   }
 }
 
-// Aviso marcado como resuelto/reencontrado → avisar a los seguidores.
+// Cambios en un aviso → avisar a los seguidores.
 async function manejarReporteUpdate(rec: any, old: any) {
-  if (!(old?.estado === 'activo' && rec.estado === 'resuelto')) return
   const nombre = rec.nombre || (ESP[rec.especie] || 'la mascota')
+
+  // A) Apareció: activo → resuelto.
+  if (old?.estado === 'activo' && rec.estado === 'resuelto') {
+    const segs = (await seguidoresDe(rec.id)).filter((u: string) => u !== rec.user_id)
+    if (segs.length) {
+      await enviarAUsuarios(segs, { title: '🎉 ¡Apareció!', body: `${nombre} volvió a casa. 🏠`, url: '/' })
+    }
+    return
+  }
+
+  // B) Novedades del dueño: cambió contenido relevante en un aviso activo.
+  //    Ignora updates internos (contador de apoyos, huella visual) comparando
+  //    solo los campos que le importan a un seguidor.
+  if (!old || rec.estado !== 'activo') return
+  const campos = [
+    'nombre', 'zona', 'referencia', 'descripcion', 'recompensa',
+    'color', 'tamano', 'raza', 'collar', 'sexo', 'edad',
+    'whatsapp', 'en_custodia', 'lat', 'lng', 'fecha_evento',
+  ]
+  const cambioCampo = campos.some((c) => (old[c] ?? null) !== (rec[c] ?? null))
+  const cambioFotos =
+    (old.foto ?? null) !== (rec.foto ?? null) ||
+    JSON.stringify(old.fotos ?? null) !== JSON.stringify(rec.fotos ?? null)
+  if (!cambioCampo && !cambioFotos) return
+
   const segs = (await seguidoresDe(rec.id)).filter((u: string) => u !== rec.user_id)
   if (segs.length) {
-    await enviarAUsuarios(segs, { title: '🎉 ¡Apareció!', body: `${nombre} volvió a casa. 🏠`, url: '/' })
+    await enviarAUsuarios(segs, {
+      title: `📝 Novedad de ${nombre}`,
+      body: 'La familia actualizó el aviso. Tocá para ver.',
+      url: '/',
+    })
   }
 }
 
