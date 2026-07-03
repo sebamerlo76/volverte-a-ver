@@ -226,7 +226,13 @@ select {
 /* Panel de filtros que se abre/cierra */
 .filtros-panel {
   padding: 2px 20px 12px;
+  max-height: max(340px, 50dvh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   animation: fade 0.2s ease;
+}
+.filtros-panel::-webkit-scrollbar {
+  width: 0;
 }
 .fp-label {
   font-size: 12px;
