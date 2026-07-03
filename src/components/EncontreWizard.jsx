@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import SelectChips from './SelectChips.jsx'
-import { NOMBRES_BARRIOS, coordsDeBarrio } from '../lib/parana.js'
+import { coordsDeBarrio } from '../lib/parana.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, coordsDeBarrioEn } from '../lib/localidades.js'
 import { COLORES, SEXOS, COLLAR, TAMANOS } from '../lib/opciones.js'
 import { addReporte, addMascota, subirFoto } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, linkWhatsApp } from '../lib/formato.js'
@@ -37,6 +38,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
   const [fotoFile, setFotoFile] = useState(null)
   const [huella, setHuella] = useState(null)
   const [analizando, setAnalizando] = useState(false)
+  const [localidad, setLocalidad] = useState(LOCALIDAD_DEFECTO)
   const [zona, setZona] = useState('Centro')
   const [fecha, setFecha] = useState('')
   const [whatsapp, setWhatsapp] = useState(ultimoWhatsapp())
@@ -50,7 +52,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
 
   function cambiarZona(z) {
     setZona(z)
-    const c = coordsDeBarrio(z)
+    const c = coordsDeBarrioEn(localidad, z)
     setPunto({ lat: c[0], lng: c[1] })
   }
 
@@ -134,6 +136,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
         tipo: 'encontrado',
         especie,
         nombre: null,
+        localidad,
         zona,
         referencia: zona,
         color: color.trim(),
@@ -270,13 +273,40 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
 
         {paso === 4 && (
           <>
+            {NOMBRES_LOCALIDADES.length > 1 && (
+              <>
+                <div className="flabel">Ciudad</div>
+                <div className="inp">
+                  <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
+                    location_city
+                  </span>
+                  <select
+                    value={localidad}
+                    onChange={(e) => {
+                      const loc = e.target.value
+                      setLocalidad(loc)
+                      const z = nombresBarriosDe(loc)[0] || ''
+                      setZona(z)
+                      const c = coordsDeBarrioEn(loc, z)
+                      setPunto({ lat: c[0], lng: c[1] })
+                    }}
+                  >
+                    {NOMBRES_LOCALIDADES.map((l) => (
+                      <option key={l} value={l}>
+                        {l}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
             <div className="flabel">Zona / barrio</div>
             <div className="inp">
               <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
                 location_on
               </span>
               <select value={zona} onChange={(e) => cambiarZona(e.target.value)}>
-                {NOMBRES_BARRIOS.map((b) => (
+                {nombresBarriosDe(localidad).map((b) => (
                   <option key={b} value={b}>
                     {b}
                   </option>

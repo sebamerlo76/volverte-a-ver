@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
-import { NOMBRES_BARRIOS, coordsDeBarrio, puntoDeReporte } from '../lib/parana.js'
+import { coordsDeBarrio, puntoDeReporte } from '../lib/parana.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, coordsDeBarrioEn } from '../lib/localidades.js'
 import { addReporte, actualizarReporte, addMascota, subirFoto } from '../data/store.js'
 import SelectChips from './SelectChips.jsx'
 import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS } from '../lib/opciones.js'
@@ -20,6 +21,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
   const [edad, setEdad] = useState(base?.edad || '')
   const [collar, setCollar] = useState(base?.collar || '')
   const [recompensa, setRecompensa] = useState(base?.recompensa || '')
+  const [localidad, setLocalidad] = useState(base?.localidad || LOCALIDAD_DEFECTO)
   const [zona, setZona] = useState(base?.zona || 'Centro')
   const [fecha, setFecha] = useState(base?.fechaEvento || '')
   const [descripcion, setDescripcion] = useState(base?.descripcion || '')
@@ -29,13 +31,22 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
   const [guardando, setGuardando] = useState(false)
 
   const puntoIni =
-    base?.lat != null && base?.lng != null ? [base.lat, base.lng] : coordsDeBarrio(base?.zona || 'Centro')
+    base?.lat != null && base?.lng != null
+      ? [base.lat, base.lng]
+      : coordsDeBarrioEn(base?.localidad || LOCALIDAD_DEFECTO, base?.zona || 'Centro')
   const [punto, setPunto] = useState({ lat: puntoIni[0], lng: puntoIni[1] })
 
   function cambiarZona(z) {
     setZona(z)
-    const c = coordsDeBarrio(z)
+    const c = coordsDeBarrioEn(localidad, z)
     setPunto({ lat: c[0], lng: c[1] }) // al cambiar el barrio, el pin va a esa zona
+  }
+  function cambiarLocalidad(loc) {
+    setLocalidad(loc)
+    const z = nombresBarriosDe(loc)[0] || ''
+    setZona(z)
+    const c = coordsDeBarrioEn(loc, z)
+    setPunto({ lat: c[0], lng: c[1] })
   }
 
   function elegirFoto(e) {
@@ -65,6 +76,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
         tipo,
         especie,
         nombre: nombre.trim() || null,
+        localidad,
         zona,
         referencia: zona,
         color,
@@ -187,13 +199,31 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
         <div className="flabel">Collar / chapita</div>
         <SelectChips opciones={COLLAR} valor={collar} onChange={setCollar} otro placeholder="Detalle, ej: rojo con chapita" />
 
+        {NOMBRES_LOCALIDADES.length > 1 && (
+          <>
+            <div className="flabel">Ciudad</div>
+            <div className="inp">
+              <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
+                location_city
+              </span>
+              <select value={localidad} onChange={(e) => cambiarLocalidad(e.target.value)}>
+                {NOMBRES_LOCALIDADES.map((l) => (
+                  <option key={l} value={l}>
+                    {l}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </>
+        )}
+
         <div className="flabel">Zona / barrio</div>
         <div className="inp">
           <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
             location_on
           </span>
           <select value={zona} onChange={(e) => cambiarZona(e.target.value)}>
-            {NOMBRES_BARRIOS.map((b) => (
+            {nombresBarriosDe(localidad).map((b) => (
               <option key={b} value={b}>
                 {b}
               </option>

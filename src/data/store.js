@@ -41,6 +41,7 @@ function desdeFila(row) {
     lng: row.lng,
     enCustodia: row.en_custodia,
     embedding: row.embedding, // huella visual (para sugerir parecidos)
+    localidad: row.localidad || 'Paraná',
   }
 }
 function haciaFila(r) {
@@ -68,6 +69,7 @@ function haciaFila(r) {
     lng: r.lng ?? null,
     en_custodia: r.enCustodia ?? false,
     embedding: r.embedding ?? null,
+    localidad: r.localidad ?? 'Paraná',
   }
 }
 

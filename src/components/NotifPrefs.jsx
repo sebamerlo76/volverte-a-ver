@@ -12,6 +12,7 @@ const DEFECTO = {
   radio_km: 5,
   especie: 'todas',
   barrios: [],
+  localidad: 'Paraná',
 }
 
 // Preferencias de notificación del usuario (qué avisos quiere recibir).
@@ -41,6 +42,7 @@ export default function NotifPrefs({ user, onToast }) {
       radio_km: np.radio_km,
       especie: np.especie,
       barrios: np.barrios,
+      localidad: np.localidad || 'Paraná',
     })
   }
   // Autosave con un pequeño retardo, para no pegarle a la base en cada toque.

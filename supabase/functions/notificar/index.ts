@@ -80,6 +80,7 @@ async function manejarReporte(nuevo: any) {
     .eq('estado', 'activo')
     .eq('tipo', opuesto)
     .eq('especie', nuevo.especie)
+    .eq('localidad', nuevo.localidad || 'Paraná')
   let matches = (candidatos || []).filter(
     (c: any) => compat(nuevo, c, 'color') && compat(nuevo, c, 'tamano') && compat(nuevo, c, 'sexo', true),
   )
@@ -109,6 +110,7 @@ async function manejarReporte(nuevo: any) {
     const destC = (cercaPrefs || [])
       .filter((p: any) => p.user_id !== nuevo.user_id)
       .filter((p: any) => p.especie === 'todas' || p.especie === nuevo.especie)
+      .filter((p: any) => (p.localidad || 'Paraná') === (nuevo.localidad || 'Paraná'))
       .filter((p: any) => {
         const porBarrio =
           Array.isArray(p.barrios) &&
