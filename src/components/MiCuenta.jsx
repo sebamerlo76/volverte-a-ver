@@ -22,6 +22,7 @@ export default function MiCuenta({
   const [pushOk, setPushOk] = useState(false)
   const [pushOn, setPushOn] = useState(false)
   const [pushBusy, setPushBusy] = useState(false)
+  const [prefsAbierto, setPrefsAbierto] = useState(false)
 
   const cargar = useCallback(async () => {
     const [r, m] = await Promise.all([
@@ -134,7 +135,22 @@ export default function MiCuenta({
                 <span className="switch-k" />
               </button>
             </div>
-            {pushOn && <NotifPrefs user={user} onToast={onToast} />}
+            {pushOn && (
+              <>
+                <button className="notif-ajustar" onClick={() => setPrefsAbierto((v) => !v)}>
+                  <span className="mi" style={{ fontSize: 18 }}>
+                    tune
+                  </span>
+                  Ajustar qué avisos recibir
+                  <span className="mi" style={{ fontSize: 20, marginLeft: 'auto' }}>
+                    {prefsAbierto ? 'expand_less' : 'expand_more'}
+                  </span>
+                </button>
+                {prefsAbierto && (
+                  <NotifPrefs user={user} onToast={onToast} onListo={() => setPrefsAbierto(false)} />
+                )}
+              </>
+            )}
           </div>
         )}
 

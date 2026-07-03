@@ -110,7 +110,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
         {/* Fila mini: logo + avatar */}
         <div className="hmini">
           <button className="hmini-logo" onClick={resetInicio} aria-label="Ir al inicio">
-            <img src="/logo.png" alt="" width="32" height="32" style={{ display: 'block' }} />
+            <img src="/logo.png" alt="" width="42" height="42" style={{ display: 'block' }} />
             Chicho
           </button>
           {authActivo ? (

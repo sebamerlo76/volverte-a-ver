@@ -16,7 +16,7 @@ const DEFECTO = {
 }
 
 // Preferencias de notificación del usuario (qué avisos quiere recibir).
-export default function NotifPrefs({ user, onToast }) {
+export default function NotifPrefs({ user, onToast, onListo }) {
   const [prefs, setPrefs] = useState(null)
   const [verMapa, setVerMapa] = useState(false)
   const timer = useRef(null)
@@ -58,6 +58,7 @@ export default function NotifPrefs({ user, onToast }) {
     try {
       await persistir(prefs)
       onToast?.('✅ Preferencias guardadas')
+      onListo?.()
     } catch (e) {
       console.warn(e)
       onToast?.('No se pudieron guardar 😕')

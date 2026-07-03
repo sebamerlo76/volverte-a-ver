@@ -295,7 +295,7 @@ select {
   gap: 9px;
   font-family: Fredoka, sans-serif;
   font-weight: 600;
-  font-size: 17px;
+  font-size: 21px;
   color: var(--ink);
 }
 .hmini-logo .mi {
@@ -625,6 +625,19 @@ select {
 }
 .switch.on .switch-k {
   transform: translateX(20px);
+}
+.notif-ajustar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--navy);
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 13.5px;
 }
 .notif-prefs {
   margin-top: 12px;
