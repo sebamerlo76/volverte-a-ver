@@ -11,7 +11,8 @@ function esc(s = '') {
 }
 // Globito de un avistamiento.
 export function popupAvist(a, n) {
-  return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:130px;line-height:1.45"><b style="font-size:13px;color:#1f9d8f">👀 Avistamiento ${n}</b><br><span style="font-size:12.5px;color:#2a2320">${esc(a.nota) || 'Sin detalle'}</span><br><span style="font-size:11.5px;color:#8a807a">${esc(a.autor) || 'Anónimo'} · ${fechaHora(a.creadoEn)}</span></div>`
+  const foto = a.foto ? `<br><img src="${esc(a.foto)}" style="margin-top:6px;width:150px;height:96px;object-fit:cover;border-radius:8px" />` : ''
+  return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:130px;line-height:1.45"><b style="font-size:13px;color:#1f9d8f">👀 Avistamiento ${n}</b><br><span style="font-size:12.5px;color:#2a2320">${esc(a.nota) || 'Sin detalle'}</span><br><span style="font-size:11.5px;color:#8a807a">${esc(a.autor) || 'Anónimo'} · ${fechaHora(a.creadoEn)}</span>${foto}</div>`
 }
 
 export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar }) {
@@ -208,6 +209,11 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
               {avist.map((a, i) => (
                 <div className="avist-row" key={a.id}>
                   <div className="avist-num">{i + 1}</div>
+                  {a.foto ? (
+                    <a href={a.foto} target="_blank" rel="noreferrer" className="avist-thumb" aria-label="Ver la foto del avistamiento">
+                      <img src={a.foto} alt="Foto del avistamiento" loading="lazy" />
+                    </a>
+                  ) : null}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div className="avist-nota">{a.nota || 'Avistamiento'}</div>
                     <div className="avist-meta">

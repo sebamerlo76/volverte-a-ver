@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import SelectChips from './SelectChips.jsx'
+import PhotoPicker from './PhotoPicker.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
-import { addAvistamiento } from '../data/store.js'
+import { addAvistamiento, subirFotos } from '../data/store.js'
 import { nombreMostrado } from '../lib/formato.js'
 import { puedeEnviarAvist, registrarEnvioAvist } from '../lib/antispam.js'
 
@@ -14,6 +15,7 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
   const [nota, setNota] = useState('')
   const [autor, setAutor] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
+  const [fotos, setFotos] = useState([]) // 1 foto opcional del lugar
   const [trampa, setTrampa] = useState('') // honeypot: si se completa, es un bot
   const [guardando, setGuardando] = useState(false)
 
@@ -31,6 +33,14 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
     }
     setGuardando(true)
     try {
+      // La foto es opcional: si la subida falla, no bloqueamos el avistamiento.
+      let foto = ''
+      try {
+        const urls = await subirFotos(fotos)
+        foto = urls[0] || ''
+      } catch (e) {
+        console.warn('No se pudo subir la foto del avistamiento:', e)
+      }
       await addAvistamiento({
         reporteId: reporte.id,
         lat: punto.lat,
@@ -38,6 +48,7 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
         nota: nota.trim(),
         autor: autor.trim() || 'Anónimo',
         whatsapp: whatsapp.trim(),
+        foto,
       })
       registrarEnvioAvist()
       onEnviado()
@@ -69,6 +80,8 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
             interactivo
             onGps={setPunto}
             onMapaClick={setPunto}
+            zona={c}
+            zonaColor={reporte.tipo === 'perdido' ? '#ff5747' : '#17a06b'}
             marcadores={[
               {
                 id: 'zona',
@@ -91,7 +104,9 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
           </span>
         </div>
         <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--faint)', marginTop: 7 }}>
-          Tocá el mapa para poner tu pin donde lo viste. El botón <span className="mi" style={{ fontSize: 15, color: '#1f9d8f', verticalAlign: 'middle' }}>my_location</span> te vuelve a tu pin.
+          Tocá el mapa para poner tu pin donde lo viste. Los botones del mapa te llevan a la{' '}
+          <span className="mi fill" style={{ fontSize: 15, color: reporte.tipo === 'perdido' ? '#ff5747' : '#17a06b', verticalAlign: 'middle' }}>location_on</span> zona del aviso o a{' '}
+          <span className="mi" style={{ fontSize: 15, color: '#2f80ed', verticalAlign: 'middle' }}>my_location</span> tu ubicación.
         </div>
 
         <div className="flabel">¿Cómo lo viste? (opcional)</div>
@@ -114,6 +129,9 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
             inputMode="tel"
           />
         </div>
+
+        <div className="flabel">Foto del lugar (opcional)</div>
+        <PhotoPicker value={fotos} onChange={setFotos} max={1} />
 
         {/* Campo trampa anti-bots: invisible para humanos, no tabulable */}
         <input

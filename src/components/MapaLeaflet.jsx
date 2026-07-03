@@ -43,6 +43,8 @@ export default function MapaLeaflet({
   ajustar = false, // encuadra el mapa para que entren todos los pines
   miUbi = null, // [lat,lng] de "mi ubicación" (punto azul)
   onGps = null, // botón GPS que deja el pin en mi ubicación (al publicar)
+  zona = null, // [lat,lng] de la zona del aviso: muestra un botón para volver ahí
+  zonaColor = '#ff5747', // color del botón de zona (según el tipo de aviso)
   onMarcadorClick,
   onMapaClick,
   style,
@@ -159,6 +161,18 @@ export default function MapaLeaflet({
         >
           <span className="mi" style={{ fontSize: 22, color: '#1f9d8f' }}>
             my_location
+          </span>
+        </button>
+      )}
+      {zona && (
+        <button
+          type="button"
+          className="map-recenter arriba"
+          onClick={() => mapRef.current && mapRef.current.setView(zona, mapRef.current.getZoom())}
+          aria-label="Ir a la zona del aviso"
+        >
+          <span className="mi fill" style={{ fontSize: 22, color: zonaColor }}>
+            location_on
           </span>
         </button>
       )}

@@ -467,6 +467,21 @@ select {
   font-size: 14.5px;
 }
 
+/* Miniatura de la foto de un avistamiento (en el recorrido) */
+.avist-thumb {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  overflow: hidden;
+  display: block;
+}
+.avist-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* Botón para escribirle a quien dejó un avistamiento */
 .avist-wa {
   flex: none;
@@ -1333,6 +1348,9 @@ select {
 }
 .map-recenter:active {
   background: #f4ede6;
+}
+.map-recenter.arriba {
+  bottom: 64px;
 }
 .avist-ref {
   display: flex;

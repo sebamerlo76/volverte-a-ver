@@ -26,7 +26,7 @@ export default function PhotoPicker({ value = [], onChange, max = 3 }) {
               close
             </span>
           </button>
-          {i === 0 && <span className="foto-main">Principal</span>}
+          {i === 0 && max > 1 && <span className="foto-main">Principal</span>}
         </div>
       ))}
       {value.length < max && (
