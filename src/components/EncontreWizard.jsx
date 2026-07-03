@@ -456,7 +456,16 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
                 close
               </span>
             </button>
-            <div className="match-foto">
+            <div
+              className="match-foto"
+              onClick={() => {
+                if (onVerAviso) {
+                  const r = matchPreview
+                  setMatchPreview(null)
+                  onVerAviso(r)
+                }
+              }}
+            >
               {matchPreview.foto ? (
                 <img src={matchPreview.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
               ) : (

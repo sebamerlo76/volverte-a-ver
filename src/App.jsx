@@ -381,7 +381,7 @@ export default function App() {
               </div>
               <button
                 className="btn-wa"
-                style={{ background: 'var(--teal)' }}
+                style={{ background: 'var(--teal)', width: '100%' }}
                 onClick={() => {
                   setSeguirTrasAuth(cartelReporte.id)
                   setSelReporte(cartelReporte)
