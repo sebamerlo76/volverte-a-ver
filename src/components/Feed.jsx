@@ -161,50 +161,48 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
           </span>
         </div>
 
-        {/* Panel de filtros que se despliega */}
-        {panelAbierto && (
-          <div className="filtros-panel">
-            <div className="fp-label">Especie</div>
-            <div className="chipsel-wrap">
-              {['perro', 'gato', 'otro'].map((e) => (
-                <button key={e} className={'chip' + (filtros.especie === e ? ' on' : '')} onClick={() => setFiltro('especie', filtros.especie === e ? null : e)}>
-                  {ESPECIE_LBL[e]}
-                </button>
-              ))}
-            </div>
-            <div className="fp-label">Barrio</div>
-            <div className="chipsel-wrap">
-              {NOMBRES_BARRIOS.map((z) => (
-                <button key={z} className={'chip' + (filtros.zona === z ? ' on' : '')} onClick={() => setFiltro('zona', filtros.zona === z ? null : z)}>
-                  {z}
-                </button>
-              ))}
-            </div>
-            <div className="fp-label">Cuándo</div>
-            <div className="chipsel-wrap">
-              {TIEMPOS.map((t) => (
-                <button key={t.k} className={'chip' + (filtros.tiempo === t.k ? ' on' : '')} onClick={() => setFiltro('tiempo', t.k)}>
-                  {t.t}
-                </button>
-              ))}
-            </div>
-            <div className="fp-label">Orden</div>
-            <div className="chipsel-wrap">
-              {ORDENES.map((o) => (
-                <button key={o.k} className={'chip' + (filtros.orden === o.k ? ' on' : '')} onClick={() => setFiltro('orden', o.k)}>
-                  {o.t}
-                </button>
-              ))}
-            </div>
-            <button className="fp-listo" onClick={() => setPanelAbierto(false)}>
-              Listo
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* Contenido: lista o mapa */}
-      {enMapa ? (
+      {/* El panel de filtros tapa los resultados mientras está abierto; al cerrar, muestra los filtrados */}
+      {panelAbierto ? (
+        <div className="filtros-panel">
+          <div className="fp-label">Especie</div>
+          <div className="chipsel-wrap">
+            {['perro', 'gato', 'otro'].map((e) => (
+              <button key={e} className={'chip' + (filtros.especie === e ? ' on' : '')} onClick={() => setFiltro('especie', filtros.especie === e ? null : e)}>
+                {ESPECIE_LBL[e]}
+              </button>
+            ))}
+          </div>
+          <div className="fp-label">Barrio</div>
+          <div className="chipsel-wrap">
+            {NOMBRES_BARRIOS.map((z) => (
+              <button key={z} className={'chip' + (filtros.zona === z ? ' on' : '')} onClick={() => setFiltro('zona', filtros.zona === z ? null : z)}>
+                {z}
+              </button>
+            ))}
+          </div>
+          <div className="fp-label">Cuándo</div>
+          <div className="chipsel-wrap">
+            {TIEMPOS.map((t) => (
+              <button key={t.k} className={'chip' + (filtros.tiempo === t.k ? ' on' : '')} onClick={() => setFiltro('tiempo', t.k)}>
+                {t.t}
+              </button>
+            ))}
+          </div>
+          <div className="fp-label">Orden</div>
+          <div className="chipsel-wrap">
+            {ORDENES.map((o) => (
+              <button key={o.k} className={'chip' + (filtros.orden === o.k ? ' on' : '')} onClick={() => setFiltro('orden', o.k)}>
+                {o.t}
+              </button>
+            ))}
+          </div>
+          <button className="fp-listo" onClick={() => setPanelAbierto(false)}>
+            Ver resultados
+          </button>
+        </div>
+      ) : enMapa ? (
         <div className="mapwrap">
           <MapaLeaflet
             center={PARANA_CENTER}

@@ -225,10 +225,12 @@ select {
 }
 /* Panel de filtros que se abre/cierra */
 .filtros-panel {
-  padding: 2px 20px 12px;
-  max-height: max(340px, 50dvh);
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  padding: 8px 20px 20px;
+  background: var(--cream);
   animation: fade 0.2s ease;
 }
 .filtros-panel::-webkit-scrollbar {
