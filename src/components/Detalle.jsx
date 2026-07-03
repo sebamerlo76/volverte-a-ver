@@ -123,7 +123,7 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
 
           <button className="btn-compartir" onClick={() => compartirFlyer(r, onToast)}>
             <span className="mi" style={{ fontSize: 20 }}>
-              ios_share
+              share
             </span>
             Compartir para ayudar
           </button>
@@ -287,7 +287,7 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
           ) : null}
           <button className="btn-share" onClick={() => compartirFlyer(r, onToast)} aria-label="Compartir aviso">
             <span className="mi" style={{ fontSize: 24 }}>
-              ios_share
+              share
             </span>
           </button>
         </div>
