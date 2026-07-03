@@ -13,7 +13,7 @@ export function popupAvist(a, n) {
   return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:130px;line-height:1.45"><b style="font-size:13px;color:#1f9d8f">👀 Avistamiento ${n}</b><br><span style="font-size:12.5px;color:#2a2320">${esc(a.nota) || 'Sin detalle'}</span><br><span style="font-size:11.5px;color:#8a807a">${esc(a.autor) || 'Anónimo'} · ${fechaHora(a.creadoEn)}</span></div>`
 }
 
-export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar }) {
+export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar }) {
   const [avist, setAvist] = useState([])
 
   useEffect(() => {
@@ -89,6 +89,15 @@ export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorra
             {r.edad ? <span className="tag">{r.edad}</span> : null}
             {r.collar ? <span className="tag">🦮 {r.collar}</span> : null}
           </div>
+
+          {puedeSeguir && r.estado !== 'resuelto' && (
+            <button className={'btn-seguir' + (siguiendo ? ' on' : '')} onClick={onSeguir}>
+              <span className="mi" style={{ fontSize: 20 }}>
+                {siguiendo ? 'notifications_active' : 'notifications'}
+              </span>
+              {siguiendo ? 'Siguiendo esta búsqueda' : 'Seguir esta búsqueda'}
+            </button>
+          )}
 
           {r.enCustodia ? (
             <div className="en-custodia">

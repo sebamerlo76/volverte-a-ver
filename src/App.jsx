@@ -13,8 +13,9 @@ import ReportarAvistamiento from './components/ReportarAvistamiento.jsx'
 import MapaRecorrido from './components/MapaRecorrido.jsx'
 import BuscadorOverlay from './components/BuscadorOverlay.jsx'
 import BottomNav from './components/BottomNav.jsx'
-import { getReportes, marcarResuelto, reactivarReporte, eliminarReporte } from './data/store.js'
+import { getReportes, marcarResuelto, reactivarReporte, eliminarReporte, seguirReporte, dejarDeSeguir, getSeguidos } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
+import { nombreMostrado } from './lib/formato.js'
 
 export default function App() {
   const [vista, setVista] = useState('feed') // feed | detalle | post | auth | cuenta | avistamiento | recorrido
@@ -31,6 +32,9 @@ export default function App() {
   const [plantilla, setPlantilla] = useState(null) // mascota para prellenar un aviso nuevo
   const [ofrecerGuardar, setOfrecerGuardar] = useState(false) // ofrecer guardar la mascota al publicar
   const [authProximo, setAuthProximo] = useState('feed') // adónde ir tras iniciar sesión
+  const [seguidos, setSeguidos] = useState([]) // ids de avisos que sigue el usuario
+  const [seguirTrasAuth, setSeguirTrasAuth] = useState(null) // seguir este aviso al loguearse
+  const [cartelReporte, setCartelReporte] = useState(null) // cartelito "seguí esta mascota"
 
   const authActivo = supabaseConfigurado
   const logueado = !authActivo || !!user
@@ -47,6 +51,12 @@ export default function App() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setUser(session?.user ?? null))
     return () => sub.subscription.unsubscribe()
   }, [authActivo])
+
+  // Avisos que sigue el usuario (para el botón Seguir / Siguiendo).
+  useEffect(() => {
+    if (user?.id) getSeguidos(user.id).then(setSeguidos).catch(() => setSeguidos([]))
+    else setSeguidos([])
+  }, [user?.id])
 
   async function cargar() {
     try {
@@ -104,6 +114,24 @@ export default function App() {
     setVista('detalle')
   }
 
+  function toggleSeguir(reporte) {
+    if (!reporte) return
+    if (!logueado) {
+      setCartelReporte(reporte) // sin cuenta → ofrecer crearla y seguir
+      return
+    }
+    const id = reporte.id
+    if (seguidos.includes(id)) {
+      dejarDeSeguir(id).catch(() => {})
+      setSeguidos((s) => s.filter((x) => x !== id))
+      mostrarToast('Dejaste de seguir')
+    } else {
+      seguirReporte(id).catch(() => {})
+      setSeguidos((s) => (s.includes(id) ? s : [...s, id]))
+      mostrarToast('🔔 Siguiendo — te aviso si hay novedades')
+    }
+  }
+
   async function alPublicar() {
     const eraEdicion = !!editando
     await cargar()
@@ -125,6 +153,16 @@ export default function App() {
     mostrarToast('Sesión cerrada')
   }
   function trasAuth() {
+    if (seguirTrasAuth) {
+      const id = seguirTrasAuth
+      setSeguirTrasAuth(null)
+      seguirReporte(id)
+        .then(() => setSeguidos((s) => (s.includes(id) ? s : [...s, id])))
+        .catch(() => {})
+      setVista('detalle')
+      mostrarToast('🔔 ¡Listo! Seguís esta búsqueda. Activá la campana en Mi cuenta para recibir los avisos.')
+      return
+    }
     mostrarToast('¡Bienvenido! 🐾')
     if (authProximo === 'post') {
       setEditando(null)
@@ -240,6 +278,9 @@ export default function App() {
           <Detalle
             r={seleccionado}
             esMio={esMio}
+            puedeSeguir={!esMio}
+            siguiendo={seleccionado ? seguidos.includes(seleccionado.id) : false}
+            onSeguir={() => toggleSeguir(seleccionado)}
             onVolver={() => setVista('feed')}
             onToast={mostrarToast}
             onEditar={editar}
@@ -257,6 +298,7 @@ export default function App() {
             onEnviado={() => {
               setVista('detalle')
               mostrarToast('👀 ¡Gracias! Tu avistamiento se sumó al recorrido')
+              if (!logueado) setCartelReporte(seleccionado)
             }}
             onToast={mostrarToast}
           />
@@ -325,6 +367,37 @@ export default function App() {
         )}
         {vista === 'qr' && mascotaEditando && (
           <ChapitaQR mascota={mascotaEditando} onCerrar={() => setVista('mascota')} onToast={mostrarToast} />
+        )}
+        {cartelReporte && (
+          <div className="match-modal" onClick={() => setCartelReporte(null)}>
+            <div className="match-card" onClick={(e) => e.stopPropagation()}>
+              <div style={{ fontSize: 44, lineHeight: 1 }}>🐾</div>
+              <div className="match-nombre" style={{ marginTop: 6 }}>¿Te aviso si hay novedades?</div>
+              <div className="match-desc">
+                Creá tu cuenta y seguí la búsqueda de <b>{nombreMostrado(cartelReporte)}</b>. Te aviso si
+                alguien más lo ve o si aparece.
+              </div>
+              <button
+                className="btn-wa"
+                style={{ background: 'var(--teal)' }}
+                onClick={() => {
+                  setSeguirTrasAuth(cartelReporte.id)
+                  setSelReporte(cartelReporte)
+                  setCartelReporte(null)
+                  setAuthProximo('feed')
+                  setVista('auth')
+                }}
+              >
+                <span className="mi fill" style={{ fontSize: 22 }}>
+                  person_add
+                </span>
+                Crear cuenta y seguir
+              </button>
+              <button className="match-no" onClick={() => setCartelReporte(null)}>
+                Ahora no
+              </button>
+            </div>
+          </div>
         )}
         {vista === 'feed' && <BottomNav modo={homeModo} onNav={navBarra} />}
 

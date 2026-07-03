@@ -398,6 +398,25 @@ export async function guardarNotifPrefs(prefs) {
   return data
 }
 
+// --- Seguir avisos (novedades de una mascota puntual) ---
+export async function seguirReporte(reporteId) {
+  if (!supabaseConfigurado) return
+  const { error } = await supabase.from('seguidores').insert({ reporte_id: reporteId })
+  if (error && error.code !== '23505') throw error // 23505 = ya lo seguía
+}
+export async function dejarDeSeguir(reporteId) {
+  if (!supabaseConfigurado) return
+  // RLS asegura que solo borra la fila propia.
+  const { error } = await supabase.from('seguidores').delete().eq('reporte_id', reporteId)
+  if (error) throw error
+}
+export async function getSeguidos(userId) {
+  if (!supabaseConfigurado || !userId) return []
+  const { data, error } = await supabase.from('seguidores').select('reporte_id').eq('user_id', userId)
+  if (error) throw error
+  return (data || []).map((s) => s.reporte_id)
+}
+
 // Sube una foto y devuelve su URL. En la nube va al Storage; en local, un data URL.
 export async function subirFoto(file) {
   if (!file) return ''

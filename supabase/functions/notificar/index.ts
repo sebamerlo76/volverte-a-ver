@@ -130,25 +130,57 @@ async function manejarReporte(nuevo: any) {
   }
 }
 
+async function seguidoresDe(reporteId: string) {
+  const { data } = await sb.from('seguidores').select('user_id').eq('reporte_id', reporteId)
+  return (data || []).map((s: any) => s.user_id)
+}
+
 async function manejarAvistamiento(rec: any) {
   const { data: rep } = await sb.from('reportes').select('*').eq('id', rec.reporte_id).maybeSingle()
-  if (!rep?.user_id) return
-  const prefs = await prefsDe([rep.user_id])
-  if ((prefs.get(rep.user_id)?.avisar_avistamiento ?? true) === false) return
-  await enviarAUsuarios([rep.user_id], {
-    title: '👀 ¡Vieron a tu mascota!',
-    body: rec.nota ? `Nuevo avistamiento: ${rec.nota}` : `Alguien reportó ver a tu ${ESP[rep.especie] || 'mascota'}.`,
-    url: '/',
-  })
+  if (!rep) return
+  const nombre = rep.nombre || (ESP[rep.especie] || 'tu mascota')
+
+  // Dueño del aviso.
+  if (rep.user_id) {
+    const prefs = await prefsDe([rep.user_id])
+    if ((prefs.get(rep.user_id)?.avisar_avistamiento ?? true) !== false) {
+      await enviarAUsuarios([rep.user_id], {
+        title: '👀 ¡Vieron a tu mascota!',
+        body: rec.nota ? `Nuevo avistamiento: ${rec.nota}` : `Alguien reportó ver a tu ${ESP[rep.especie] || 'mascota'}.`,
+        url: '/',
+      })
+    }
+  }
+
+  // Seguidores del aviso (menos el dueño, que ya recibió).
+  const segs = (await seguidoresDe(rec.reporte_id)).filter((u: string) => u !== rep.user_id)
+  if (segs.length) {
+    await enviarAUsuarios(segs, {
+      title: `👀 Novedad de ${nombre}`,
+      body: rec.nota ? `Nuevo avistamiento: ${rec.nota}` : 'Alguien lo vio.',
+      url: '/',
+    })
+  }
+}
+
+// Aviso marcado como resuelto/reencontrado → avisar a los seguidores.
+async function manejarReporteUpdate(rec: any, old: any) {
+  if (!(old?.estado === 'activo' && rec.estado === 'resuelto')) return
+  const nombre = rec.nombre || (ESP[rec.especie] || 'la mascota')
+  const segs = (await seguidoresDe(rec.id)).filter((u: string) => u !== rec.user_id)
+  if (segs.length) {
+    await enviarAUsuarios(segs, { title: '🎉 ¡Apareció!', body: `${nombre} volvió a casa. 🏠`, url: '/' })
+  }
 }
 
 Deno.serve(async (req) => {
   try {
     const body = await req.json()
     const rec = body.record
-    if (rec && body.type === 'INSERT') {
-      if (body.table === 'reportes') await manejarReporte(rec)
-      else if (body.table === 'avistamientos') await manejarAvistamiento(rec)
+    if (rec) {
+      if (body.table === 'reportes' && body.type === 'INSERT') await manejarReporte(rec)
+      else if (body.table === 'reportes' && body.type === 'UPDATE') await manejarReporteUpdate(rec, body.old_record)
+      else if (body.table === 'avistamientos' && body.type === 'INSERT') await manejarAvistamiento(rec)
     }
     return new Response('ok', { status: 200 })
   } catch (e) {

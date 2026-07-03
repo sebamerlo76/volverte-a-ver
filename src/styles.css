@@ -412,6 +412,28 @@ select {
   border-radius: 7px;
 }
 
+/* Botón Seguir / Siguiendo una búsqueda (detalle del aviso) */
+.btn-seguir {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1.5px solid var(--teal);
+  background: #fff;
+  color: var(--teal);
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 14.5px;
+}
+.btn-seguir.on {
+  background: var(--teal);
+  color: #fff;
+}
+
 /* Botón para escribirle a quien dejó un avistamiento */
 .avist-wa {
   flex: none;
