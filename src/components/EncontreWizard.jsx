@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import SelectChips from './SelectChips.jsx'
+import PhotoPicker from './PhotoPicker.jsx'
 import { coordsDeBarrio } from '../lib/parana.js'
 import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, coordsDeBarrioEn } from '../lib/localidades.js'
 import { COLORES, SEXOS, COLLAR, TAMANOS } from '../lib/opciones.js'
-import { addReporte, addMascota, subirFoto } from '../data/store.js'
+import { addReporte, addMascota, subirFotos } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, linkWhatsApp } from '../lib/formato.js'
 import { similitud } from '../lib/vector.js'
 
@@ -34,8 +35,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
   const [edad, setEdad] = useState('')
   const [collar, setCollar] = useState('')
   const [descripcion, setDescripcion] = useState('')
-  const [foto, setFoto] = useState('')
-  const [fotoFile, setFotoFile] = useState(null)
+  const [fotos, setFotos] = useState([])
   const [huella, setHuella] = useState(null)
   const [analizando, setAnalizando] = useState(false)
   const [localidad, setLocalidad] = useState(LOCALIDAD_DEFECTO)
@@ -63,21 +63,24 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
       .catch(() => {})
   }, [])
 
-  async function elegirFoto(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setFotoFile(file)
-    const url = URL.createObjectURL(file)
-    setFoto(url)
+  // Al cambiar la primera foto, calculamos su huella (para sugerir parecidos).
+  useEffect(() => {
+    const primera = fotos[0]
+    if (!primera) {
+      setHuella(null)
+      return
+    }
+    let vivo = true
     setHuella(null)
     setAnalizando(true)
-    try {
-      const { huellaDeImagen } = await import('../lib/similar.js')
-      setHuella(await huellaDeImagen(url))
-    } finally {
-      setAnalizando(false)
+    import('../lib/similar.js')
+      .then((m) => m.huellaDeImagen(primera.url))
+      .then((h) => vivo && setHuella(h))
+      .finally(() => vivo && setAnalizando(false))
+    return () => {
+      vivo = false
     }
-  }
+  }, [fotos[0]?.url])
 
   function atras() {
     if (paso === 1) onCerrar()
@@ -131,7 +134,8 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
           /* ignore */
         }
       }
-      const fotoUrl = fotoFile ? await subirFoto(fotoFile) : ''
+      const fotosUrls = await subirFotos(fotos)
+      const fotoUrl = fotosUrls[0] || ''
       await addReporte({
         tipo: 'encontrado',
         especie,
@@ -147,6 +151,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
         collar: collar.trim(),
         descripcion: descripcion.trim(),
         foto: fotoUrl,
+        fotos: fotosUrls,
         whatsapp: wa,
         fechaEvento: fecha || new Date().toISOString().slice(0, 10),
         lat: punto.lat,
@@ -244,19 +249,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
 
         {paso === 3 && (
           <>
-            <label className="photo-up" style={{ width: '100%', height: 160 }}>
-              {foto ? (
-                <img src={foto} alt="Foto" />
-              ) : (
-                <>
-                  <span className="mi" style={{ fontSize: 30 }}>
-                    photo_camera
-                  </span>
-                  Tocá para agregar una foto
-                </>
-              )}
-              <input type="file" accept="image/*" onChange={elegirFoto} style={{ display: 'none' }} />
-            </label>
+            <PhotoPicker value={fotos} onChange={setFotos} max={3} />
             <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700, marginTop: 12, lineHeight: 1.5 }}>
               La foto ayuda muchísimo a que la familia la reconozca. Si no tenés, podés seguir igual.
             </div>

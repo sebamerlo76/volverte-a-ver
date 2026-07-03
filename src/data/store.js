@@ -25,7 +25,8 @@ function desdeFila(row) {
     tamano: row.tamano,
     raza: row.raza,
     descripcion: row.descripcion,
-    foto: row.foto,
+    foto: (row.fotos && row.fotos.length ? row.fotos[0] : row.foto) || '',
+    fotos: row.fotos && row.fotos.length ? row.fotos : row.foto ? [row.foto] : [],
     whatsapp: row.whatsapp,
     autor: row.autor,
     fechaEvento: row.fecha_evento,
@@ -57,7 +58,8 @@ function haciaFila(r) {
     tamano: r.tamano,
     raza: r.raza,
     descripcion: r.descripcion,
-    foto: r.foto,
+    foto: r.fotos && r.fotos.length ? r.fotos[0] : r.foto ?? null,
+    fotos: r.fotos && r.fotos.length ? r.fotos : r.foto ? [r.foto] : null,
     whatsapp: r.whatsapp,
     fecha_evento: r.fechaEvento,
     mascota_id: r.mascotaId ?? null,
@@ -417,6 +419,17 @@ export async function getSeguidos(userId) {
   const { data, error } = await supabase.from('seguidores').select('reporte_id').eq('user_id', userId)
   if (error) throw error
   return (data || []).map((s) => s.reporte_id)
+}
+
+// Sube una lista de fotos [{ url, file }] y devuelve las URLs finales.
+// Las que ya tienen url remota se conservan; las nuevas (con file) se suben.
+export async function subirFotos(items) {
+  const urls = []
+  for (const it of items || []) {
+    if (it.file) urls.push(await subirFoto(it.file))
+    else if (it.url) urls.push(it.url)
+  }
+  return urls
 }
 
 // Sube una foto y devuelve su URL. En la nube va al Storage; en local, un data URL.

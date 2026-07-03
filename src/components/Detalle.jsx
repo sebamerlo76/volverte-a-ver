@@ -15,6 +15,7 @@ export function popupAvist(a, n) {
 
 export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar }) {
   const [avist, setAvist] = useState([])
+  const [fotoActiva, setFotoActiva] = useState(0)
 
   useEffect(() => {
     if (!r?.id) return
@@ -31,6 +32,7 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
   const perdido = r.tipo === 'perdido'
   const resuelto = r.estado === 'resuelto'
   const clr = perdido ? '#ff6b5e' : '#1f9d8f'
+  const fotos = r.fotos && r.fotos.length ? r.fotos : r.foto ? [r.foto] : []
   const centro = puntoDeReporte(r)
 
   // Marcadores del mapa: la zona del aviso + cada avistamiento numerado.
@@ -51,12 +53,30 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
     <div className="view">
       <div className="body">
         <div className={'dhero' + (perdido ? '' : ' g')}>
-          {r.foto ? (
-            <img src={r.foto} alt={nombreMostrado(r)} onError={(e) => (e.target.style.display = 'none')} />
+          {fotos.length > 0 ? (
+            <div
+              className="dhero-carrusel"
+              onScroll={(e) => {
+                const el = e.currentTarget
+                const i = Math.round(el.scrollLeft / el.clientWidth)
+                if (i !== fotoActiva) setFotoActiva(i)
+              }}
+            >
+              {fotos.map((u, i) => (
+                <img key={i} src={u} alt={nombreMostrado(r)} onError={(e) => (e.target.style.display = 'none')} />
+              ))}
+            </div>
           ) : (
             <span className="ph-pet mi fill" style={{ fontSize: 96 }}>
               pets
             </span>
+          )}
+          {fotos.length > 1 && (
+            <div className="dhero-dots">
+              {fotos.map((_, i) => (
+                <span key={i} className={'ddot' + (i === fotoActiva ? ' on' : '')} />
+              ))}
+            </div>
           )}
           <button className="dback" onClick={onVolver}>
             <span className="mi" style={{ fontSize: 23, color: '#2a2320' }}>

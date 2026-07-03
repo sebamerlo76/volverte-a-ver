@@ -2,8 +2,9 @@ import { useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { coordsDeBarrio, puntoDeReporte } from '../lib/parana.js'
 import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, coordsDeBarrioEn } from '../lib/localidades.js'
-import { addReporte, actualizarReporte, addMascota, subirFoto } from '../data/store.js'
+import { addReporte, actualizarReporte, addMascota, subirFotos } from '../data/store.js'
 import SelectChips from './SelectChips.jsx'
+import PhotoPicker from './PhotoPicker.jsx'
 import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS } from '../lib/opciones.js'
 
 export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar, onPublicado, onToast }) {
@@ -12,8 +13,13 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
   const base = inicial || plantilla || null
   const [tipo, setTipo] = useState(base?.tipo || 'perdido')
   const [especie, setEspecie] = useState(base?.especie || 'perro')
-  const [foto, setFoto] = useState(base?.foto || '') // vista previa / foto actual
-  const [fotoFile, setFotoFile] = useState(null) // archivo nuevo a subir (si cambia)
+  const [fotos, setFotos] = useState(
+    base?.fotos?.length
+      ? base.fotos.map((u) => ({ url: u, file: null }))
+      : base?.foto
+      ? [{ url: base.foto, file: null }]
+      : []
+  )
   const [nombre, setNombre] = useState(base?.nombre || '')
   const [color, setColor] = useState(base?.color || '')
   const [tamano, setTamano] = useState(base?.tamano || '')
@@ -49,13 +55,6 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
     setPunto({ lat: c[0], lng: c[1] })
   }
 
-  function elegirFoto(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setFotoFile(file)
-    setFoto(URL.createObjectURL(file)) // vista previa instantánea
-  }
-
   async function publicar() {
     if (!whatsapp.trim()) {
       onToast('Poné un WhatsApp de contacto 🙏')
@@ -63,14 +62,14 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
     }
     setGuardando(true)
     try {
-      // Si no eligió foto nueva, se conserva la actual (importante al editar).
-      const fotoUrl = fotoFile ? await subirFoto(fotoFile) : foto
-      // Huella visual (bajo demanda): la calculamos si subió foto nueva, o si hay foto
-      // pero todavía no tiene huella (ej. perdido cargado desde una mascota guardada).
+      // Subimos las fotos nuevas y conservamos las que ya estaban.
+      const fotosUrls = await subirFotos(fotos)
+      const fotoUrl = fotosUrls[0] || ''
+      // Huella visual de la PRIMERA foto (reconocimiento): si es nueva o no había huella.
       let embedding = base?.embedding ?? null
-      if (foto && (fotoFile || !embedding)) {
+      if (fotos[0] && (fotos[0].file || !embedding)) {
         const { huellaDeImagen } = await import('../lib/similar.js')
-        embedding = await huellaDeImagen(foto)
+        embedding = await huellaDeImagen(fotos[0].url)
       }
       const datos = {
         tipo,
@@ -88,6 +87,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
         recompensa: tipo === 'perdido' ? recompensa.trim() : '',
         descripcion: descripcion.trim(),
         foto: fotoUrl,
+        fotos: fotosUrls,
         whatsapp: whatsapp.trim(),
         fechaEvento: fecha || new Date().toISOString().slice(0, 10),
         mascotaId: base?.mascotaId ?? null,
@@ -164,20 +164,8 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
           ))}
         </div>
 
-        <div className="flabel">Foto</div>
-        <label className="photo-up">
-          {foto ? (
-            <img src={foto} alt="Foto elegida" />
-          ) : (
-            <>
-              <span className="mi" style={{ fontSize: 26 }}>
-                photo_camera
-              </span>
-              Agregar
-            </>
-          )}
-          <input type="file" accept="image/*" onChange={elegirFoto} style={{ display: 'none' }} />
-        </label>
+        <div className="flabel">Fotos (hasta 3)</div>
+        <PhotoPicker value={fotos} onChange={setFotos} max={3} />
 
         <div className="flabel">Nombre (si lo sabés)</div>
         <div className="inp">
