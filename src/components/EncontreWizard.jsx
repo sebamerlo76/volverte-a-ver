@@ -30,7 +30,14 @@ export default function EncontreWizard({ onCerrar, onPublicado, onToast }) {
   const [whatsapp, setWhatsapp] = useState('')
   const [guardando, setGuardando] = useState(false)
 
-  const centro = coordsDeBarrio(zona)
+  const cIni = coordsDeBarrio('Centro')
+  const [punto, setPunto] = useState({ lat: cIni[0], lng: cIni[1] })
+
+  function cambiarZona(z) {
+    setZona(z)
+    const c = coordsDeBarrio(z)
+    setPunto({ lat: c[0], lng: c[1] })
+  }
 
   function elegirFoto(e) {
     const file = e.target.files?.[0]
@@ -71,6 +78,8 @@ export default function EncontreWizard({ onCerrar, onPublicado, onToast }) {
         foto: fotoUrl,
         whatsapp: whatsapp.trim(),
         fechaEvento: fecha || new Date().toISOString().slice(0, 10),
+        lat: punto.lat,
+        lng: punto.lng,
       })
       onPublicado()
     } catch (e) {
@@ -168,7 +177,7 @@ export default function EncontreWizard({ onCerrar, onPublicado, onToast }) {
               <span className="mi" style={{ fontSize: 20, color: '#ff6b5e' }}>
                 location_on
               </span>
-              <select value={zona} onChange={(e) => setZona(e.target.value)}>
+              <select value={zona} onChange={(e) => cambiarZona(e.target.value)}>
                 {NOMBRES_BARRIOS.map((b) => (
                   <option key={b} value={b}>
                     {b}
@@ -176,14 +185,16 @@ export default function EncontreWizard({ onCerrar, onPublicado, onToast }) {
                 ))}
               </select>
             </div>
-            <div className="mappick">
+            <div className="mappick" style={{ height: 200 }}>
               <MapaLeaflet
-                center={centro}
-                zoom={14}
-                interactivo={false}
-                marcadores={[{ id: 'nuevo', lat: centro[0], lng: centro[1], tipo: 'encontrado' }]}
+                center={[punto.lat, punto.lng]}
+                zoom={15}
+                interactivo
+                recentrar
+                onMapaClick={setPunto}
+                marcadores={[{ id: 'nuevo', lat: punto.lat, lng: punto.lng, tipo: 'encontrado', especie }]}
               />
-              <div className="hint">Elegí el barrio para ubicar la zona</div>
+              <div className="hint">Tocá el mapa para marcar el lugar exacto</div>
             </div>
             <div className="flabel">Fecha</div>
             <div className="inp">

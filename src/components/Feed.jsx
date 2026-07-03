@@ -84,7 +84,8 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
   const marcadores = useMemo(
     () =>
       filtrados.map((r) => {
-        const [lat, lng] = jitter(coordsDeBarrio(r.zona), r.id)
+        const exacto = r.lat != null && r.lng != null
+        const [lat, lng] = exacto ? [r.lat, r.lng] : jitter(coordsDeBarrio(r.zona), r.id)
         return { id: r.id, lat, lng, tipo: r.estado === 'resuelto' ? 'avistamiento' : r.tipo, especie: r.especie }
       }),
     [filtrados]

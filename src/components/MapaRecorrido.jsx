@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
-import { coordsDeBarrio } from '../lib/parana.js'
+import { puntoDeReporte } from '../lib/parana.js'
 import { getAvistamientos } from '../data/store.js'
 import { nombreMostrado } from '../lib/formato.js'
 import { popupAvist } from './Detalle.jsx'
@@ -20,7 +20,7 @@ export default function MapaRecorrido({ reporte, onCerrar }) {
     }
   }, [reporte?.id])
 
-  const centro = coordsDeBarrio(reporte.zona)
+  const centro = puntoDeReporte(reporte)
   const marcadores = [
     { id: 'zona', lat: centro[0], lng: centro[1], tipo: reporte.tipo, especie: reporte.especie },
     ...avist.map((a, i) => ({

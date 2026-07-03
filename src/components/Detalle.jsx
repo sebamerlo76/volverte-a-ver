@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
-import { coordsDeBarrio } from '../lib/parana.js'
+import { puntoDeReporte } from '../lib/parana.js'
 import { getAvistamientos } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp } from '../lib/formato.js'
 
@@ -30,7 +30,7 @@ export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorra
   if (!r) return null
   const perdido = r.tipo === 'perdido'
   const clr = perdido ? '#ff6b5e' : '#1f9d8f'
-  const centro = coordsDeBarrio(r.zona)
+  const centro = puntoDeReporte(r)
 
   // Marcadores del mapa: la zona del aviso + cada avistamiento numerado.
   const marcadores = [

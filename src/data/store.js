@@ -37,6 +37,8 @@ function desdeFila(row) {
     edad: row.edad,
     collar: row.collar,
     recompensa: row.recompensa,
+    lat: row.lat,
+    lng: row.lng,
   }
 }
 function haciaFila(r) {
@@ -60,6 +62,8 @@ function haciaFila(r) {
     edad: r.edad ?? null,
     collar: r.collar ?? null,
     recompensa: r.recompensa ?? null,
+    lat: r.lat ?? null,
+    lng: r.lng ?? null,
   }
 }
 

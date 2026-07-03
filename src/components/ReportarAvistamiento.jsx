@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import SelectChips from './SelectChips.jsx'
-import { coordsDeBarrio } from '../lib/parana.js'
+import { puntoDeReporte } from '../lib/parana.js'
 import { addAvistamiento } from '../data/store.js'
 import { nombreMostrado } from '../lib/formato.js'
 
 const NOTAS = ['Lo vi suelto', 'Alguien lo tiene', 'Cruzó la calle', 'Estaba asustado', 'Se dejó acercar']
 
 export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onToast }) {
-  const c = coordsDeBarrio(reporte.zona)
+  const c = puntoDeReporte(reporte)
   const [punto, setPunto] = useState({ lat: c[0], lng: c[1] })
   const [nota, setNota] = useState('')
   const [autor, setAutor] = useState('')

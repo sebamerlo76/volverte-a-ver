@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
-import { NOMBRES_BARRIOS, coordsDeBarrio } from '../lib/parana.js'
+import { NOMBRES_BARRIOS, coordsDeBarrio, puntoDeReporte } from '../lib/parana.js'
 import { addReporte, actualizarReporte, addMascota, subirFoto } from '../data/store.js'
 import SelectChips from './SelectChips.jsx'
 import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS } from '../lib/opciones.js'
@@ -27,7 +27,15 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
   const [guardarMasc, setGuardarMasc] = useState(true) // guardar en "Mis mascotas"
   const [guardando, setGuardando] = useState(false)
 
-  const centro = coordsDeBarrio(zona)
+  const puntoIni =
+    base?.lat != null && base?.lng != null ? [base.lat, base.lng] : coordsDeBarrio(base?.zona || 'Centro')
+  const [punto, setPunto] = useState({ lat: puntoIni[0], lng: puntoIni[1] })
+
+  function cambiarZona(z) {
+    setZona(z)
+    const c = coordsDeBarrio(z)
+    setPunto({ lat: c[0], lng: c[1] }) // al cambiar el barrio, el pin va a esa zona
+  }
 
   function elegirFoto(e) {
     const file = e.target.files?.[0]
@@ -63,6 +71,8 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
         whatsapp: whatsapp.trim(),
         fechaEvento: fecha || new Date().toISOString().slice(0, 10),
         mascotaId: base?.mascotaId ?? null,
+        lat: punto.lat,
+        lng: punto.lng,
       }
       if (editando) await actualizarReporte(inicial.id, datos)
       else await addReporte(datos)
@@ -172,7 +182,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
           <span className="mi" style={{ fontSize: 20, color: '#ff6b5e' }}>
             location_on
           </span>
-          <select value={zona} onChange={(e) => setZona(e.target.value)}>
+          <select value={zona} onChange={(e) => cambiarZona(e.target.value)}>
             {NOMBRES_BARRIOS.map((b) => (
               <option key={b} value={b}>
                 {b}
@@ -180,9 +190,16 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
             ))}
           </select>
         </div>
-        <div className="mappick">
-          <MapaLeaflet center={centro} zoom={14} interactivo={false} marcadores={[{ id: 'nuevo', lat: centro[0], lng: centro[1], tipo }]} />
-          <div className="hint">Elegí el barrio arriba para ubicar la zona</div>
+        <div className="mappick" style={{ height: 190 }}>
+          <MapaLeaflet
+            center={[punto.lat, punto.lng]}
+            zoom={15}
+            interactivo
+            recentrar
+            onMapaClick={setPunto}
+            marcadores={[{ id: 'nuevo', lat: punto.lat, lng: punto.lng, tipo, especie }]}
+          />
+          <div className="hint">Tocá el mapa para marcar el lugar exacto</div>
         </div>
 
         <div className="flabel">Fecha</div>

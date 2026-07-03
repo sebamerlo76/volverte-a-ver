@@ -19,3 +19,9 @@ export const NOMBRES_BARRIOS = Object.keys(BARRIOS)
 export function coordsDeBarrio(barrio) {
   return BARRIOS[barrio] || PARANA_CENTER
 }
+
+// Punto de un aviso: su ubicación exacta si la tiene, si no el centro del barrio.
+export function puntoDeReporte(r) {
+  if (r && r.lat != null && r.lng != null) return [r.lat, r.lng]
+  return coordsDeBarrio(r?.zona)
+}
