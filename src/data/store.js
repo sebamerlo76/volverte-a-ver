@@ -365,10 +365,15 @@ export async function getAvistamientos(reporteId) {
 
 export async function addAvistamiento({ reporteId, lat, lng, nota, autor, whatsapp }) {
   if (supabaseConfigurado) {
-    // whatsapp solo si viene (así no rompe si todavía no corriste el SQL de la columna).
-    const fila = { reporte_id: reporteId, lat, lng, nota, autor }
-    if (whatsapp) fila.whatsapp = whatsapp
-    const { data, error } = await supabase.from('avistamientos').insert(fila).select().single()
+    const base = { reporte_id: reporteId, lat, lng, nota, autor }
+    const fila = whatsapp ? { ...base, whatsapp } : base
+    let { data, error } = await supabase.from('avistamientos').insert(fila).select().single()
+    // A prueba de balas: si el alta con whatsapp falla (p. ej. columna faltante),
+    // reintentamos con lo esencial — jamás perdemos un avistamiento.
+    if (error && whatsapp) {
+      console.warn('Avistamiento: reintento sin whatsapp por error:', error.message)
+      ;({ data, error } = await supabase.from('avistamientos').insert(base).select().single())
+    }
     if (error) throw error
     return avistDesdeFila(data)
   }
