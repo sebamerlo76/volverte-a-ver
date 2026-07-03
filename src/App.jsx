@@ -281,6 +281,8 @@ export default function App() {
         )}
         {vista === 'post-encontre' && (
           <EncontreWizard
+            reportes={reportes}
+            onVerAviso={abrirDetalle}
             onCerrar={() => setVista('post-intent')}
             onPublicado={alPublicar}
             onToast={mostrarToast}

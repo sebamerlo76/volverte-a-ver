@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import SelectChips from './SelectChips.jsx'
 import { NOMBRES_BARRIOS, coordsDeBarrio } from '../lib/parana.js'
 import { COLORES, SEXOS, COLLAR, TAMANOS } from '../lib/opciones.js'
 import { addReporte, subirFoto } from '../data/store.js'
+import { nombreMostrado, tiempoRelativo } from '../lib/formato.js'
 
 const TOTAL = 5
 const TITULOS = [
@@ -14,7 +15,7 @@ const TITULOS = [
   '¿Cómo te contactan?',
 ]
 
-export default function EncontreWizard({ onCerrar, onPublicado, onToast }) {
+export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, onPublicado, onToast }) {
   const [paso, setPaso] = useState(1)
   const [especie, setEspecie] = useState('perro')
   const [color, setColor] = useState('')
@@ -53,6 +54,12 @@ export default function EncontreWizard({ onCerrar, onPublicado, onToast }) {
   function siguiente() {
     setPaso(Math.min(TOTAL, paso + 1))
   }
+
+  // Posibles dueños: perdidos activos de la misma especie (misma zona primero).
+  const coincidencias = useMemo(() => {
+    const mismos = reportes.filter((r) => r.tipo === 'perdido' && r.estado === 'activo' && r.especie === especie)
+    return [...mismos].sort((a, b) => (a.zona === zona ? 0 : 1) - (b.zona === zona ? 0 : 1)).slice(0, 4)
+  }, [reportes, especie, zona])
 
   async function publicar() {
     if (!whatsapp.trim()) {
@@ -224,6 +231,40 @@ export default function EncontreWizard({ onCerrar, onPublicado, onToast }) {
               Cuando la familia vea el aviso, te va a escribir por acá. 🐾
             </div>
           </>
+        )}
+
+        {onVerAviso && coincidencias.length > 0 && (
+          <div className="coinc">
+            <div className="coinc-t">
+              <span className="mi" style={{ fontSize: 18, color: '#1f9d8f' }}>
+                visibility
+              </span>
+              ¿Alguno es este?
+            </div>
+            <div className="coinc-sub">Fijate si su familia ya lo está buscando — así lo devolvés al toque.</div>
+            {coincidencias.map((r) => (
+              <button className="bres-row" key={r.id} onClick={() => onVerAviso(r)}>
+                <div className="bres-foto">
+                  {r.foto ? (
+                    <img src={r.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
+                  ) : (
+                    <span className="mi fill" style={{ fontSize: 22, color: '#c9a58f' }}>
+                      pets
+                    </span>
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="bres-nombre">{nombreMostrado(r)}</div>
+                  <div className="bres-sub">
+                    {r.zona} · Perdido · {tiempoRelativo(r.creadoEn)}
+                  </div>
+                </div>
+                <span className="mi" style={{ fontSize: 22, color: '#c3b8b0' }}>
+                  chevron_right
+                </span>
+              </button>
+            ))}
+          </div>
         )}
 
         <div style={{ height: 20 }} />
