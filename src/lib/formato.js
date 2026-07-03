@@ -46,6 +46,10 @@ export function dentroDeRango(iso, rango) {
   if (!rango || rango === 'todos') return true
   const d = new Date(iso)
   if (isNaN(d)) return true
+  if (rango === 'hoy') {
+    const h = new Date()
+    return d.getFullYear() === h.getFullYear() && d.getMonth() === h.getMonth() && d.getDate() === h.getDate()
+  }
   const dias = (Date.now() - d.getTime()) / 86400000
   if (rango === 'semana') return dias <= 7
   if (rango === 'mes') return dias <= 31

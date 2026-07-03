@@ -8,6 +8,7 @@ import { coordsDeBarrio, PARANA_CENTER, NOMBRES_BARRIOS } from '../lib/parana.js
 const ESPECIE_LBL = { perro: 'Perros', gato: 'Gatos', otro: 'Otros' }
 const TIEMPOS = [
   { k: 'todos', t: 'Siempre' },
+  { k: 'hoy', t: 'Hoy' },
   { k: 'semana', t: 'Esta semana' },
   { k: 'mes', t: 'Este mes' },
 ]
