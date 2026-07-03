@@ -75,6 +75,12 @@ export function linkWhatsApp(r) {
   return `${base}?text=${encodeURIComponent(texto)}`
 }
 
+// Link para llamar por teléfono (usa el mismo número que el WhatsApp).
+export function linkTel(whatsapp) {
+  const numero = (whatsapp || '').replace(/\D/g, '')
+  return numero ? `tel:+54${numero}` : null
+}
+
 // Link para que la familia le escriba a quien dejó un avistamiento.
 export function linkWhatsAppAvist(whatsapp, reporte) {
   const numero = (whatsapp || '').replace(/\D/g, '')

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { getAvistamientos } from '../data/store.js'
-import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist } from '../lib/formato.js'
+import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel } from '../lib/formato.js'
 import { compartirFlyer } from '../lib/flyer.js'
 
 // Escapa texto del usuario para meterlo seguro en el HTML del globito.
@@ -278,6 +278,13 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
             </span>
             Contactar por WhatsApp
           </a>
+          {r.whatsapp ? (
+            <a className="btn-share" href={linkTel(r.whatsapp)} aria-label="Llamar por teléfono">
+              <span className="mi fill" style={{ fontSize: 24, color: 'var(--teal)' }}>
+                call
+              </span>
+            </a>
+          ) : null}
           <button className="btn-share" onClick={() => compartirFlyer(r, onToast)} aria-label="Compartir aviso">
             <span className="mi" style={{ fontSize: 24 }}>
               ios_share
