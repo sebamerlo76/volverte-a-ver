@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { getNotifPrefs, guardarNotifPrefs } from '../data/store.js'
-import { PARANA_CENTER } from '../lib/parana.js'
+import { PARANA_CENTER, NOMBRES_BARRIOS } from '../lib/parana.js'
 
 const DEFECTO = {
   avisar_match: true,
@@ -11,11 +11,13 @@ const DEFECTO = {
   centro_lng: null,
   radio_km: 5,
   especie: 'todas',
+  barrios: [],
 }
 
 // Preferencias de notificación del usuario (qué avisos quiere recibir).
 export default function NotifPrefs({ user }) {
   const [prefs, setPrefs] = useState(null)
+  const [verMapa, setVerMapa] = useState(false)
   const timer = useRef(null)
 
   useEffect(() => {
@@ -41,6 +43,7 @@ export default function NotifPrefs({ user }) {
         centro_lng: np.centro_lng,
         radio_km: np.radio_km,
         especie: np.especie,
+        barrios: np.barrios,
       }).catch((e) => console.warn('No se pudieron guardar las preferencias:', e))
     }, 600)
   }
@@ -55,6 +58,15 @@ export default function NotifPrefs({ user }) {
   function setCentro(pt) {
     setPrefs((p) => {
       const np = { ...p, centro_lat: pt.lat, centro_lng: pt.lng }
+      guardar(np)
+      return np
+    })
+  }
+  function toggleBarrio(b) {
+    setPrefs((p) => {
+      const cur = p.barrios || []
+      const barrios = cur.includes(b) ? cur.filter((x) => x !== b) : [...cur, b]
+      const np = { ...p, barrios }
       guardar(np)
       return np
     })
@@ -90,27 +102,49 @@ export default function NotifPrefs({ user }) {
 
       {prefs.avisar_cerca && (
         <div className="cerca-box">
-          <div className="cerca-lbl">Tocá el mapa para marcar tu zona (centro del radio)</div>
-          <div className="mappick" style={{ height: 170 }}>
-            <MapaLeaflet
-              center={centro}
-              zoom={13}
-              interactivo
-              onGps={setCentro}
-              onMapaClick={setCentro}
-              marcadores={[{ id: 'centro', lat: centro[0], lng: centro[1], tipo: 'encontrado' }]}
-            />
+          <div className="cerca-lbl">¿De qué barrios querés enterarte?</div>
+          <div className="barrio-chips">
+            {NOMBRES_BARRIOS.map((b) => {
+              const on = (prefs.barrios || []).includes(b)
+              return (
+                <button key={b} className={'esp-chip' + (on ? ' on' : '')} onClick={() => toggleBarrio(b)}>
+                  {b}
+                </button>
+              )
+            })}
           </div>
-          <div className="cerca-radio">
-            <span>Radio: <b>{prefs.radio_km} km</b></span>
-            <input
-              type="range"
-              min="1"
-              max="20"
-              value={prefs.radio_km}
-              onChange={(e) => set('radio_km', +e.target.value)}
-            />
-          </div>
+
+          <button className="cerca-adv-toggle" onClick={() => setVerMapa((v) => !v)}>
+            <span className="mi" style={{ fontSize: 18 }}>{verMapa ? 'expand_less' : 'expand_more'}</span>
+            O marcá un punto exacto + radio
+          </button>
+          {verMapa && (
+            <div className="cerca-adv">
+              <div className="cerca-lbl">Tocá el mapa para marcar tu punto (centro del radio)</div>
+              <div className="mappick" style={{ height: 170 }}>
+                <MapaLeaflet
+                  center={centro}
+                  zoom={13}
+                  interactivo
+                  onGps={setCentro}
+                  onMapaClick={setCentro}
+                  marcadores={[{ id: 'centro', lat: centro[0], lng: centro[1], tipo: 'encontrado' }]}
+                />
+              </div>
+              <div className="cerca-radio">
+                <span>Radio: <b>{prefs.radio_km} km</b></span>
+                <input
+                  type="range"
+                  min="1"
+                  max="20"
+                  value={prefs.radio_km}
+                  onChange={(e) => set('radio_km', +e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="cerca-lbl" style={{ marginTop: 12 }}>¿Qué especie?</div>
           <div className="cerca-esp">
             {[
               { k: 'todas', t: 'Todas' },

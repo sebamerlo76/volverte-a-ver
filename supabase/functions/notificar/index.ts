@@ -103,17 +103,21 @@ async function manejarReporte(nuevo: any) {
     })
   }
 
-  // 2) CERCA: usuarios con avisar_cerca dentro del radio.
-  if (nuevo.lat != null && nuevo.lng != null) {
-    const { data: cercaPrefs } = await sb
-      .from('notif_prefs')
-      .select('*')
-      .eq('avisar_cerca', true)
-      .not('centro_lat', 'is', null)
+  // 2) CERCA: usuarios con avisar_cerca — por barrio elegido O por punto+radio.
+  {
+    const { data: cercaPrefs } = await sb.from('notif_prefs').select('*').eq('avisar_cerca', true)
     const destC = (cercaPrefs || [])
       .filter((p: any) => p.user_id !== nuevo.user_id)
       .filter((p: any) => p.especie === 'todas' || p.especie === nuevo.especie)
-      .filter((p: any) => distanciaKm(p.centro_lat, p.centro_lng, nuevo.lat, nuevo.lng) <= (p.radio_km || 5))
+      .filter((p: any) => {
+        const porBarrio = Array.isArray(p.barrios) && nuevo.zona && p.barrios.includes(nuevo.zona)
+        const porRadio =
+          p.centro_lat != null &&
+          nuevo.lat != null &&
+          nuevo.lng != null &&
+          distanciaKm(p.centro_lat, p.centro_lng, nuevo.lat, nuevo.lng) <= (p.radio_km || 5)
+        return porBarrio || porRadio
+      })
       .map((p: any) => p.user_id)
     if (destC.length) {
       const tipoTxt = nuevo.tipo === 'perdido' ? 'perdido' : 'encontrado'

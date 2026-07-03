@@ -527,6 +527,31 @@ select {
   gap: 8px;
   margin-top: 10px;
 }
+.barrio-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.barrio-chips .esp-chip {
+  flex: 0 1 auto;
+  padding: 7px 12px;
+}
+.cerca-adv-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: #1f9d8f;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+}
+.cerca-adv {
+  margin-top: 8px;
+}
 .esp-chip {
   flex: 1;
   padding: 8px;
