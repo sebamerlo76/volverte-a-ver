@@ -5,7 +5,7 @@ import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, coordsDeBarri
 import { addReporte, actualizarReporte, addMascota, subirFotos } from '../data/store.js'
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
-import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS } from '../lib/opciones.js'
+import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
 
 export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar, onPublicado, onToast }) {
   const editando = !!inicial
@@ -22,6 +22,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
   )
   const [nombre, setNombre] = useState(base?.nombre || '')
   const [color, setColor] = useState(base?.color || '')
+  const [raza, setRaza] = useState(base?.raza || '')
   const [tamano, setTamano] = useState(base?.tamano || '')
   const [sexo, setSexo] = useState(base?.sexo || '')
   const [edad, setEdad] = useState(base?.edad || '')
@@ -80,7 +81,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
         referencia: zona,
         color,
         tamano,
-        raza: base?.raza || '',
+        raza: raza.trim(),
         sexo,
         edad: edad.trim(),
         collar: collar.trim(),
@@ -107,7 +108,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
             especie,
             color: '',
             tamano: '',
-            raza: '',
+            raza: raza.trim(),
             descripcion: descripcion.trim(),
             foto: fotoUrl,
           })
@@ -177,6 +178,19 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
 
         <div className="flabel">Tamaño</div>
         <SelectChips opciones={TAMANOS} valor={tamano} onChange={setTamano} />
+
+        {especie !== 'otro' && (
+          <>
+            <div className="flabel">Raza</div>
+            <SelectChips
+              opciones={especie === 'gato' ? RAZAS_GATO : RAZAS_PERRO}
+              valor={raza}
+              onChange={setRaza}
+              otro
+              placeholder="Otra raza"
+            />
+          </>
+        )}
 
         <div className="flabel">Sexo</div>
         <SelectChips opciones={SEXOS} valor={sexo} onChange={setSexo} />

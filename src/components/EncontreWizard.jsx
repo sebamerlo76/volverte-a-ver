@@ -4,7 +4,7 @@ import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import { coordsDeBarrio } from '../lib/parana.js'
 import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, coordsDeBarrioEn } from '../lib/localidades.js'
-import { COLORES, SEXOS, COLLAR, TAMANOS } from '../lib/opciones.js'
+import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
 import { addReporte, addMascota, subirFotos } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, linkWhatsApp } from '../lib/formato.js'
 import { similitud } from '../lib/vector.js'
@@ -31,6 +31,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
   const [especie, setEspecie] = useState('perro')
   const [color, setColor] = useState('')
   const [tamano, setTamano] = useState('')
+  const [raza, setRaza] = useState('')
   const [sexo, setSexo] = useState('')
   const [edad, setEdad] = useState('')
   const [collar, setCollar] = useState('')
@@ -145,7 +146,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
         referencia: zona,
         color: color.trim(),
         tamano,
-        raza: '',
+        raza: raza.trim(),
         sexo,
         edad: edad.trim(),
         collar: collar.trim(),
@@ -166,7 +167,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
             especie,
             color: color.trim(),
             tamano,
-            raza: '',
+            raza: raza.trim(),
             sexo,
             edad: edad.trim(),
             collar: collar.trim(),
@@ -233,6 +234,18 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
             <SelectChips opciones={COLORES} valor={color} onChange={setColor} otro placeholder="Otro color" />
             <div className="flabel">Tamaño</div>
             <SelectChips opciones={TAMANOS} valor={tamano} onChange={setTamano} />
+            {especie !== 'otro' && (
+              <>
+                <div className="flabel">Raza</div>
+                <SelectChips
+                  opciones={especie === 'gato' ? RAZAS_GATO : RAZAS_PERRO}
+                  valor={raza}
+                  onChange={setRaza}
+                  otro
+                  placeholder="Otra raza"
+                />
+              </>
+            )}
             <div className="flabel">Sexo</div>
             <SelectChips opciones={SEXOS} valor={sexo} onChange={setSexo} />
             <div className="flabel">Collar / chapita</div>

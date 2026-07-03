@@ -54,7 +54,7 @@ En vivo: https://volverte-a-ver.vercel.app · Código: https://github.com/sebame
 
 - [ ] **Múltiples fotos** por aviso.
 - [ ] **Teléfono** además de WhatsApp.
-- [ ] **Raza clickeable** (hoy es texto libre).
+- [x] **Raza clickeable** — chips de razas comunes (perro/gato) o escribir otra, en Publicar y Encontré. ✅ (fotitos de raza quedan para más adelante)
 - [ ] **Acciones rápidas**: marcar reencontrado desde la lista sin abrir el aviso.
 - [ ] **Buscar dentro de "Mis avisos"** (si alguien tiene muchos).
 - [ ] **Compartir a Facebook** (además de WhatsApp).

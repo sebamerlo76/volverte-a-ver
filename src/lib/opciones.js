@@ -19,3 +19,23 @@ export const EDADES = ['Cachorro', 'Adulto', 'Senior', 'No sé']
 export const COLLAR = ['Con collar', 'Sin collar', 'No sé']
 
 export const TAMANOS = ['Chico', 'Mediano', 'Grande']
+
+// Razas comunes (Argentina). Tocás una o escribís otra. La mayoría son mestizos.
+export const RAZAS_PERRO = [
+  'Mestizo',
+  'Caniche',
+  'Labrador',
+  'Ovejero alemán',
+  'Bulldog',
+  'Pitbull',
+  'Golden',
+  'Cocker',
+  'Salchicha',
+  'Chihuahua',
+  'Boxer',
+  'Beagle',
+  'Border Collie',
+  'Rottweiler',
+]
+
+export const RAZAS_GATO = ['Común / Mestizo', 'Siamés', 'Persa', 'Angora', 'Bengalí', 'Atigrado']
