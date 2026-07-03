@@ -54,6 +54,12 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
     try {
       // Si no eligió foto nueva, se conserva la actual (importante al editar).
       const fotoUrl = fotoFile ? await subirFoto(fotoFile) : foto
+      // Huella visual: si cambió la foto la recalculamos (bajo demanda), si no se conserva.
+      let embedding = base?.embedding ?? null
+      if (fotoFile) {
+        const { huellaDeImagen } = await import('../lib/similar.js')
+        embedding = await huellaDeImagen(foto)
+      }
       const datos = {
         tipo,
         especie,
@@ -75,6 +81,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
         lat: punto.lat,
         lng: punto.lng,
         en_custodia: tipo === 'encontrado' ? enCustodia : false,
+        embedding,
       }
       if (editando) await actualizarReporte(inicial.id, datos)
       else await addReporte(datos)

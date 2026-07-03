@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import SelectChips from './SelectChips.jsx'
 import { NOMBRES_BARRIOS, coordsDeBarrio } from '../lib/parana.js'
 import { COLORES, SEXOS, COLLAR, TAMANOS } from '../lib/opciones.js'
 import { addReporte, addMascota, subirFoto } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, linkWhatsApp } from '../lib/formato.js'
+import { similitud } from '../lib/vector.js'
 
 function ultimoWhatsapp() {
   try {
@@ -34,6 +35,8 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
   const [descripcion, setDescripcion] = useState('')
   const [foto, setFoto] = useState('')
   const [fotoFile, setFotoFile] = useState(null)
+  const [huella, setHuella] = useState(null)
+  const [analizando, setAnalizando] = useState(false)
   const [zona, setZona] = useState('Centro')
   const [fecha, setFecha] = useState('')
   const [whatsapp, setWhatsapp] = useState(ultimoWhatsapp())
@@ -51,11 +54,27 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
     setPunto({ lat: c[0], lng: c[1] })
   }
 
-  function elegirFoto(e) {
+  // Precargamos el modelo (bajo demanda) al abrir el asistente, para que la foto se analice rápido.
+  useEffect(() => {
+    import('../lib/similar.js')
+      .then((m) => m.precargarModelo())
+      .catch(() => {})
+  }, [])
+
+  async function elegirFoto(e) {
     const file = e.target.files?.[0]
     if (!file) return
     setFotoFile(file)
-    setFoto(URL.createObjectURL(file))
+    const url = URL.createObjectURL(file)
+    setFoto(url)
+    setHuella(null)
+    setAnalizando(true)
+    try {
+      const { huellaDeImagen } = await import('../lib/similar.js')
+      setHuella(await huellaDeImagen(url))
+    } finally {
+      setAnalizando(false)
+    }
   }
 
   function atras() {
@@ -69,7 +88,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
   // Posibles dueños: perdidos activos que coinciden. Refina según el paso.
   // Solo en pasos 1 (especie), 2 (cómo es) y 4 (dónde). En foto/contacto no.
   const coincidencias = useMemo(() => {
-    if (paso !== 1 && paso !== 2 && paso !== 4) return []
+    if (paso !== 1 && paso !== 2 && paso !== 3 && paso !== 4) return []
     const compat = (r, campo, valor, ignorarNoSe) => {
       if (!valor || (ignorarNoSe && valor === 'No sé')) return true
       if (!r[campo]) return true // si el otro no especificó, no lo descarto
@@ -79,11 +98,21 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
     if (paso >= 2) {
       arr = arr.filter((r) => compat(r, 'color', color) && compat(r, 'tamano', tamano) && compat(r, 'sexo', sexo, true))
     }
+    // Paso 3 (foto): ordenamos por parecido visual a la foto cargada.
+    if (paso === 3) {
+      if (!huella) return []
+      const conH = arr.filter((r) => Array.isArray(r.embedding) && r.embedding.length === huella.length)
+      return conH
+        .map((r) => ({ r, s: similitud(huella, r.embedding) }))
+        .sort((a, b) => b.s - a.s)
+        .slice(0, 4)
+        .map((o) => o.r)
+    }
     if (paso >= 4) {
       arr = arr.filter((r) => compat(r, 'zona', zona))
     }
     return [...arr].sort((a, b) => (a.zona === zona ? 0 : 1) - (b.zona === zona ? 0 : 1)).slice(0, 4)
-  }, [reportes, especie, color, tamano, sexo, zona, paso])
+  }, [reportes, especie, color, tamano, sexo, zona, paso, huella])
 
   async function publicar() {
     if (!soloAviso && !whatsapp.trim()) {
@@ -120,6 +149,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
         lat: punto.lat,
         lng: punto.lng,
         en_custodia: enCustodia,
+        embedding: huella,
       })
       if (enCustodia) {
         try {
@@ -227,6 +257,14 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
             <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700, marginTop: 12, lineHeight: 1.5 }}>
               La foto ayuda muchísimo a que la familia la reconozca. Si no tenés, podés seguir igual.
             </div>
+            {analizando && (
+              <div className="analizando">
+                <span className="mi spin" style={{ fontSize: 18 }}>
+                  autorenew
+                </span>
+                Buscando parecidos por la foto…
+              </div>
+            )}
           </>
         )}
 
@@ -327,7 +365,11 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
               </span>
               ¿Alguno es este?
             </div>
-            <div className="coinc-sub">Fijate si su familia ya lo está buscando — así lo devolvés al toque.</div>
+            <div className="coinc-sub">
+              {paso === 3
+                ? 'Ordenados por parecido a tu foto 🔍'
+                : 'Fijate si su familia ya lo está buscando — así lo devolvés al toque.'}
+            </div>
             {coincidencias.map((r) => (
               <button className="bres-row" key={r.id} onClick={() => setMatchPreview(r)}>
                 <div className="bres-foto">

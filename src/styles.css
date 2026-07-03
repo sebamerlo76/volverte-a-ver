@@ -412,6 +412,25 @@ select {
   border-radius: 7px;
 }
 
+/* Estado "analizando la foto" en el paso 3 (reconocimiento visual) */
+.analizando {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  color: #1f9d8f;
+  font-size: 13.5px;
+  font-weight: 800;
+}
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Preview de una coincidencia dentro del asistente (no navega, no pierde el paso) */
 .match-modal {
   position: absolute;

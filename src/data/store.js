@@ -40,6 +40,7 @@ function desdeFila(row) {
     lat: row.lat,
     lng: row.lng,
     enCustodia: row.en_custodia,
+    embedding: row.embedding, // huella visual (para sugerir parecidos)
   }
 }
 function haciaFila(r) {
@@ -66,6 +67,7 @@ function haciaFila(r) {
     lat: r.lat ?? null,
     lng: r.lng ?? null,
     en_custodia: r.enCustodia ?? false,
+    embedding: r.embedding ?? null,
   }
 }
 
