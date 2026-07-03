@@ -1,7 +1,7 @@
 # Chicho — Pendientes e ideas
 
 Buscador de mascotas perdidas/encontradas para Paraná (Entre Ríos).
-En vivo: https://volverte-a-ver.vercel.app · Código: https://github.com/sebamerlo76/volverte-a-ver
+En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a-ver
 
 ---
 
@@ -42,28 +42,39 @@ En vivo: https://volverte-a-ver.vercel.app · Código: https://github.com/sebame
 - **Seguir una mascota**: botón Seguir en el aviso + cartelito para crear cuenta al dejar un avistamiento → te llegan las novedades y el "🎉 ¡apareció!".
 - **QR para el collar**: chapita imprimible que abre el perfil público (`/m/<id>`) con WhatsApp.
 
+**Compartir y contacto**
+- **Flyer para compartir**: genera una imagen linda del aviso (foto, estado, nombre, zona, chips, recompensa) con logo + chicho.ar, lista para WhatsApp/Facebook.
+- **Link directo al aviso** (`chicho.ar/r/<id>`): el flyer/compartir incluye el link que abre justo esa mascota.
+- **Botón Llamar** además de WhatsApp (usa el mismo número).
+
+**Dominio y solidez**
+- **Dominio propio `chicho.ar`** (con HTTPS), delegado a Vercel; Supabase Auth y Google OK.
+- **Endurecimiento de seguridad** (warnings de Supabase: search_path en funciones, revoke del trigger).
+- **Avistamiento a prueba de balas** (si falla el alta con WhatsApp, reintenta y no se pierde).
+- Publicar **instantáneo** (la huella visual se calcula en segundo plano, ya no cuelga el guardado).
+
 ---
 
 ## 🔜 Próximo / priorizado
 
-- [ ] **⚠️ Backend pendiente (features ya en código):** correr en Supabase `schema-localidad.sql` + `schema-fotos.sql`, y **re-desplegar la Edge Function `notificar`** (chip "Todos" los barrios + filtro por ciudad). Sin esto, publicar con multi-foto/ciudad puede fallar.
+- [x] **Backend de features:** SQLs corridos (localidad, fotos, contacto avist., seguridad) + Edge Function `notificar` re-desplegada (chip "Todos" + filtro por ciudad). ✅
 - [ ] **Anti-spam** en avistamientos (hoy cualquiera puede dejar uno sin login).
-- [ ] **Borrar los avisos de prueba** (demo) antes de lanzar de verdad.
-- [ ] **Producción de email**: reactivar "Confirm email" en Supabase + configurar un SMTP.
+- [ ] **Borrar los avisos de prueba** (demo) — **el usuario los mantiene por ahora para probar**.
+- [ ] **Email**: para lanzar se va con **"Confirm email" OFF** (Google primario, registro sin depender de correo). SMTP propio (Resend) + "recuperar contraseña" quedan para cuando se quiera reforzar.
 
 ---
 
 ## 💡 Ideas a futuro
 
 - [x] **Múltiples fotos** por aviso (hasta 3 + carrusel). ✅
-- [ ] **Teléfono** además de WhatsApp.
-- [ ] **Compartir con imagen linda** (flyer del aviso) para WhatsApp/Facebook — clave para la difusión por barrios.
+- [x] **Teléfono** además de WhatsApp — botón Llamar con el mismo número. ✅
+- [x] **Compartir con imagen linda** (flyer del aviso) para WhatsApp/Facebook + **link directo al aviso**. ✅
 - [ ] **Fotitos de raza** (grilla visual curada) — más adelante, con imágenes con licencia.
 - [x] **Raza clickeable** — chips de razas comunes (perro/gato) o escribir otra, en Publicar y Encontré. ✅ (fotitos de raza quedan para más adelante)
 - [ ] **Acciones rápidas**: marcar reencontrado desde la lista sin abrir el aviso.
 - [ ] **Buscar dentro de "Mis avisos"** (si alguien tiene muchos).
 - [ ] **Compartir a Facebook** (además de WhatsApp).
-- [ ] **Dominio propio** (ej: chicho.com.ar).
+- [x] **Dominio propio**: `chicho.ar` en vivo. ✅
 - [ ] Botón centrar: opción "volver a la zona del aviso" además de "al pin".
 
 ---
