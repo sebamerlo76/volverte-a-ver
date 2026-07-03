@@ -4,6 +4,7 @@ import SelectChips from './SelectChips.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { addAvistamiento } from '../data/store.js'
 import { nombreMostrado } from '../lib/formato.js'
+import { puedeEnviarAvist, registrarEnvioAvist } from '../lib/antispam.js'
 
 const NOTAS = ['Lo vi suelto', 'Alguien lo tiene', 'Cruzó la calle', 'Estaba asustado', 'Se dejó acercar']
 
@@ -13,9 +14,21 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
   const [nota, setNota] = useState('')
   const [autor, setAutor] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
+  const [trampa, setTrampa] = useState('') // honeypot: si se completa, es un bot
   const [guardando, setGuardando] = useState(false)
 
   async function enviar() {
+    // Honeypot: un humano no ve este campo; si vino lleno, es un bot → fingimos éxito.
+    if (trampa) {
+      onEnviado()
+      return
+    }
+    // Rate-limit por dispositivo (frena doble-tap y abuso casual).
+    const chequeo = puedeEnviarAvist()
+    if (!chequeo.ok) {
+      onToast(chequeo.motivo)
+      return
+    }
     setGuardando(true)
     try {
       await addAvistamiento({
@@ -26,6 +39,7 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
         autor: autor.trim() || 'Anónimo',
         whatsapp: whatsapp.trim(),
       })
+      registrarEnvioAvist()
       onEnviado()
     } catch (e) {
       console.error(e)
@@ -100,6 +114,18 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
             inputMode="tel"
           />
         </div>
+
+        {/* Campo trampa anti-bots: invisible para humanos, no tabulable */}
+        <input
+          type="text"
+          value={trampa}
+          onChange={(e) => setTrampa(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+        />
+
         <div style={{ height: 24 }} />
       </div>
 
