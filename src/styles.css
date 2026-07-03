@@ -2267,7 +2267,7 @@ select {
 .mloc {
   position: absolute;
   right: 16px;
-  bottom: 20px;
+  bottom: 76px; /* por encima del hint "Tocá un pin..." que va en bottom: 20px */
   z-index: 500;
   width: 48px;
   height: 48px;
