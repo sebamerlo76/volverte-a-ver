@@ -24,6 +24,7 @@ export default function App() {
   const [filtros, setFiltros] = useState(FILTROS_INI) // filtros del inicio (se conservan entre vistas)
   const [buscadorAbierto, setBuscadorAbierto] = useState(false)
   const [selReporte, setSelReporte] = useState(null) // aviso abierto en el detalle
+  const [detalleOrigen, setDetalleOrigen] = useState('feed') // a dónde volver al cerrar el detalle
   const [reportes, setReportes] = useState([])
   const [toast, setToast] = useState('')
   const [user, setUser] = useState(null)
@@ -109,7 +110,8 @@ export default function App() {
     if (accion === 'toggle') return setHomeModo((m) => (m === 'mapa' ? 'lista' : 'mapa'))
   }
 
-  function abrirDetalle(reporte) {
+  function abrirDetalle(reporte, origen = 'feed') {
+    setDetalleOrigen(origen)
     setSelReporte(reporte)
     setVista('detalle')
   }
@@ -201,7 +203,7 @@ export default function App() {
     try {
       await marcarResuelto(id)
       await cargar()
-      setVista('feed')
+      setVista(detalleOrigen)
       mostrarToast('🎉 ¡Marcado como reencontrado!')
     } catch (e) {
       console.error(e)
@@ -212,7 +214,7 @@ export default function App() {
     try {
       await reactivarReporte(id)
       await cargar()
-      setVista('feed')
+      setVista(detalleOrigen)
       mostrarToast('Aviso reactivado')
     } catch (e) {
       console.error(e)
@@ -224,7 +226,7 @@ export default function App() {
     try {
       await eliminarReporte(id)
       await cargar()
-      setVista('feed')
+      setVista(detalleOrigen)
       mostrarToast('Aviso borrado')
     } catch (e) {
       console.error(e)
@@ -281,7 +283,7 @@ export default function App() {
             puedeSeguir={!esMio}
             siguiendo={seleccionado ? seguidos.includes(seleccionado.id) : false}
             onSeguir={() => toggleSeguir(seleccionado)}
-            onVolver={() => setVista('feed')}
+            onVolver={() => setVista(detalleOrigen)}
             onToast={mostrarToast}
             onEditar={editar}
             onBorrar={borrar}
@@ -345,7 +347,7 @@ export default function App() {
           <MiCuenta
             user={user}
             onVolver={() => setVista('feed')}
-            onAbrir={abrirDetalle}
+            onAbrir={(r) => abrirDetalle(r, 'cuenta')}
             onLogout={salir}
             onNuevaMascota={nuevaMascota}
             onEditarMascota={editarMascota}
