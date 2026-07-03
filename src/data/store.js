@@ -183,6 +183,13 @@ export async function actualizarReporte(id, datos) {
 }
 
 // Marca un aviso como reencontrado/resuelto (sale del listado).
+// Guarda SOLO la huella visual de un aviso (se calcula en segundo plano tras publicar).
+export async function guardarEmbedding(id, embedding) {
+  if (!supabaseConfigurado || !id || !embedding) return
+  const { error } = await supabase.from('reportes').update({ embedding }).eq('id', id)
+  if (error) console.warn('No se pudo guardar la huella:', error)
+}
+
 export async function marcarResuelto(id) {
   if (supabaseConfigurado) {
     const { error } = await supabase.from('reportes').update({ estado: 'resuelto' }).eq('id', id)

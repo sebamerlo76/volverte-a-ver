@@ -2,7 +2,7 @@ import { useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { coordsDeBarrio, puntoDeReporte } from '../lib/parana.js'
 import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, coordsDeBarrioEn } from '../lib/localidades.js'
-import { addReporte, actualizarReporte, addMascota, subirFotos } from '../data/store.js'
+import { addReporte, actualizarReporte, addMascota, subirFotos, guardarEmbedding } from '../data/store.js'
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import FechaPicker from './FechaPicker.jsx'
@@ -67,21 +67,9 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
       // Subimos las fotos nuevas y conservamos las que ya estaban.
       const fotosUrls = await subirFotos(fotos)
       const fotoUrl = fotosUrls[0] || ''
-      // Huella visual de la PRIMERA foto (reconocimiento): si es nueva o no había huella.
-      let embedding = base?.embedding ?? null
-      if (fotos[0] && (fotos[0].file || !embedding)) {
-        // No bloqueamos el guardado si el modelo tarda o falla: máx ~8s.
-        // Si no llega a tiempo, se publica sin huella (se puede recalcular después).
-        try {
-          const { huellaDeImagen } = await import('../lib/similar.js')
-          embedding = await Promise.race([
-            huellaDeImagen(fotos[0].url),
-            new Promise((res) => setTimeout(() => res(embedding), 8000)),
-          ])
-        } catch (e) {
-          console.warn('No se pudo calcular la huella; se publica sin ella:', e)
-        }
-      }
+      // La huella visual NO se calcula acá (para que el guardado sea instantáneo):
+      // se hace en segundo plano después de publicar (ver más abajo).
+      const embedding = base?.embedding ?? null
       const datos = {
         tipo,
         especie,
@@ -107,8 +95,17 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
         enCustodia: tipo === 'encontrado' ? enCustodia : false,
         embedding,
       }
-      if (editando) await actualizarReporte(inicial.id, datos)
-      else await addReporte(datos)
+      const guardado = editando ? await actualizarReporte(inicial.id, datos) : await addReporte(datos)
+
+      // Huella visual EN SEGUNDO PLANO (no bloquea el guardado). Usa la 1ª foto ya subida
+      // (URL remota, sobrevive al cierre del formulario). Si falla, no pasa nada.
+      const primeraUrl = fotosUrls[0]
+      if (guardado?.id && primeraUrl && (fotos[0]?.file || !base?.embedding)) {
+        import('../lib/similar.js')
+          .then((m) => m.huellaDeImagen(primeraUrl))
+          .then((emb) => emb && guardarEmbedding(guardado.id, emb))
+          .catch(() => {})
+      }
 
       // Si vino de "cargar y publicar", guardamos también la mascota en el perfil.
       if (ofrecerGuardar && guardarMasc) {
