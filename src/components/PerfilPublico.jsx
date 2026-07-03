@@ -57,12 +57,11 @@ export default function PerfilPublico({ id }) {
       <div className="app pub">
         <div className="pub-scroll">
           <div className="pub-top">
-            <div className="pub-brand-row">
-              <span className="mi fill" style={{ fontSize: 18, color: 'var(--navy)' }}>
-                pets
-              </span>
-              Chicho · Paraná
-            </div>
+            <img
+              src="/isologo.png"
+              alt="Chicho"
+              style={{ width: '68%', maxWidth: 220, margin: '0 auto', display: 'block' }}
+            />
           </div>
 
           {m.perdido && (

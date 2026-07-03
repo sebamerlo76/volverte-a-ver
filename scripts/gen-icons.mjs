@@ -1,20 +1,18 @@
-// Genera los íconos PWA (patita blanca sobre coral) desde un SVG, con sharp.
+// Genera los íconos PWA a partir del logo de Chicho (public/logo.png).
 // Uso: node scripts/gen-icons.mjs
 import sharp from 'sharp'
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#1f3852"/>
-  <g fill="#fceed6">
-    <ellipse cx="256" cy="320" rx="98" ry="80"/>
-    <ellipse cx="146" cy="238" rx="40" ry="53"/>
-    <ellipse cx="366" cy="238" rx="40" ry="53"/>
-    <ellipse cx="205" cy="150" rx="37" ry="49"/>
-    <ellipse cx="307" cy="150" rx="37" ry="49"/>
-  </g>
-</svg>`
+const CREMA = { r: 252, g: 238, b: 214, alpha: 1 } // #fceed6, fondo del logo
 
-const buf = Buffer.from(svg)
-await sharp(buf).resize(512, 512).png().toFile('public/icon-512.png')
-await sharp(buf).resize(192, 192).png().toFile('public/icon-192.png')
-await sharp(buf).resize(180, 180).png().toFile('public/apple-touch-icon.png')
-console.log('Íconos generados en public/')
+async function gen(size, salida) {
+  await sharp('public/logo.png')
+    .resize(size, size, { fit: 'contain', background: CREMA })
+    .flatten({ background: CREMA })
+    .png()
+    .toFile(salida)
+}
+
+await gen(512, 'public/icon-512.png')
+await gen(192, 'public/icon-192.png')
+await gen(180, 'public/apple-touch-icon.png')
+console.log('Íconos PWA generados desde public/logo.png')
