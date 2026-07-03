@@ -3,6 +3,7 @@ import MapaLeaflet from './MapaLeaflet.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { getAvistamientos } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist } from '../lib/formato.js'
+import { compartirFlyer } from '../lib/flyer.js'
 
 // Escapa texto del usuario para meterlo seguro en el HTML del globito.
 function esc(s = '') {
@@ -119,6 +120,13 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
               {siguiendo ? 'Siguiendo esta búsqueda' : 'Seguir esta búsqueda'}
             </button>
           )}
+
+          <button className="btn-compartir" onClick={() => compartirFlyer(r, onToast)}>
+            <span className="mi" style={{ fontSize: 20 }}>
+              ios_share
+            </span>
+            Compartir para ayudar
+          </button>
 
           {r.enCustodia ? (
             <div className="en-custodia">
@@ -270,22 +278,7 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
             </span>
             Contactar por WhatsApp
           </a>
-          <button
-            className="btn-share"
-            onClick={async () => {
-              const url = window.location.href
-              const texto = `${nombreMostrado(r)} — ${r.tipo} en ${r.zona}, Paraná. Mirá en Chicho.`
-              if (navigator.share) {
-                try {
-                  await navigator.share({ title: 'Chicho', text: texto, url })
-                } catch (e) {
-                  /* el usuario canceló */
-                }
-              } else {
-                onToast('🔗 Compartir disponible en el celular')
-              }
-            }}
-          >
+          <button className="btn-share" onClick={() => compartirFlyer(r, onToast)} aria-label="Compartir aviso">
             <span className="mi" style={{ fontSize: 24 }}>
               ios_share
             </span>
