@@ -4,7 +4,15 @@ import SelectChips from './SelectChips.jsx'
 import { NOMBRES_BARRIOS, coordsDeBarrio } from '../lib/parana.js'
 import { COLORES, SEXOS, COLLAR, TAMANOS } from '../lib/opciones.js'
 import { addReporte, addMascota, subirFoto } from '../data/store.js'
-import { nombreMostrado, tiempoRelativo } from '../lib/formato.js'
+import { nombreMostrado, tiempoRelativo, linkWhatsApp } from '../lib/formato.js'
+
+function ultimoWhatsapp() {
+  try {
+    return localStorage.getItem('vav_wa') || ''
+  } catch (e) {
+    return ''
+  }
+}
 
 const TOTAL = 5
 const TITULOS = [
@@ -28,7 +36,9 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
   const [fotoFile, setFotoFile] = useState(null)
   const [zona, setZona] = useState('Centro')
   const [fecha, setFecha] = useState('')
-  const [whatsapp, setWhatsapp] = useState('')
+  const [whatsapp, setWhatsapp] = useState(ultimoWhatsapp())
+  const [soloAviso, setSoloAviso] = useState(false)
+  const [matchPreview, setMatchPreview] = useState(null)
   const [enCustodia, setEnCustodia] = useState(false)
   const [guardando, setGuardando] = useState(false)
 
@@ -56,19 +66,40 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
     setPaso(Math.min(TOTAL, paso + 1))
   }
 
-  // Posibles dueños: perdidos activos de la misma especie (misma zona primero).
+  // Posibles dueños: perdidos activos que coinciden. Refina según el paso.
+  // Solo en pasos 1 (especie), 2 (cómo es) y 4 (dónde). En foto/contacto no.
   const coincidencias = useMemo(() => {
-    const mismos = reportes.filter((r) => r.tipo === 'perdido' && r.estado === 'activo' && r.especie === especie)
-    return [...mismos].sort((a, b) => (a.zona === zona ? 0 : 1) - (b.zona === zona ? 0 : 1)).slice(0, 4)
-  }, [reportes, especie, zona])
+    if (paso !== 1 && paso !== 2 && paso !== 4) return []
+    const compat = (r, campo, valor, ignorarNoSe) => {
+      if (!valor || (ignorarNoSe && valor === 'No sé')) return true
+      if (!r[campo]) return true // si el otro no especificó, no lo descarto
+      return r[campo] === valor
+    }
+    let arr = reportes.filter((r) => r.tipo === 'perdido' && r.estado === 'activo' && r.especie === especie)
+    if (paso >= 2) {
+      arr = arr.filter((r) => compat(r, 'color', color) && compat(r, 'tamano', tamano) && compat(r, 'sexo', sexo, true))
+    }
+    if (paso >= 4) {
+      arr = arr.filter((r) => compat(r, 'zona', zona))
+    }
+    return [...arr].sort((a, b) => (a.zona === zona ? 0 : 1) - (b.zona === zona ? 0 : 1)).slice(0, 4)
+  }, [reportes, especie, color, tamano, sexo, zona, paso])
 
   async function publicar() {
-    if (!whatsapp.trim()) {
-      onToast('Poné un WhatsApp de contacto 🙏')
+    if (!soloAviso && !whatsapp.trim()) {
+      onToast('Poné un WhatsApp, o marcá "solo quiero avisar" 🙏')
       return
     }
     setGuardando(true)
     try {
+      const wa = soloAviso ? '' : whatsapp.trim()
+      if (wa) {
+        try {
+          localStorage.setItem('vav_wa', wa)
+        } catch (e) {
+          /* ignore */
+        }
+      }
       const fotoUrl = fotoFile ? await subirFoto(fotoFile) : ''
       await addReporte({
         tipo: 'encontrado',
@@ -84,7 +115,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
         collar: collar.trim(),
         descripcion: descripcion.trim(),
         foto: fotoUrl,
-        whatsapp: whatsapp.trim(),
+        whatsapp: wa,
         fechaEvento: fecha || new Date().toISOString().slice(0, 10),
         lat: punto.lat,
         lng: punto.lng,
@@ -103,7 +134,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
             collar: collar.trim(),
             descripcion: descripcion.trim(),
             foto: fotoUrl,
-            whatsapp: whatsapp.trim(),
+            whatsapp: wa,
             relacion: 'transito',
           })
         } catch (e) {
@@ -237,21 +268,42 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
 
         {paso === 5 && (
           <>
-            <div className="flabel">WhatsApp de contacto</div>
-            <div className="inp">
-              <span className="mi" style={{ fontSize: 20, color: '#25D366' }}>
-                chat
+            <button className="check-row" onClick={() => setSoloAviso((v) => !v)}>
+              <span className={'check-box' + (soloAviso ? ' on' : '')}>
+                {soloAviso && (
+                  <span className="mi" style={{ fontSize: 16, color: '#fff' }}>
+                    check
+                  </span>
+                )}
               </span>
-              <input
-                value={whatsapp}
-                onChange={(e) => setWhatsapp(e.target.value)}
-                placeholder="Ej: 343 412 3456"
-                inputMode="tel"
-              />
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700, marginTop: 12, lineHeight: 1.5 }}>
-              Cuando la familia vea el aviso, te va a escribir por acá. 🐾
-            </div>
+              <span>
+                Solo quiero avisar que lo vi <b>(sin dejar mis datos)</b>
+              </span>
+            </button>
+
+            {!soloAviso ? (
+              <>
+                <div className="flabel">WhatsApp de contacto</div>
+                <div className="inp">
+                  <span className="mi" style={{ fontSize: 20, color: '#25D366' }}>
+                    chat
+                  </span>
+                  <input
+                    value={whatsapp}
+                    onChange={(e) => setWhatsapp(e.target.value)}
+                    placeholder="Ej: 343 412 3456"
+                    inputMode="tel"
+                  />
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700, marginTop: 12, lineHeight: 1.5 }}>
+                  Cuando la familia vea el aviso, te va a escribir por acá. 🐾
+                </div>
+              </>
+            ) : (
+              <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700, marginTop: 12, lineHeight: 1.5 }}>
+                Se publica igual para que la familia lo vea en el mapa. Sin tu WhatsApp no van a poder escribirte. 👀
+              </div>
+            )}
             <button className="check-row" style={{ marginTop: 16 }} onClick={() => setEnCustodia((v) => !v)}>
               <span className={'check-box' + (enCustodia ? ' on' : '')}>
                 {enCustodia && (
@@ -267,7 +319,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
           </>
         )}
 
-        {onVerAviso && coincidencias.length > 0 && (
+        {coincidencias.length > 0 && (
           <div className="coinc">
             <div className="coinc-t">
               <span className="mi" style={{ fontSize: 18, color: '#1f9d8f' }}>
@@ -277,7 +329,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
             </div>
             <div className="coinc-sub">Fijate si su familia ya lo está buscando — así lo devolvés al toque.</div>
             {coincidencias.map((r) => (
-              <button className="bres-row" key={r.id} onClick={() => onVerAviso(r)}>
+              <button className="bres-row" key={r.id} onClick={() => setMatchPreview(r)}>
                 <div className="bres-foto">
                   {r.foto ? (
                     <img src={r.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
@@ -321,6 +373,68 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
           </button>
         )}
       </div>
+
+      {matchPreview && (
+        <div className="match-modal" onClick={() => setMatchPreview(null)}>
+          <div className="match-card" onClick={(e) => e.stopPropagation()}>
+            <button className="match-x" onClick={() => setMatchPreview(null)} aria-label="Cerrar">
+              <span className="mi" style={{ fontSize: 22 }}>
+                close
+              </span>
+            </button>
+            <div className="match-foto">
+              {matchPreview.foto ? (
+                <img src={matchPreview.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
+              ) : (
+                <span className="mi fill" style={{ fontSize: 46, color: '#c9a58f' }}>
+                  pets
+                </span>
+              )}
+            </div>
+            <div className="match-nombre">{nombreMostrado(matchPreview)}</div>
+            <div className="match-sub">
+              <span className="mi" style={{ fontSize: 16, color: '#ff6b5e' }}>
+                location_on
+              </span>
+              {matchPreview.zona} · Perdido · {tiempoRelativo(matchPreview.creadoEn)}
+            </div>
+            <div className="match-tags">
+              {matchPreview.sexo && matchPreview.sexo !== 'No sé' ? <span className="tag">{matchPreview.sexo}</span> : null}
+              {matchPreview.color ? <span className="tag">{matchPreview.color}</span> : null}
+              {matchPreview.tamano ? <span className="tag">{matchPreview.tamano}</span> : null}
+              {matchPreview.collar ? <span className="tag">🦮 {matchPreview.collar}</span> : null}
+            </div>
+            {matchPreview.descripcion ? <div className="match-desc">{matchPreview.descripcion}</div> : null}
+            <a
+              className="btn-wa"
+              href={linkWhatsApp(matchPreview)}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => onToast('Abriendo WhatsApp…')}
+            >
+              <span className="mi fill" style={{ fontSize: 22 }}>
+                chat
+              </span>
+              Contactar a la familia
+            </a>
+            {onVerAviso && (
+              <button
+                className="match-ver"
+                onClick={() => {
+                  const r = matchPreview
+                  setMatchPreview(null)
+                  onVerAviso(r)
+                }}
+              >
+                Ver aviso completo
+              </button>
+            )}
+            <button className="match-no" onClick={() => setMatchPreview(null)}>
+              No es este — seguir
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
