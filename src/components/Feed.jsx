@@ -86,7 +86,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
       filtrados.map((r) => {
         const exacto = r.lat != null && r.lng != null
         const [lat, lng] = exacto ? [r.lat, r.lng] : jitter(coordsDeBarrio(r.zona), r.id)
-        return { id: r.id, lat, lng, tipo: r.estado === 'resuelto' ? 'avistamiento' : r.tipo, especie: r.especie }
+        return { id: r.id, lat, lng, tipo: r.estado === 'resuelto' ? 'encasa' : r.tipo, especie: r.especie }
       }),
     [filtrados]
   )
@@ -217,7 +217,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
           />
           <div className="mlegend">
             {verFinales ? (
-              <div className="l" style={{ background: '#17a06b' }}>
+              <div className="l" style={{ background: '#e0a300' }}>
                 En casa · {filtrados.length}
               </div>
             ) : (

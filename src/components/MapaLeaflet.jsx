@@ -22,7 +22,7 @@ function pin(color, label, especie) {
   })
 }
 
-const COLOR = { perdido: '#ff5747', encontrado: '#17a06b', avistamiento: '#1f9d8f' }
+const COLOR = { perdido: '#ff5747', encontrado: '#17a06b', avistamiento: '#1f9d8f', encasa: '#e0a300' }
 
 /**
  * Mapa reutilizable.

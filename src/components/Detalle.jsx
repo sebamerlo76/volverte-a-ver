@@ -29,6 +29,7 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
 
   if (!r) return null
   const perdido = r.tipo === 'perdido'
+  const resuelto = r.estado === 'resuelto'
   const clr = perdido ? '#ff6b5e' : '#1f9d8f'
   const centro = puntoDeReporte(r)
 
@@ -62,11 +63,11 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
               arrow_back
             </span>
           </button>
-          <span className={'badge ' + (perdido ? 'lost' : 'found')} style={{ top: 16, left: 'auto', right: 16 }}>
+          <span className={'badge ' + (resuelto ? 'encasa' : perdido ? 'lost' : 'found')} style={{ top: 16, left: 'auto', right: 16 }}>
             <span className="mi" style={{ fontSize: 16 }}>
-              {perdido ? 'error_outline' : 'check_circle'}
+              {resuelto ? 'celebration' : perdido ? 'error_outline' : 'check_circle'}
             </span>
-            {perdido ? 'Perdido' : 'Encontrado'} · {tiempoRelativo(r.creadoEn)}
+            {resuelto ? 'En casa' : perdido ? 'Perdido' : 'Encontrado'} · {tiempoRelativo(r.creadoEn)}
           </span>
         </div>
 

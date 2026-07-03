@@ -110,7 +110,9 @@ async function manejarReporte(nuevo: any) {
       .filter((p: any) => p.user_id !== nuevo.user_id)
       .filter((p: any) => p.especie === 'todas' || p.especie === nuevo.especie)
       .filter((p: any) => {
-        const porBarrio = Array.isArray(p.barrios) && nuevo.zona && p.barrios.includes(nuevo.zona)
+        const porBarrio =
+          Array.isArray(p.barrios) &&
+          (p.barrios.includes('*') || (nuevo.zona && p.barrios.includes(nuevo.zona)))
         const porRadio =
           p.centro_lat != null &&
           nuevo.lat != null &&

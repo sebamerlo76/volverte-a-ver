@@ -15,7 +15,7 @@ const DEFECTO = {
 }
 
 // Preferencias de notificación del usuario (qué avisos quiere recibir).
-export default function NotifPrefs({ user }) {
+export default function NotifPrefs({ user, onToast }) {
   const [prefs, setPrefs] = useState(null)
   const [verMapa, setVerMapa] = useState(false)
   const timer = useRef(null)
@@ -30,22 +30,36 @@ export default function NotifPrefs({ user }) {
     }
   }, [user?.id])
 
-  // Guarda con un pequeño retardo para no pegarle a la base en cada toque.
+  function persistir(np) {
+    return guardarNotifPrefs({
+      user_id: user.id,
+      avisar_match: np.avisar_match,
+      avisar_avistamiento: np.avisar_avistamiento,
+      avisar_cerca: np.avisar_cerca,
+      centro_lat: np.centro_lat,
+      centro_lng: np.centro_lng,
+      radio_km: np.radio_km,
+      especie: np.especie,
+      barrios: np.barrios,
+    })
+  }
+  // Autosave con un pequeño retardo, para no pegarle a la base en cada toque.
   function guardar(np) {
     if (timer.current) clearTimeout(timer.current)
     timer.current = setTimeout(() => {
-      guardarNotifPrefs({
-        user_id: user.id,
-        avisar_match: np.avisar_match,
-        avisar_avistamiento: np.avisar_avistamiento,
-        avisar_cerca: np.avisar_cerca,
-        centro_lat: np.centro_lat,
-        centro_lng: np.centro_lng,
-        radio_km: np.radio_km,
-        especie: np.especie,
-        barrios: np.barrios,
-      }).catch((e) => console.warn('No se pudieron guardar las preferencias:', e))
+      persistir(np).catch((e) => console.warn('No se pudieron guardar las preferencias:', e))
     }, 600)
+  }
+  // Guardado explícito (botón), con confirmación.
+  async function guardarAhora() {
+    if (timer.current) clearTimeout(timer.current)
+    try {
+      await persistir(prefs)
+      onToast?.('✅ Preferencias guardadas')
+    } catch (e) {
+      console.warn(e)
+      onToast?.('No se pudieron guardar 😕')
+    }
   }
 
   function set(campo, valor) {
@@ -64,9 +78,17 @@ export default function NotifPrefs({ user }) {
   }
   function toggleBarrio(b) {
     setPrefs((p) => {
-      const cur = p.barrios || []
+      const cur = (p.barrios || []).filter((x) => x !== '*') // si estaba en "todos", salgo
       const barrios = cur.includes(b) ? cur.filter((x) => x !== b) : [...cur, b]
       const np = { ...p, barrios }
+      guardar(np)
+      return np
+    })
+  }
+  function toggleTodos() {
+    setPrefs((p) => {
+      const on = (p.barrios || []).includes('*')
+      const np = { ...p, barrios: on ? [] : ['*'] }
       guardar(np)
       return np
     })
@@ -74,6 +96,7 @@ export default function NotifPrefs({ user }) {
 
   if (!prefs) return null
   const centro = prefs.centro_lat != null ? [prefs.centro_lat, prefs.centro_lng] : PARANA_CENTER
+  const todos = (prefs.barrios || []).includes('*')
 
   const Check = ({ campo, children }) => (
     <button className="check-row" onClick={() => set(campo, !prefs[campo])}>
@@ -104,10 +127,17 @@ export default function NotifPrefs({ user }) {
         <div className="cerca-box">
           <div className="cerca-lbl">¿De qué barrios querés enterarte?</div>
           <div className="barrio-chips">
+            <button className={'esp-chip' + (todos ? ' on' : '')} onClick={toggleTodos}>
+              🌎 Todos
+            </button>
             {NOMBRES_BARRIOS.map((b) => {
-              const on = (prefs.barrios || []).includes(b)
+              const on = !todos && (prefs.barrios || []).includes(b)
               return (
-                <button key={b} className={'esp-chip' + (on ? ' on' : '')} onClick={() => toggleBarrio(b)}>
+                <button
+                  key={b}
+                  className={'esp-chip' + (on ? ' on' : '') + (todos ? ' dim' : '')}
+                  onClick={() => toggleBarrio(b)}
+                >
                   {b}
                 </button>
               )
@@ -116,7 +146,7 @@ export default function NotifPrefs({ user }) {
 
           <button className="cerca-adv-toggle" onClick={() => setVerMapa((v) => !v)}>
             <span className="mi" style={{ fontSize: 18 }}>{verMapa ? 'expand_less' : 'expand_more'}</span>
-            O marcá un punto exacto + radio
+            Marcar un punto y radio exacto (opcional)
           </button>
           {verMapa && (
             <div className="cerca-adv">
@@ -162,6 +192,12 @@ export default function NotifPrefs({ user }) {
           </div>
         </div>
       )}
+      <button className="btn-guardar-prefs" onClick={guardarAhora}>
+        <span className="mi" style={{ fontSize: 19 }}>
+          check_circle
+        </span>
+        Guardar preferencias
+      </button>
     </div>
   )
 }

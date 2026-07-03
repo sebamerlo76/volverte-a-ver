@@ -15,11 +15,11 @@ export default function PetCard({ r, onClick }) {
           </span>
         )}
         {resuelto ? (
-          <span className="badge found">
+          <span className="badge encasa">
             <span className="mi fill" style={{ fontSize: 16 }}>
               celebration
             </span>
-            Reencontrado
+            En casa
           </span>
         ) : (
           <span className={'badge ' + (perdido ? 'lost' : 'found')}>

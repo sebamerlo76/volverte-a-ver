@@ -5,6 +5,7 @@
   --teal: #1f9d8f;
   --green: #17a06b;
   --wa: #25d366;
+  --amber: #e0a300;
   /* Marca Chicho: navy + crema para el chrome */
   --navy: #1f3852;
   --navy-2: #213b55;
@@ -12,7 +13,7 @@
   --ink: #1f3852;
   --muted: #647a86;
   --faint: #9aa7b0;
-  --cream: #fdf4e2;
+  --cream: #faf7f1;
   --line: #efe3d0;
   --line2: #eaddc8;
 }
@@ -271,8 +272,8 @@ select {
   --acento-bg: #ecf7f4;
 }
 .view.home-finales {
-  --acento: #17a06b;
-  --acento-bg: #ecf7f0;
+  --acento: #e0a300;
+  --acento-bg: #fdf6e3;
 }
 
 /* Fila mini: logo + avatar */
@@ -569,13 +570,34 @@ select {
   align-items: center;
   gap: 4px;
   margin-top: 12px;
-  padding: 4px 0;
+  padding: 6px 0;
   border: none;
   background: none;
-  color: #1f9d8f;
+  color: var(--navy);
   font-family: Nunito, sans-serif;
   font-weight: 800;
   font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: #c9d2da;
+}
+.esp-chip.dim {
+  opacity: 0.4;
+}
+.btn-guardar-prefs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--navy);
+  color: #fff;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 14.5px;
 }
 .cerca-adv {
   margin-top: 8px;
@@ -955,6 +977,10 @@ select {
 .badge.found {
   background: var(--green);
   box-shadow: 0 4px 10px rgba(23, 160, 107, 0.4);
+}
+.badge.encasa {
+  background: var(--amber);
+  box-shadow: 0 4px 10px rgba(224, 163, 0, 0.4);
 }
 .time {
   position: absolute;
@@ -1710,13 +1736,13 @@ select {
   top: 24px;
   right: 30px;
   z-index: 3;
-  background: var(--green);
+  background: var(--amber);
   color: #fff;
   font-size: 12px;
   font-weight: 800;
   padding: 5px 11px;
   border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(23, 160, 107, 0.4);
+  box-shadow: 0 4px 10px rgba(224, 163, 0, 0.4);
 }
 .btn-logout {
   width: 100%;

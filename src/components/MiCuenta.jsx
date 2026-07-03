@@ -134,7 +134,7 @@ export default function MiCuenta({
                 <span className="switch-k" />
               </button>
             </div>
-            {pushOn && <NotifPrefs user={user} />}
+            {pushOn && <NotifPrefs user={user} onToast={onToast} />}
           </div>
         )}
 
@@ -218,7 +218,7 @@ export default function MiCuenta({
         ) : (
           mios.map((r) => (
             <div key={r.id} style={{ position: 'relative' }}>
-              {r.estado === 'resuelto' && <div className="resuelto-chip">🎉 Reencontrado</div>}
+              {r.estado === 'resuelto' && <div className="resuelto-chip">🏠 En casa</div>}
               <div style={{ opacity: r.estado === 'resuelto' ? 0.6 : 1 }}>
                 <PetCard r={r} onClick={() => onAbrir(r)} />
               </div>
