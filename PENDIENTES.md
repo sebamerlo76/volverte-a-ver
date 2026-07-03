@@ -25,6 +25,7 @@ En vivo: https://volverte-a-ver.vercel.app · Código: https://github.com/sebame
 - **Ubicación exacta** en el mapa al publicar (tocás el punto / GPS).
 - Campos clickeables (color, sexo, tamaño, collar, edad) + **recompensa** (con aviso anti-estafa).
 - **En tránsito**: marcar que retenés a la mascota que encontraste (queda en Mi cuenta).
+- **Raza** en chips (comunes o escribir otra), **hasta 3 fotos** con carrusel en el aviso, y **Ciudad → barrio** (estructura escalable: sumar Santa Fe = agregar un dato).
 
 **Mapa y búsqueda**
 - Mapa real (OpenStreetMap/Leaflet, gratis); inicio con toggle **Lista / Mapa** y filtros compartidos.
@@ -32,7 +33,8 @@ En vivo: https://volverte-a-ver.vercel.app · Código: https://github.com/sebame
 - **Avistamientos** ("¡Lo vi acá!", sin login) con **recorrido** en el mapa, globitos y pantalla completa.
 - Avistador puede dejar su **WhatsApp** → el dueño lo contacta ("Escribirle").
 - **Buscador flotante multi-palabra y sin acentos** (ej: "perro marrón", "gato con collar").
-- Filtros progresivos (Especie/Barrio), por tiempo y orden; "Limpiar filtros"; botón **mi ubicación** (GPS).
+- Filtros (Especie/Barrio/Cuándo con **Hoy**) que **tapan los resultados** mientras filtrás; "Limpiar filtros"; botón **mi ubicación** (GPS).
+- "En casa" (reencontrados) en **ámbar** (distinto de Encontrado); fondo blanco cálido; al borrar un aviso desde Mi cuenta, volvés a Mi cuenta.
 
 **Inteligente**
 - **Reconocimiento visual** 🐶🔍: al cargar un "Encontré", sugiere los perdidos **parecidos por foto** (modelo CLIP corriendo en el navegador, gratis y privado).
@@ -44,6 +46,7 @@ En vivo: https://volverte-a-ver.vercel.app · Código: https://github.com/sebame
 
 ## 🔜 Próximo / priorizado
 
+- [ ] **⚠️ Backend pendiente (features ya en código):** correr en Supabase `schema-localidad.sql` + `schema-fotos.sql`, y **re-desplegar la Edge Function `notificar`** (chip "Todos" los barrios + filtro por ciudad). Sin esto, publicar con multi-foto/ciudad puede fallar.
 - [ ] **Anti-spam** en avistamientos (hoy cualquiera puede dejar uno sin login).
 - [ ] **Borrar los avisos de prueba** (demo) antes de lanzar de verdad.
 - [ ] **Producción de email**: reactivar "Confirm email" en Supabase + configurar un SMTP.
@@ -52,8 +55,10 @@ En vivo: https://volverte-a-ver.vercel.app · Código: https://github.com/sebame
 
 ## 💡 Ideas a futuro
 
-- [ ] **Múltiples fotos** por aviso.
+- [x] **Múltiples fotos** por aviso (hasta 3 + carrusel). ✅
 - [ ] **Teléfono** además de WhatsApp.
+- [ ] **Compartir con imagen linda** (flyer del aviso) para WhatsApp/Facebook — clave para la difusión por barrios.
+- [ ] **Fotitos de raza** (grilla visual curada) — más adelante, con imágenes con licencia.
 - [x] **Raza clickeable** — chips de razas comunes (perro/gato) o escribir otra, en Publicar y Encontré. ✅ (fotitos de raza quedan para más adelante)
 - [ ] **Acciones rápidas**: marcar reencontrado desde la lista sin abrir el aviso.
 - [ ] **Buscar dentro de "Mis avisos"** (si alguien tiene muchos).
