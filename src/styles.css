@@ -567,7 +567,7 @@ select {
 .buscador {
   position: absolute;
   inset: 0;
-  z-index: 200;
+  z-index: 2000; /* por encima del mapa de Leaflet (capas ~600) y de la barra (1000) */
   background: var(--cream);
   display: flex;
   flex-direction: column;
