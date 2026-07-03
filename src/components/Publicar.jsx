@@ -80,7 +80,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
         mascotaId: base?.mascotaId ?? null,
         lat: punto.lat,
         lng: punto.lng,
-        en_custodia: tipo === 'encontrado' ? enCustodia : false,
+        enCustodia: tipo === 'encontrado' ? enCustodia : false,
         embedding,
       }
       if (editando) await actualizarReporte(inicial.id, datos)

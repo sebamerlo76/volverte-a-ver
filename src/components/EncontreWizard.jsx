@@ -148,7 +148,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
         fechaEvento: fecha || new Date().toISOString().slice(0, 10),
         lat: punto.lat,
         lng: punto.lng,
-        en_custodia: enCustodia,
+        enCustodia,
         embedding: huella,
       })
       if (enCustodia) {
