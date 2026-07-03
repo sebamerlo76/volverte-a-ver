@@ -90,6 +90,15 @@ export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorra
             {r.collar ? <span className="tag">🦮 {r.collar}</span> : null}
           </div>
 
+          {r.enCustodia ? (
+            <div className="en-custodia">
+              <span className="mi" style={{ fontSize: 19, color: '#177f73' }}>
+                volunteer_activism
+              </span>
+              En tránsito — quien la encontró la tiene a resguardo 🏠
+            </div>
+          ) : null}
+
           {r.recompensa ? (
             <div className="recompensa-box">
               <div className="recompensa-top">

@@ -3,7 +3,7 @@ import MapaLeaflet from './MapaLeaflet.jsx'
 import SelectChips from './SelectChips.jsx'
 import { NOMBRES_BARRIOS, coordsDeBarrio } from '../lib/parana.js'
 import { COLORES, SEXOS, COLLAR, TAMANOS } from '../lib/opciones.js'
-import { addReporte, subirFoto } from '../data/store.js'
+import { addReporte, addMascota, subirFoto } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo } from '../lib/formato.js'
 
 const TOTAL = 5
@@ -29,6 +29,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
   const [zona, setZona] = useState('Centro')
   const [fecha, setFecha] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
+  const [enCustodia, setEnCustodia] = useState(false)
   const [guardando, setGuardando] = useState(false)
 
   const cIni = coordsDeBarrio('Centro')
@@ -87,7 +88,28 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
         fechaEvento: fecha || new Date().toISOString().slice(0, 10),
         lat: punto.lat,
         lng: punto.lng,
+        en_custodia: enCustodia,
       })
+      if (enCustodia) {
+        try {
+          await addMascota({
+            nombre: null,
+            especie,
+            color: color.trim(),
+            tamano,
+            raza: '',
+            sexo,
+            edad: edad.trim(),
+            collar: collar.trim(),
+            descripcion: descripcion.trim(),
+            foto: fotoUrl,
+            whatsapp: whatsapp.trim(),
+            relacion: 'transito',
+          })
+        } catch (e) {
+          console.warn('No se pudo guardar en tránsito:', e)
+        }
+      }
       onPublicado()
     } catch (e) {
       console.error(e)
@@ -230,6 +252,18 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
             <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700, marginTop: 12, lineHeight: 1.5 }}>
               Cuando la familia vea el aviso, te va a escribir por acá. 🐾
             </div>
+            <button className="check-row" style={{ marginTop: 16 }} onClick={() => setEnCustodia((v) => !v)}>
+              <span className={'check-box' + (enCustodia ? ' on' : '')}>
+                {enCustodia && (
+                  <span className="mi" style={{ fontSize: 16, color: '#fff' }}>
+                    check
+                  </span>
+                )}
+              </span>
+              <span>
+                La tengo conmigo <b>(en tránsito)</b> — guardarla en Mi cuenta
+              </span>
+            </button>
           </>
         )}
 

@@ -119,6 +119,7 @@ export default function MiCuenta({
                     <div className="masc-nombre">
                       {m.nombre || 'Sin nombre'}
                       {perdido && <span className="masc-estado">Perdido</span>}
+                      {m.relacion === 'transito' && <span className="masc-transito">En tránsito</span>}
                     </div>
                     <div className="masc-sub">
                       {ESPECIE_LBL[m.especie] || 'Mascota'}

@@ -6,6 +6,7 @@ import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS } from '../lib/opciones.js'
 export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, onVerQR }) {
   const editando = !!inicial
   const [especie, setEspecie] = useState(inicial?.especie || 'perro')
+  const [relacion, setRelacion] = useState(inicial?.relacion || 'propia')
   const [whatsapp, setWhatsapp] = useState(inicial?.whatsapp || '')
   const [foto, setFoto] = useState(inicial?.foto || '')
   const [fotoFile, setFotoFile] = useState(null)
@@ -46,6 +47,7 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, on
         descripcion: descripcion.trim(),
         foto: fotoUrl,
         whatsapp: whatsapp.trim(),
+        relacion,
       }
       if (editando) await actualizarMascota(inicial.id, datos)
       else await addMascota(datos)
@@ -78,6 +80,22 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, on
       </div>
 
       <div className="body form-body">
+        <div className="flabel">¿Es tuya o está en tránsito?</div>
+        <div className="seg">
+          <button className={'segb' + (relacion === 'propia' ? ' on p' : '')} onClick={() => setRelacion('propia')}>
+            <span className="mi" style={{ fontSize: 19 }}>
+              home
+            </span>
+            Es mía
+          </button>
+          <button className={'segb' + (relacion === 'transito' ? ' on e' : '')} onClick={() => setRelacion('transito')}>
+            <span className="mi" style={{ fontSize: 19 }}>
+              volunteer_activism
+            </span>
+            En tránsito
+          </button>
+        </div>
+
         <div className="flabel">Especie</div>
         <div className="spec">
           {[

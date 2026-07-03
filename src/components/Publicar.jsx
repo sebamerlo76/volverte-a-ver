@@ -25,6 +25,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
   const [descripcion, setDescripcion] = useState(base?.descripcion || '')
   const [whatsapp, setWhatsapp] = useState(base?.whatsapp || '')
   const [guardarMasc, setGuardarMasc] = useState(true) // guardar en "Mis mascotas"
+  const [enCustodia, setEnCustodia] = useState(base?.enCustodia || false) // la tengo conmigo (encontrado)
   const [guardando, setGuardando] = useState(false)
 
   const puntoIni =
@@ -73,6 +74,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
         mascotaId: base?.mascotaId ?? null,
         lat: punto.lat,
         lng: punto.lng,
+        en_custodia: tipo === 'encontrado' ? enCustodia : false,
       }
       if (editando) await actualizarReporte(inicial.id, datos)
       else await addReporte(datos)
@@ -233,6 +235,21 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
               </div>
             )}
           </>
+        )}
+
+        {tipo === 'encontrado' && (
+          <button className="check-row" onClick={() => setEnCustodia((v) => !v)}>
+            <span className={'check-box' + (enCustodia ? ' on' : '')}>
+              {enCustodia && (
+                <span className="mi" style={{ fontSize: 16, color: '#fff' }}>
+                  check
+                </span>
+              )}
+            </span>
+            <span>
+              La tengo conmigo <b>(en tránsito)</b>
+            </span>
+          </button>
         )}
 
         <div className="flabel">WhatsApp de contacto</div>

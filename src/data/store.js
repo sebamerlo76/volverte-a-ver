@@ -39,6 +39,7 @@ function desdeFila(row) {
     recompensa: row.recompensa,
     lat: row.lat,
     lng: row.lng,
+    enCustodia: row.en_custodia,
   }
 }
 function haciaFila(r) {
@@ -64,6 +65,7 @@ function haciaFila(r) {
     recompensa: r.recompensa ?? null,
     lat: r.lat ?? null,
     lng: r.lng ?? null,
+    en_custodia: r.enCustodia ?? false,
   }
 }
 
@@ -225,6 +227,7 @@ function mascotaDesdeFila(row) {
     edad: row.edad,
     collar: row.collar,
     whatsapp: row.whatsapp,
+    relacion: row.relacion || 'propia',
   }
 }
 function mascotaHaciaFila(m) {
@@ -240,6 +243,7 @@ function mascotaHaciaFila(m) {
     sexo: m.sexo ?? null,
     edad: m.edad ?? null,
     collar: m.collar ?? null,
+    relacion: m.relacion ?? 'propia',
   }
 }
 function leerMascotasLocal() {
