@@ -70,3 +70,12 @@ export function linkWhatsApp(r) {
   const base = numero ? `https://wa.me/54${numero}` : 'https://wa.me/'
   return `${base}?text=${encodeURIComponent(texto)}`
 }
+
+// Link para que la familia le escriba a quien dejó un avistamiento.
+export function linkWhatsAppAvist(whatsapp, reporte) {
+  const numero = (whatsapp || '').replace(/\D/g, '')
+  if (!numero) return null
+  const nombre = reporte ? nombreMostrado(reporte) : 'mi mascota'
+  const texto = `Hola! Soy la familia de ${nombre} (Volverte a ver). Vi que dejaste un avistamiento, ¿me podés contar más? 🙏`
+  return `https://wa.me/54${numero}?text=${encodeURIComponent(texto)}`
+}

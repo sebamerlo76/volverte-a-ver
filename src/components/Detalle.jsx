@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { getAvistamientos } from '../data/store.js'
-import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp } from '../lib/formato.js'
+import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist } from '../lib/formato.js'
 
 // Escapa texto del usuario para meterlo seguro en el HTML del globito.
 function esc(s = '') {
@@ -176,6 +176,20 @@ export default function Detalle({ r, esMio, onVolver, onToast, onEditar, onBorra
                       {a.autor || 'Anónimo'} · {tiempoRelativo(a.creadoEn)}
                     </div>
                   </div>
+                  {a.whatsapp ? (
+                    <a
+                      className="avist-wa"
+                      href={linkWhatsAppAvist(a.whatsapp, r)}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => onToast?.('Abriendo WhatsApp…')}
+                    >
+                      <span className="mi fill" style={{ fontSize: 17 }}>
+                        chat
+                      </span>
+                      Escribirle
+                    </a>
+                  ) : null}
                 </div>
               ))}
             </div>

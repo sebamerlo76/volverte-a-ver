@@ -333,7 +333,7 @@ export async function eliminarMascota(id) {
 const CLAVE_AVIST = 'vav_avistamientos_v1'
 
 function avistDesdeFila(a) {
-  return { id: a.id, reporteId: a.reporte_id, lat: a.lat, lng: a.lng, nota: a.nota, autor: a.autor, creadoEn: a.creado_en }
+  return { id: a.id, reporteId: a.reporte_id, lat: a.lat, lng: a.lng, nota: a.nota, autor: a.autor, whatsapp: a.whatsapp, creadoEn: a.creado_en }
 }
 
 // Avistamientos de un aviso, del más viejo al más nuevo (para ver el recorrido).
@@ -352,18 +352,17 @@ export async function getAvistamientos(reporteId) {
   return all.filter((a) => a.reporteId === reporteId).sort((a, b) => (a.creadoEn < b.creadoEn ? -1 : 1))
 }
 
-export async function addAvistamiento({ reporteId, lat, lng, nota, autor }) {
+export async function addAvistamiento({ reporteId, lat, lng, nota, autor, whatsapp }) {
   if (supabaseConfigurado) {
-    const { data, error } = await supabase
-      .from('avistamientos')
-      .insert({ reporte_id: reporteId, lat, lng, nota, autor })
-      .select()
-      .single()
+    // whatsapp solo si viene (así no rompe si todavía no corriste el SQL de la columna).
+    const fila = { reporte_id: reporteId, lat, lng, nota, autor }
+    if (whatsapp) fila.whatsapp = whatsapp
+    const { data, error } = await supabase.from('avistamientos').insert(fila).select().single()
     if (error) throw error
     return avistDesdeFila(data)
   }
   const all = JSON.parse(localStorage.getItem(CLAVE_AVIST) || '[]')
-  const nuevo = { id: 'a-' + Date.now().toString(36), reporteId, lat, lng, nota, autor, creadoEn: new Date().toISOString() }
+  const nuevo = { id: 'a-' + Date.now().toString(36), reporteId, lat, lng, nota, autor, whatsapp: whatsapp || '', creadoEn: new Date().toISOString() }
   all.push(nuevo)
   localStorage.setItem(CLAVE_AVIST, JSON.stringify(all))
   return nuevo

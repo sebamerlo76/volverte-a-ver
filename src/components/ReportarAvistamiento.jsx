@@ -12,6 +12,7 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
   const [punto, setPunto] = useState({ lat: c[0], lng: c[1] })
   const [nota, setNota] = useState('')
   const [autor, setAutor] = useState('')
+  const [whatsapp, setWhatsapp] = useState('')
   const [guardando, setGuardando] = useState(false)
 
   async function enviar() {
@@ -23,6 +24,7 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
         lng: punto.lng,
         nota: nota.trim(),
         autor: autor.trim() || 'Anónimo',
+        whatsapp: whatsapp.trim(),
       })
       onEnviado()
     } catch (e) {
@@ -84,6 +86,19 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
         <div className="flabel">Tu nombre (para que puedan agradecerte)</div>
         <div className="inp">
           <input value={autor} onChange={(e) => setAutor(e.target.value)} placeholder="Ej: Vecino de la zona" />
+        </div>
+
+        <div className="flabel">Tu WhatsApp (opcional, para que la familia te escriba)</div>
+        <div className="inp">
+          <span className="mi" style={{ fontSize: 20, color: '#25D366' }}>
+            chat
+          </span>
+          <input
+            value={whatsapp}
+            onChange={(e) => setWhatsapp(e.target.value)}
+            placeholder="Ej: 343 412 3456"
+            inputMode="tel"
+          />
         </div>
         <div style={{ height: 24 }} />
       </div>
