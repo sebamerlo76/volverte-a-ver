@@ -70,8 +70,17 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
       // Huella visual de la PRIMERA foto (reconocimiento): si es nueva o no había huella.
       let embedding = base?.embedding ?? null
       if (fotos[0] && (fotos[0].file || !embedding)) {
-        const { huellaDeImagen } = await import('../lib/similar.js')
-        embedding = await huellaDeImagen(fotos[0].url)
+        // No bloqueamos el guardado si el modelo tarda o falla: máx ~8s.
+        // Si no llega a tiempo, se publica sin huella (se puede recalcular después).
+        try {
+          const { huellaDeImagen } = await import('../lib/similar.js')
+          embedding = await Promise.race([
+            huellaDeImagen(fotos[0].url),
+            new Promise((res) => setTimeout(() => res(embedding), 8000)),
+          ])
+        } catch (e) {
+          console.warn('No se pudo calcular la huella; se publica sin ella:', e)
+        }
       }
       const datos = {
         tipo,
