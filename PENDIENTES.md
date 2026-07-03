@@ -75,7 +75,8 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
 - [ ] **Buscar dentro de "Mis avisos"** (si alguien tiene muchos).
 - [ ] **Compartir a Facebook** (además de WhatsApp).
 - [x] **Dominio propio**: `chicho.ar` en vivo. ✅
-- [ ] Botón centrar: opción "volver a la zona del aviso" además de "al pin".
+- [x] Botón centrar: opción "volver a la zona del aviso" además de "a mi pin". ✅
+- [x] **Foto opcional en el avistamiento** (imagen del lugar donde se lo vio) — miniatura en el recorrido y el globito. ✅
 
 ---
 
