@@ -77,7 +77,7 @@ export default function Auth({ onCerrar, onAuth, onToast }) {
             </span>
           </div>
           <div style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 22, marginTop: 12 }}>
-            {esRegistro ? 'Sumate a Volverte a ver' : '¡Hola de nuevo!'}
+            {esRegistro ? 'Sumate a Chicho' : '¡Hola de nuevo!'}
           </div>
           <div style={{ fontSize: 13.5, color: 'var(--muted)', fontWeight: 700, marginTop: 4, lineHeight: 1.5 }}>
             {esRegistro
@@ -114,7 +114,7 @@ export default function Auth({ onCerrar, onAuth, onToast }) {
 
         <div className="flabel">Email</div>
         <div className="inp">
-          <span className="mi" style={{ fontSize: 20, color: '#ff6b5e' }}>
+          <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
             mail
           </span>
           <input
@@ -129,7 +129,7 @@ export default function Auth({ onCerrar, onAuth, onToast }) {
 
         <div className="flabel">Contraseña</div>
         <div className="inp">
-          <span className="mi" style={{ fontSize: 20, color: '#ff6b5e' }}>
+          <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
             lock
           </span>
           <input

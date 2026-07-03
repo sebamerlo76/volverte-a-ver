@@ -118,7 +118,7 @@ export default function MiCuenta({
             <div className="notif-row">
               <div style={{ minWidth: 0 }}>
                 <div className="notif-t">
-                  <span className="mi" style={{ fontSize: 19, color: '#ff6b5e' }}>
+                  <span className="mi" style={{ fontSize: 19, color: 'var(--navy)' }}>
                     notifications
                   </span>
                   Notificaciones

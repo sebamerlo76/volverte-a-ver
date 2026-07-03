@@ -1,15 +1,20 @@
 :root {
+  /* Estados (señales funcionales): perdido = coral, encontrado = verde/teal */
   --coral: #ff6b5e;
   --coral-strong: #ff5747;
   --teal: #1f9d8f;
   --green: #17a06b;
   --wa: #25d366;
-  --ink: #2a2320;
-  --muted: #8a807a;
-  --faint: #b0a49b;
-  --cream: #fffaf6;
-  --line: #f0e7df;
-  --line2: #efe4db;
+  /* Marca Chicho: navy + crema para el chrome */
+  --navy: #1f3852;
+  --navy-2: #213b55;
+  --slate: #3e5367;
+  --ink: #1f3852;
+  --muted: #647a86;
+  --faint: #9aa7b0;
+  --cream: #fdf4e2;
+  --line: #efe3d0;
+  --line2: #eaddc8;
 }
 
 * {
@@ -20,7 +25,7 @@
 }
 
 body {
-  background: #e7e1d9;
+  background: #d8dee2;
   font-family: Nunito, system-ui, sans-serif;
   color: var(--ink);
 }
@@ -30,6 +35,7 @@ button {
   cursor: pointer;
   border: none;
   background: none;
+  color: inherit;
 }
 input,
 textarea,
@@ -125,7 +131,7 @@ select {
   width: 36px;
   height: 36px;
   border-radius: 12px;
-  background: var(--coral);
+  background: var(--navy);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -233,7 +239,7 @@ select {
   margin-top: 12px;
   font-size: 13px;
   font-weight: 800;
-  color: var(--coral);
+  color: var(--navy);
 }
 .map-hint {
   position: absolute;
@@ -289,7 +295,7 @@ select {
   width: 30px;
   height: 30px;
   border-radius: 10px;
-  background: var(--coral);
+  background: var(--navy);
   color: #fff;
   display: flex;
   align-items: center;
@@ -586,9 +592,9 @@ select {
   color: #6b6058;
 }
 .esp-chip.on {
-  border-color: #ff6b5e;
-  background: #fff1ee;
-  color: #ff5747;
+  border-color: var(--navy);
+  background: #eef2f6;
+  color: var(--navy);
 }
 
 /* Estado "analizando la foto" en el paso 3 (reconocimiento visual) */
@@ -667,7 +673,7 @@ select {
   font-family: Fredoka, Nunito, sans-serif;
   font-weight: 600;
   font-size: 20px;
-  color: #2a2320;
+  color: var(--ink);
 }
 .match-sub {
   display: flex;
@@ -1021,8 +1027,8 @@ select {
   color: #6b6058;
 }
 .chipsel.on {
-  background: var(--coral);
-  border-color: var(--coral);
+  background: var(--navy);
+  border-color: var(--navy);
   color: #fff;
 }
 .chipsel-otro {
@@ -1120,13 +1126,13 @@ select {
   flex: 1;
 }
 .ni.on {
-  color: var(--coral);
+  color: var(--navy);
 }
 .navc {
   width: 62px;
   height: 62px;
   border-radius: 21px;
-  background: var(--coral);
+  background: var(--navy);
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -1134,7 +1140,7 @@ select {
   justify-content: center;
   gap: 1px;
   margin-top: -30px;
-  box-shadow: 0 12px 24px rgba(255, 107, 94, 0.48);
+  box-shadow: 0 12px 24px rgba(31, 56, 82, 0.42);
   font-size: 10px;
   font-weight: 800;
   flex: none;
@@ -1250,7 +1256,7 @@ select {
 .sec-t {
   font-size: 12px;
   font-weight: 900;
-  color: var(--coral);
+  color: var(--navy);
   letter-spacing: 0.3px;
   text-transform: uppercase;
   margin-bottom: 6px;
@@ -1482,9 +1488,9 @@ select {
   color: var(--muted);
 }
 .specb.on {
-  border-color: var(--coral);
-  background: #fff6ef;
-  color: var(--coral);
+  border-color: var(--navy);
+  background: #eef2f6;
+  color: var(--navy);
 }
 .inp {
   height: 50px;
@@ -1575,7 +1581,7 @@ select {
   height: 56px;
   width: 100%;
   border-radius: 17px;
-  background: var(--coral);
+  background: var(--navy);
   color: #fff;
   display: flex;
   align-items: center;
@@ -1583,7 +1589,7 @@ select {
   gap: 8px;
   font-size: 16px;
   font-weight: 800;
-  box-shadow: 0 10px 22px rgba(255, 107, 94, 0.45);
+  box-shadow: 0 10px 22px rgba(31, 56, 82, 0.4);
 }
 .btn-pub:disabled {
   opacity: 0.5;
@@ -1634,8 +1640,8 @@ select {
   width: 54px;
   height: 54px;
   border-radius: 50%;
-  background: #fff1ee;
-  color: var(--coral);
+  background: #eef2f6;
+  color: var(--navy);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1744,7 +1750,7 @@ select {
   display: flex;
   align-items: center;
   gap: 4px;
-  color: var(--coral);
+  color: var(--navy);
   font-size: 13px;
   font-weight: 800;
   text-transform: none;
@@ -1893,7 +1899,7 @@ select {
   transition: 0.2s;
 }
 .wiz-dot.on {
-  background: var(--coral);
+  background: var(--navy);
 }
 .wiz-titulo {
   font-family: Fredoka, sans-serif;
@@ -1926,8 +1932,8 @@ select {
   background: #fff;
 }
 .check-box.on {
-  background: var(--coral);
-  border-color: var(--coral);
+  background: var(--navy);
+  border-color: var(--navy);
 }
 
 /* ---- Chapita QR ---- */

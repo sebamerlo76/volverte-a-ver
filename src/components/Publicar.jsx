@@ -189,7 +189,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
 
         <div className="flabel">Zona / barrio</div>
         <div className="inp">
-          <span className="mi" style={{ fontSize: 20, color: '#ff6b5e' }}>
+          <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
             location_on
           </span>
           <select value={zona} onChange={(e) => cambiarZona(e.target.value)}>
@@ -214,7 +214,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
 
         <div className="flabel">Fecha</div>
         <div className="inp">
-          <span className="mi" style={{ fontSize: 20, color: '#ff6b5e' }}>
+          <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
             calendar_today
           </span>
           <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />

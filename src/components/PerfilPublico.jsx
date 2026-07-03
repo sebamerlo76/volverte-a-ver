@@ -35,7 +35,7 @@ export default function PerfilPublico({ id }) {
                 pets
               </span>
             </div>
-            <div className="pub-brand">Volverte a ver</div>
+            <div className="pub-brand">Chicho</div>
           </div>
           <div className="empty" style={{ marginTop: 40 }}>
             No encontramos esta mascota.
@@ -49,7 +49,7 @@ export default function PerfilPublico({ id }) {
 
   const nombre = m.nombre || (m.especie === 'gato' ? 'Gato' : 'Perro')
   const wa = (m.whatsapp || '').replace(/\D/g, '')
-  const texto = encodeURIComponent(`¡Hola! Encontré a ${nombre} 🐾 (por el QR de Volverte a ver). ¿Dónde te lo llevo?`)
+  const texto = encodeURIComponent(`¡Hola! Encontré a ${nombre} 🐾 (por el QR de Chicho). ¿Dónde te lo llevo?`)
   const waLink = wa ? `https://wa.me/54${wa}?text=${texto}` : null
 
   return (
@@ -58,10 +58,10 @@ export default function PerfilPublico({ id }) {
         <div className="pub-scroll">
           <div className="pub-top">
             <div className="pub-brand-row">
-              <span className="mi fill" style={{ fontSize: 18, color: '#ff6b5e' }}>
+              <span className="mi fill" style={{ fontSize: 18, color: 'var(--navy)' }}>
                 pets
               </span>
-              Volverte a ver · Paraná
+              Chicho · Paraná
             </div>
           </div>
 

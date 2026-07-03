@@ -253,10 +253,10 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
             className="btn-share"
             onClick={async () => {
               const url = window.location.href
-              const texto = `${nombreMostrado(r)} — ${r.tipo} en ${r.zona}, Paraná. Mirá en Volverte a ver.`
+              const texto = `${nombreMostrado(r)} — ${r.tipo} en ${r.zona}, Paraná. Mirá en Chicho.`
               if (navigator.share) {
                 try {
-                  await navigator.share({ title: 'Volverte a ver', text: texto, url })
+                  await navigator.share({ title: 'Chicho', text: texto, url })
                 } catch (e) {
                   /* el usuario canceló */
                 }

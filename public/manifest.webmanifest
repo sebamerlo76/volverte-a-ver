@@ -1,6 +1,6 @@
 {
-  "name": "Volverte a ver — Mascotas perdidas en Paraná",
-  "short_name": "Volverte a ver",
+  "name": "Chicho — Buscador de mascotas perdidas en Paraná",
+  "short_name": "Chicho",
   "description": "Buscá y reportá mascotas perdidas y encontradas en Paraná.",
   "start_url": "/",
   "scope": "/",

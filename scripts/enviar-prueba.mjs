@@ -25,7 +25,7 @@ if (error) throw error
 console.log(`${subs.length} suscripción(es) guardada(s).`)
 
 const payload = JSON.stringify({
-  title: '🐾 Volverte a ver',
+  title: '🐾 Chicho',
   body: '¡Las notificaciones funcionan! Esto es una prueba.',
   url: '/',
 })

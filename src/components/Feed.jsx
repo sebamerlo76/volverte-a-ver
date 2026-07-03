@@ -113,14 +113,14 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
             <span className="mi fill" style={{ fontSize: 19 }}>
               pets
             </span>
-            Volverte a ver
+            Chicho
           </button>
           {authActivo ? (
             <button onClick={logueado ? onCuenta : onLogin} aria-label={logueado ? 'Mi cuenta' : 'Iniciar sesión'}>
               {logueado && avatar ? (
                 <img className="hd-av" src={avatar} alt="Mi cuenta" referrerPolicy="no-referrer" />
               ) : (
-                <span className={'mi' + (logueado ? ' fill' : '')} style={{ fontSize: 27, color: logueado ? '#ff6b5e' : '#c3b8b0' }}>
+                <span className={'mi' + (logueado ? ' fill' : '')} style={{ fontSize: 27, color: logueado ? 'var(--navy)' : '#c3b8b0' }}>
                   {logueado ? 'account_circle' : 'login'}
                 </span>
               )}

@@ -3,8 +3,8 @@
 import sharp from 'sharp'
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#ff6b5e"/>
-  <g fill="#ffffff">
+  <rect width="512" height="512" rx="112" fill="#1f3852"/>
+  <g fill="#fceed6">
     <ellipse cx="256" cy="320" rx="98" ry="80"/>
     <ellipse cx="146" cy="238" rx="40" ry="53"/>
     <ellipse cx="366" cy="238" rx="40" ry="53"/>

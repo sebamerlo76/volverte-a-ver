@@ -24,7 +24,7 @@ export default function ChapitaQR({ mascota, onCerrar, onToast }) {
   async function compartir() {
     if (navigator.share) {
       try {
-        await navigator.share({ title: `Chapita QR de ${nombre}`, text: `Perfil de ${nombre} en Volverte a ver`, url })
+        await navigator.share({ title: `Chapita QR de ${nombre}`, text: `Perfil de ${nombre} en Chicho`, url })
       } catch (e) {
         /* cancelado */
       }
@@ -56,10 +56,10 @@ export default function ChapitaQR({ mascota, onCerrar, onToast }) {
         <div className="qr-box">
           {dataUrl ? <img src={dataUrl} alt="Código QR" /> : <div className="empty">Generando…</div>}
           <div className="qr-pie">
-            <span className="mi fill" style={{ fontSize: 16, color: '#ff6b5e' }}>
+            <span className="mi fill" style={{ fontSize: 16, color: 'var(--navy)' }}>
               pets
             </span>
-            {nombre} · Volverte a ver
+            {nombre} · Chicho
           </div>
         </div>
 
