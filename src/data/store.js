@@ -43,6 +43,7 @@ function desdeFila(row) {
     enCustodia: row.en_custodia,
     embedding: row.embedding, // huella visual (para sugerir parecidos)
     localidad: row.localidad || 'Paraná',
+    apoyos: row.apoyos || 0, // prueba social: cuánta gente se sumó a difundir
   }
 }
 function haciaFila(r) {
@@ -106,6 +107,17 @@ export async function getReportes() {
   return leerLocal()
     .filter((r) => r.estado !== 'resuelto')
     .sort((a, b) => (a.creadoEn < b.creadoEn ? 1 : -1))
+}
+
+// Suma 1 apoyo (prueba social) a un aviso. Devuelve el nuevo total, o null.
+export async function sumarApoyo(reporteId) {
+  if (!reporteId) return null
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase.rpc('sumar_apoyo', { rid: reporteId })
+    if (error) throw error
+    return data
+  }
+  return null // modo local: el cliente ya muestra el +1 optimista
 }
 
 // Trae un aviso puntual por id (activo o resuelto), para abrir un link directo.

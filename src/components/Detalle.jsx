@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
-import { getAvistamientos } from '../data/store.js'
+import { getAvistamientos, sumarApoyo } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel } from '../lib/formato.js'
 import { compartirFlyer } from '../lib/flyer.js'
 
@@ -15,9 +15,31 @@ export function popupAvist(a, n) {
   return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:130px;line-height:1.45"><b style="font-size:13px;color:#1f9d8f">👀 Avistamiento ${n}</b><br><span style="font-size:12.5px;color:#2a2320">${esc(a.nota) || 'Sin detalle'}</span><br><span style="font-size:11.5px;color:#8a807a">${esc(a.autor) || 'Anónimo'} · ${fechaHora(a.creadoEn)}</span>${foto}</div>`
 }
 
+// ¿Este dispositivo ya apoyó este aviso? (para no contar dos veces)
+function yaApoyado(id) {
+  try {
+    return JSON.parse(localStorage.getItem('chicho_apoyos') || '[]').includes(id)
+  } catch (e) {
+    return false
+  }
+}
+function marcarApoyado(id) {
+  try {
+    const a = JSON.parse(localStorage.getItem('chicho_apoyos') || '[]')
+    if (!a.includes(id)) {
+      a.push(id)
+      localStorage.setItem('chicho_apoyos', JSON.stringify(a))
+    }
+  } catch (e) {
+    /* ignore */
+  }
+}
+
 export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar }) {
   const [avist, setAvist] = useState([])
   const [fotoActiva, setFotoActiva] = useState(0)
+  const [apoyos, setApoyos] = useState(r?.apoyos || 0)
+  const [apoyado, setApoyado] = useState(false)
 
   useEffect(() => {
     if (!r?.id) return
@@ -29,6 +51,26 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
       vivo = false
     }
   }, [r?.id])
+
+  // Sincronizar el contador de apoyos al cambiar de aviso.
+  useEffect(() => {
+    setApoyos(r?.apoyos || 0)
+    setApoyado(yaApoyado(r?.id))
+  }, [r?.id, r?.apoyos])
+
+  async function sumarme() {
+    if (apoyado || !r?.id) return
+    setApoyado(true)
+    setApoyos((n) => n + 1)
+    marcarApoyado(r.id)
+    onToast?.('💛 ¡Gracias! Compartilo para llegar a más gente')
+    try {
+      const total = await sumarApoyo(r.id)
+      if (typeof total === 'number') setApoyos(total)
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   if (!r) return null
   const perdido = r.tipo === 'perdido'
@@ -128,6 +170,24 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
             </span>
             Compartir para ayudar
           </button>
+
+          <div className="apoyo-box">
+            <span className="mi fill apoyo-ico">volunteer_activism</span>
+            <div className="apoyo-txt">
+              {apoyos > 0 ? (
+                <>
+                  <b>{apoyos}</b> {apoyos === 1 ? 'persona' : 'personas'} ayudando a difundir
+                </>
+              ) : (
+                <>Sumate a difundir a {nombreMostrado(r)}</>
+              )}
+            </div>
+            {r.estado !== 'resuelto' && (
+              <button className={'apoyo-btn' + (apoyado ? ' on' : '')} onClick={sumarme} disabled={apoyado}>
+                {apoyado ? '¡Gracias! 💛' : 'Me sumo'}
+              </button>
+            )}
+          </div>
 
           {r.enCustodia ? (
             <div className="en-custodia">

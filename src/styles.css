@@ -449,6 +449,49 @@ select {
   color: #fff;
 }
 
+/* Tira de "prueba social": cuánta gente se sumó a difundir el aviso */
+.apoyo-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px 13px;
+  border-radius: 14px;
+  background: #fff4ef;
+  border: 1px solid #ffe0d4;
+}
+.apoyo-ico {
+  font-size: 21px;
+  color: var(--coral);
+  flex: none;
+}
+.apoyo-txt {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.8px;
+  font-weight: 700;
+  color: #6b5850;
+  line-height: 1.35;
+}
+.apoyo-txt b {
+  color: var(--coral);
+}
+.apoyo-btn {
+  flex: none;
+  padding: 8px 15px;
+  border-radius: 999px;
+  border: none;
+  background: var(--coral);
+  color: #fff;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 12.5px;
+}
+.apoyo-btn.on {
+  background: #ece0d8;
+  color: #8a7a68;
+}
+
 /* Botón para compartir el aviso como imagen (flyer) */
 .btn-compartir {
   display: flex;
