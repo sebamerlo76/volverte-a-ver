@@ -54,9 +54,10 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
     try {
       // Si no eligió foto nueva, se conserva la actual (importante al editar).
       const fotoUrl = fotoFile ? await subirFoto(fotoFile) : foto
-      // Huella visual: si cambió la foto la recalculamos (bajo demanda), si no se conserva.
+      // Huella visual (bajo demanda): la calculamos si subió foto nueva, o si hay foto
+      // pero todavía no tiene huella (ej. perdido cargado desde una mascota guardada).
       let embedding = base?.embedding ?? null
-      if (fotoFile) {
+      if (foto && (fotoFile || !embedding)) {
         const { huellaDeImagen } = await import('../lib/similar.js')
         embedding = await huellaDeImagen(foto)
       }
