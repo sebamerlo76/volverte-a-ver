@@ -1,3 +1,4 @@
+/* global __BUILD_ID__ */
 import { useEffect, useState } from 'react'
 import Feed from './components/Feed.jsx'
 import Detalle from './components/Detalle.jsx'
@@ -44,6 +45,7 @@ export default function App() {
   const [menuAbierto, setMenuAbierto] = useState(false) // menú de la cara
   const [cuentaSeccion, setCuentaSeccion] = useState('cuenta') // sección abierta de Mi cuenta
   const [guiaAbierta, setGuiaAbierta] = useState(false) // recorrido de bienvenida
+  const [hayUpdate, setHayUpdate] = useState(false) // hay una versión nueva desplegada
 
   const notifsNoLeidas = notifs.filter((n) => !n.leida).length
 
@@ -53,6 +55,32 @@ export default function App() {
   // Cargar reportes al iniciar.
   useEffect(() => {
     cargar()
+  }, [])
+
+  // "Hay versión nueva": compara el build actual contra /version.json cada tanto.
+  useEffect(() => {
+    const actual = typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : ''
+    if (!actual) return
+    let cancel = false
+    async function chequear() {
+      try {
+        const r = await fetch('/version.json?t=' + Date.now(), { cache: 'no-store' })
+        if (!r.ok) return
+        const d = await r.json()
+        if (!cancel && d.v && d.v !== actual) setHayUpdate(true)
+      } catch (e) {
+        /* sin conexión o dev: ignorar */
+      }
+    }
+    chequear()
+    const iv = setInterval(chequear, 5 * 60 * 1000)
+    const onVis = () => document.visibilityState === 'visible' && chequear()
+    document.addEventListener('visibilitychange', onVis)
+    return () => {
+      cancel = true
+      clearInterval(iv)
+      document.removeEventListener('visibilitychange', onVis)
+    }
   }, [])
 
   // Recorrido de bienvenida: la primera vez (salvo que entren por un link directo a un aviso).
@@ -350,6 +378,14 @@ export default function App() {
   return (
     <div className="app-shell">
       <div className="app">
+        {hayUpdate && (
+          <button className="update-banner" onClick={() => window.location.reload()}>
+            <span className="mi" style={{ fontSize: 18 }}>
+              rocket_launch
+            </span>
+            Hay una versión nueva — <b>&nbsp;Actualizar</b>
+          </button>
+        )}
         {vista === 'feed' && (
           <Feed
             reportes={reportes}
@@ -500,7 +536,7 @@ export default function App() {
         {guiaAbierta && <WelcomeGuide onClose={cerrarGuia} />}
 
         {menuAbierto && (
-          <MenuUsuario user={user} onSeccion={irSeccion} onCerrar={() => setMenuAbierto(false)} />
+          <MenuUsuario user={user} onSeccion={irSeccion} onLogout={salir} onCerrar={() => setMenuAbierto(false)} />
         )}
 
         {notifsAbierto && (

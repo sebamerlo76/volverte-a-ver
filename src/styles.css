@@ -2063,6 +2063,7 @@ select {
   text-overflow: ellipsis;
 }
 .menu-lista {
+  flex: 1;
   padding: 8px 0;
   overflow-y: auto;
 }
@@ -2090,6 +2091,22 @@ select {
   margin-left: auto;
   font-size: 20px;
   color: #b9ada3;
+}
+.menu-logout {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  color: #c0554b;
+}
+.menu-logout:active {
+  background: #f0e7dc;
 }
 
 /* Botón "desactivar mi cuenta" (sutil) */
@@ -2277,6 +2294,25 @@ select {
 .crop-listo {
   background: var(--navy);
   color: #fff;
+}
+
+/* Banner "hay versión nueva" */
+.update-banner {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 12px;
+  background: var(--navy);
+  color: #fff;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 13.5px;
+}
+.update-banner b {
+  text-decoration: underline;
 }
 
 .hd-bell {

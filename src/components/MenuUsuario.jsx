@@ -10,7 +10,7 @@ const ITEMS = [
   { k: 'guia', ic: 'help', t: 'Guía' },
 ]
 
-export default function MenuUsuario({ user, onSeccion, onCerrar }) {
+export default function MenuUsuario({ user, onSeccion, onLogout, onCerrar }) {
   const nombre = nombreUsuario(user)
   const email = user?.email || 'Tu cuenta'
   const avatar = avatarDe(user)
@@ -43,6 +43,13 @@ export default function MenuUsuario({ user, onSeccion, onCerrar }) {
             </button>
           ))}
         </div>
+
+        <button className="menu-logout" onClick={onLogout}>
+          <span className="mi menu-ico" style={{ color: '#c0554b' }}>
+            logout
+          </span>
+          Cerrar sesión
+        </button>
       </div>
     </div>
   )

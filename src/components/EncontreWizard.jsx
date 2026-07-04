@@ -29,7 +29,7 @@ const TITULOS = [
 
 export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, onPublicado, onToast }) {
   const [paso, setPaso] = useState(1)
-  const [especie, setEspecie] = useState('perro')
+  const [especie, setEspecie] = useState('') // sin asumir: se elige en el paso 1
   const [color, setColor] = useState('')
   const [tamano, setTamano] = useState('')
   const [raza, setRaza] = useState('')
@@ -89,6 +89,10 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
     else setPaso(paso - 1)
   }
   function siguiente() {
+    if (paso === 1 && !especie) {
+      onToast?.('Elegí qué animal es 🐾')
+      return
+    }
     setPaso(Math.min(TOTAL, paso + 1))
   }
 
