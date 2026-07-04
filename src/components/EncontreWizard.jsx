@@ -27,7 +27,7 @@ const TITULOS = [
   '¿Cómo te contactan?',
 ]
 
-export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, onPublicado, onToast }) {
+export default function EncontreWizard({ reportes = [], telefonoGuardado = '', onVerAviso, onCerrar, onPublicado, onToast }) {
   const [paso, setPaso] = useState(1)
   const [especie, setEspecie] = useState('') // sin asumir: se elige en el paso 1
   const [color, setColor] = useState('')
@@ -43,7 +43,7 @@ export default function EncontreWizard({ reportes = [], onVerAviso, onCerrar, on
   const [localidad, setLocalidad] = useState(LOCALIDAD_DEFECTO)
   const [zona, setZona] = useState('Centro')
   const [fecha, setFecha] = useState('')
-  const [whatsapp, setWhatsapp] = useState(ultimoWhatsapp())
+  const [whatsapp, setWhatsapp] = useState(telefonoGuardado || ultimoWhatsapp())
   const [soloAviso, setSoloAviso] = useState(false)
   const [matchPreview, setMatchPreview] = useState(null)
   const [enCustodia, setEnCustodia] = useState(false)

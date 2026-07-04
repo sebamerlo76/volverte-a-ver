@@ -454,6 +454,7 @@ export default function App() {
         {vista === 'post-encontre' && (
           <EncontreWizard
             reportes={reportes}
+            telefonoGuardado={user?.user_metadata?.telefono || ''}
             onVerAviso={abrirDetalle}
             onCerrar={() => setVista('post-intent')}
             onPublicado={alPublicar}
@@ -465,6 +466,7 @@ export default function App() {
             inicial={editando}
             plantilla={plantilla}
             ofrecerGuardar={ofrecerGuardar}
+            telefonoGuardado={user?.user_metadata?.telefono || ''}
             onCerrar={cerrarPublicar}
             onPublicado={alPublicar}
             onToast={mostrarToast}

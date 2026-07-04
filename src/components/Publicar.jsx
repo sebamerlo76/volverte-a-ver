@@ -8,7 +8,7 @@ import PhotoPicker from './PhotoPicker.jsx'
 import FechaPicker from './FechaPicker.jsx'
 import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
 
-export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar, onPublicado, onToast }) {
+export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoGuardado = '', onCerrar, onPublicado, onToast }) {
   const editando = !!inicial
   // base = datos para prellenar: un aviso a editar, o una mascota guardada ("Se me perdió").
   const base = inicial || plantilla || null
@@ -33,7 +33,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
   const [zona, setZona] = useState(base?.zona || 'Centro')
   const [fecha, setFecha] = useState(base?.fechaEvento || '')
   const [descripcion, setDescripcion] = useState(base?.descripcion || '')
-  const [whatsapp, setWhatsapp] = useState(base?.whatsapp || '')
+  const [whatsapp, setWhatsapp] = useState(base?.whatsapp || telefonoGuardado || '')
   const [guardarMasc, setGuardarMasc] = useState(true) // guardar en "Mis mascotas"
   const [enCustodia, setEnCustodia] = useState(base?.enCustodia || false) // la tengo conmigo (encontrado)
   const [guardando, setGuardando] = useState(false)
