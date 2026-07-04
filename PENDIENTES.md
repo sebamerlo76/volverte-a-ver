@@ -57,6 +57,13 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
 
 ## 🔜 Próximo / priorizado
 
+**Epic "menú de usuario" — Etapa 2 (Etapa 1 ya hecha: header cara/logo/campana + menú + secciones + nombre/teléfono):**
+- [ ] **Mis ubicaciones**: lugares guardados (casa/trabajo) + zonas de aviso (tabla `ubicaciones` + cambio en Edge Function para las alertas por zona).
+- [ ] **Desactivar cuenta** reversible (ocultar avisos + baja de notificaciones, poder reactivar).
+- [ ] **Banner "hay versión nueva"** (PWA): avisar que hay update en vez de tener que cerrar/reabrir.
+- [ ] Usar el **teléfono guardado** para autocompletar el WhatsApp al publicar.
+- [ ] **Guía de bienvenida / recorrido**: mini-tour al entrar la primera vez (qué hace la app), con "cerrar" y "no volver a mostrar" (localStorage), y accesible desde el menú como **"Guía"**. Recomendado: carrusel de ~5 pasos (perdido vs en la calle, publicar con la patita, reconocimiento por foto, notificaciones, compartir).
+
 - [x] **Backend de features:** SQLs corridos (localidad, fotos, contacto avist., seguridad) + Edge Function `notificar` re-desplegada (chip "Todos" + filtro por ciudad). ✅
 - [ ] **Anti-spam** en avistamientos (hoy cualquiera puede dejar uno sin login).
 - [ ] **Borrar los avisos de prueba** (demo) — **el usuario los mantiene por ahora para probar**.
