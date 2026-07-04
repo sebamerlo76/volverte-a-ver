@@ -15,6 +15,7 @@ import BuscadorOverlay from './components/BuscadorOverlay.jsx'
 import BottomNav from './components/BottomNav.jsx'
 import NotifPanel from './components/NotifPanel.jsx'
 import MenuUsuario from './components/MenuUsuario.jsx'
+import WelcomeGuide from './components/WelcomeGuide.jsx'
 import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { nombreMostrado } from './lib/formato.js'
@@ -42,6 +43,7 @@ export default function App() {
   const [notifsAbierto, setNotifsAbierto] = useState(false)
   const [menuAbierto, setMenuAbierto] = useState(false) // menú de la cara
   const [cuentaSeccion, setCuentaSeccion] = useState('cuenta') // sección abierta de Mi cuenta
+  const [guiaAbierta, setGuiaAbierta] = useState(false) // recorrido de bienvenida
 
   const notifsNoLeidas = notifs.filter((n) => !n.leida).length
 
@@ -51,6 +53,13 @@ export default function App() {
   // Cargar reportes al iniciar.
   useEffect(() => {
     cargar()
+  }, [])
+
+  // Recorrido de bienvenida: la primera vez (salvo que entren por un link directo a un aviso).
+  useEffect(() => {
+    const yaVista = localStorage.getItem('chicho_guia_vista')
+    const esLinkDirecto = /^\/r\//.test(window.location.pathname)
+    if (!yaVista && !esLinkDirecto) setGuiaAbierta(true)
   }, [])
 
   // Link directo a un aviso: chicho.ar/r/<id> abre el detalle de ese aviso.
@@ -154,9 +163,21 @@ export default function App() {
 
   // --- Menú de la cara ---
   function irSeccion(sec) {
-    setCuentaSeccion(sec)
     setMenuAbierto(false)
+    if (sec === 'guia') {
+      setGuiaAbierta(true)
+      return
+    }
+    setCuentaSeccion(sec)
     setVista('cuenta')
+  }
+  function cerrarGuia() {
+    setGuiaAbierta(false)
+    try {
+      localStorage.setItem('chicho_guia_vista', '1')
+    } catch (e) {
+      /* storage bloqueado: no pasa nada */
+    }
   }
 
   // --- Notificaciones (campanita) ---
@@ -475,6 +496,8 @@ export default function App() {
           </div>
         )}
         {vista === 'feed' && <BottomNav modo={homeModo} onNav={navBarra} />}
+
+        {guiaAbierta && <WelcomeGuide onClose={cerrarGuia} />}
 
         {menuAbierto && (
           <MenuUsuario user={user} onSeccion={irSeccion} onCerrar={() => setMenuAbierto(false)} />

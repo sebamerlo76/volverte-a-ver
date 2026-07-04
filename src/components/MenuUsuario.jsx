@@ -7,6 +7,7 @@ const ITEMS = [
   { k: 'notificaciones', ic: 'notifications', t: 'Notificaciones' },
   { k: 'avisos', ic: 'campaign', t: 'Mis avisos' },
   { k: 'cuenta', ic: 'person', t: 'Mi cuenta' },
+  { k: 'guia', ic: 'help', t: 'Guía' },
 ]
 
 export default function MenuUsuario({ user, onSeccion, onCerrar }) {
