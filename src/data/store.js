@@ -121,6 +121,45 @@ export async function sumarApoyo(reporteId) {
 }
 
 // ---------------------------------------------------------------------------
+// Mis ubicaciones (lugares guardados + zonas de aviso)
+// ---------------------------------------------------------------------------
+function ubicDesdeFila(u) {
+  return { id: u.id, nombre: u.nombre, lat: u.lat, lng: u.lng, radioKm: u.radio_km, avisar: u.avisar }
+}
+
+export async function getUbicaciones(userId) {
+  if (!userId || !supabaseConfigurado) return []
+  const { data, error } = await supabase.from('ubicaciones').select('*').eq('user_id', userId).order('creado_en', { ascending: true })
+  if (error) throw error
+  return (data || []).map(ubicDesdeFila)
+}
+
+export async function addUbicacion({ userId, nombre, lat, lng, radioKm, avisar }) {
+  if (!supabaseConfigurado) return null
+  const { data, error } = await supabase
+    .from('ubicaciones')
+    .insert({ user_id: userId, nombre, lat, lng, radio_km: radioKm, avisar })
+    .select()
+    .single()
+  if (error) throw error
+  return ubicDesdeFila(data)
+}
+
+export async function actualizarUbicacion(id, campos) {
+  if (!id || !supabaseConfigurado) return
+  const fila = {}
+  if (campos.avisar != null) fila.avisar = campos.avisar
+  if (campos.radioKm != null) fila.radio_km = campos.radioKm
+  if (campos.nombre != null) fila.nombre = campos.nombre
+  await supabase.from('ubicaciones').update(fila).eq('id', id)
+}
+
+export async function eliminarUbicacion(id) {
+  if (!id || !supabaseConfigurado) return
+  await supabase.from('ubicaciones').delete().eq('id', id)
+}
+
+// ---------------------------------------------------------------------------
 // Centro de notificaciones in-app (la campanita)
 // ---------------------------------------------------------------------------
 function notifDesdeFila(n) {

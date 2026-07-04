@@ -5,6 +5,7 @@ import { avatarDe, nombreUsuario } from '../lib/formato.js'
 import { soportado as pushSoportado, yaSuscripto, activarPush, desactivarPush } from '../lib/push.js'
 import { supabase } from '../lib/supabase.js'
 import NotifPrefs from './NotifPrefs.jsx'
+import MisUbicaciones from './MisUbicaciones.jsx'
 
 const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
 const TITULOS = {
@@ -340,15 +341,8 @@ export default function MiCuenta({
             })
           ))}
 
-        {/* ---------------- Mis ubicaciones (próximamente) ---------------- */}
-        {seccion === 'ubicaciones' && (
-          <div className="empty" style={{ padding: '46px 34px', textAlign: 'center', lineHeight: 1.55 }}>
-            <span className="mi" style={{ fontSize: 44, color: '#c9bdb4' }}>location_on</span>
-            <div style={{ marginTop: 12, fontWeight: 700 }}>
-              Muy pronto vas a poder guardar tus lugares (casa, trabajo) y elegir las zonas donde querés que te avise. 🐾
-            </div>
-          </div>
-        )}
+        {/* ---------------- Mis ubicaciones ---------------- */}
+        {seccion === 'ubicaciones' && <MisUbicaciones user={user} onToast={onToast} />}
 
         <div style={{ height: 20 }} />
       </div>

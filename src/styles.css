@@ -2315,6 +2315,37 @@ select {
   text-decoration: underline;
 }
 
+/* Mis ubicaciones (lugares guardados / zonas de aviso) */
+.ubic-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 8px 20px 0;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid #f0e7dc;
+  border-radius: 16px;
+}
+.ubic-ico {
+  font-size: 24px;
+  flex: none;
+}
+.ubic-nombre {
+  font-weight: 800;
+  font-size: 14.5px;
+  color: #2a2320;
+}
+.ubic-sub {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-top: 1px;
+}
+.ubic-x {
+  flex: none;
+  padding: 4px;
+}
+
 .hd-bell {
   position: relative;
   padding: 4px;

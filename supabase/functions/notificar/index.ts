@@ -125,10 +125,10 @@ async function manejarReporte(nuevo: any) {
     )
   }
 
-  // 2) CERCA: usuarios con avisar_cerca — por barrio elegido O por punto+radio.
+  // 2) CERCA: usuarios con avisar_cerca (barrio o punto+radio) + zonas de "Mis ubicaciones".
   {
     const { data: cercaPrefs } = await sb.from('notif_prefs').select('*').eq('avisar_cerca', true)
-    const destC = (cercaPrefs || [])
+    const destPrefs = (cercaPrefs || [])
       .filter((p: any) => p.user_id !== nuevo.user_id)
       .filter((p: any) => p.especie === 'todas' || p.especie === nuevo.especie)
       .filter((p: any) => (p.localidad || 'Paraná') === (nuevo.localidad || 'Paraná'))
@@ -144,6 +144,18 @@ async function manejarReporte(nuevo: any) {
         return porBarrio || porRadio
       })
       .map((p: any) => p.user_id)
+
+    // Zonas guardadas en "Mis ubicaciones" (avisar=true) dentro del radio del nuevo aviso.
+    let destUbic: string[] = []
+    if (nuevo.lat != null && nuevo.lng != null) {
+      const { data: ubis } = await sb.from('ubicaciones').select('user_id, lat, lng, radio_km').eq('avisar', true)
+      destUbic = (ubis || [])
+        .filter((u: any) => u.user_id !== nuevo.user_id)
+        .filter((u: any) => distanciaKm(u.lat, u.lng, nuevo.lat, nuevo.lng) <= (u.radio_km || 3))
+        .map((u: any) => u.user_id)
+    }
+
+    const destC = [...new Set([...destPrefs, ...destUbic])]
     if (destC.length) {
       const tipoTxt = nuevo.tipo === 'perdido' ? 'perdido' : 'encontrado'
       await enviarAUsuarios(
