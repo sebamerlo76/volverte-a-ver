@@ -48,9 +48,23 @@ async function prefsDe(userIds: string[]) {
   return map
 }
 
-async function enviarAUsuarios(userIds: string[], payload: any) {
+async function enviarAUsuarios(userIds: string[], payload: any, meta: any = {}) {
   const ids = [...new Set(userIds.filter(Boolean))]
   if (!ids.length) return 0
+  // Guardar en el "inbox" de cada usuario, aunque no tenga push activado.
+  try {
+    await sb.from('notificaciones').insert(
+      ids.map((uid) => ({
+        user_id: uid,
+        titulo: payload.title,
+        cuerpo: payload.body,
+        reporte_id: meta.reporteId ?? null,
+        tipo: meta.tipo ?? null,
+      })),
+    )
+  } catch (e) {
+    console.error('inbox insert error:', e)
+  }
   const { data: subs } = await sb.from('push_subs').select('*').in('user_id', ids)
   if (!subs?.length) return 0
   let ok = 0
@@ -97,11 +111,15 @@ async function manejarReporte(nuevo: any) {
     .filter((m: any) => (prefsM.get(m.user_id)?.avisar_match ?? true) !== false)
     .map((m: any) => m.user_id)
   if (destM.length) {
-    await enviarAUsuarios(destM, {
-      title: '🐾 ¿Será el tuyo?',
-      body: `Apareció un ${ESP[nuevo.especie] || 'animal'} parecido en ${nuevo.zona || 'Paraná'}.`,
-      url: '/',
-    })
+    await enviarAUsuarios(
+      destM,
+      {
+        title: '🐾 ¿Será el tuyo?',
+        body: `Apareció un ${ESP[nuevo.especie] || 'animal'} parecido en ${nuevo.zona || 'Paraná'}.`,
+        url: '/',
+      },
+      { reporteId: nuevo.id, tipo: 'match' },
+    )
   }
 
   // 2) CERCA: usuarios con avisar_cerca — por barrio elegido O por punto+radio.
@@ -125,11 +143,15 @@ async function manejarReporte(nuevo: any) {
       .map((p: any) => p.user_id)
     if (destC.length) {
       const tipoTxt = nuevo.tipo === 'perdido' ? 'perdido' : 'encontrado'
-      await enviarAUsuarios(destC, {
-        title: '📍 Nuevo aviso cerca tuyo',
-        body: `Un ${ESP[nuevo.especie] || 'animal'} ${tipoTxt} en ${nuevo.zona || 'Paraná'}.`,
-        url: '/',
-      })
+      await enviarAUsuarios(
+        destC,
+        {
+          title: '📍 Nuevo aviso cerca tuyo',
+          body: `Un ${ESP[nuevo.especie] || 'animal'} ${tipoTxt} en ${nuevo.zona || 'Paraná'}.`,
+          url: '/',
+        },
+        { reporteId: nuevo.id, tipo: 'cerca' },
+      )
     }
   }
 }
@@ -148,22 +170,30 @@ async function manejarAvistamiento(rec: any) {
   if (rep.user_id) {
     const prefs = await prefsDe([rep.user_id])
     if ((prefs.get(rep.user_id)?.avisar_avistamiento ?? true) !== false) {
-      await enviarAUsuarios([rep.user_id], {
-        title: '👀 ¡Vieron a tu mascota!',
-        body: rec.nota ? `Nuevo avistamiento: ${rec.nota}` : `Alguien reportó ver a tu ${ESP[rep.especie] || 'mascota'}.`,
-        url: '/',
-      })
+      await enviarAUsuarios(
+        [rep.user_id],
+        {
+          title: '👀 ¡Vieron a tu mascota!',
+          body: rec.nota ? `Nuevo avistamiento: ${rec.nota}` : `Alguien reportó ver a tu ${ESP[rep.especie] || 'mascota'}.`,
+          url: '/',
+        },
+        { reporteId: rec.reporte_id, tipo: 'avistamiento' },
+      )
     }
   }
 
   // Seguidores del aviso (menos el dueño, que ya recibió).
   const segs = (await seguidoresDe(rec.reporte_id)).filter((u: string) => u !== rep.user_id)
   if (segs.length) {
-    await enviarAUsuarios(segs, {
-      title: `👀 Novedad de ${nombre}`,
-      body: rec.nota ? `Nuevo avistamiento: ${rec.nota}` : 'Alguien lo vio.',
-      url: '/',
-    })
+    await enviarAUsuarios(
+      segs,
+      {
+        title: `👀 Novedad de ${nombre}`,
+        body: rec.nota ? `Nuevo avistamiento: ${rec.nota}` : 'Alguien lo vio.',
+        url: '/',
+      },
+      { reporteId: rec.reporte_id, tipo: 'avistamiento' },
+    )
   }
 }
 
@@ -175,7 +205,7 @@ async function manejarReporteUpdate(rec: any, old: any) {
   if (old?.estado === 'activo' && rec.estado === 'resuelto') {
     const segs = (await seguidoresDe(rec.id)).filter((u: string) => u !== rec.user_id)
     if (segs.length) {
-      await enviarAUsuarios(segs, { title: '🎉 ¡Apareció!', body: `${nombre} volvió a casa. 🏠`, url: '/' })
+      await enviarAUsuarios(segs, { title: '🎉 ¡Apareció!', body: `${nombre} volvió a casa. 🏠`, url: '/' }, { reporteId: rec.id, tipo: 'aparecio' })
     }
     return
   }
@@ -197,11 +227,15 @@ async function manejarReporteUpdate(rec: any, old: any) {
 
   const segs = (await seguidoresDe(rec.id)).filter((u: string) => u !== rec.user_id)
   if (segs.length) {
-    await enviarAUsuarios(segs, {
-      title: `📝 Novedad de ${nombre}`,
-      body: 'La familia actualizó el aviso. Tocá para ver.',
-      url: '/',
-    })
+    await enviarAUsuarios(
+      segs,
+      {
+        title: `📝 Novedad de ${nombre}`,
+        body: 'La familia actualizó el aviso. Tocá para ver.',
+        url: '/',
+      },
+      { reporteId: rec.id, tipo: 'novedad' },
+    )
   }
 }
 

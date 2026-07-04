@@ -28,7 +28,7 @@ function jitter(base, id = '') {
   return [base[0] + dy, base[1] + dx]
 }
 
-export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, user, onLogin, onCuenta, modo, filtros, setFiltro, resetInicio }) {
+export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, user, onLogin, onCuenta, onNotifs, notifsNoLeidas = 0, modo, filtros, setFiltro, resetInicio }) {
   const avatar = avatarDe(user)
   const [finales, setFinales] = useState(null)
   const [sel, setSel] = useState(null)
@@ -111,15 +111,27 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
             Chicho
           </button>
           {authActivo ? (
-            <button onClick={logueado ? onCuenta : onLogin} aria-label={logueado ? 'Mi cuenta' : 'Iniciar sesión'}>
-              {logueado && avatar ? (
-                <img className="hd-av" src={avatar} alt="Mi cuenta" referrerPolicy="no-referrer" />
-              ) : (
-                <span className={'mi' + (logueado ? ' fill' : '')} style={{ fontSize: 27, color: logueado ? 'var(--navy)' : '#c3b8b0' }}>
-                  {logueado ? 'account_circle' : 'login'}
-                </span>
-              )}
-            </button>
+            <div className="hmini-acc">
+              {logueado ? (
+                <button className="hd-bell" onClick={onNotifs} aria-label="Notificaciones">
+                  <span className="mi" style={{ fontSize: 26, color: 'var(--navy)' }}>
+                    notifications
+                  </span>
+                  {notifsNoLeidas > 0 ? (
+                    <span className="hd-bell-badge">{notifsNoLeidas > 9 ? '9+' : notifsNoLeidas}</span>
+                  ) : null}
+                </button>
+              ) : null}
+              <button onClick={logueado ? onCuenta : onLogin} aria-label={logueado ? 'Mi cuenta' : 'Iniciar sesión'}>
+                {logueado && avatar ? (
+                  <img className="hd-av" src={avatar} alt="Mi cuenta" referrerPolicy="no-referrer" />
+                ) : (
+                  <span className={'mi' + (logueado ? ' fill' : '')} style={{ fontSize: 27, color: logueado ? 'var(--navy)' : '#c3b8b0' }}>
+                    {logueado ? 'account_circle' : 'login'}
+                  </span>
+                )}
+              </button>
+            </div>
           ) : null}
         </div>
 

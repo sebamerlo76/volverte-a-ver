@@ -9,6 +9,7 @@ const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
 
 export default function MiCuenta({
   user,
+  notifs,
   onVolver,
   onAbrir,
   onLogout,
@@ -232,14 +233,25 @@ export default function MiCuenta({
             Todavía no publicaste ningún aviso.
           </div>
         ) : (
-          mios.map((r) => (
-            <div key={r.id} style={{ position: 'relative' }}>
-              {r.estado === 'resuelto' && <div className="resuelto-chip">🏠 En casa</div>}
-              <div style={{ opacity: r.estado === 'resuelto' ? 0.6 : 1 }}>
-                <PetCard r={r} onClick={() => onAbrir(r)} />
+          mios.map((r) => {
+            const conNovedad = (notifs || []).some((n) => !n.leida && n.reporteId === r.id)
+            return (
+              <div key={r.id} style={{ position: 'relative' }}>
+                {r.estado === 'resuelto' && <div className="resuelto-chip">🏠 En casa</div>}
+                {conNovedad && (
+                  <div className="novedad-chip">
+                    <span className="mi fill" style={{ fontSize: 14 }}>
+                      notifications_active
+                    </span>
+                    Novedad
+                  </div>
+                )}
+                <div style={{ opacity: r.estado === 'resuelto' ? 0.6 : 1 }}>
+                  <PetCard r={r} onClick={() => onAbrir(r)} />
+                </div>
               </div>
-            </div>
-          ))
+            )
+          })
         )}
 
         <div style={{ padding: '22px 20px 30px' }}>

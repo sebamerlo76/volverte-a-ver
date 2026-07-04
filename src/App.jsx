@@ -13,7 +13,8 @@ import ReportarAvistamiento from './components/ReportarAvistamiento.jsx'
 import MapaRecorrido from './components/MapaRecorrido.jsx'
 import BuscadorOverlay from './components/BuscadorOverlay.jsx'
 import BottomNav from './components/BottomNav.jsx'
-import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, seguirReporte, dejarDeSeguir, getSeguidos } from './data/store.js'
+import NotifPanel from './components/NotifPanel.jsx'
+import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { nombreMostrado } from './lib/formato.js'
 
@@ -36,6 +37,10 @@ export default function App() {
   const [seguidos, setSeguidos] = useState([]) // ids de avisos que sigue el usuario
   const [seguirTrasAuth, setSeguirTrasAuth] = useState(null) // seguir este aviso al loguearse
   const [cartelReporte, setCartelReporte] = useState(null) // cartelito "seguí esta mascota"
+  const [notifs, setNotifs] = useState([]) // notificaciones in-app del usuario
+  const [notifsAbierto, setNotifsAbierto] = useState(false)
+
+  const notifsNoLeidas = notifs.filter((n) => !n.leida).length
 
   const authActivo = supabaseConfigurado
   const logueado = !authActivo || !!user
@@ -67,6 +72,12 @@ export default function App() {
   useEffect(() => {
     if (user?.id) getSeguidos(user.id).then(setSeguidos).catch(() => setSeguidos([]))
     else setSeguidos([])
+  }, [user?.id])
+
+  // Notificaciones in-app del usuario (para la campanita).
+  useEffect(() => {
+    if (user?.id) getNotificaciones(user.id).then(setNotifs).catch(() => setNotifs([]))
+    else setNotifs([])
   }, [user?.id])
 
   async function cargar() {
@@ -124,6 +135,37 @@ export default function App() {
     setDetalleOrigen(origen)
     setSelReporte(reporte)
     setVista('detalle')
+    // Al abrir un aviso, damos por leídas sus novedades.
+    if (user?.id && reporte?.id && notifs.some((n) => !n.leida && n.reporteId === reporte.id)) {
+      setNotifs((arr) => arr.map((x) => (x.reporteId === reporte.id ? { ...x, leida: true } : x)))
+      marcarLeidasDeReporte(user.id, reporte.id).catch(() => {})
+    }
+  }
+
+  // --- Notificaciones (campanita) ---
+  async function abrirNotifs() {
+    setNotifsAbierto(true)
+    if (user?.id) {
+      try {
+        setNotifs(await getNotificaciones(user.id))
+      } catch (e) {
+        /* dejamos las que ya teníamos */
+      }
+    }
+  }
+  function abrirDesdeNotif(n) {
+    setNotifs((arr) => arr.map((x) => (x.id === n.id ? { ...x, leida: true } : x)))
+    marcarNotifLeida(n.id).catch(() => {})
+    setNotifsAbierto(false)
+    if (n.reporteId) {
+      getReportePorId(n.reporteId)
+        .then((r) => r && abrirDetalle(r, 'feed'))
+        .catch(() => {})
+    }
+  }
+  function marcarTodasNotifs() {
+    setNotifs((arr) => arr.map((x) => ({ ...x, leida: true })))
+    if (user?.id) marcarTodasLeidas(user.id).catch(() => {})
   }
 
   function toggleSeguir(reporte) {
@@ -280,6 +322,8 @@ export default function App() {
             user={user}
             onLogin={pedirLogin}
             onCuenta={() => setVista('cuenta')}
+            onNotifs={abrirNotifs}
+            notifsNoLeidas={notifsNoLeidas}
             modo={homeModo}
             filtros={filtros}
             setFiltro={setFiltro}
@@ -356,6 +400,7 @@ export default function App() {
         {vista === 'cuenta' && (
           <MiCuenta
             user={user}
+            notifs={notifs}
             onVolver={() => setVista('feed')}
             onAbrir={(r) => abrirDetalle(r, 'cuenta')}
             onLogout={salir}
@@ -412,6 +457,15 @@ export default function App() {
           </div>
         )}
         {vista === 'feed' && <BottomNav modo={homeModo} onNav={navBarra} />}
+
+        {notifsAbierto && (
+          <NotifPanel
+            notifs={notifs}
+            onClose={() => setNotifsAbierto(false)}
+            onAbrir={abrirDesdeNotif}
+            onMarcarTodas={marcarTodasNotifs}
+          />
+        )}
 
         {buscadorAbierto && (
           <BuscadorOverlay

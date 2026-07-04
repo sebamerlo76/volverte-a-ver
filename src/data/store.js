@@ -120,6 +120,40 @@ export async function sumarApoyo(reporteId) {
   return null // modo local: el cliente ya muestra el +1 optimista
 }
 
+// ---------------------------------------------------------------------------
+// Centro de notificaciones in-app (la campanita)
+// ---------------------------------------------------------------------------
+function notifDesdeFila(n) {
+  return { id: n.id, titulo: n.titulo, cuerpo: n.cuerpo, reporteId: n.reporte_id, tipo: n.tipo, leida: n.leida, creadoEn: n.creado_en }
+}
+
+export async function getNotificaciones(userId) {
+  if (!userId || !supabaseConfigurado) return []
+  const { data, error } = await supabase
+    .from('notificaciones')
+    .select('*')
+    .eq('user_id', userId)
+    .order('creado_en', { ascending: false })
+    .limit(50)
+  if (error) throw error
+  return (data || []).map(notifDesdeFila)
+}
+
+export async function marcarNotifLeida(id) {
+  if (!id || !supabaseConfigurado) return
+  await supabase.from('notificaciones').update({ leida: true }).eq('id', id)
+}
+
+export async function marcarTodasLeidas(userId) {
+  if (!userId || !supabaseConfigurado) return
+  await supabase.from('notificaciones').update({ leida: true }).eq('user_id', userId).eq('leida', false)
+}
+
+export async function marcarLeidasDeReporte(userId, reporteId) {
+  if (!userId || !reporteId || !supabaseConfigurado) return
+  await supabase.from('notificaciones').update({ leida: true }).eq('user_id', userId).eq('reporte_id', reporteId).eq('leida', false)
+}
+
 // Trae un aviso puntual por id (activo o resuelto), para abrir un link directo.
 export async function getReportePorId(id) {
   if (!id) return null
