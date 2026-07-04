@@ -1959,10 +1959,10 @@ select {
   box-shadow: 0 4px 10px rgba(224, 163, 0, 0.4);
 }
 
-/* Novedad (notificación sin leer) en Mis avisos */
+/* Novedad (notificación sin leer) en Mis avisos — debajo del badge Perdido/En la calle */
 .novedad-chip {
   position: absolute;
-  top: 24px;
+  top: 60px;
   left: 30px;
   z-index: 3;
   display: inline-flex;
