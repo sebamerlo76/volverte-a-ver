@@ -14,6 +14,7 @@ import MapaRecorrido from './components/MapaRecorrido.jsx'
 import BuscadorOverlay from './components/BuscadorOverlay.jsx'
 import BottomNav from './components/BottomNav.jsx'
 import NotifPanel from './components/NotifPanel.jsx'
+import MenuUsuario from './components/MenuUsuario.jsx'
 import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { nombreMostrado } from './lib/formato.js'
@@ -39,6 +40,8 @@ export default function App() {
   const [cartelReporte, setCartelReporte] = useState(null) // cartelito "seguí esta mascota"
   const [notifs, setNotifs] = useState([]) // notificaciones in-app del usuario
   const [notifsAbierto, setNotifsAbierto] = useState(false)
+  const [menuAbierto, setMenuAbierto] = useState(false) // menú de la cara
+  const [cuentaSeccion, setCuentaSeccion] = useState('cuenta') // sección abierta de Mi cuenta
 
   const notifsNoLeidas = notifs.filter((n) => !n.leida).length
 
@@ -147,6 +150,13 @@ export default function App() {
       setNotifs((arr) => arr.map((x) => (x.reporteId === reporte.id ? { ...x, leida: true } : x)))
       marcarLeidasDeReporte(user.id, reporte.id).catch(() => {})
     }
+  }
+
+  // --- Menú de la cara ---
+  function irSeccion(sec) {
+    setCuentaSeccion(sec)
+    setMenuAbierto(false)
+    setVista('cuenta')
   }
 
   // --- Notificaciones (campanita) ---
@@ -328,7 +338,7 @@ export default function App() {
             logueado={logueado}
             user={user}
             onLogin={pedirLogin}
-            onCuenta={() => setVista('cuenta')}
+            onMenu={() => setMenuAbierto(true)}
             onNotifs={abrirNotifs}
             notifsNoLeidas={notifsNoLeidas}
             modo={homeModo}
@@ -407,6 +417,7 @@ export default function App() {
         {vista === 'cuenta' && (
           <MiCuenta
             user={user}
+            seccion={cuentaSeccion}
             notifs={notifs}
             onVolver={() => setVista('feed')}
             onAbrir={(r) => abrirDetalle(r, 'cuenta')}
@@ -464,6 +475,10 @@ export default function App() {
           </div>
         )}
         {vista === 'feed' && <BottomNav modo={homeModo} onNav={navBarra} />}
+
+        {menuAbierto && (
+          <MenuUsuario user={user} onSeccion={irSeccion} onCerrar={() => setMenuAbierto(false)} />
+        )}
 
         {notifsAbierto && (
           <NotifPanel

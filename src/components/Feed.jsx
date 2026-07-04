@@ -28,7 +28,7 @@ function jitter(base, id = '') {
   return [base[0] + dy, base[1] + dx]
 }
 
-export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, user, onLogin, onCuenta, onNotifs, notifsNoLeidas = 0, modo, filtros, setFiltro, resetInicio }) {
+export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, user, onLogin, onMenu, onNotifs, notifsNoLeidas = 0, modo, filtros, setFiltro, resetInicio }) {
   const avatar = avatarDe(user)
   const [finales, setFinales] = useState(null)
   const [sel, setSel] = useState(null)
@@ -104,35 +104,39 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
   return (
     <div className={'view home-' + filtros.estado}>
       <div className="home-top">
-        {/* Fila mini: logo + avatar */}
+        {/* Fila mini: menú (cara) · logo · campana */}
         <div className="hmini">
+          <div className="hmini-side">
+            {authActivo ? (
+              <button onClick={logueado ? onMenu : onLogin} aria-label={logueado ? 'Menú' : 'Iniciar sesión'}>
+                {logueado && avatar ? (
+                  <img className="hd-av" src={avatar} alt="Menú" referrerPolicy="no-referrer" />
+                ) : (
+                  <span className="mi" style={{ fontSize: 27, color: logueado ? 'var(--navy)' : '#c3b8b0' }}>
+                    {logueado ? 'menu' : 'login'}
+                  </span>
+                )}
+              </button>
+            ) : null}
+          </div>
+
           <button className="hmini-logo" onClick={resetInicio} aria-label="Ir al inicio">
             <img src="/logo.png" alt="" width="42" height="42" style={{ display: 'block' }} />
             Chicho
           </button>
-          {authActivo ? (
-            <div className="hmini-acc">
-              {logueado ? (
-                <button className="hd-bell" onClick={onNotifs} aria-label="Notificaciones">
-                  <span className="mi" style={{ fontSize: 26, color: 'var(--navy)' }}>
-                    notifications
-                  </span>
-                  {notifsNoLeidas > 0 ? (
-                    <span className="hd-bell-badge">{notifsNoLeidas > 9 ? '9+' : notifsNoLeidas}</span>
-                  ) : null}
-                </button>
-              ) : null}
-              <button onClick={logueado ? onCuenta : onLogin} aria-label={logueado ? 'Mi cuenta' : 'Iniciar sesión'}>
-                {logueado && avatar ? (
-                  <img className="hd-av" src={avatar} alt="Mi cuenta" referrerPolicy="no-referrer" />
-                ) : (
-                  <span className={'mi' + (logueado ? ' fill' : '')} style={{ fontSize: 27, color: logueado ? 'var(--navy)' : '#c3b8b0' }}>
-                    {logueado ? 'account_circle' : 'login'}
-                  </span>
-                )}
+
+          <div className="hmini-side hmini-side-r">
+            {authActivo && logueado ? (
+              <button className="hd-bell" onClick={onNotifs} aria-label="Notificaciones">
+                <span className="mi" style={{ fontSize: 26, color: 'var(--navy)' }}>
+                  notifications
+                </span>
+                {notifsNoLeidas > 0 ? (
+                  <span className="hd-bell-badge">{notifsNoLeidas > 9 ? '9+' : notifsNoLeidas}</span>
+                ) : null}
               </button>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
 
         {/* Pestañas de estado (con acento de color) */}
