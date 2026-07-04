@@ -59,7 +59,8 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
 
 **Epic "menú de usuario" — Etapa 2 (Etapa 1 ya hecha: header cara/logo/campana + menú + secciones + nombre/teléfono):**
 - [x] **Mis ubicaciones**: lugares guardados + zonas de aviso (tabla `ubicaciones` + Edge Function considera las zonas guardadas). ✅ *(correr `schema-ubicaciones.sql` + redeploy de `notificar`)*
-- [ ] **Desactivar cuenta** reversible (ocultar avisos + baja de notificaciones, poder reactivar). ← lo único que queda de la Etapa 2.
+- [x] **Desactivar cuenta** reversible (oculta avisos vía `reportes.oculto` + baja de push + flag; reactivar los muestra). ✅ *(correr `schema-desactivar.sql` + redeploy de `notificar`)*
+- [x] **Guía**: sumada la pantalla "Instalá la app" (Android + iPhone). ✅ → **Etapa 2 COMPLETA**.
 - [x] **Banner "hay versión nueva"** (PWA): version.json por build + chequeo → "Actualizar" recarga. ✅
 - [x] Usar el **teléfono guardado** para autocompletar el WhatsApp al publicar. ✅
 - [x] **Guía de bienvenida / recorrido**: carrusel de 5 pasos, "no volver a mostrar", accesible desde el menú como "Guía". ✅
