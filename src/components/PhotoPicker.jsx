@@ -1,16 +1,21 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+import ImageCropper from './ImageCropper.jsx'
 
-// Selector de hasta `max` fotos. value = [{ url, file }], onChange(nuevoArray).
-// La primera foto es la "principal" (thumbnail de tarjetas + huella visual).
+// Selector de hasta `max` fotos, con encuadre (cropper) al elegir cada una.
+// value = [{ url, file }], onChange(nuevoArray). La primera es la "principal".
 export default function PhotoPicker({ value = [], onChange, max = 3 }) {
   const inputRef = useRef(null)
+  const [pendiente, setPendiente] = useState(null) // foto elegida, a la espera de encuadre
 
-  function agregar(e) {
-    const files = Array.from(e.target.files || [])
-    const libres = max - value.length
-    const nuevas = files.slice(0, libres).map((f) => ({ url: URL.createObjectURL(f), file: f }))
-    if (nuevas.length) onChange([...value, ...nuevas])
+  function elegir(e) {
+    const f = (e.target.files || [])[0]
+    if (f) setPendiente(f)
     e.target.value = ''
+  }
+  function alConfirmar(blob) {
+    const f = new File([blob], `foto-${Date.now()}.jpg`, { type: 'image/jpeg' })
+    onChange([...value, { url: URL.createObjectURL(blob), file: f }])
+    setPendiente(null)
   }
   function quitar(i) {
     onChange(value.filter((_, j) => j !== i))
@@ -37,7 +42,9 @@ export default function PhotoPicker({ value = [], onChange, max = 3 }) {
           <span style={{ fontSize: 11, fontWeight: 800 }}>Agregar</span>
         </button>
       )}
-      <input ref={inputRef} type="file" accept="image/*" multiple onChange={agregar} style={{ display: 'none' }} />
+      <input ref={inputRef} type="file" accept="image/*" onChange={elegir} style={{ display: 'none' }} />
+
+      {pendiente && <ImageCropper file={pendiente} onConfirm={alConfirmar} onCancel={() => setPendiente(null)} />}
     </div>
   )
 }

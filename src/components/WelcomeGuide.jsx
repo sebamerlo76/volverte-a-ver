@@ -8,14 +8,14 @@ const PASOS = [
     d: 'Ayudamos a que las mascotas perdidas de Paraná vuelvan a casa. 🐾',
   },
   {
-    ic: 'pets',
+    ic: 'swap_horiz',
     color: 'var(--navy)',
     t: 'Perdido vs. En la calle',
     d: '🔴 Perdido: su familia lo busca.\n🔵 En la calle: alguien lo encontró y busca a su familia.',
   },
   {
-    ic: 'add_circle',
-    color: '#ff5747',
+    ic: 'pets',
+    color: 'var(--navy)',
     t: 'Publicá en un toque',
     d: '¿Perdiste o encontraste una? Tocá la patita 🐾 de abajo para cargar tu aviso.',
   },

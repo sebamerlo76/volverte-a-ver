@@ -2200,6 +2200,85 @@ select {
   font-size: 16px;
 }
 
+/* Encuadre de foto (cropper) */
+.crop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  background: rgba(20, 14, 10, 0.66);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.crop-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--cream);
+  border-radius: 22px;
+  padding: 18px 16px 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+}
+.crop-titulo {
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 19px;
+  color: var(--navy);
+  text-align: center;
+}
+.crop-sub {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+  margin: 3px 0 14px;
+}
+.crop-marco {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #1b1512;
+  cursor: grab;
+  touch-action: none;
+}
+.crop-marco:active {
+  cursor: grabbing;
+}
+.crop-zoom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 6px 4px;
+}
+.crop-zoom input {
+  flex: 1;
+  accent-color: var(--navy);
+}
+.crop-acciones {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.crop-cancelar,
+.crop-listo {
+  flex: 1;
+  height: 48px;
+  border-radius: 14px;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+}
+.crop-cancelar {
+  background: #ece3d8;
+  color: #6b6058;
+}
+.crop-listo {
+  background: var(--navy);
+  color: #fff;
+}
+
 .hd-bell {
   position: relative;
   padding: 4px;
