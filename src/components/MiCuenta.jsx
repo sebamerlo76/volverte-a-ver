@@ -344,7 +344,7 @@ export default function MiCuenta({
         {/* ---------------- Mis ubicaciones ---------------- */}
         {seccion === 'ubicaciones' && <MisUbicaciones user={user} onToast={onToast} />}
 
-        <div style={{ height: 20 }} />
+        <div style={{ height: 'calc(24px + env(safe-area-inset-bottom))' }} />
       </div>
     </div>
   )
