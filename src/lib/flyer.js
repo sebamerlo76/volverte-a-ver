@@ -101,8 +101,8 @@ export async function generarFlyer(r) {
 
   const resuelto = r.estado === 'resuelto'
   const perdido = r.tipo === 'perdido'
-  const estadoColor = resuelto ? '#e0a300' : perdido ? '#ff5747' : '#17a06b'
-  const estadoTxt = resuelto ? 'EN CASA' : perdido ? 'PERDIDO' : 'ENCONTRADO'
+  const estadoColor = resuelto ? '#e0a300' : perdido ? '#ff5747' : '#2f7fed'
+  const estadoTxt = resuelto ? 'EN CASA' : perdido ? 'PERDIDO' : 'EN LA CALLE'
 
   // ---- Foto ----
   const fotoSrc = (r.fotos && r.fotos[0]) || r.foto
@@ -223,7 +223,7 @@ export async function compartirFlyer(r, onToast) {
     onToast?.('Generando imagen…')
     const blob = await generarFlyer(r)
     const file = new File([blob], `chicho-${r.id || 'aviso'}.png`, { type: 'image/png' })
-    const estado = r.estado === 'resuelto' ? 'apareció' : r.tipo === 'perdido' ? 'PERDIDO' : 'ENCONTRADO'
+    const estado = r.estado === 'resuelto' ? 'apareció' : r.tipo === 'perdido' ? 'PERDIDO' : 'EN LA CALLE'
     const link = r.id ? `https://chicho.ar/r/${r.id}` : 'https://chicho.ar'
     const texto = `${nombreMostrado(r)} — ${estado} en ${r.zona || ''}, ${r.localidad || 'Paraná'}. Mirá y ayudá 🐾\n${link}`
     if (navigator.canShare && navigator.canShare({ files: [file] })) {

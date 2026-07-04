@@ -1,9 +1,10 @@
 :root {
-  /* Estados (señales funcionales): perdido = coral, encontrado = verde/teal */
+  /* Estados (señales funcionales): perdido = coral, en la calle = azul, en casa = amber */
   --coral: #ff6b5e;
   --coral-strong: #ff5747;
   --teal: #1f9d8f;
   --green: #17a06b;
+  --blue: #2f7fed;
   --wa: #25d366;
   --amber: #e0a300;
   /* Marca Chicho: navy + crema para el chrome */
@@ -276,8 +277,8 @@ select {
   --acento-bg: #fff2ef;
 }
 .view.home-encontrado {
-  --acento: #1f9d8f;
-  --acento-bg: #ecf7f4;
+  --acento: #2f7fed;
+  --acento-bg: #eef3fe;
 }
 .view.home-finales {
   --acento: #e0a300;
@@ -1175,8 +1176,8 @@ select {
   box-shadow: 0 4px 10px rgba(255, 87, 71, 0.4);
 }
 .badge.found {
-  background: var(--green);
-  box-shadow: 0 4px 10px rgba(23, 160, 107, 0.4);
+  background: var(--blue);
+  box-shadow: 0 4px 10px rgba(47, 127, 237, 0.4);
 }
 .badge.encasa {
   background: var(--amber);
@@ -1214,6 +1215,15 @@ select {
   font-weight: 800;
   color: var(--muted);
   margin-top: 2px;
+}
+/* Subtítulo "quién busca" (perdido: su familia lo busca / en la calle: busca a su familia) */
+.cbusca {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 800;
+  margin-top: 3px;
 }
 .tags {
   display: flex;
@@ -1694,9 +1704,9 @@ select {
   box-shadow: 0 5px 12px rgba(255, 87, 71, 0.35);
 }
 .segb.on.e {
-  background: var(--green);
+  background: var(--blue);
   color: #fff;
-  box-shadow: 0 5px 12px rgba(23, 160, 107, 0.35);
+  box-shadow: 0 5px 12px rgba(47, 127, 237, 0.35);
 }
 .spec {
   display: flex;

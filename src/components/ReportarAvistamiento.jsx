@@ -81,7 +81,7 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
             onGps={setPunto}
             onMapaClick={setPunto}
             zona={c}
-            zonaColor={reporte.tipo === 'perdido' ? '#ff5747' : '#17a06b'}
+            zonaColor={reporte.tipo === 'perdido' ? '#ff5747' : '#2f7fed'}
             marcadores={[
               {
                 id: 'zona',
@@ -105,7 +105,7 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
         </div>
         <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--faint)', marginTop: 7 }}>
           Tocá el mapa para poner tu pin donde lo viste. Los botones del mapa te llevan a la{' '}
-          <span className="mi fill" style={{ fontSize: 15, color: reporte.tipo === 'perdido' ? '#ff5747' : '#17a06b', verticalAlign: 'middle' }}>location_on</span> zona del aviso o a{' '}
+          <span className="mi fill" style={{ fontSize: 15, color: reporte.tipo === 'perdido' ? '#ff5747' : '#2f7fed', verticalAlign: 'middle' }}>location_on</span> zona del aviso o a{' '}
           <span className="mi" style={{ fontSize: 15, color: '#2f80ed', verticalAlign: 'middle' }}>my_location</span> tu ubicación.
         </div>
 

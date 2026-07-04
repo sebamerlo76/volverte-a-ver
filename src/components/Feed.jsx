@@ -15,7 +15,7 @@ const TIEMPOS = [
 const TABS = [
   { k: 'todos', t: 'Todos' },
   { k: 'perdido', t: 'Perdidos' },
-  { k: 'encontrado', t: 'Encontrados' },
+  { k: 'encontrado', t: 'En la calle' },
   { k: 'finales', t: 'En casa', icono: 'home' },
 ]
 
@@ -227,8 +227,8 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
                   </div>
                 )}
                 {filtros.estado !== 'perdido' && (
-                  <div className="l" style={{ background: '#17a06b' }}>
-                    Encontrados · {encontrados}
+                  <div className="l" style={{ background: '#2f7fed' }}>
+                    En la calle · {encontrados}
                   </div>
                 )}
               </>
@@ -248,8 +248,8 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
               )}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: seleccionado.tipo === 'perdido' ? '#ff5747' : '#17a06b' }} />
-                  <span style={{ fontSize: 11, fontWeight: 900, color: seleccionado.tipo === 'perdido' ? '#ff5747' : '#17a06b' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: seleccionado.tipo === 'perdido' ? '#ff5747' : '#2f7fed' }} />
+                  <span style={{ fontSize: 11, fontWeight: 900, color: seleccionado.tipo === 'perdido' ? '#ff5747' : '#2f7fed' }}>
                     {seleccionado.tipo.toUpperCase()} · {tiempoRelativo(seleccionado.creadoEn)}
                   </span>
                 </div>

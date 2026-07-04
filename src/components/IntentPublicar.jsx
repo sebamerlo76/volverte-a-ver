@@ -26,7 +26,7 @@ export default function IntentPublicar({ onPerdido, onEncontre, onCerrar }) {
         </button>
 
         <button className="intent-card" onClick={onEncontre}>
-          <div className="intent-ic" style={{ background: '#e7f6f1', color: 'var(--green)' }}>
+          <div className="intent-ic" style={{ background: '#eef3fe', color: 'var(--blue)' }}>
             <span className="mi fill" style={{ fontSize: 32 }}>
               pets
             </span>

@@ -3,7 +3,7 @@ import { nombreMostrado, tiempoRelativo } from '../lib/formato.js'
 export default function PetCard({ r, onClick }) {
   const perdido = r.tipo === 'perdido'
   const resuelto = r.estado === 'resuelto'
-  const clr = perdido ? '#ff6b5e' : '#1f9d8f'
+  const clr = perdido ? '#ff6b5e' : '#2f7fed'
   return (
     <button className="card" onClick={onClick}>
       <div className={'ci' + (perdido ? '' : ' g')}>
@@ -23,16 +23,24 @@ export default function PetCard({ r, onClick }) {
           </span>
         ) : (
           <span className={'badge ' + (perdido ? 'lost' : 'found')}>
-            <span className="mi" style={{ fontSize: 16 }}>
-              {perdido ? 'error_outline' : 'check_circle'}
+            <span className={'mi' + (perdido ? '' : ' fill')} style={{ fontSize: 16 }}>
+              {perdido ? 'error_outline' : 'pets'}
             </span>
-            {perdido ? 'Perdido' : 'Encontrado'}
+            {perdido ? 'Perdido' : 'En la calle'}
           </span>
         )}
         <span className="time">{tiempoRelativo(r.creadoEn)}</span>
       </div>
       <div className="cbody">
         <div className="cname">{nombreMostrado(r)}</div>
+        {!resuelto && (
+          <div className="cbusca" style={{ color: clr }}>
+            <span className="mi fill" style={{ fontSize: 14 }}>
+              {perdido ? 'search' : 'volunteer_activism'}
+            </span>
+            {perdido ? 'Su familia lo busca' : 'Busca a su familia'}
+          </div>
+        )}
         <div className="cmeta">
           <span className="mi" style={{ fontSize: 16, color: clr }}>
             location_on

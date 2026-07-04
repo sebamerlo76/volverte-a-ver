@@ -60,8 +60,8 @@ export default function Mapa({ reportes, onAbrir, onToast }) {
           <div className="l" style={{ background: '#ff5747' }}>
             Perdidos · {perdidos}
           </div>
-          <div className="l" style={{ background: '#17a06b' }}>
-            Encontrados · {encontrados}
+          <div className="l" style={{ background: '#2f7fed' }}>
+            En la calle · {encontrados}
           </div>
         </div>
 
@@ -85,14 +85,14 @@ export default function Mapa({ reportes, onAbrir, onToast }) {
                     width: 8,
                     height: 8,
                     borderRadius: '50%',
-                    background: seleccionado.tipo === 'perdido' ? '#ff5747' : '#17a06b',
+                    background: seleccionado.tipo === 'perdido' ? '#ff5747' : '#2f7fed',
                   }}
                 />
                 <span
                   style={{
                     fontSize: 11,
                     fontWeight: 900,
-                    color: seleccionado.tipo === 'perdido' ? '#ff5747' : '#17a06b',
+                    color: seleccionado.tipo === 'perdido' ? '#ff5747' : '#2f7fed',
                   }}
                 >
                   {seleccionado.tipo.toUpperCase()} · {tiempoRelativo(seleccionado.creadoEn)}

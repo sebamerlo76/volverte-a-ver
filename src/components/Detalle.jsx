@@ -75,7 +75,7 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
   if (!r) return null
   const perdido = r.tipo === 'perdido'
   const resuelto = r.estado === 'resuelto'
-  const clr = perdido ? '#ff6b5e' : '#1f9d8f'
+  const clr = perdido ? '#ff6b5e' : '#2f7fed'
   const fotos = r.fotos && r.fotos.length ? r.fotos : r.foto ? [r.foto] : []
   const centro = puntoDeReporte(r)
 
@@ -129,14 +129,22 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
           </button>
           <span className={'badge ' + (resuelto ? 'encasa' : perdido ? 'lost' : 'found')} style={{ top: 16, left: 'auto', right: 16 }}>
             <span className="mi" style={{ fontSize: 16 }}>
-              {resuelto ? 'celebration' : perdido ? 'error_outline' : 'check_circle'}
+              {resuelto ? 'celebration' : perdido ? 'error_outline' : 'pets'}
             </span>
-            {resuelto ? 'En casa' : perdido ? 'Perdido' : 'Encontrado'} · {tiempoRelativo(r.creadoEn)}
+            {resuelto ? 'En casa' : perdido ? 'Perdido' : 'En la calle'} · {tiempoRelativo(r.creadoEn)}
           </span>
         </div>
 
         <div className="dpad">
           <div className="dname">{nombreMostrado(r)}</div>
+          {!resuelto && (
+            <div className="cbusca" style={{ color: clr, marginTop: 5 }}>
+              <span className="mi fill" style={{ fontSize: 15 }}>
+                {perdido ? 'search' : 'volunteer_activism'}
+              </span>
+              {perdido ? 'Su familia lo busca' : 'Busca a su familia'}
+            </div>
+          )}
           <div className="cmeta" style={{ fontSize: 14, marginTop: 5 }}>
             <span className="mi" style={{ fontSize: 17, color: clr }}>
               location_on

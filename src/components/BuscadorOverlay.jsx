@@ -111,9 +111,9 @@ export default function BuscadorOverlay({ reportes, q, onQ, onOpen, onCerrar }) 
                 </div>
                 <span
                   className="bres-badge"
-                  style={{ background: resuelto ? '#e0a300' : perdido ? '#ff5747' : '#17a06b' }}
+                  style={{ background: resuelto ? '#e0a300' : perdido ? '#ff5747' : '#2f7fed' }}
                 >
-                  {resuelto ? 'En casa' : perdido ? 'Perdido' : 'Encontrado'}
+                  {resuelto ? 'En casa' : perdido ? 'Perdido' : 'En la calle'}
                 </span>
               </button>
             )

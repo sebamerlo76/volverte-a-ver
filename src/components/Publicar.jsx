@@ -149,8 +149,8 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, onCerrar,
             Perdí a mi mascota
           </button>
           <button className={'segb e' + (tipo === 'encontrado' ? ' on' : '')} onClick={() => setTipo('encontrado')}>
-            <span className="mi" style={{ fontSize: 19 }}>
-              check_circle
+            <span className="mi fill" style={{ fontSize: 19 }}>
+              pets
             </span>
             Encontré una
           </button>
