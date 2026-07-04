@@ -100,6 +100,7 @@ export async function getReportes() {
       .from('reportes')
       .select('*')
       .eq('estado', 'activo')
+      .eq('oculto', false)
       .order('creado_en', { ascending: false })
     if (error) throw error
     return data.map(desdeFila)
@@ -160,6 +161,21 @@ export async function eliminarUbicacion(id) {
 }
 
 // ---------------------------------------------------------------------------
+// Desactivar / reactivar cuenta (reversible): oculta o muestra los avisos del usuario.
+// ---------------------------------------------------------------------------
+export async function desactivarCuenta(userId) {
+  if (!supabaseConfigurado || !userId) return
+  await supabase.from('reportes').update({ oculto: true }).eq('user_id', userId)
+  await supabase.auth.updateUser({ data: { desactivada: true } })
+}
+
+export async function reactivarCuenta(userId) {
+  if (!supabaseConfigurado || !userId) return
+  await supabase.from('reportes').update({ oculto: false }).eq('user_id', userId)
+  await supabase.auth.updateUser({ data: { desactivada: false } })
+}
+
+// ---------------------------------------------------------------------------
 // Centro de notificaciones in-app (la campanita)
 // ---------------------------------------------------------------------------
 function notifDesdeFila(n) {
@@ -197,7 +213,7 @@ export async function marcarLeidasDeReporte(userId, reporteId) {
 export async function getReportePorId(id) {
   if (!id) return null
   if (supabaseConfigurado) {
-    const { data, error } = await supabase.from('reportes').select('*').eq('id', id).maybeSingle()
+    const { data, error } = await supabase.from('reportes').select('*').eq('id', id).eq('oculto', false).maybeSingle()
     if (error) throw error
     return data ? desdeFila(data) : null
   }
@@ -228,6 +244,7 @@ export async function getReencontrados() {
       .from('reportes')
       .select('*')
       .eq('estado', 'resuelto')
+      .eq('oculto', false)
       .order('creado_en', { ascending: false })
       .limit(50)
     if (error) throw error

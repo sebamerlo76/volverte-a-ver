@@ -95,6 +95,7 @@ async function manejarReporte(nuevo: any) {
     .from('reportes')
     .select('*')
     .eq('estado', 'activo')
+    .eq('oculto', false)
     .eq('tipo', opuesto)
     .eq('especie', nuevo.especie)
     .eq('localidad', nuevo.localidad || 'Paraná')

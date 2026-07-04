@@ -31,6 +31,12 @@ const PASOS = [
     t: 'Te avisamos',
     d: 'Activá las notificaciones: te aviso si aparece o si alguien la ve. Y compartí el aviso para llegar a más gente. 📢',
   },
+  {
+    ic: 'install_mobile',
+    color: 'var(--navy)',
+    t: 'Instalá la app 📲',
+    d: 'Tenela en tu inicio como cualquier app.\n\n📱 Android: menú ⋮ → "Instalar app".\n🍎 iPhone: en Safari, tocá Compartir (el cuadradito con la flecha ↑) → "Agregar a inicio".',
+  },
 ]
 
 export default function WelcomeGuide({ onClose }) {

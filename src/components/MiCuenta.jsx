@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import PetCard from './PetCard.jsx'
-import { getMisReportes, getMisMascotas, marcarResuelto } from '../data/store.js'
+import { getMisReportes, getMisMascotas, marcarResuelto, desactivarCuenta, reactivarCuenta } from '../data/store.js'
 import { avatarDe, nombreUsuario } from '../lib/formato.js'
 import { soportado as pushSoportado, yaSuscripto, activarPush, desactivarPush } from '../lib/push.js'
 import { supabase } from '../lib/supabase.js'
@@ -110,6 +110,29 @@ export default function MiCuenta({
     }
   }
 
+  const desactivada = !!user?.user_metadata?.desactivada
+  async function desactivar() {
+    if (!window.confirm('¿Desactivar tu cuenta? Tus avisos dejan de verse y no vas a recibir notificaciones. Podés reactivarla cuando quieras.')) return
+    try {
+      await desactivarCuenta(user.id)
+      await desactivarPush().catch(() => {})
+      setPushOn(false)
+      onToast?.('Tu cuenta quedó desactivada. Reactivala cuando quieras 🐾')
+    } catch (e) {
+      console.error(e)
+      onToast?.('No se pudo 😕')
+    }
+  }
+  async function reactivar() {
+    try {
+      await reactivarCuenta(user.id)
+      onToast?.('🎉 ¡Cuenta reactivada! Tus avisos vuelven a verse.')
+    } catch (e) {
+      console.error(e)
+      onToast?.('No se pudo 😕')
+    }
+  }
+
   const email = user?.email || 'Tu cuenta'
   const nombre = nombreEdit || nombreUsuario(user)
   const avatar = avatarDe(user)
@@ -186,13 +209,24 @@ export default function MiCuenta({
                 Cerrar sesión
               </button>
             </div>
-            <div style={{ padding: '0 20px 34px', textAlign: 'center' }}>
-              <button
-                className="btn-desactivar"
-                onClick={() => onToast?.('🔧 Muy pronto vas a poder desactivar tu cuenta')}
-              >
-                Desactivar mi cuenta
-              </button>
+            <div style={{ padding: '0 20px 34px' }}>
+              {desactivada ? (
+                <div className="desact-box">
+                  <div className="desact-txt">
+                    Tu cuenta está <b>desactivada</b>. Tus avisos no se ven y no recibís notificaciones.
+                  </div>
+                  <button className="btn-reactivar" onClick={reactivar}>
+                    <span className="mi" style={{ fontSize: 20 }}>
+                      restart_alt
+                    </span>
+                    Reactivar mi cuenta
+                  </button>
+                </div>
+              ) : (
+                <button className="btn-desactivar" onClick={desactivar}>
+                  Desactivar mi cuenta
+                </button>
+              )}
             </div>
           </>
         )}
