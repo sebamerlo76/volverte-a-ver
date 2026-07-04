@@ -50,10 +50,11 @@ async function prefsDe(userIds: string[]) {
 
 async function enviarAUsuarios(userIds: string[], payload: any, meta: any = {}) {
   const ids = [...new Set(userIds.filter(Boolean))]
+  console.log('enviarAUsuarios', { ids: ids.length, tipo: meta.tipo })
   if (!ids.length) return 0
   // Guardar en el "inbox" de cada usuario, aunque no tenga push activado.
   try {
-    await sb.from('notificaciones').insert(
+    const { error } = await sb.from('notificaciones').insert(
       ids.map((uid) => ({
         user_id: uid,
         titulo: payload.title,
@@ -62,8 +63,10 @@ async function enviarAUsuarios(userIds: string[], payload: any, meta: any = {}) 
         tipo: meta.tipo ?? null,
       })),
     )
+    if (error) console.error('inbox insert error:', error.message)
+    else console.log('inbox ok', ids.length, meta.tipo)
   } catch (e) {
-    console.error('inbox insert error:', e)
+    console.error('inbox insert throw:', e)
   }
   const { data: subs } = await sb.from('push_subs').select('*').in('user_id', ids)
   if (!subs?.length) return 0
@@ -163,7 +166,11 @@ async function seguidoresDe(reporteId: string) {
 
 async function manejarAvistamiento(rec: any) {
   const { data: rep } = await sb.from('reportes').select('*').eq('id', rec.reporte_id).maybeSingle()
-  if (!rep) return
+  if (!rep) {
+    console.log('avist: reporte no encontrado', rec.reporte_id)
+    return
+  }
+  console.log('avist rep', rep.id, 'user_id', rep.user_id)
   const nombre = rep.nombre || (ESP[rep.especie] || 'tu mascota')
 
   // Dueño del aviso.
@@ -243,6 +250,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json()
     const rec = body.record
+    console.log('notificar', body.type, body.table, rec?.id)
     if (rec) {
       if (body.table === 'reportes' && body.type === 'INSERT') await manejarReporte(rec)
       else if (body.table === 'reportes' && body.type === 'UPDATE') await manejarReporteUpdate(rec, body.old_record)
