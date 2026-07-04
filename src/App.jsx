@@ -80,6 +80,13 @@ export default function App() {
     else setNotifs([])
   }, [user?.id])
 
+  // Refrescar al entrar a Mi cuenta, para que el chip "Novedad" esté al día.
+  useEffect(() => {
+    if (vista === 'cuenta' && user?.id) {
+      getNotificaciones(user.id).then(setNotifs).catch(() => {})
+    }
+  }, [vista, user?.id])
+
   async function cargar() {
     try {
       setReportes(await getReportes())
