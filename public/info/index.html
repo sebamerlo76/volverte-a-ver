@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1f3852" />
+  <title>Chicho — Buscador de mascotas perdidas en Paraná</title>
+  <meta name="description" content="Chicho ayuda a que las mascotas perdidas de Paraná vuelvan a casa. Publicá si perdiste o encontraste una, con reconocimiento por foto y avisos por tu zona. Gratis." />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" href="/logo.png" />
+
+  <!-- Compartir (WhatsApp/Facebook) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Chicho" />
+  <meta property="og:title" content="Chicho — Mascotas perdidas en Paraná" />
+  <meta property="og:description" content="Ayudamos a que las mascotas perdidas de Paraná vuelvan a casa. 🐾" />
+  <meta property="og:image" content="https://chicho.ar/isologo.png" />
+  <meta property="og:url" content="https://chicho.ar/info" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --navy: #1f3852;
+      --slate: #3e5367;
+      --cream: #faf7f1;
+      --coral: #ff6b5e;
+      --blue: #2f7fed;
+      --amber: #e0a300;
+      --green: #17a06b;
+      --muted: #647a86;
+      --line: #efe3d0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Nunito, system-ui, sans-serif;
+      background: var(--cream);
+      color: #2a2320;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+    h1, h2, h3 { font-family: Fredoka, sans-serif; font-weight: 600; color: var(--navy); line-height: 1.2; }
+    a { color: var(--blue); }
+
+    /* Top bar */
+    .top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px; max-width: 860px; margin: 0 auto;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 22px; color: var(--navy); }
+    .brand img { width: 40px; height: 40px; display: block; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--navy); color: #fff; text-decoration: none;
+      font-weight: 800; font-size: 15px; padding: 11px 20px; border-radius: 14px;
+      box-shadow: 0 8px 20px rgba(31,56,82,.25); transition: transform .12s;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn.sm { padding: 8px 15px; font-size: 13.5px; box-shadow: none; }
+
+    /* Hero */
+    .hero { text-align: center; padding: 26px 0 40px; }
+    .hero img.iso { width: 78%; max-width: 300px; margin: 8px auto 22px; display: block; }
+    .hero h1 { font-size: clamp(26px, 6vw, 38px); margin-bottom: 12px; }
+    .hero p { font-size: 17px; color: var(--slate); font-weight: 700; max-width: 560px; margin: 0 auto 26px; }
+    .hero .btn { font-size: 17px; padding: 15px 30px; border-radius: 16px; }
+    .hero .free { margin-top: 14px; font-size: 13.5px; font-weight: 800; color: var(--muted); }
+
+    section { padding: 30px 0; }
+    .sec-t { text-align: center; font-size: 24px; margin-bottom: 8px; }
+    .sec-s { text-align: center; color: var(--muted); font-weight: 700; margin-bottom: 24px; }
+
+    /* Cards */
+    .cards { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 640px) { .cards { grid-template-columns: 1fr 1fr 1fr; } }
+    .card {
+      background: #fff; border: 1px solid #f0e7dc; border-radius: 20px;
+      padding: 22px 20px; box-shadow: 0 10px 26px rgba(90,55,35,.07);
+    }
+    .card .ic {
+      width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+      font-size: 26px; margin-bottom: 12px;
+    }
+    .card h3 { font-size: 18px; margin-bottom: 6px; }
+    .card p { font-size: 14.5px; color: var(--slate); font-weight: 600; }
+    .ic.lost { background: #fff1ee; }
+    .ic.calle { background: #eef3fe; }
+    .ic.avisa { background: #fdf6e3; }
+
+    /* Features */
+    .feats { display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 620px; margin: 0 auto; }
+    @media (min-width: 640px) { .feats { grid-template-columns: 1fr 1fr; } }
+    .feat { display: flex; gap: 12px; background: #fff; border: 1px solid #f0e7dc; border-radius: 16px; padding: 15px 16px; }
+    .feat .fe { font-size: 24px; flex: none; }
+    .feat b { color: var(--navy); }
+    .feat span { font-size: 14px; color: var(--slate); font-weight: 600; }
+
+    /* Instalar */
+    .inst { display: grid; grid-template-columns: 1fr; gap: 14px; max-width: 620px; margin: 0 auto; }
+    @media (min-width: 560px) { .inst { grid-template-columns: 1fr 1fr; } }
+    .inst .card h3 { display: flex; align-items: center; gap: 8px; }
+    .inst .card p { margin-top: 4px; }
+
+    /* Trust */
+    .trust { background: #fff; border: 1px solid #f0e7dc; border-radius: 22px; padding: 24px; text-align: center; }
+    .trust p { color: var(--slate); font-weight: 700; max-width: 560px; margin: 6px auto 0; }
+    .trust .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+    .chip { background: var(--cream); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; font-size: 13.5px; font-weight: 800; color: var(--navy); }
+
+    /* CTA final */
+    .cta-final { text-align: center; padding: 36px 0 20px; }
+
+    /* Footer */
+    footer { background: var(--navy); color: #e7edf3; margin-top: 30px; padding: 30px 20px calc(30px + env(safe-area-inset-bottom)); }
+    footer .fwrap { max-width: 860px; margin: 0 auto; text-align: center; }
+    footer .brand { color: #fff; justify-content: center; margin-bottom: 10px; }
+    footer a { color: #cfe0f5; font-weight: 800; text-decoration: none; }
+    footer .links { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; margin: 12px 0; font-size: 14px; }
+    footer .made { font-size: 13px; opacity: .8; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <span class="brand"><img src="/logo.png" alt="Chicho" />Chicho</span>
+    <a class="btn sm" href="/">Abrir la app</a>
+  </div>
+
+  <header class="hero wrap">
+    <img class="iso" src="/isologo.png" alt="Chicho" />
+    <h1>Que las mascotas perdidas<br />de Paraná vuelvan a casa 🐾</h1>
+    <p>Chicho es el buscador local de mascotas perdidas y encontradas. Publicá, buscá y ayudá a tu barrio.</p>
+    <a class="btn" href="/">Abrir la app</a>
+    <div class="free">Gratis · Hecho en Paraná</div>
+  </header>
+
+  <section class="wrap">
+    <h2 class="sec-t">¿Cómo funciona?</h2>
+    <div class="sec-s">Tres formas de ayudar</div>
+    <div class="cards">
+      <div class="card">
+        <div class="ic lost">🔴</div>
+        <h3>Perdiste una</h3>
+        <p>Publicás tu mascota y su familia (vos y tus vecinos) la busca. Aparece en el mapa del barrio.</p>
+      </div>
+      <div class="card">
+        <div class="ic calle">🔵</div>
+        <h3>La viste en la calle</h3>
+        <p>¿Encontraste un animal sin dueño? Lo cargás y Chicho busca a su familia entre los perdidos.</p>
+      </div>
+      <div class="card">
+        <div class="ic avisa">🎉</div>
+        <h3>Te avisamos</h3>
+        <p>Te llega una notificación si aparece una parecida, si alguien la ve, o cuando vuelve a casa.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2 class="sec-t">Lo que la hace distinta</h2>
+    <div class="sec-s">Pensada para encontrarlas más rápido</div>
+    <div class="feats">
+      <div class="feat"><span class="fe">👀</span><span><b>Reconocimiento por foto.</b> Si cargás una que encontraste, te sugiere las perdidas que se parecen.</span></div>
+      <div class="feat"><span class="fe">📍</span><span><b>Avisos por tu zona.</b> Elegís tus lugares (casa, trabajo) y te avisamos si aparece algo cerca.</span></div>
+      <div class="feat"><span class="fe">🔔</span><span><b>Seguí una búsqueda.</b> Te enterás de cada novedad de la mascota que te importa.</span></div>
+      <div class="feat"><span class="fe">🏷️</span><span><b>QR para el collar.</b> Quien la encuentre escanea y contacta a su familia al toque.</span></div>
+      <div class="feat"><span class="fe">📢</span><span><b>Compartí en un toque.</b> Genera una imagen linda del aviso para tus grupos de WhatsApp.</span></div>
+      <div class="feat"><span class="fe">🗺️</span><span><b>Todo en el mapa.</b> Los avistamientos arman el recorrido de dónde la vieron.</span></div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2 class="sec-t">Instalala como app 📲</h2>
+    <div class="sec-s">Tenela en tu inicio, sin bajar nada de ninguna tienda</div>
+    <div class="inst">
+      <div class="card">
+        <h3>📱 Android</h3>
+        <p>Abrí <b>chicho.ar</b> en Chrome → menú <b>⋮</b> → <b>"Instalar app"</b> (o "Agregar a pantalla de inicio").</p>
+      </div>
+      <div class="card">
+        <h3>🍎 iPhone</h3>
+        <p>Abrí <b>chicho.ar</b> en Safari → tocá <b>Compartir</b> (el cuadradito con la flecha ↑) → <b>"Agregar a inicio"</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="trust">
+      <h2 class="sec-t" style="margin-bottom:2px">Gratis, local y cuidada</h2>
+      <p>Chicho es gratis y hecho en Paraná. Tus datos se usan solo para conectar mascotas con sus familias.</p>
+      <div class="chips">
+        <span class="chip">🆓 Gratis</span>
+        <span class="chip">📍 De Paraná</span>
+        <span class="chip">🔒 <a href="/privacidad" style="color:inherit;text-decoration:none">Cuidamos tus datos</a></span>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-final wrap">
+    <a class="btn" href="/">Abrir la app 🐾</a>
+  </div>
+
+  <footer>
+    <div class="fwrap">
+      <span class="brand"><img src="/logo.png" alt="" style="width:34px;height:34px" />Chicho</span>
+      <div class="links">
+        <a href="/">Abrir la app</a>
+        <a href="/privacidad">Privacidad</a>
+        <a href="mailto:sebamerlo76@gmail.com">Contacto</a>
+      </div>
+      <div class="made">Hecho con 🐾 en Paraná, Entre Ríos.</div>
+    </div>
+  </footer>
+</body>
+</html>
