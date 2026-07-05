@@ -19,6 +19,7 @@ import MenuUsuario from './components/MenuUsuario.jsx'
 import WelcomeGuide from './components/WelcomeGuide.jsx'
 import Admin from './components/Admin.jsx'
 import Moderacion from './components/Moderacion.jsx'
+import Soporte from './components/Soporte.jsx'
 import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { nombreMostrado } from './lib/formato.js'
@@ -47,6 +48,7 @@ export default function App() {
   const [menuAbierto, setMenuAbierto] = useState(false) // menú de la cara
   const [cuentaSeccion, setCuentaSeccion] = useState('cuenta') // sección abierta de Mi cuenta
   const [guiaAbierta, setGuiaAbierta] = useState(false) // recorrido de bienvenida
+  const [soporteAbierto, setSoporteAbierto] = useState(false) // hoja de ayuda/soporte
   const [hayUpdate, setHayUpdate] = useState(false) // hay una versión nueva desplegada
 
   const notifsNoLeidas = notifs.filter((n) => !n.leida).length
@@ -197,6 +199,10 @@ export default function App() {
     setMenuAbierto(false)
     if (sec === 'guia') {
       setGuiaAbierta(true)
+      return
+    }
+    if (sec === 'ayuda') {
+      setSoporteAbierto(true)
       return
     }
     if (sec === 'admin') {
@@ -550,6 +556,8 @@ export default function App() {
         {vista === 'moderacion' && esAdmin && <Moderacion onVolver={() => setVista('feed')} />}
 
         {guiaAbierta && <WelcomeGuide onClose={cerrarGuia} />}
+
+        {soporteAbierto && <Soporte onCerrar={() => setSoporteAbierto(false)} />}
 
         {menuAbierto && (
           <MenuUsuario user={user} esAdmin={esAdmin} onSeccion={irSeccion} onLogout={salir} onCerrar={() => setMenuAbierto(false)} />

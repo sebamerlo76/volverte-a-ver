@@ -8,6 +8,7 @@ const ITEMS = [
   { k: 'avisos', ic: 'campaign', t: 'Mis avisos' },
   { k: 'cuenta', ic: 'person', t: 'Mi cuenta' },
   { k: 'guia', ic: 'help', t: 'Guía' },
+  { k: 'ayuda', ic: 'support_agent', t: 'Ayuda / Soporte' },
 ]
 
 export default function MenuUsuario({ user, esAdmin, onSeccion, onLogout, onCerrar }) {

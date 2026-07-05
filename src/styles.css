@@ -2455,6 +2455,7 @@ select {
   font-weight: 800;
   font-size: 15.5px;
   color: #2a2320;
+  text-decoration: none;
 }
 .pp-op:active {
   background: #f0e7dc;
