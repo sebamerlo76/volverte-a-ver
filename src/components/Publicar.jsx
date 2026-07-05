@@ -7,6 +7,7 @@ import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import FechaPicker from './FechaPicker.jsx'
 import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
+import { tieneGroseria } from '../lib/moderacion.js'
 
 export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoGuardado = '', onCerrar, onPublicado, onToast }) {
   const editando = !!inicial
@@ -58,6 +59,10 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
   }
 
   async function publicar() {
+    if (tieneGroseria(`${nombre} ${descripcion} ${raza}`)) {
+      onToast('Cuidá el lenguaje: sacá los insultos 🙏')
+      return
+    }
     if (!whatsapp.trim()) {
       onToast('Poné un WhatsApp de contacto 🙏')
       return

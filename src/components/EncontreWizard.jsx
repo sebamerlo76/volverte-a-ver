@@ -9,6 +9,7 @@ import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib
 import { addReporte, addMascota, subirFotos } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, linkWhatsApp } from '../lib/formato.js'
 import { similitud } from '../lib/vector.js'
+import { tieneGroseria } from '../lib/moderacion.js'
 
 function ultimoWhatsapp() {
   try {
@@ -126,6 +127,10 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
   }, [reportes, especie, color, tamano, sexo, zona, paso, huella])
 
   async function publicar() {
+    if (tieneGroseria(`${descripcion} ${raza}`)) {
+      onToast('Cuidá el lenguaje: sacá los insultos 🙏')
+      return
+    }
     if (!soloAviso && !whatsapp.trim()) {
       onToast('Poné un WhatsApp, o marcá "solo quiero avisar" 🙏')
       return

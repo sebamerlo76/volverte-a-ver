@@ -6,6 +6,7 @@ import { puntoDeReporte } from '../lib/parana.js'
 import { addAvistamiento, subirFotos } from '../data/store.js'
 import { nombreMostrado } from '../lib/formato.js'
 import { puedeEnviarAvist, registrarEnvioAvist } from '../lib/antispam.js'
+import { tieneGroseria } from '../lib/moderacion.js'
 
 const NOTAS = ['Lo vi suelto', 'Alguien lo tiene', 'Cruzó la calle', 'Estaba asustado', 'Se dejó acercar']
 
@@ -23,6 +24,10 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
     // Honeypot: un humano no ve este campo; si vino lleno, es un bot → fingimos éxito.
     if (trampa) {
       onEnviado()
+      return
+    }
+    if (tieneGroseria(`${nota} ${autor}`)) {
+      onToast('Cuidá el lenguaje: sacá los insultos 🙏')
       return
     }
     // Rate-limit por dispositivo (frena doble-tap y abuso casual).
