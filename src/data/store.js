@@ -176,6 +176,16 @@ export async function reactivarCuenta(userId) {
 }
 
 // ---------------------------------------------------------------------------
+// Panel de administración (solo el dueño; la función SQL valida por email).
+// ---------------------------------------------------------------------------
+export async function getAdminStats() {
+  if (!supabaseConfigurado) return null
+  const { data, error } = await supabase.rpc('admin_stats')
+  if (error) throw error
+  return data
+}
+
+// ---------------------------------------------------------------------------
 // Centro de notificaciones in-app (la campanita)
 // ---------------------------------------------------------------------------
 function notifDesdeFila(n) {

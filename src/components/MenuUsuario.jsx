@@ -10,10 +10,11 @@ const ITEMS = [
   { k: 'guia', ic: 'help', t: 'Guía' },
 ]
 
-export default function MenuUsuario({ user, onSeccion, onLogout, onCerrar }) {
+export default function MenuUsuario({ user, esAdmin, onSeccion, onLogout, onCerrar }) {
   const nombre = nombreUsuario(user)
   const email = user?.email || 'Tu cuenta'
   const avatar = avatarDe(user)
+  const items = esAdmin ? [{ k: 'admin', ic: 'insights', t: 'Panel (admin)' }, ...ITEMS] : ITEMS
 
   return (
     <div className="menu-overlay" onClick={onCerrar}>
@@ -35,7 +36,7 @@ export default function MenuUsuario({ user, onSeccion, onLogout, onCerrar }) {
         </div>
 
         <div className="menu-lista">
-          {ITEMS.map((it) => (
+          {items.map((it) => (
             <button key={it.k} className="menu-item" onClick={() => onSeccion(it.k)}>
               <span className="mi menu-ico">{it.ic}</span>
               {it.t}

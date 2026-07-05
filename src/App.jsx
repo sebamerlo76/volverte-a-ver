@@ -17,6 +17,7 @@ import BottomNav from './components/BottomNav.jsx'
 import NotifPanel from './components/NotifPanel.jsx'
 import MenuUsuario from './components/MenuUsuario.jsx'
 import WelcomeGuide from './components/WelcomeGuide.jsx'
+import Admin from './components/Admin.jsx'
 import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { nombreMostrado } from './lib/formato.js'
@@ -51,6 +52,7 @@ export default function App() {
 
   const authActivo = supabaseConfigurado
   const logueado = !authActivo || !!user
+  const esAdmin = user?.email === 'sebamerlo76@gmail.com'
 
   // Cargar reportes al iniciar.
   useEffect(() => {
@@ -194,6 +196,10 @@ export default function App() {
     setMenuAbierto(false)
     if (sec === 'guia') {
       setGuiaAbierta(true)
+      return
+    }
+    if (sec === 'admin') {
+      setVista('admin')
       return
     }
     setCuentaSeccion(sec)
@@ -535,10 +541,12 @@ export default function App() {
         )}
         {vista === 'feed' && <BottomNav modo={homeModo} onNav={navBarra} />}
 
+        {vista === 'admin' && esAdmin && <Admin onVolver={() => setVista('feed')} />}
+
         {guiaAbierta && <WelcomeGuide onClose={cerrarGuia} />}
 
         {menuAbierto && (
-          <MenuUsuario user={user} onSeccion={irSeccion} onLogout={salir} onCerrar={() => setMenuAbierto(false)} />
+          <MenuUsuario user={user} esAdmin={esAdmin} onSeccion={irSeccion} onLogout={salir} onCerrar={() => setMenuAbierto(false)} />
         )}
 
         {notifsAbierto && (

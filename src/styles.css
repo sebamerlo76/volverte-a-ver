@@ -2147,6 +2147,27 @@ select {
   font-size: 15px;
 }
 
+/* Panel de administración */
+.adm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.adm-grid.tres { grid-template-columns: 1fr 1fr 1fr; }
+.adm-card { background: #fff; border: 1px solid #f0e7dc; border-radius: 16px; padding: 14px 12px; text-align: center; }
+.adm-n { font-family: Fredoka, sans-serif; font-weight: 600; font-size: 26px; color: var(--navy); line-height: 1.1; }
+.adm-l { font-size: 11.5px; font-weight: 800; color: var(--muted); margin-top: 3px; }
+.adm-sub { font-family: Fredoka, sans-serif; font-weight: 500; font-size: 15px; color: var(--navy); margin: 22px 0 2px; }
+.adm-exito { display: flex; align-items: center; gap: 14px; background: #fdf6e3; border: 1px solid #f5e6bf; border-radius: 18px; padding: 16px 18px; margin-top: 14px; font-size: 14px; font-weight: 700; color: #7a5c00; }
+.adm-exito-n { font-family: Fredoka, sans-serif; font-weight: 600; font-size: 34px; color: var(--amber); line-height: 1; flex: none; }
+.adm-chart { display: flex; align-items: flex-end; gap: 5px; height: 150px; background: #fff; border: 1px solid #f0e7dc; border-radius: 16px; padding: 12px 10px 6px; margin-top: 8px; }
+.adm-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; }
+.adm-bar-v { font-size: 10px; font-weight: 800; color: var(--muted); height: 12px; }
+.adm-bar { width: 100%; max-width: 20px; min-height: 2px; background: var(--navy); border-radius: 5px 5px 0 0; }
+.adm-bar-x { font-size: 9.5px; font-weight: 800; color: var(--faint); }
+.adm-zonas { display: flex; flex-direction: column; gap: 9px; margin-top: 8px; }
+.adm-zona-t { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; color: #2a2320; margin-bottom: 3px; }
+.adm-zona-t b { color: var(--navy); }
+.adm-zona-bar { height: 8px; background: #f0e7dc; border-radius: 999px; overflow: hidden; }
+.adm-zona-bar div { height: 100%; background: var(--teal); border-radius: 999px; }
+.adm-nota { font-size: 11.5px; color: var(--faint); text-align: center; margin-top: 22px; line-height: 1.5; }
+
 /* Recorrido de bienvenida (carrusel a pantalla completa) */
 .guia-overlay {
   position: fixed;
