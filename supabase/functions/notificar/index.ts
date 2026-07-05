@@ -94,6 +94,7 @@ async function manejarReporte(nuevo: any) {
     .select('*')
     .eq('estado', 'activo')
     .eq('oculto', false)
+    .eq('bloqueado', false)
     .eq('tipo', opuesto)
     .eq('especie', nuevo.especie)
     .eq('localidad', nuevo.localidad || 'Paraná')
@@ -175,6 +176,20 @@ async function seguidoresDe(reporteId: string) {
   return (data || []).map((s: any) => s.user_id)
 }
 
+// Push al admin (para moderación). La notif in-app la inserta el RPC.
+async function pushAAdmin(payload: any) {
+  const { data: adminId } = await sb.rpc('admin_id')
+  if (!adminId) return
+  const { data: subs } = await sb.from('push_subs').select('*').eq('user_id', adminId)
+  for (const s of subs || []) {
+    try {
+      await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload))
+    } catch (e: any) {
+      if (e?.statusCode === 404 || e?.statusCode === 410) await sb.from('push_subs').delete().eq('endpoint', s.endpoint)
+    }
+  }
+}
+
 async function manejarAvistamiento(rec: any) {
   const { data: rep } = await sb.from('reportes').select('*').eq('id', rec.reporte_id).maybeSingle()
   if (!rep) return
@@ -214,6 +229,16 @@ async function manejarAvistamiento(rec: any) {
 // Cambios en un aviso → avisar a los seguidores.
 async function manejarReporteUpdate(rec: any, old: any) {
   const nombre = rec.nombre || (ESP[rec.especie] || 'la mascota')
+
+  // Bloqueado por reportes → push al admin.
+  if (!old?.bloqueado && rec.bloqueado) {
+    await pushAAdmin({
+      title: '🚫 Aviso bloqueado por reportes',
+      body: 'Un aviso juntó 3 denuncias y se ocultó. Revisalo en Moderación.',
+      url: '/',
+    })
+    return
+  }
 
   // A) Apareció: activo → resuelto.
   if (old?.estado === 'activo' && rec.estado === 'resuelto') {

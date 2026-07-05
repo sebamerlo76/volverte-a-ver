@@ -297,48 +297,60 @@ export default function MiCuenta({
                 Cargá tu perro o gato acá 🐾 Si algún día se pierde, lo publicás al toque, sin llenar todo de nuevo.
               </div>
             ) : (
-              mascotas.map((m) => {
-                const aviso = avisoActivoDe(m)
-                const perdido = !!aviso
-                return (
-                  <div className="masc-row" key={m.id}>
-                    <button className="masc-info" onClick={() => onEditarMascota(m)}>
-                      <div className="masc-foto">
-                        {m.foto ? (
-                          <img src={m.foto} alt={m.nombre} onError={(e) => (e.target.style.display = 'none')} />
-                        ) : (
-                          <span className="mi fill" style={{ fontSize: 26, color: '#c9a58f' }}>
-                            pets
+              (() => {
+                const propias = mascotas.filter((m) => m.relacion !== 'transito')
+                const transito = mascotas.filter((m) => m.relacion === 'transito')
+                const hayMix = propias.length > 0 && transito.length > 0
+                const fila = (m) => {
+                  const aviso = avisoActivoDe(m)
+                  const perdido = !!aviso
+                  return (
+                    <div className="masc-row" key={m.id}>
+                      <button className="masc-info" onClick={() => onEditarMascota(m)}>
+                        <div className="masc-foto">
+                          {m.foto ? (
+                            <img src={m.foto} alt={m.nombre} onError={(e) => (e.target.style.display = 'none')} />
+                          ) : (
+                            <span className="mi fill" style={{ fontSize: 26, color: '#c9a58f' }}>
+                              pets
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div className="masc-nombre">
+                            {m.nombre || 'Sin nombre'}
+                            {perdido && <span className="masc-estado">Perdido</span>}
+                          </div>
+                          <div className="masc-sub">
+                            {ESPECIE_LBL[m.especie] || 'Mascota'}
+                            {m.color ? ` · ${m.color}` : ''}
+                          </div>
+                        </div>
+                      </button>
+                      {perdido ? (
+                        <button className="masc-aparecio" onClick={() => aparecio(aviso.id)}>
+                          <span className="mi" style={{ fontSize: 17 }}>
+                            celebration
                           </span>
-                        )}
-                      </div>
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <div className="masc-nombre">
-                          {m.nombre || 'Sin nombre'}
-                          {perdido && <span className="masc-estado">Perdido</span>}
-                          {m.relacion === 'transito' && <span className="masc-transito">En tránsito</span>}
-                        </div>
-                        <div className="masc-sub">
-                          {ESPECIE_LBL[m.especie] || 'Mascota'}
-                          {m.color ? ` · ${m.color}` : ''}
-                        </div>
-                      </div>
-                    </button>
-                    {perdido ? (
-                      <button className="masc-aparecio" onClick={() => aparecio(aviso.id)}>
-                        <span className="mi" style={{ fontSize: 17 }}>
-                          celebration
-                        </span>
-                        ¡Apareció!
-                      </button>
-                    ) : (
-                      <button className="masc-perdi" onClick={() => onPublicarMascota(m)}>
-                        Se me perdió
-                      </button>
-                    )}
-                  </div>
+                          ¡Apareció!
+                        </button>
+                      ) : (
+                        <button className="masc-perdi" onClick={() => onPublicarMascota(m)}>
+                          Se me perdió
+                        </button>
+                      )}
+                    </div>
+                  )
+                }
+                return (
+                  <>
+                    {hayMix && <div className="masc-grupo">Míos</div>}
+                    {propias.map(fila)}
+                    {transito.length > 0 && <div className="masc-grupo">En tránsito 🤝</div>}
+                    {transito.map(fila)}
+                  </>
                 )
-              })
+              })()
             )}
           </>
         )}

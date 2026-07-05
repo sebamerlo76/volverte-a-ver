@@ -14,7 +14,9 @@ export default function MenuUsuario({ user, esAdmin, onSeccion, onLogout, onCerr
   const nombre = nombreUsuario(user)
   const email = user?.email || 'Tu cuenta'
   const avatar = avatarDe(user)
-  const items = esAdmin ? [{ k: 'admin', ic: 'insights', t: 'Panel (admin)' }, ...ITEMS] : ITEMS
+  const items = esAdmin
+    ? [{ k: 'admin', ic: 'insights', t: 'Panel (admin)' }, { k: 'moderacion', ic: 'shield', t: 'Moderación' }, ...ITEMS]
+    : ITEMS
 
   return (
     <div className="menu-overlay" onClick={onCerrar}>

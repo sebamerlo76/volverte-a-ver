@@ -18,6 +18,7 @@ import NotifPanel from './components/NotifPanel.jsx'
 import MenuUsuario from './components/MenuUsuario.jsx'
 import WelcomeGuide from './components/WelcomeGuide.jsx'
 import Admin from './components/Admin.jsx'
+import Moderacion from './components/Moderacion.jsx'
 import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { nombreMostrado } from './lib/formato.js'
@@ -200,6 +201,10 @@ export default function App() {
     }
     if (sec === 'admin') {
       setVista('admin')
+      return
+    }
+    if (sec === 'moderacion') {
+      setVista('moderacion')
       return
     }
     setCuentaSeccion(sec)
@@ -542,6 +547,7 @@ export default function App() {
         {vista === 'feed' && <BottomNav modo={homeModo} onNav={navBarra} />}
 
         {vista === 'admin' && esAdmin && <Admin onVolver={() => setVista('feed')} />}
+        {vista === 'moderacion' && esAdmin && <Moderacion onVolver={() => setVista('feed')} />}
 
         {guiaAbierta && <WelcomeGuide onClose={cerrarGuia} />}
 

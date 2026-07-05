@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
-import { getAvistamientos, sumarApoyo } from '../data/store.js'
+import { getAvistamientos, sumarApoyo, denunciarReporte } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel } from '../lib/formato.js'
 import { compartirFlyer } from '../lib/flyer.js'
 
@@ -34,12 +34,33 @@ function marcarApoyado(id) {
     /* ignore */
   }
 }
+function yaReportado(id) {
+  try {
+    return JSON.parse(localStorage.getItem('chicho_denuncias') || '[]').includes(id)
+  } catch (e) {
+    return false
+  }
+}
+function marcarReportado(id) {
+  try {
+    const a = JSON.parse(localStorage.getItem('chicho_denuncias') || '[]')
+    if (!a.includes(id)) {
+      a.push(id)
+      localStorage.setItem('chicho_denuncias', JSON.stringify(a))
+    }
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+const MOTIVOS = ['Insulto o agresión', 'Foto inapropiada', 'Spam o falso', 'Otro']
 
 export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar }) {
   const [avist, setAvist] = useState([])
   const [fotoActiva, setFotoActiva] = useState(0)
   const [apoyos, setApoyos] = useState(r?.apoyos || 0)
   const [apoyado, setApoyado] = useState(false)
+  const [reporteAbierto, setReporteAbierto] = useState(false)
 
   useEffect(() => {
     if (!r?.id) return
@@ -70,6 +91,21 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
     } catch (e) {
       console.error(e)
     }
+  }
+
+  function abrirReporte() {
+    if (!r?.id) return
+    if (yaReportado(r.id)) {
+      onToast?.('Ya reportaste este aviso 👍')
+      return
+    }
+    setReporteAbierto(true)
+  }
+  function reportar(motivo) {
+    setReporteAbierto(false)
+    marcarReportado(r.id)
+    onToast?.('Gracias, lo vamos a revisar 🙏')
+    denunciarReporte(r.id, motivo).catch((e) => console.error(e))
   }
 
   if (!r) return null
@@ -307,8 +343,35 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
             </div>
           )}
         </div>
+        <div style={{ textAlign: 'center', padding: '2px 20px' }}>
+          <button className="btn-reportar" onClick={abrirReporte}>
+            <span className="mi" style={{ fontSize: 15 }}>
+              flag
+            </span>
+            Reportar este aviso
+          </button>
+        </div>
         <div style={{ height: 18 }} />
       </div>
+
+      {reporteAbierto && (
+        <div className="pp-sheet-ov" onClick={() => setReporteAbierto(false)}>
+          <div className="pp-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="report-sheet-t">¿Por qué reportás este aviso?</div>
+            {MOTIVOS.map((m) => (
+              <button key={m} className="pp-op" onClick={() => reportar(m)}>
+                <span className="mi" style={{ fontSize: 22, color: 'var(--coral)' }}>
+                  flag
+                </span>
+                {m}
+              </button>
+            ))}
+            <button className="pp-cancel" onClick={() => setReporteAbierto(false)}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
 
       {esMio ? (
         <div className="cta">

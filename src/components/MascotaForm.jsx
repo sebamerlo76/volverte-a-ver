@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { addMascota, actualizarMascota, eliminarMascota, subirFoto } from '../data/store.js'
+import { addMascota, actualizarMascota, eliminarMascota, subirFotos } from '../data/store.js'
 import SelectChips from './SelectChips.jsx'
+import PhotoPicker from './PhotoPicker.jsx'
 import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS } from '../lib/opciones.js'
 
 export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, onVerQR }) {
@@ -8,8 +9,7 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, on
   const [especie, setEspecie] = useState(inicial?.especie || 'perro')
   const [relacion, setRelacion] = useState(inicial?.relacion || 'propia')
   const [whatsapp, setWhatsapp] = useState(inicial?.whatsapp || '')
-  const [foto, setFoto] = useState(inicial?.foto || '')
-  const [fotoFile, setFotoFile] = useState(null)
+  const [fotos, setFotos] = useState(inicial?.foto ? [{ url: inicial.foto, file: null }] : [])
   const [nombre, setNombre] = useState(inicial?.nombre || '')
   const [sexo, setSexo] = useState(inicial?.sexo || '')
   const [edad, setEdad] = useState(inicial?.edad || '')
@@ -20,13 +20,6 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, on
   const [descripcion, setDescripcion] = useState(inicial?.descripcion || '')
   const [guardando, setGuardando] = useState(false)
 
-  function elegirFoto(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setFotoFile(file)
-    setFoto(URL.createObjectURL(file))
-  }
-
   async function guardar() {
     if (!nombre.trim()) {
       onToast('Poné un nombre 🐾')
@@ -34,7 +27,7 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, on
     }
     setGuardando(true)
     try {
-      const fotoUrl = fotoFile ? await subirFoto(fotoFile) : foto
+      const fotoUrl = (await subirFotos(fotos))[0] || ''
       const datos = {
         nombre: nombre.trim(),
         especie,
@@ -113,19 +106,7 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, on
         </div>
 
         <div className="flabel">Foto</div>
-        <label className="photo-up">
-          {foto ? (
-            <img src={foto} alt="Foto de la mascota" />
-          ) : (
-            <>
-              <span className="mi" style={{ fontSize: 26 }}>
-                photo_camera
-              </span>
-              Agregar
-            </>
-          )}
-          <input type="file" accept="image/*" onChange={elegirFoto} style={{ display: 'none' }} />
-        </label>
+        <PhotoPicker value={fotos} onChange={setFotos} max={1} />
 
         <div className="flabel">Nombre</div>
         <div className="inp">

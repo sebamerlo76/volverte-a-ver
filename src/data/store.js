@@ -101,6 +101,7 @@ export async function getReportes() {
       .select('*')
       .eq('estado', 'activo')
       .eq('oculto', false)
+      .eq('bloqueado', false)
       .order('creado_en', { ascending: false })
     if (error) throw error
     return data.map(desdeFila)
@@ -186,6 +187,48 @@ export async function getAdminStats() {
 }
 
 // ---------------------------------------------------------------------------
+// Moderación: reportar avisos (sin login) + acciones de admin.
+// ---------------------------------------------------------------------------
+function deviceId() {
+  try {
+    let d = localStorage.getItem('chicho_device')
+    if (!d) {
+      d = (window.crypto && crypto.randomUUID && crypto.randomUUID()) || `${Date.now()}-${Math.random()}`
+      localStorage.setItem('chicho_device', d)
+    }
+    return d
+  } catch (e) {
+    return 'anon'
+  }
+}
+
+export async function denunciarReporte(reporteId, motivo) {
+  if (!reporteId || !supabaseConfigurado) return null
+  const { data, error } = await supabase.rpc('denunciar_reporte', { rid: reporteId, dev: deviceId(), motivo: motivo || null })
+  if (error) throw error
+  return data
+}
+
+export async function getModeracion() {
+  if (!supabaseConfigurado) return null
+  const { data, error } = await supabase.rpc('admin_moderacion')
+  if (error) throw error
+  return data
+}
+export async function desbloquearReporte(id) {
+  if (supabaseConfigurado) await supabase.rpc('desbloquear_reporte', { rid: id })
+}
+export async function borrarReporteAdmin(id) {
+  if (supabaseConfigurado) await supabase.rpc('borrar_reporte_admin', { rid: id })
+}
+export async function banearUsuario(uid) {
+  if (supabaseConfigurado) await supabase.rpc('banear_usuario', { uid })
+}
+export async function desbanearUsuario(uid) {
+  if (supabaseConfigurado) await supabase.rpc('desbanear_usuario', { uid })
+}
+
+// ---------------------------------------------------------------------------
 // Centro de notificaciones in-app (la campanita)
 // ---------------------------------------------------------------------------
 function notifDesdeFila(n) {
@@ -223,7 +266,7 @@ export async function marcarLeidasDeReporte(userId, reporteId) {
 export async function getReportePorId(id) {
   if (!id) return null
   if (supabaseConfigurado) {
-    const { data, error } = await supabase.from('reportes').select('*').eq('id', id).eq('oculto', false).maybeSingle()
+    const { data, error } = await supabase.from('reportes').select('*').eq('id', id).eq('oculto', false).eq('bloqueado', false).maybeSingle()
     if (error) throw error
     return data ? desdeFila(data) : null
   }
@@ -255,6 +298,7 @@ export async function getReencontrados() {
       .select('*')
       .eq('estado', 'resuelto')
       .eq('oculto', false)
+      .eq('bloqueado', false)
       .order('creado_en', { ascending: false })
       .limit(50)
     if (error) throw error
