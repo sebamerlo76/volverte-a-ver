@@ -10,7 +10,8 @@ export default function ElegirMascota({ user, onElegir, onOtra, onVolver }) {
   useEffect(() => {
     let vivo = true
     getMisMascotas(user?.id)
-      .then((m) => vivo && setMascotas(m))
+      // "Se me perdió" es solo para tus mascotas, no las que tenés en tránsito.
+      .then((m) => vivo && setMascotas(m.filter((x) => x.relacion !== 'transito')))
       .catch(() => vivo && setMascotas([]))
     return () => {
       vivo = false

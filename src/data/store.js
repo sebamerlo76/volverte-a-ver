@@ -153,6 +153,8 @@ export async function actualizarUbicacion(id, campos) {
   if (campos.avisar != null) fila.avisar = campos.avisar
   if (campos.radioKm != null) fila.radio_km = campos.radioKm
   if (campos.nombre != null) fila.nombre = campos.nombre
+  if (campos.lat != null) fila.lat = campos.lat
+  if (campos.lng != null) fila.lng = campos.lng
   await supabase.from('ubicaciones').update(fila).eq('id', id)
 }
 
@@ -182,6 +184,13 @@ export async function reactivarCuenta(userId) {
 export async function getAdminStats() {
   if (!supabaseConfigurado) return null
   const { data, error } = await supabase.rpc('admin_stats')
+  if (error) throw error
+  return data
+}
+
+export async function getAdminStatsRango(desde, hasta) {
+  if (!supabaseConfigurado) return null
+  const { data, error } = await supabase.rpc('admin_stats_rango', { desde, hasta })
   if (error) throw error
   return data
 }

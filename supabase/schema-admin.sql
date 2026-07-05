@@ -59,3 +59,34 @@ end;
 $$;
 
 grant execute on function public.admin_stats() to authenticated;
+
+-- Estadísticas de un rango de fechas elegido (para el selector del panel).
+create or replace function public.admin_stats_rango(desde date, hasta date)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  res jsonb;
+  d1 timestamptz := desde::timestamptz;
+  d2 timestamptz := (hasta + 1)::timestamptz; -- inclusivo del día "hasta"
+begin
+  if not coalesce((auth.jwt() ->> 'email') = 'sebamerlo76@gmail.com', false) then
+    raise exception 'No autorizado';
+  end if;
+  select jsonb_build_object(
+    'avisos',        (select count(*) from reportes where creado_en >= d1 and creado_en < d2),
+    'perdidos',      (select count(*) from reportes where tipo = 'perdido' and creado_en >= d1 and creado_en < d2),
+    'enLaCalle',     (select count(*) from reportes where tipo = 'encontrado' and creado_en >= d1 and creado_en < d2),
+    'enCasa',        (select count(*) from reportes where estado = 'resuelto' and creado_en >= d1 and creado_en < d2),
+    'perro',         (select count(*) from reportes where especie = 'perro' and creado_en >= d1 and creado_en < d2),
+    'gato',          (select count(*) from reportes where especie = 'gato' and creado_en >= d1 and creado_en < d2),
+    'otro',          (select count(*) from reportes where especie = 'otro' and creado_en >= d1 and creado_en < d2),
+    'avistamientos', (select count(*) from avistamientos where creado_en >= d1 and creado_en < d2),
+    'usuarios',      (select count(*) from auth.users where created_at >= d1 and created_at < d2)
+  ) into res;
+  return res;
+end;
+$$;
+grant execute on function public.admin_stats_rango(date, date) to authenticated;

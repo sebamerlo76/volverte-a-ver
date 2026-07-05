@@ -57,11 +57,10 @@ export default function PerfilPublico({ id }) {
       <div className="app pub">
         <div className="pub-scroll">
           <div className="pub-top">
-            <img
-              src="/isologo.png"
-              alt="Chicho"
-              style={{ width: '68%', maxWidth: 220, margin: '0 auto', display: 'block' }}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9 }}>
+              <img src="/logo.png" alt="" width="52" height="52" style={{ display: 'block' }} />
+              <span style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 34, color: 'var(--navy)' }}>Chicho</span>
+            </div>
           </div>
 
           {m.perdido && (

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getAdminStats } from '../data/store.js'
+import { getAdminStats, getAdminStatsRango } from '../data/store.js'
 
 function Card({ n, label, color }) {
   return (
@@ -13,6 +13,22 @@ function Card({ n, label, color }) {
 export default function Admin({ onVolver, stats }) {
   const [s, setS] = useState(stats || null)
   const [error, setError] = useState('')
+  const [desde, setDesde] = useState('')
+  const [hasta, setHasta] = useState('')
+  const [rango, setRango] = useState(null)
+  const [rangoBusy, setRangoBusy] = useState(false)
+
+  async function verRango() {
+    if (!desde || !hasta) return
+    setRangoBusy(true)
+    try {
+      setRango(await getAdminStatsRango(desde, hasta))
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setRangoBusy(false)
+    }
+  }
 
   useEffect(() => {
     if (stats) return
@@ -65,6 +81,26 @@ export default function Admin({ onVolver, stats }) {
               <Card n={s.avisosMes} label="Este mes" />
               <Card n={s.avisosAnio} label="Este año" />
             </div>
+
+            <div className="adm-sub">Ver un rango de fechas</div>
+            <div className="adm-rango">
+              <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} aria-label="Desde" />
+              <span>→</span>
+              <input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} aria-label="Hasta" />
+              <button onClick={verRango} disabled={rangoBusy || !desde || !hasta}>
+                {rangoBusy ? '…' : 'Ver'}
+              </button>
+            </div>
+            {rango && (
+              <div className="adm-grid tres" style={{ marginTop: 10 }}>
+                <Card n={rango.avisos} label="Avisos" color="var(--navy)" />
+                <Card n={rango.perdidos} label="Perdidos" color="var(--coral)" />
+                <Card n={rango.enLaCalle} label="En la calle" color="var(--blue)" />
+                <Card n={rango.enCasa} label="En casa" color="var(--amber)" />
+                <Card n={rango.usuarios} label="Usuarios" />
+                <Card n={rango.avistamientos} label="Avistamientos" />
+              </div>
+            )}
 
             <div className="adm-sub">Por tipo</div>
             <div className="adm-grid tres">

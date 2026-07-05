@@ -68,11 +68,10 @@ export default function Auth({ onCerrar, onAuth, onToast }) {
             margin: '10px 0 4px',
           }}
         >
-          <img
-            src="/isologo.png"
-            alt="Chicho"
-            style={{ width: '82%', maxWidth: 280, margin: '4px auto 0', display: 'block' }}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, margin: '4px 0 0' }}>
+            <img src="/logo.png" alt="" width="58" height="58" style={{ display: 'block' }} />
+            <span style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 40, color: 'var(--navy)' }}>Chicho</span>
+          </div>
           <div style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 20, marginTop: 10 }}>
             {esRegistro ? 'Creá tu cuenta' : '¡Hola de nuevo!'}
           </div>

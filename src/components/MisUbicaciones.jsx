@@ -11,6 +11,7 @@ export default function MisUbicaciones({ user, onToast }) {
   const [radio, setRadio] = useState(3)
   const [avisar, setAvisar] = useState(true)
   const [guardando, setGuardando] = useState(false)
+  const [editId, setEditId] = useState(null)
 
   async function cargar() {
     try {
@@ -25,10 +26,19 @@ export default function MisUbicaciones({ user, onToast }) {
   }, [user?.id])
 
   function nuevo() {
+    setEditId(null)
     setNombre('')
     setPunto({ lat: PARANA_CENTER[0], lng: PARANA_CENTER[1] })
     setRadio(3)
     setAvisar(true)
+    setModo('nuevo')
+  }
+  function editar(u) {
+    setEditId(u.id)
+    setNombre(u.nombre)
+    setPunto({ lat: u.lat, lng: u.lng })
+    setRadio(u.radioKm || 3)
+    setAvisar(u.avisar)
     setModo('nuevo')
   }
 
@@ -39,9 +49,15 @@ export default function MisUbicaciones({ user, onToast }) {
     }
     setGuardando(true)
     try {
-      await addUbicacion({ userId: user.id, nombre: nombre.trim(), lat: punto.lat, lng: punto.lng, radioKm: radio, avisar })
-      onToast?.('📍 Lugar guardado')
+      if (editId) {
+        await actualizarUbicacion(editId, { nombre: nombre.trim(), lat: punto.lat, lng: punto.lng, radioKm: radio, avisar })
+        onToast?.('📍 Lugar actualizado')
+      } else {
+        await addUbicacion({ userId: user.id, nombre: nombre.trim(), lat: punto.lat, lng: punto.lng, radioKm: radio, avisar })
+        onToast?.('📍 Lugar guardado')
+      }
       setModo('lista')
+      setEditId(null)
       await cargar()
     } catch (e) {
       console.error(e)
@@ -121,7 +137,7 @@ export default function MisUbicaciones({ user, onToast }) {
             Cancelar
           </button>
           <button className="crop-listo" onClick={guardar} disabled={guardando}>
-            {guardando ? 'Guardando…' : 'Guardar lugar'}
+            {guardando ? 'Guardando…' : editId ? 'Guardar cambios' : 'Guardar lugar'}
           </button>
         </div>
       </div>
@@ -155,13 +171,15 @@ export default function MisUbicaciones({ user, onToast }) {
       ) : (
         lista.map((u) => (
           <div className="ubic-row" key={u.id}>
-            <span className="mi fill ubic-ico" style={{ color: u.avisar ? 'var(--navy)' : '#c3b8b0' }}>
-              location_on
-            </span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="ubic-nombre">{u.nombre}</div>
-              <div className="ubic-sub">{u.avisar ? `🔔 Te aviso · ${u.radioKm} km` : '🔕 Sin avisos'}</div>
-            </div>
+            <button className="ubic-info" onClick={() => editar(u)}>
+              <span className="mi fill ubic-ico" style={{ color: u.avisar ? 'var(--navy)' : '#c3b8b0' }}>
+                location_on
+              </span>
+              <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+                <div className="ubic-nombre">{u.nombre}</div>
+                <div className="ubic-sub">{u.avisar ? `🔔 Te aviso · ${u.radioKm} km` : '🔕 Sin avisos'}</div>
+              </div>
+            </button>
             <button
               className={'switch' + (u.avisar ? ' on' : '')}
               onClick={() => toggleAvisar(u)}
