@@ -2637,6 +2637,69 @@ select {
   opacity: 0.5;
 }
 
+/* Buscador de dirección (geocoding sobre el mapa) */
+.dir-buscar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0;
+  padding: 3px 5px 3px 12px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1.5px solid var(--line);
+}
+.dir-buscar > .mi {
+  flex: none;
+}
+.dir-buscar input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: none;
+  font-family: Nunito, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+  padding: 9px 0;
+}
+.dir-buscar button {
+  flex: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--navy);
+  color: #fff;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+}
+.dir-buscar button:disabled {
+  opacity: 0.5;
+}
+
+/* Encontré: mensaje cuando no hay perdidos que coincidan */
+.coinc-vacio {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 14px;
+  padding: 13px 14px;
+  border-radius: 14px;
+  background: #f6f2ea;
+  border: 1px solid var(--line);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.coinc-vacio > .mi {
+  flex: none;
+  margin-top: 1px;
+}
+.coinc-vacio b {
+  color: var(--ink);
+}
+
 .hd-bell {
   position: relative;
   padding: 4px;

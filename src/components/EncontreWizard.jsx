@@ -4,6 +4,7 @@ import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import FechaPicker from './FechaPicker.jsx'
 import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad } from '../lib/localidades.js'
+import BuscarDireccion from './BuscarDireccion.jsx'
 import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
 import { addReporte, addMascota, subirFotos, subirFotoFeed } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, linkWhatsApp } from '../lib/formato.js'
@@ -56,6 +57,10 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
     setZona(z)
     const c = coordsDeBarrioEn(localidad, z)
     setPunto({ lat: c[0], lng: c[1] })
+  }
+  function cambiarZonaSel(v) {
+    if (v === 'Otro') setZona('') // barrio libre: lo escriben y ubican con el buscador/mapa
+    else cambiarZona(v)
   }
 
   // Precargamos el modelo (bajo demanda) al abrir el asistente, para que la foto se analice rápido.
@@ -321,14 +326,24 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
               <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
                 location_on
               </span>
-              <select value={zona} onChange={(e) => cambiarZona(e.target.value)}>
+              <select value={nombresBarriosDe(localidad).includes(zona) ? zona : 'Otro'} onChange={(e) => cambiarZonaSel(e.target.value)}>
                 {nombresBarriosDe(localidad).map((b) => (
                   <option key={b} value={b}>
                     {b}
                   </option>
                 ))}
+                <option value="Otro">Otro…</option>
               </select>
             </div>
+            {!nombresBarriosDe(localidad).includes(zona) && (
+              <div className="inp" style={{ marginTop: 8 }}>
+                <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
+                  edit
+                </span>
+                <input value={zona} onChange={(e) => setZona(e.target.value)} placeholder="¿Qué barrio? (ej: Paracao)" />
+              </div>
+            )}
+            <BuscarDireccion localidad={localidad} onEncontrado={setPunto} onToast={onToast} />
             <div className="mappick" style={{ height: 200 }}>
               <MapaLeaflet
                 center={[punto.lat, punto.lng]}
@@ -338,7 +353,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
                 onMapaClick={setPunto}
                 marcadores={[{ id: 'nuevo', lat: punto.lat, lng: punto.lng, tipo: 'encontrado', especie }]}
               />
-              <div className="hint">Tocá el mapa para marcar el lugar exacto</div>
+              <div className="hint">Buscá la dirección o tocá el mapa para marcar el lugar exacto</div>
             </div>
             <div className="flabel">¿Cuándo lo encontraste?</div>
             <FechaPicker value={fecha} onChange={setFecha} />
@@ -433,6 +448,20 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
                 </span>
               </button>
             ))}
+          </div>
+        )}
+
+        {especie && coincidencias.length === 0 && paso >= 2 && paso !== 3 && (
+          <div className="coinc-vacio">
+            <span className="mi" style={{ fontSize: 21, color: 'var(--muted)' }}>
+              search_off
+            </span>
+            <div>
+              <b>Todavía no hay perdidos que coincidan.</b>
+              <div style={{ marginTop: 2 }}>
+                Igual publicá tu hallazgo 👇 — su familia lo va a encontrar acá cuando lo busque.
+              </div>
+            </div>
           </div>
         )}
 

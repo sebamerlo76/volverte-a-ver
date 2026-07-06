@@ -35,6 +35,7 @@ export const LOCALIDADES = {
       'Paraná V': [-31.77, -60.525],
       'Villa Uranga': [-31.766, -60.5],
       'La Milagrosa': [-31.755, -60.49],
+      'Paracao': [-31.703, -60.476],
     },
   },
   'Crespo': {
@@ -108,7 +109,12 @@ export function barriosDe(loc) {
   return (LOCALIDADES[loc] || LOCALIDADES[LOCALIDAD_DEFECTO]).barrios
 }
 export function nombresBarriosDe(loc) {
-  return Object.keys(barriosDe(loc))
+  // Alfabético para encontrarlo rápido, pero "Centro" primero (es el más usado).
+  return Object.keys(barriosDe(loc)).sort((a, b) => {
+    if (a === 'Centro') return -1
+    if (b === 'Centro') return 1
+    return a.localeCompare(b, 'es')
+  })
 }
 export function coordsDeBarrioEn(loc, barrio) {
   return barriosDe(loc)[barrio] || centroDe(loc)

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { coordsDeBarrio, puntoDeReporte } from '../lib/parana.js'
 import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad } from '../lib/localidades.js'
+import BuscarDireccion from './BuscarDireccion.jsx'
 import { addReporte, actualizarReporte, addMascota, subirFotos, subirFotoFeed, guardarEmbedding } from '../data/store.js'
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
@@ -53,10 +54,14 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
   function cambiarLocalidad(loc) {
     setLocalidad(loc)
     recordarLocalidad(loc) // queda como tu ciudad por defecto para la próxima
-    const z = nombresBarriosDe(loc)[0] || ''
+    const z = 'Centro'
     setZona(z)
     const c = coordsDeBarrioEn(loc, z)
     setPunto({ lat: c[0], lng: c[1] })
+  }
+  function cambiarZonaSel(v) {
+    if (v === 'Otro') setZona('') // barrio libre: lo escriben y ubican con el buscador/mapa
+    else cambiarZona(v)
   }
 
   async function publicar() {
@@ -237,14 +242,24 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
           <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
             location_on
           </span>
-          <select value={zona} onChange={(e) => cambiarZona(e.target.value)}>
+          <select value={nombresBarriosDe(localidad).includes(zona) ? zona : 'Otro'} onChange={(e) => cambiarZonaSel(e.target.value)}>
             {nombresBarriosDe(localidad).map((b) => (
               <option key={b} value={b}>
                 {b}
               </option>
             ))}
+            <option value="Otro">Otro…</option>
           </select>
         </div>
+        {!nombresBarriosDe(localidad).includes(zona) && (
+          <div className="inp" style={{ marginTop: 8 }}>
+            <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
+              edit
+            </span>
+            <input value={zona} onChange={(e) => setZona(e.target.value)} placeholder="¿Qué barrio? (ej: Paracao)" />
+          </div>
+        )}
+        <BuscarDireccion localidad={localidad} onEncontrado={setPunto} onToast={onToast} />
         <div className="mappick" style={{ height: 190 }}>
           <MapaLeaflet
             center={[punto.lat, punto.lng]}
@@ -254,7 +269,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
             onMapaClick={setPunto}
             marcadores={[{ id: 'nuevo', lat: punto.lat, lng: punto.lng, tipo, especie }]}
           />
-          <div className="hint">Tocá el mapa para marcar el lugar exacto</div>
+          <div className="hint">Buscá la dirección o tocá el mapa para marcar el lugar exacto</div>
         </div>
 
         <div className="flabel">¿Cuándo fue?</div>
