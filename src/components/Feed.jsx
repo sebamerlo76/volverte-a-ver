@@ -3,7 +3,7 @@ import PetCard from './PetCard.jsx'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
-import { coordsDeBarrio, PARANA_CENTER, NOMBRES_BARRIOS } from '../lib/parana.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad } from '../lib/localidades.js'
 
 const ESPECIE_LBL = { perro: 'Perros', gato: 'Gatos', otro: 'Otros' }
 const TIEMPOS = [
@@ -34,6 +34,15 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
   const [sel, setSel] = useState(null)
   const [panelAbierto, setPanelAbierto] = useState(false)
   const [miUbi, setMiUbi] = useState(null)
+  const [ciudadSheet, setCiudadSheet] = useState(false)
+
+  const loc = filtros.localidad // null = todas las localidades
+  function elegirCiudad(l) {
+    setFiltro('localidad', l)
+    setFiltro('zona', null) // los barrios cambian según la ciudad
+    if (l) recordarLocalidad(l)
+    setCiudadSheet(false)
+  }
 
   function ubicarme() {
     if (!navigator.geolocation) {
@@ -60,6 +69,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
     const texto = (filtros.q || '').trim().toLowerCase()
     const fuente = verFinales ? finales || [] : reportes
     let arr = fuente.filter((r) => {
+      if (loc && (r.localidad || 'Paraná') !== loc) return false
       if (filtros.estado === 'perdido' || filtros.estado === 'encontrado') {
         if (r.tipo !== filtros.estado) return false
       }
@@ -79,7 +89,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
     () =>
       filtrados.map((r) => {
         const exacto = r.lat != null && r.lng != null
-        const [lat, lng] = exacto ? [r.lat, r.lng] : jitter(coordsDeBarrio(r.zona), r.id)
+        const [lat, lng] = exacto ? [r.lat, r.lng] : jitter(coordsDeBarrioEn(r.localidad || 'Paraná', r.zona), r.id)
         return { id: r.id, lat, lng, tipo: r.estado === 'resuelto' ? 'encasa' : r.tipo, especie: r.especie }
       }),
     [filtrados]
@@ -155,6 +165,11 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
 
         {/* Barra de filtros (breadcrumb) */}
         <div className="fbar">
+          <button className="fbar-ciudad" onClick={() => setCiudadSheet(true)}>
+            <span className="mi" style={{ fontSize: 16 }}>place</span>
+            {loc || 'Todas'}
+            <span className="mi" style={{ fontSize: 15 }}>expand_more</span>
+          </button>
           <button className={'fbar-tune' + (panelAbierto ? ' on' : '')} onClick={() => setPanelAbierto((v) => !v)}>
             <span className="mi" style={{ fontSize: 18 }}>
               tune
@@ -187,14 +202,18 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
               </button>
             ))}
           </div>
-          <div className="fp-label">Barrio</div>
-          <div className="chipsel-wrap">
-            {NOMBRES_BARRIOS.map((z) => (
-              <button key={z} className={'chip' + (filtros.zona === z ? ' on' : '')} onClick={() => setFiltro('zona', filtros.zona === z ? null : z)}>
-                {z}
-              </button>
-            ))}
-          </div>
+          {loc && (
+            <>
+              <div className="fp-label">Barrio</div>
+              <div className="chipsel-wrap">
+                {nombresBarriosDe(loc).map((z) => (
+                  <button key={z} className={'chip' + (filtros.zona === z ? ' on' : '')} onClick={() => setFiltro('zona', filtros.zona === z ? null : z)}>
+                    {z}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
           <div className="fp-label">Cuándo</div>
           <div className="chipsel-wrap">
             {TIEMPOS.map((t) => (
@@ -210,7 +229,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
       ) : enMapa ? (
         <div className="mapwrap">
           <MapaLeaflet
-            center={PARANA_CENTER}
+            center={centroDe(loc || LOCALIDAD_DEFECTO)}
             zoom={13}
             marcadores={marcadores}
             ajustar
@@ -297,6 +316,30 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
             filtrados.map((r) => <PetCard key={r.id} r={r} onClick={() => onOpen(r)} />)
           )}
           <div style={{ height: 18 }} />
+        </div>
+      )}
+
+      {ciudadSheet && (
+        <div className="pp-sheet-ov" onClick={() => setCiudadSheet(false)}>
+          <div className="pp-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="report-sheet-t">¿Qué localidad querés ver?</div>
+            <button className="pp-op" onClick={() => elegirCiudad(null)}>
+              <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>public</span>
+              Todas
+              {!loc && (
+                <span className="mi" style={{ marginLeft: 'auto', color: 'var(--navy)' }}>check</span>
+              )}
+            </button>
+            {NOMBRES_LOCALIDADES.map((l) => (
+              <button key={l} className="pp-op" onClick={() => elegirCiudad(l)}>
+                <span className="mi fill" style={{ fontSize: 20, color: 'var(--navy)' }}>location_on</span>
+                {l}
+                {loc === l && (
+                  <span className="mi" style={{ marginLeft: 'auto', color: 'var(--navy)' }}>check</span>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
