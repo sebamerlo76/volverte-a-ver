@@ -3,8 +3,7 @@ import MapaLeaflet from './MapaLeaflet.jsx'
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import FechaPicker from './FechaPicker.jsx'
-import { coordsDeBarrio } from '../lib/parana.js'
-import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, coordsDeBarrioEn } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad } from '../lib/localidades.js'
 import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
 import { addReporte, addMascota, subirFotos } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, linkWhatsApp } from '../lib/formato.js'
@@ -41,7 +40,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
   const [fotos, setFotos] = useState([])
   const [huella, setHuella] = useState(null)
   const [analizando, setAnalizando] = useState(false)
-  const [localidad, setLocalidad] = useState(LOCALIDAD_DEFECTO)
+  const [localidad, setLocalidad] = useState(localidadGuardada())
   const [zona, setZona] = useState('Centro')
   const [fecha, setFecha] = useState('')
   const [whatsapp, setWhatsapp] = useState(telefonoGuardado || ultimoWhatsapp())
@@ -50,7 +49,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
   const [enCustodia, setEnCustodia] = useState(false)
   const [guardando, setGuardando] = useState(false)
 
-  const cIni = coordsDeBarrio('Centro')
+  const cIni = coordsDeBarrioEn(localidad, 'Centro')
   const [punto, setPunto] = useState({ lat: cIni[0], lng: cIni[1] })
 
   function cambiarZona(z) {
@@ -301,6 +300,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
                     onChange={(e) => {
                       const loc = e.target.value
                       setLocalidad(loc)
+                      recordarLocalidad(loc) // queda como tu ciudad por defecto para la próxima
                       const z = nombresBarriosDe(loc)[0] || ''
                       setZona(z)
                       const c = coordsDeBarrioEn(loc, z)

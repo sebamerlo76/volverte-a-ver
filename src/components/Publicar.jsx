@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { coordsDeBarrio, puntoDeReporte } from '../lib/parana.js'
-import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, coordsDeBarrioEn } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad } from '../lib/localidades.js'
 import { addReporte, actualizarReporte, addMascota, subirFotos, guardarEmbedding } from '../data/store.js'
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
@@ -30,7 +30,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
   const [edad, setEdad] = useState(base?.edad || '')
   const [collar, setCollar] = useState(base?.collar || '')
   const [recompensa, setRecompensa] = useState(base?.recompensa || '')
-  const [localidad, setLocalidad] = useState(base?.localidad || LOCALIDAD_DEFECTO)
+  const [localidad, setLocalidad] = useState(base?.localidad || localidadGuardada())
   const [zona, setZona] = useState(base?.zona || 'Centro')
   const [fecha, setFecha] = useState(base?.fechaEvento || '')
   const [descripcion, setDescripcion] = useState(base?.descripcion || '')
@@ -42,7 +42,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
   const puntoIni =
     base?.lat != null && base?.lng != null
       ? [base.lat, base.lng]
-      : coordsDeBarrioEn(base?.localidad || LOCALIDAD_DEFECTO, base?.zona || 'Centro')
+      : coordsDeBarrioEn(base?.localidad || localidadGuardada(), base?.zona || 'Centro')
   const [punto, setPunto] = useState({ lat: puntoIni[0], lng: puntoIni[1] })
 
   function cambiarZona(z) {
@@ -52,6 +52,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
   }
   function cambiarLocalidad(loc) {
     setLocalidad(loc)
+    recordarLocalidad(loc) // queda como tu ciudad por defecto para la próxima
     const z = nombresBarriosDe(loc)[0] || ''
     setZona(z)
     const c = coordsDeBarrioEn(loc, z)

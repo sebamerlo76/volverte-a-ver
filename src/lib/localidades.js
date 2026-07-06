@@ -113,3 +113,23 @@ export function nombresBarriosDe(loc) {
 export function coordsDeBarrioEn(loc, barrio) {
   return barriosDe(loc)[barrio] || centroDe(loc)
 }
+
+// --- Ciudad recordada (la última que usó el usuario en este dispositivo) ---
+// Así un vecino de Crespo no tiene que cambiar el selector cada vez que publica.
+const LS_LOCALIDAD = 'chicho_localidad'
+export function localidadGuardada() {
+  try {
+    const v = localStorage.getItem(LS_LOCALIDAD)
+    if (v && LOCALIDADES[v]) return v
+  } catch (e) {
+    /* ignore */
+  }
+  return LOCALIDAD_DEFECTO
+}
+export function recordarLocalidad(loc) {
+  try {
+    if (loc && LOCALIDADES[loc]) localStorage.setItem(LS_LOCALIDAD, loc)
+  } catch (e) {
+    /* ignore */
+  }
+}

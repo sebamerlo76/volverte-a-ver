@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { getNotifPrefs, guardarNotifPrefs } from '../data/store.js'
-import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, centroDe } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, centroDe, localidadGuardada, recordarLocalidad } from '../lib/localidades.js'
 
 const DEFECTO = {
   avisar_match: true,
@@ -24,8 +24,16 @@ export default function NotifPrefs({ user, onToast, onListo }) {
   useEffect(() => {
     let vivo = true
     getNotifPrefs(user?.id)
-      .then((p) => vivo && setPrefs(p ? { ...DEFECTO, ...p } : DEFECTO))
-      .catch(() => vivo && setPrefs(DEFECTO))
+      .then(
+        (p) =>
+          vivo &&
+          setPrefs(
+            p
+              ? { ...DEFECTO, ...p, localidad: p.localidad || localidadGuardada() }
+              : { ...DEFECTO, localidad: localidadGuardada() }
+          )
+      )
+      .catch(() => vivo && setPrefs({ ...DEFECTO, localidad: localidadGuardada() }))
     return () => {
       vivo = false
     }
@@ -42,7 +50,7 @@ export default function NotifPrefs({ user, onToast, onListo }) {
       radio_km: np.radio_km,
       especie: np.especie,
       barrios: np.barrios,
-      localidad: np.localidad || 'Paraná',
+      localidad: np.localidad || localidadGuardada(),
     })
   }
   // Autosave con un pequeño retardo, para no pegarle a la base en cada toque.
@@ -97,6 +105,7 @@ export default function NotifPrefs({ user, onToast, onListo }) {
     })
   }
   function cambiarLocalidad(l) {
+    recordarLocalidad(l) // queda como tu ciudad por defecto para la próxima
     setPrefs((p) => {
       const np = { ...p, localidad: l, barrios: [] } // los barrios cambian según la ciudad
       guardar(np)
