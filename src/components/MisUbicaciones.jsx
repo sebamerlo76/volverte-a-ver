@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
-import { PARANA_CENTER } from '../lib/parana.js'
+import { centroDe, localidadGuardada } from '../lib/localidades.js'
 import { getUbicaciones, addUbicacion, actualizarUbicacion, eliminarUbicacion } from '../data/store.js'
 
 export default function MisUbicaciones({ user, onToast }) {
+  const centroIni = centroDe(localidadGuardada()) // el mapa arranca en tu ciudad, no siempre en Paraná
   const [lista, setLista] = useState(null)
   const [modo, setModo] = useState('lista') // lista | nuevo
   const [nombre, setNombre] = useState('')
-  const [punto, setPunto] = useState({ lat: PARANA_CENTER[0], lng: PARANA_CENTER[1] })
+  const [punto, setPunto] = useState({ lat: centroIni[0], lng: centroIni[1] })
   const [radio, setRadio] = useState(3)
   const [avisar, setAvisar] = useState(true)
   const [guardando, setGuardando] = useState(false)
@@ -28,7 +29,7 @@ export default function MisUbicaciones({ user, onToast }) {
   function nuevo() {
     setEditId(null)
     setNombre('')
-    setPunto({ lat: PARANA_CENTER[0], lng: PARANA_CENTER[1] })
+    setPunto({ lat: centroIni[0], lng: centroIni[1] })
     setRadio(3)
     setAvisar(true)
     setModo('nuevo')
