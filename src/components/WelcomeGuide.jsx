@@ -5,7 +5,13 @@ const PASOS = [
   {
     logo: true,
     t: '¡Bienvenido a Chicho!',
-    d: 'Ayudamos a que las mascotas perdidas de Paraná vuelvan a casa. 🐾',
+    d: 'Ayudamos a que las mascotas perdidas de tu ciudad vuelvan a casa. 🐾',
+  },
+  {
+    ic: 'place',
+    color: 'var(--coral)',
+    t: 'Cerca tuyo',
+    d: 'Ya estamos en Paraná, Crespo, Colonia Avellaneda y San Benito.\n\n¿Tu localidad no aparece? Escribinos y la sumamos. 💜',
   },
   {
     ic: 'swap_horiz',

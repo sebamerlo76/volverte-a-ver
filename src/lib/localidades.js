@@ -37,7 +37,38 @@ export const LOCALIDADES = {
       'La Milagrosa': [-31.755, -60.49],
     },
   },
-  // 'Santa Fe': { center: [...], barrios: { ... } },  ← futuro
+  'Crespo': {
+    center: [-32.0294, -60.3097],
+    barrios: {
+      'Centro': [-32.0294, -60.3097],
+      'Norte': [-32.0205, -60.3097],
+      'Sur': [-32.0385, -60.3097],
+      'Este': [-32.0294, -60.2985],
+      'Oeste': [-32.0294, -60.321],
+      'Parque Industrial': [-32.045, -60.30],
+    },
+  },
+  'Colonia Avellaneda': {
+    center: [-31.76, -60.485],
+    barrios: {
+      'Centro': [-31.76, -60.485],
+      'Norte': [-31.752, -60.485],
+      'Sur': [-31.768, -60.485],
+      'Este': [-31.76, -60.476],
+      'Oeste': [-31.76, -60.494],
+    },
+  },
+  'San Benito': {
+    center: [-31.7708, -60.4636],
+    barrios: {
+      'Centro': [-31.7708, -60.4636],
+      'Norte': [-31.762, -60.4636],
+      'Sur': [-31.78, -60.4636],
+      'Este': [-31.7708, -60.454],
+      'Oeste': [-31.7708, -60.473],
+    },
+  },
+  // Para sumar otra: copiá un bloque, poné center [lat,lng] y sus barrios.
 }
 
 export const NOMBRES_LOCALIDADES = Object.keys(LOCALIDADES)

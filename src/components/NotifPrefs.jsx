@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { getNotifPrefs, guardarNotifPrefs } from '../data/store.js'
-import { PARANA_CENTER, NOMBRES_BARRIOS } from '../lib/parana.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, centroDe } from '../lib/localidades.js'
 
 const DEFECTO = {
   avisar_match: true,
@@ -96,9 +96,17 @@ export default function NotifPrefs({ user, onToast, onListo }) {
       return np
     })
   }
+  function cambiarLocalidad(l) {
+    setPrefs((p) => {
+      const np = { ...p, localidad: l, barrios: [] } // los barrios cambian según la ciudad
+      guardar(np)
+      return np
+    })
+  }
 
   if (!prefs) return null
-  const centro = prefs.centro_lat != null ? [prefs.centro_lat, prefs.centro_lng] : PARANA_CENTER
+  const loc = prefs.localidad || LOCALIDAD_DEFECTO
+  const centro = prefs.centro_lat != null ? [prefs.centro_lat, prefs.centro_lng] : centroDe(loc)
   const todos = (prefs.barrios || []).includes('*')
 
   const Check = ({ campo, children }) => (
@@ -128,12 +136,28 @@ export default function NotifPrefs({ user, onToast, onListo }) {
 
       {prefs.avisar_cerca && (
         <div className="cerca-box">
+          {NOMBRES_LOCALIDADES.length > 1 && (
+            <>
+              <div className="cerca-lbl">¿En qué localidad?</div>
+              <div className="barrio-chips" style={{ marginBottom: 12 }}>
+                {NOMBRES_LOCALIDADES.map((l) => (
+                  <button
+                    key={l}
+                    className={'esp-chip' + (loc === l ? ' on' : '')}
+                    onClick={() => cambiarLocalidad(l)}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
           <div className="cerca-lbl">¿De qué barrios querés enterarte?</div>
           <div className="barrio-chips">
             <button className={'esp-chip' + (todos ? ' on' : '')} onClick={toggleTodos}>
               🌎 Todos
             </button>
-            {NOMBRES_BARRIOS.map((b) => {
+            {nombresBarriosDe(loc).map((b) => {
               const on = !todos && (prefs.barrios || []).includes(b)
               return (
                 <button
