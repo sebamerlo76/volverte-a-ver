@@ -1,17 +1,53 @@
 import { useEffect, useState } from 'react'
-import { getPerfilPublico } from '../data/store.js'
+import { getPerfilPublico, addAvistamiento } from '../data/store.js'
 
 const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
 
 // Página pública que ve quien escanea el QR del collar (sin login).
 export default function PerfilPublico({ id }) {
   const [m, setM] = useState(undefined) // undefined = cargando, null = no existe
+  const [enviando, setEnviando] = useState(false)
+  const [avisado, setAvisado] = useState(false)
+  const [msg, setMsg] = useState('')
 
   useEffect(() => {
     getPerfilPublico(id)
       .then((r) => setM(r))
       .catch(() => setM(null))
   }, [id])
+
+  // Avisarle a la familia dónde está (crea un avistamiento → le llega push + al mapa).
+  function avisarUbicacion() {
+    if (!navigator.geolocation) {
+      setMsg('Tu navegador no permite ubicación. Avisale por WhatsApp 👇')
+      return
+    }
+    setEnviando(true)
+    setMsg('')
+    navigator.geolocation.getCurrentPosition(
+      async (p) => {
+        try {
+          await addAvistamiento({
+            reporteId: m.reporte_id,
+            lat: p.coords.latitude,
+            lng: p.coords.longitude,
+            nota: 'Escanearon el QR del collar 🏷️',
+            autor: 'Alguien por el QR',
+          })
+          setAvisado(true)
+        } catch (e) {
+          setMsg('No se pudo avisar. Probá por WhatsApp 👇')
+        } finally {
+          setEnviando(false)
+        }
+      },
+      () => {
+        setEnviando(false)
+        setMsg('Activá la ubicación para avisarle dónde estás 📍. O escribile por WhatsApp 👇')
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    )
+  }
 
   if (m === undefined) {
     return (
@@ -112,6 +148,24 @@ export default function PerfilPublico({ id }) {
         </div>
 
         <div className="pub-cta">
+          {m.perdido && m.reporte_id ? (
+            avisado ? (
+              <div className="pub-ok">
+                <span className="mi fill" style={{ fontSize: 20, color: 'var(--green)' }}>
+                  check_circle
+                </span>
+                ¡Gracias! La familia ya recibió tu ubicación. Están en camino 🐾
+              </div>
+            ) : (
+              <button className="btn-ubi" onClick={avisarUbicacion} disabled={enviando}>
+                <span className="mi fill" style={{ fontSize: 22 }}>
+                  my_location
+                </span>
+                {enviando ? 'Enviando…' : 'Avisar a la familia dónde estoy'}
+              </button>
+            )
+          ) : null}
+          {msg ? <div className="pub-msg">{msg}</div> : null}
           {waLink ? (
             <a className="btn-wa" href={waLink} target="_blank" rel="noreferrer">
               <span className="mi fill" style={{ fontSize: 24 }}>
@@ -119,11 +173,11 @@ export default function PerfilPublico({ id }) {
               </span>
               Avisar por WhatsApp
             </a>
-          ) : (
+          ) : !(m.perdido && m.reporte_id) ? (
             <div className="empty" style={{ padding: 12 }}>
               Esta mascota no tiene un contacto cargado.
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
