@@ -47,14 +47,16 @@ export default function PetCard({ r, onClick }) {
           </span>
           {r.zona}
         </div>
-        <div className="tags">
-          {r.recompensa ? <span className="tag recompensa">💰 Recompensa</span> : null}
-          <span className="tag">{r.especie === 'perro' ? 'Perro' : r.especie === 'gato' ? 'Gato' : 'Otro'}</span>
-          {r.sexo && r.sexo !== 'No sé' ? <span className="tag">{r.sexo}</span> : null}
-          {r.color ? <span className="tag">{r.color}</span> : null}
-          {r.tamano ? <span className="tag">{r.tamano}</span> : null}
-          {r.raza ? <span className="tag">{r.raza}</span> : null}
-        </div>
+        {(() => {
+          const attrs = [r.tamano, r.color, r.raza, r.sexo && r.sexo !== 'No sé' ? r.sexo : null].filter(Boolean)
+          if (!r.recompensa && !attrs.length) return null
+          return (
+            <div className="cfoot">
+              {r.recompensa ? <span className="tag recompensa">💰 Recompensa</span> : null}
+              {attrs.length ? <span className="cattrs">{attrs.join(' · ')}</span> : null}
+            </div>
+          )
+        })()}
       </div>
     </button>
   )

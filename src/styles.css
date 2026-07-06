@@ -13,7 +13,7 @@
   --slate: #3e5367;
   --ink: #1f3852;
   --muted: #647a86;
-  --faint: #9aa7b0;
+  --faint: #636e77; /* legible sobre crema (AA), importa al sol */
   --cream: #faf7f1;
   --line: #efe3d0;
   --line2: #eaddc8;
@@ -1255,6 +1255,20 @@ select {
   gap: 6px;
   margin-top: 11px;
   flex-wrap: wrap;
+}
+/* Pie de tarjeta: recompensa (destacada) + atributos en texto plano (menos ruido) */
+.cfoot {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.cattrs {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1.3;
 }
 .tag {
   display: inline-flex;
@@ -3164,4 +3178,30 @@ select {
 .toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* Accesibilidad: foco visible para quien navega con teclado */
+:focus-visible {
+  outline: 3px solid var(--navy);
+  outline-offset: 2px;
+}
+/* Los inputs tienen outline:none permanente; se lo devolvemos solo en foco de teclado */
+.inp input:focus-visible,
+.inp select:focus-visible,
+.search input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+/* Accesibilidad: respetar a quien pide menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -47,7 +47,7 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, on
       onGuardado()
     } catch (e) {
       console.error(e)
-      onToast('No se pudo guardar 😕')
+      onToast('No se guardó. Probá de nuevo 🔄')
       setGuardando(false)
     }
   }
@@ -59,7 +59,7 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, on
       onGuardado()
     } catch (e) {
       console.error(e)
-      onToast('No se pudo borrar 😕')
+      onToast('No se borró. Probá de nuevo 🔄')
     }
   }
 

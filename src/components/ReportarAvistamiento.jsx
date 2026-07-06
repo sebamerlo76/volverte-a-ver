@@ -59,7 +59,7 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
       onEnviado()
     } catch (e) {
       console.error(e)
-      onToast('No se pudo enviar 😕')
+      onToast('No se envió. Reintentá en un toque 🔄')
       setGuardando(false)
     }
   }

@@ -62,7 +62,7 @@ export default function MiCuenta({
       onToast?.('🎉 ¡Qué alegría! Tu mascota volvió a casa')
     } catch (e) {
       console.error(e)
-      onToast?.('No se pudo actualizar 😕')
+      onToast?.('No se actualizó. Probá de nuevo 🔄')
     }
   }
 
@@ -88,7 +88,7 @@ export default function MiCuenta({
       }
     } catch (e) {
       console.error(e)
-      onToast?.(e.message || 'No se pudo cambiar 😕')
+      onToast?.(e.message || 'No salió. Probá de nuevo 🔄')
     } finally {
       setPushBusy(false)
     }
@@ -104,7 +104,7 @@ export default function MiCuenta({
       onToast?.('✅ Datos guardados')
     } catch (e) {
       console.error(e)
-      onToast?.('No se pudieron guardar 😕')
+      onToast?.('No se guardaron. Probá de nuevo 🔄')
     } finally {
       setGuardando(false)
     }
@@ -120,7 +120,7 @@ export default function MiCuenta({
       onToast?.('Tu cuenta quedó desactivada. Reactivala cuando quieras 🐾')
     } catch (e) {
       console.error(e)
-      onToast?.('No se pudo 😕')
+      onToast?.('No salió. Probá de nuevo 🔄')
     }
   }
   async function reactivar() {
@@ -129,7 +129,7 @@ export default function MiCuenta({
       onToast?.('🎉 ¡Cuenta reactivada! Tus avisos vuelven a verse.')
     } catch (e) {
       console.error(e)
-      onToast?.('No se pudo 😕')
+      onToast?.('No salió. Probá de nuevo 🔄')
     }
   }
 

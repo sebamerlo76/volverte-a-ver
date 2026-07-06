@@ -192,7 +192,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
       onPublicado()
     } catch (e) {
       console.error(e)
-      onToast('No se pudo publicar 😕')
+      onToast('No salió. Reintentá en un toque 🔄')
       setGuardando(false)
     }
   }

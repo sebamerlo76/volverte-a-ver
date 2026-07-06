@@ -62,7 +62,7 @@ export default function MisUbicaciones({ user, onToast }) {
       await cargar()
     } catch (e) {
       console.error(e)
-      onToast?.('No se pudo guardar 😕')
+      onToast?.('No se guardó. Probá de nuevo 🔄')
     } finally {
       setGuardando(false)
     }

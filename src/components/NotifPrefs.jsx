@@ -69,7 +69,7 @@ export default function NotifPrefs({ user, onToast, onListo }) {
       onListo?.()
     } catch (e) {
       console.warn(e)
-      onToast?.('No se pudieron guardar 😕')
+      onToast?.('No se guardaron. Probá de nuevo 🔄')
     }
   }
 

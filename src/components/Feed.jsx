@@ -52,7 +52,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
     }
     navigator.geolocation.getCurrentPosition(
       (p) => setMiUbi([p.coords.latitude, p.coords.longitude]),
-      () => onToast && onToast('No pudimos acceder a tu ubicación 📍'),
+      () => onToast && onToast('Activá la ubicación del navegador para verte en el mapa 📍'),
       { enableHighAccuracy: true, timeout: 8000 }
     )
   }

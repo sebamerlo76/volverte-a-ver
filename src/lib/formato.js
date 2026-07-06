@@ -3,7 +3,10 @@
 // Nombre a mostrar cuando la mascota no tiene nombre cargado.
 export function nombreMostrado(r) {
   if (r.nombre) return r.nombre
-  return r.especie === 'gato' ? 'Gato sin identificar' : 'Perro sin identificar'
+  const hembra = r.sexo === 'Hembra'
+  if (r.especie === 'gato') return hembra ? 'Gatita sin nombre' : 'Gato sin nombre'
+  if (r.especie === 'otro') return 'Mascota sin nombre'
+  return hembra ? 'Perrita sin nombre' : 'Perro sin nombre'
 }
 
 // "hace 2 h", "ayer", "hace 5 días"... a partir de la fecha de creación.

@@ -132,7 +132,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
       onPublicado()
     } catch (e) {
       console.error('No se pudo guardar:', e)
-      onToast('No se pudo guardar 😕 revisá la conexión')
+      onToast('No se guardó. Revisá la conexión y reintentá 🔄')
       setGuardando(false)
     }
   }
