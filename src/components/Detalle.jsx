@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
-import { getAvistamientos, sumarApoyo, denunciarReporte } from '../data/store.js'
+import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel } from '../lib/formato.js'
 import { compartirFlyer } from '../lib/flyer.js'
 
@@ -54,6 +54,30 @@ function marcarReportado(id) {
 }
 
 const MOTIVOS = ['Insulto o agresión', 'Foto inapropiada', 'Spam o falso', 'Otro']
+const MOTIVOS_NUM = ['Me pidió plata / recompensa por adelantado', 'Se hace pasar por quien la encontró', 'Otro']
+
+function normNum(w) {
+  return String(w || '').replace(/\D/g, '').slice(-10)
+}
+function yaReporteNum(w) {
+  try {
+    return JSON.parse(localStorage.getItem('chicho_numeros') || '[]').includes(normNum(w))
+  } catch (e) {
+    return false
+  }
+}
+function marcarReporteNum(w) {
+  try {
+    const a = JSON.parse(localStorage.getItem('chicho_numeros') || '[]')
+    const k = normNum(w)
+    if (k && !a.includes(k)) {
+      a.push(k)
+      localStorage.setItem('chicho_numeros', JSON.stringify(a))
+    }
+  } catch (e) {
+    /* ignore */
+  }
+}
 
 export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar }) {
   const [avist, setAvist] = useState([])
@@ -61,6 +85,8 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
   const [apoyos, setApoyos] = useState(r?.apoyos || 0)
   const [apoyado, setApoyado] = useState(false)
   const [reporteAbierto, setReporteAbierto] = useState(false)
+  const [numeroSheet, setNumeroSheet] = useState(false)
+  const [numReportes, setNumReportes] = useState(0)
 
   useEffect(() => {
     if (!r?.id) return
@@ -72,6 +98,20 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
       vivo = false
     }
   }, [r?.id])
+
+  // ¿El número de contacto fue reportado como sospechoso? (para la advertencia)
+  useEffect(() => {
+    let vivo = true
+    setNumReportes(0)
+    if (r?.whatsapp && !esMio) {
+      reportesDeNumero(r.whatsapp)
+        .then((n) => vivo && setNumReportes(n || 0))
+        .catch(() => {})
+    }
+    return () => {
+      vivo = false
+    }
+  }, [r?.whatsapp, esMio])
 
   // Sincronizar el contador de apoyos al cambiar de aviso.
   useEffect(() => {
@@ -106,6 +146,21 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
     marcarReportado(r.id)
     onToast?.('Gracias, lo vamos a revisar 🙏')
     denunciarReporte(r.id, motivo).catch((e) => console.error(e))
+  }
+  function abrirNumero() {
+    if (yaReporteNum(r.whatsapp)) {
+      onToast?.('Ya reportaste este número 👍')
+      return
+    }
+    setNumeroSheet(true)
+  }
+  function reportarNum(motivo) {
+    setNumeroSheet(false)
+    marcarReporteNum(r.whatsapp)
+    onToast?.('Gracias, lo revisamos 🙏')
+    reportarNumero(r.whatsapp, motivo)
+      .then((n) => typeof n === 'number' && setNumReportes(n))
+      .catch((e) => console.error(e))
   }
 
   if (!r) return null
@@ -343,6 +398,27 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
             </div>
           )}
         </div>
+        {!esMio && r.whatsapp && (
+          <div style={{ padding: '2px 20px 6px' }}>
+            <div className={'scam-tip' + (numReportes >= 3 ? ' danger' : '')}>
+              <span className="mi fill" style={{ fontSize: 19 }}>
+                {numReportes >= 3 ? 'gpp_bad' : 'verified_user'}
+              </span>
+              <div style={{ flex: 1 }}>
+                {numReportes >= 3 ? (
+                  <b>Ojo: {numReportes} personas reportaron este número como sospechoso. Verificá bien antes de coordinar.</b>
+                ) : (
+                  <>
+                    <b>Cuidá tu plata:</b> quien la encontró no debería pedirte dinero por adelantado.
+                  </>
+                )}
+                <button className="scam-report" onClick={abrirNumero}>
+                  Reportar número sospechoso
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <div style={{ textAlign: 'center', padding: '2px 20px' }}>
           <button className="btn-reportar" onClick={abrirReporte}>
             <span className="mi" style={{ fontSize: 15 }}>
@@ -367,6 +443,25 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
               </button>
             ))}
             <button className="pp-cancel" onClick={() => setReporteAbierto(false)}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {numeroSheet && (
+        <div className="pp-sheet-ov" onClick={() => setNumeroSheet(false)}>
+          <div className="pp-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="report-sheet-t">¿Por qué reportás este número?</div>
+            {MOTIVOS_NUM.map((m) => (
+              <button key={m} className="pp-op" onClick={() => reportarNum(m)}>
+                <span className="mi" style={{ fontSize: 22, color: 'var(--coral)' }}>
+                  report
+                </span>
+                {m}
+              </button>
+            ))}
+            <button className="pp-cancel" onClick={() => setNumeroSheet(false)}>
               Cancelar
             </button>
           </div>

@@ -220,6 +220,33 @@ export async function denunciarReporte(reporteId, motivo) {
   return data
 }
 
+// --- Anti-estafa: números de WhatsApp sospechosos ---
+// Normaliza a solo dígitos, últimos 10 (así +54 9 343..., 0343..., 343... matchean).
+function normalizarNumero(w) {
+  const d = String(w || '').replace(/\D/g, '')
+  return d.slice(-10)
+}
+// Reporta un número. Devuelve cuántos dispositivos distintos lo reportaron.
+export async function reportarNumero(whatsapp, motivo) {
+  const num = normalizarNumero(whatsapp)
+  if (!num || !supabaseConfigurado) return 0
+  const { data, error } = await supabase.rpc('reportar_numero', { num, dev: deviceId(), motivo: motivo || null })
+  if (error) throw error
+  return data || 0
+}
+// Cuántos reportaron ese número (para la advertencia). Falla silencioso → 0.
+export async function reportesDeNumero(whatsapp) {
+  const num = normalizarNumero(whatsapp)
+  if (!num || !supabaseConfigurado) return 0
+  try {
+    const { data, error } = await supabase.rpc('reportes_de_numero', { num })
+    if (error) return 0
+    return data || 0
+  } catch (e) {
+    return 0
+  }
+}
+
 export async function getModeracion() {
   if (!supabaseConfigurado) return null
   const { data, error } = await supabase.rpc('admin_moderacion')
@@ -376,6 +403,24 @@ export async function marcarResuelto(id) {
   }
   const reportes = leerLocal().map((r) => (r.id === id ? { ...r, estado: 'resuelto' } : r))
   guardarLocal(reportes)
+}
+
+// Renueva un aviso: lo "re-publica" (actualiza creado_en a ahora) para que
+// vuelva arriba en el feed. La fecha en que se perdió (fecha_evento) no se toca.
+export async function renovarReporte(id) {
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase
+      .from('reportes')
+      .update({ creado_en: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .maybeSingle()
+    if (error) throw error
+    return data ? desdeFila(data) : null
+  }
+  const reportes = leerLocal().map((r) => (r.id === id ? { ...r, creadoEn: new Date().toISOString() } : r))
+  guardarLocal(reportes)
+  return reportes.find((r) => r.id === id) || null
 }
 
 // Vuelve a activar un aviso que estaba resuelto.

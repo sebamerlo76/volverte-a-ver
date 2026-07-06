@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import PetCard from './PetCard.jsx'
-import { getMisReportes, getMisMascotas, marcarResuelto, desactivarCuenta, reactivarCuenta } from '../data/store.js'
+import { getMisReportes, getMisMascotas, marcarResuelto, renovarReporte, desactivarCuenta, reactivarCuenta } from '../data/store.js'
 import { avatarDe, nombreUsuario } from '../lib/formato.js'
 import { soportado as pushSoportado, yaSuscripto, activarPush, desactivarPush } from '../lib/push.js'
 import { supabase } from '../lib/supabase.js'
@@ -8,6 +8,11 @@ import NotifPrefs from './NotifPrefs.jsx'
 import MisUbicaciones from './MisUbicaciones.jsx'
 
 const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
+const DIAS_VIEJO = 30 // a partir de acá, ofrecemos renovar el aviso
+function diasDe(iso) {
+  const ms = Date.now() - new Date(iso).getTime()
+  return isNaN(ms) ? 0 : Math.floor(ms / 86400000)
+}
 const TITULOS = {
   animalitos: 'Mis animalitos',
   ubicaciones: 'Mis ubicaciones',
@@ -37,6 +42,21 @@ export default function MiCuenta({
   const [nombreEdit, setNombreEdit] = useState(user?.user_metadata?.nombre || '')
   const [telEdit, setTelEdit] = useState(user?.user_metadata?.telefono || '')
   const [guardando, setGuardando] = useState(false)
+  const [renovando, setRenovando] = useState(null)
+
+  async function renovar(id) {
+    setRenovando(id)
+    try {
+      await renovarReporte(id)
+      onToast?.('🔄 ¡Aviso renovado! Vuelve arriba en el feed')
+      await cargar()
+    } catch (e) {
+      console.error(e)
+      onToast?.('No se renovó. Probá de nuevo 🔄')
+    } finally {
+      setRenovando(null)
+    }
+  }
 
   const cargar = useCallback(async () => {
     const [r, m] = await Promise.all([
@@ -382,6 +402,17 @@ export default function MiCuenta({
                   <div style={{ opacity: r.estado === 'resuelto' ? 0.6 : 1 }}>
                     <PetCard r={r} onClick={() => onAbrir(r)} />
                   </div>
+                  {r.estado === 'activo' && diasDe(r.creadoEn) >= DIAS_VIEJO && (
+                    <div className="renovar-bar">
+                      <span>
+                        Hace <b>{diasDe(r.creadoEn)} días</b>. ¿Seguís buscando?
+                      </span>
+                      <button onClick={() => renovar(r.id)} disabled={renovando === r.id}>
+                        <span className="mi" style={{ fontSize: 16 }}>refresh</span>
+                        {renovando === r.id ? '…' : 'Renovar'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )
             })
