@@ -3,7 +3,7 @@ import PetCard from './PetCard.jsx'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
-import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarLocalidadFeed } from '../lib/localidades.js'
 
 const ESPECIE_LBL = { perro: 'Perros', gato: 'Gatos', otro: 'Otros' }
 const TIEMPOS = [
@@ -40,7 +40,8 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
   function elegirCiudad(l) {
     setFiltro('localidad', l)
     setFiltro('zona', null) // los barrios cambian según la ciudad
-    if (l) recordarLocalidad(l)
+    recordarLocalidadFeed(l) // recuerda la vista del feed (incluido "Todas")
+    if (l) recordarLocalidad(l) // el default de publicar sigue una ciudad real
     setCiudadSheet(false)
   }
 

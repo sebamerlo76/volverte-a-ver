@@ -133,3 +133,25 @@ export function recordarLocalidad(loc) {
     /* ignore */
   }
 }
+
+// Preferencia de ciudad del FEED. A diferencia de la de arriba, acá SÍ se puede
+// elegir "Todas" (null). Es una clave aparte para no pisar el default de publicar
+// (que siempre tiene que ser una ciudad real).
+const LS_FEED_LOC = 'chicho_feed_loc'
+export function localidadFeedGuardada() {
+  try {
+    const v = localStorage.getItem(LS_FEED_LOC)
+    if (v === '*') return null // el usuario eligió "Todas"
+    if (v && LOCALIDADES[v]) return v
+  } catch (e) {
+    /* ignore */
+  }
+  return localidadGuardada() // primera vez: arranca en tu ciudad
+}
+export function recordarLocalidadFeed(loc) {
+  try {
+    localStorage.setItem(LS_FEED_LOC, loc && LOCALIDADES[loc] ? loc : '*')
+  } catch (e) {
+    /* ignore */
+  }
+}
