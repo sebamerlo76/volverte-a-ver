@@ -16,9 +16,12 @@ export default function PhotoPicker({ value = [], onChange, max = 3 }) {
     e.target.value = ''
     setSheet(false)
   }
-  function alConfirmar(blob) {
-    const f = new File([blob], `foto-${Date.now()}.jpg`, { type: 'image/jpeg' })
-    onChange([...value, { url: URL.createObjectURL(blob), file: f }])
+  function alConfirmar({ full, thumb }) {
+    const ts = Date.now()
+    const fFull = new File([full], `foto-${ts}.jpg`, { type: 'image/jpeg' })
+    const fThumb = new File([thumb], `thumb-${ts}.jpg`, { type: 'image/jpeg' })
+    // url = la completa (previsualización); file = completa (detalle); thumb = recorte del feed
+    onChange([...value, { url: URL.createObjectURL(full), file: fFull, thumb: fThumb }])
     setPendiente(null)
   }
   function quitar(i) {

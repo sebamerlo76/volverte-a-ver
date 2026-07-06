@@ -1,18 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 
-// Encuadre de foto: cuadrado, con arrastrar (pan) + zoom. Sin librerías.
-// Devuelve un Blob JPEG recortado (1080x1080).
-const SALIDA = 1080
+// Encuadre para el FEED. La foto se publica COMPLETA (para el detalle); acá el
+// usuario elige qué franja horizontal se muestra en el feed (mismo formato que
+// la tarjeta). Devuelve { full, thumb }: la imagen entera + el recorte del feed.
+const RATIO = 2 // feed 2:1 (ancho:alto)
+const THUMB_W = 1080
+const FULL_MAX = 1440
 
 export default function ImageCropper({ file, onConfirm, onCancel }) {
   const [src, setSrc] = useState('')
   const [nat, setNat] = useState({ w: 0, h: 0 })
-  const [z, setZ] = useState(1) // zoom (>= 1)
-  const [pos, setPos] = useState({ x: 0, y: 0 }) // pan en px de pantalla
-  const [frame, setFrame] = useState(300) // lado del marco cuadrado en px
-  const marcoRef = useRef(null)
-  const drag = useRef(null)
+  const [disp, setDisp] = useState({ w: 0, h: 0 }) // tamaño mostrado (contain)
+  const [bandY, setBandY] = useState(0) // offset vertical de la banda (px display)
+  const wrapRef = useRef(null)
   const imgRef = useRef(null)
+  const drag = useRef(null)
 
   useEffect(() => {
     const url = URL.createObjectURL(file)
@@ -20,46 +22,45 @@ export default function ImageCropper({ file, onConfirm, onCancel }) {
     return () => URL.revokeObjectURL(url)
   }, [file])
 
+  // Imagen más ancha que 2:1 → entra casi entera; si no, la banda es una franja.
+  const wide = nat.w && nat.h ? nat.w / nat.h >= RATIO : false
+  const bandW = wide ? disp.h * RATIO : disp.w
+  const bandH = wide ? disp.h : disp.w / RATIO
+  const bandX = (disp.w - bandW) / 2
+  const maxBandY = Math.max(0, disp.h - bandH)
+
+  function medir() {
+    const wrap = wrapRef.current
+    if (!wrap || !nat.w) return
+    const scale = Math.min(wrap.clientWidth / nat.w, wrap.clientHeight / nat.h)
+    setDisp({ w: nat.w * scale, h: nat.h * scale })
+  }
   useEffect(() => {
-    function medir() {
-      if (marcoRef.current) setFrame(marcoRef.current.clientWidth)
-    }
     medir()
     window.addEventListener('resize', medir)
     return () => window.removeEventListener('resize', medir)
-  }, [])
-
-  // Escala base para que la imagen "cubra" el marco a z=1.
-  const coverScale = nat.w && nat.h ? frame / Math.min(nat.w, nat.h) : 1
-  const dispW = nat.w * coverScale * z
-  const dispH = nat.h * coverScale * z
-
-  // Limita el pan para que la imagen siempre cubra el marco.
-  function clamp(p) {
-    const maxX = Math.max(0, (dispW - frame) / 2)
-    const maxY = Math.max(0, (dispH - frame) / 2)
-    return { x: Math.max(-maxX, Math.min(maxX, p.x)), y: Math.max(-maxY, Math.min(maxY, p.y)) }
-  }
-
-  useEffect(() => {
-    setPos((p) => clamp(p))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [z, frame, nat.w, nat.h])
+  }, [nat])
+
+  // Al conocer el tamaño mostrado, centro la banda.
+  useEffect(() => {
+    setBandY(Math.max(0, (disp.h - bandH) / 2))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [disp.h])
 
   function onImgLoad(e) {
     setNat({ w: e.target.naturalWidth, h: e.target.naturalHeight })
-    setPos({ x: 0, y: 0 })
-    setZ(1)
   }
 
   function onDown(e) {
     const pt = e.touches ? e.touches[0] : e
-    drag.current = { sx: pt.clientX, sy: pt.clientY, ox: pos.x, oy: pos.y }
+    drag.current = { sy: pt.clientY, oy: bandY }
   }
   function onMove(e) {
     if (!drag.current) return
     const pt = e.touches ? e.touches[0] : e
-    setPos(clamp({ x: drag.current.ox + (pt.clientX - drag.current.sx), y: drag.current.oy + (pt.clientY - drag.current.sy) }))
+    const y = drag.current.oy + (pt.clientY - drag.current.sy)
+    setBandY(Math.max(0, Math.min(maxBandY, y)))
   }
   function onUp() {
     drag.current = null
@@ -68,68 +69,72 @@ export default function ImageCropper({ file, onConfirm, onCancel }) {
   function confirmar() {
     const img = imgRef.current
     if (!img || !nat.w) return
-    // El marco (0..frame) mapea a un cuadrado en coordenadas de la imagen fuente.
-    const srcPerDisp = nat.w / dispW
-    const cropDispX = dispW / 2 - frame / 2 - pos.x
-    const cropDispY = dispH / 2 - frame / 2 - pos.y
-    const sx = cropDispX * srcPerDisp
-    const sy = cropDispY * srcPerDisp
-    const sSize = frame * srcPerDisp
+    const d2n = nat.h / disp.h // px mostrados → px fuente (escala uniforme)
 
-    const canvas = document.createElement('canvas')
-    canvas.width = SALIDA
-    canvas.height = SALIDA
-    const ctx = canvas.getContext('2d')
-    ctx.drawImage(img, sx, sy, sSize, sSize, 0, 0, SALIDA, SALIDA)
-    canvas.toBlob((blob) => blob && onConfirm(blob), 'image/jpeg', 0.9)
+    // Región de la banda en coordenadas de la imagen fuente.
+    const sY = wide ? 0 : bandY * d2n
+    const sH = wide ? nat.h : bandH * d2n
+    const sW = wide ? nat.h * RATIO : nat.w
+    const sX = wide ? (nat.w - sW) / 2 : 0
+
+    // Recorte del feed (2:1)
+    const tW = THUMB_W
+    const tH = Math.round(THUMB_W / RATIO)
+    const c1 = document.createElement('canvas')
+    c1.width = tW
+    c1.height = tH
+    c1.getContext('2d').drawImage(img, sX, sY, sW, sH, 0, 0, tW, tH)
+
+    // Foto completa (lado mayor <= FULL_MAX)
+    const fScale = Math.min(1, FULL_MAX / Math.max(nat.w, nat.h))
+    const fW = Math.round(nat.w * fScale)
+    const fH = Math.round(nat.h * fScale)
+    const c2 = document.createElement('canvas')
+    c2.width = fW
+    c2.height = fH
+    c2.getContext('2d').drawImage(img, 0, 0, fW, fH)
+
+    c1.toBlob((thumb) => {
+      c2.toBlob((full) => {
+        if (thumb && full) onConfirm({ full, thumb })
+      }, 'image/jpeg', 0.85)
+    }, 'image/jpeg', 0.85)
   }
 
   return (
     <div className="crop-overlay">
       <div className="crop-card">
-        <div className="crop-titulo">Encuadrá la foto</div>
-        <div className="crop-sub">Arrastrá y usá el zoom para elegir qué parte se ve.</div>
+        <div className="crop-titulo">¿Qué se ve en el feed?</div>
+        <div className="crop-sub">Movés el recuadro para elegir. La foto se publica completa 👇</div>
 
-        <div
-          className="crop-marco"
-          ref={marcoRef}
-          onMouseDown={onDown}
-          onMouseMove={onMove}
-          onMouseUp={onUp}
-          onMouseLeave={onUp}
-          onTouchStart={onDown}
-          onTouchMove={onMove}
-          onTouchEnd={onUp}
-        >
+        <div className="crop-stage" ref={wrapRef}>
           {src ? (
-            <img
-              ref={imgRef}
-              src={src}
-              alt=""
-              onLoad={onImgLoad}
-              draggable={false}
-              style={{
-                position: 'absolute',
-                left: '50%',
-                top: '50%',
-                width: dispW ? dispW + 'px' : 'auto',
-                height: dispH ? dispH + 'px' : 'auto',
-                transform: `translate(-50%, -50%) translate(${pos.x}px, ${pos.y}px)`,
-                userSelect: 'none',
-                touchAction: 'none',
-              }}
-            />
+            <div style={{ position: 'relative', width: disp.w || 'auto', height: disp.h || 'auto' }}>
+              <img
+                ref={imgRef}
+                src={src}
+                alt=""
+                onLoad={onImgLoad}
+                draggable={false}
+                style={{ width: disp.w ? disp.w + 'px' : 'auto', height: disp.h ? disp.h + 'px' : 'auto', display: 'block', userSelect: 'none' }}
+              />
+              {disp.h ? (
+                <div
+                  className="crop-band"
+                  style={{ left: bandX + 'px', top: bandY + 'px', width: bandW + 'px', height: bandH + 'px' }}
+                  onMouseDown={onDown}
+                  onMouseMove={onMove}
+                  onMouseUp={onUp}
+                  onMouseLeave={onUp}
+                  onTouchStart={onDown}
+                  onTouchMove={onMove}
+                  onTouchEnd={onUp}
+                >
+                  <span className="crop-band-lbl">Feed</span>
+                </div>
+              ) : null}
+            </div>
           ) : null}
-        </div>
-
-        <div className="crop-zoom">
-          <span className="mi" style={{ fontSize: 19, color: 'var(--muted)' }}>
-            zoom_out
-          </span>
-          <input type="range" min="1" max="3" step="0.01" value={z} onChange={(e) => setZ(parseFloat(e.target.value))} />
-          <span className="mi" style={{ fontSize: 19, color: 'var(--muted)' }}>
-            zoom_in
-          </span>
         </div>
 
         <div className="crop-acciones">

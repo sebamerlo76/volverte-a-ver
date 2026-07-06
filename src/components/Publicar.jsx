@@ -2,7 +2,7 @@ import { useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { coordsDeBarrio, puntoDeReporte } from '../lib/parana.js'
 import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad } from '../lib/localidades.js'
-import { addReporte, actualizarReporte, addMascota, subirFotos, guardarEmbedding } from '../data/store.js'
+import { addReporte, actualizarReporte, addMascota, subirFotos, subirFotoFeed, guardarEmbedding } from '../data/store.js'
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import FechaPicker from './FechaPicker.jsx'
@@ -71,8 +71,8 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
     setGuardando(true)
     try {
       // Subimos las fotos nuevas y conservamos las que ya estaban.
-      const fotosUrls = await subirFotos(fotos)
-      const fotoUrl = fotosUrls[0] || ''
+      const fotosUrls = await subirFotos(fotos) // completas (para el detalle)
+      const fotoUrl = await subirFotoFeed(fotos, fotosUrls[0] || '') // recorte para el feed
       // La huella visual NO se calcula acá (para que el guardado sea instantáneo):
       // se hace en segundo plano después de publicar (ver más abajo).
       const embedding = base?.embedding ?? null

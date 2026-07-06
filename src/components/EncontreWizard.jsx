@@ -5,7 +5,7 @@ import PhotoPicker from './PhotoPicker.jsx'
 import FechaPicker from './FechaPicker.jsx'
 import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad } from '../lib/localidades.js'
 import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
-import { addReporte, addMascota, subirFotos } from '../data/store.js'
+import { addReporte, addMascota, subirFotos, subirFotoFeed } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, linkWhatsApp } from '../lib/formato.js'
 import { similitud } from '../lib/vector.js'
 import { tieneGroseria } from '../lib/moderacion.js'
@@ -144,8 +144,8 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
           /* ignore */
         }
       }
-      const fotosUrls = await subirFotos(fotos)
-      const fotoUrl = fotosUrls[0] || ''
+      const fotosUrls = await subirFotos(fotos) // completas (para el detalle)
+      const fotoUrl = await subirFotoFeed(fotos, fotosUrls[0] || '') // recorte para el feed
       await addReporte({
         tipo: 'encontrado',
         especie,

@@ -643,7 +643,7 @@ select {
   width: 100%;
   height: 100%;
   flex: none;
-  object-fit: cover;
+  object-fit: contain; /* foto entera, sin recortar */
   scroll-snap-align: start;
 }
 .dhero-dots {
@@ -1160,7 +1160,7 @@ select {
 }
 .ci {
   position: relative;
-  aspect-ratio: 1 / 1; /* cuadrada, igual que el encuadre de la foto (no recorta la cara) */
+  aspect-ratio: 2 / 1; /* apaisada; coincide exacto con el recorte del feed */
   background: linear-gradient(135deg, #ffd9d3, #ffb3a8);
 }
 .ci.g {
@@ -1483,7 +1483,7 @@ select {
 /* ---- Detalle ---- */
 .dhero {
   position: relative;
-  aspect-ratio: 1 / 1; /* cuadrada, igual que el encuadre (consistente con el feed) */
+  aspect-ratio: 1 / 1; /* marco cuadrado; la foto se ve COMPLETA adentro (contain) */
   background: linear-gradient(135deg, #ffd9d3, #ffb3a8);
   flex: none;
 }
@@ -1493,7 +1493,7 @@ select {
 .dhero img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* foto entera (vertical/horizontal/cuadrada), sin recortar */
 }
 .dback {
   position: absolute;
@@ -2349,6 +2349,42 @@ select {
   background: #1b1512;
   cursor: grab;
   touch-action: none;
+}
+/* Recortador del feed: muestra la foto entera y una banda movible (lo que se ve en el feed) */
+.crop-stage {
+  position: relative;
+  width: 100%;
+  height: 56vh;
+  max-height: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #1b1512;
+}
+.crop-band {
+  position: absolute;
+  box-shadow: 0 0 0 2000px rgba(20, 14, 10, 0.62); /* opaca todo menos la banda */
+  border: 2px solid #fff;
+  border-radius: 4px;
+  cursor: grab;
+  touch-action: none;
+}
+.crop-band:active {
+  cursor: grabbing;
+}
+.crop-band-lbl {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(31, 56, 82, 0.92);
+  color: #fff;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
 }
 .crop-marco:active {
   cursor: grabbing;

@@ -25,7 +25,8 @@ function desdeFila(row) {
     tamano: row.tamano,
     raza: row.raza,
     descripcion: row.descripcion,
-    foto: (row.fotos && row.fotos.length ? row.fotos[0] : row.foto) || '',
+    // foto = recorte del feed (columna foto); fotos = las completas (columna fotos)
+    foto: row.foto || (row.fotos && row.fotos.length ? row.fotos[0] : '') || '',
     fotos: row.fotos && row.fotos.length ? row.fotos : row.foto ? [row.foto] : [],
     whatsapp: row.whatsapp,
     autor: row.autor,
@@ -59,7 +60,8 @@ function haciaFila(r) {
     tamano: r.tamano,
     raza: r.raza,
     descripcion: r.descripcion,
-    foto: r.fotos && r.fotos.length ? r.fotos[0] : r.foto ?? null,
+    // foto = recorte del feed (lo setea el que publica); fotos = las completas
+    foto: r.foto ?? (r.fotos && r.fotos.length ? r.fotos[0] : null),
     fotos: r.fotos && r.fotos.length ? r.fotos : r.foto ? [r.foto] : null,
     whatsapp: r.whatsapp,
     fecha_evento: r.fechaEvento,
@@ -620,6 +622,14 @@ export async function subirFotos(items) {
     else if (it.url) urls.push(it.url)
   }
   return urls
+}
+
+// Sube el recorte para el FEED (el de la 1ª foto) y devuelve su URL. Si esa foto
+// no tiene recorte (p. ej. una edición con foto ya subida), cae al fallback.
+export async function subirFotoFeed(items, fallbackUrl = '') {
+  const it = (items || [])[0]
+  if (it && it.thumb) return await subirFoto(it.thumb)
+  return fallbackUrl
 }
 
 // Sube una foto y devuelve su URL. En la nube va al Storage; en local, un data URL.
