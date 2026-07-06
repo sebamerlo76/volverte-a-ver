@@ -1160,7 +1160,7 @@ select {
 }
 .ci {
   position: relative;
-  height: 162px;
+  aspect-ratio: 1 / 1; /* cuadrada, igual que el encuadre de la foto (no recorta la cara) */
   background: linear-gradient(135deg, #ffd9d3, #ffb3a8);
 }
 .ci.g {
@@ -1483,7 +1483,7 @@ select {
 /* ---- Detalle ---- */
 .dhero {
   position: relative;
-  height: 300px;
+  aspect-ratio: 1 / 1; /* cuadrada, igual que el encuadre (consistente con el feed) */
   background: linear-gradient(135deg, #ffd9d3, #ffb3a8);
   flex: none;
 }
