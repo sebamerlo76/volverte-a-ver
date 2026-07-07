@@ -89,7 +89,6 @@ select {
   .app {
     height: 100vh;
     height: 100dvh;
-    height: var(--app-h, 100dvh); /* altura real por JS: estable al recargar en la PWA */
     max-height: none;
     border-radius: 0;
   }
