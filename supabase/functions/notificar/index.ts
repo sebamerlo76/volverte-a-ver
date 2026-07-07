@@ -131,11 +131,16 @@ async function manejarReporte(nuevo: any) {
     const destPrefs = (cercaPrefs || [])
       .filter((p: any) => p.user_id !== nuevo.user_id)
       .filter((p: any) => p.especie === 'todas' || p.especie === nuevo.especie)
-      .filter((p: any) => (p.localidad || 'Paraná') === (nuevo.localidad || 'Paraná'))
       .filter((p: any) => {
+        // Una o varias localidades (compat: si no hay array, usa la vieja columna localidad).
+        const locs =
+          Array.isArray(p.localidades) && p.localidades.length ? p.localidades : [p.localidad || 'Paraná']
+        if (!locs.includes(nuevo.localidad || 'Paraná')) return false
+        // Con varias ciudades elegidas, avisamos de todos los barrios de esas ciudades.
+        const variasCiudades = locs.length > 1
         const porBarrio =
-          Array.isArray(p.barrios) &&
-          (p.barrios.includes('*') || (nuevo.zona && p.barrios.includes(nuevo.zona)))
+          variasCiudades ||
+          (Array.isArray(p.barrios) && (p.barrios.includes('*') || (nuevo.zona && p.barrios.includes(nuevo.zona))))
         const porRadio =
           p.centro_lat != null &&
           nuevo.lat != null &&

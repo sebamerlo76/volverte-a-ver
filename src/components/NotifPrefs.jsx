@@ -13,6 +13,7 @@ const DEFECTO = {
   especie: 'todas',
   barrios: [],
   localidad: 'Paraná',
+  localidades: null, // una o varias ciudades para "cerca mío"
 }
 
 // Preferencias de notificación del usuario (qué avisos quiere recibir).
@@ -29,11 +30,11 @@ export default function NotifPrefs({ user, onToast, onListo }) {
           vivo &&
           setPrefs(
             p
-              ? { ...DEFECTO, ...p, localidad: p.localidad || localidadGuardada() }
-              : { ...DEFECTO, localidad: localidadGuardada() }
+              ? { ...DEFECTO, ...p, localidades: p.localidades && p.localidades.length ? p.localidades : [p.localidad || localidadGuardada()] }
+              : { ...DEFECTO, localidades: [localidadGuardada()] }
           )
       )
-      .catch(() => vivo && setPrefs({ ...DEFECTO, localidad: localidadGuardada() }))
+      .catch(() => vivo && setPrefs({ ...DEFECTO, localidades: [localidadGuardada()] }))
     return () => {
       vivo = false
     }
@@ -50,7 +51,8 @@ export default function NotifPrefs({ user, onToast, onListo }) {
       radio_km: np.radio_km,
       especie: np.especie,
       barrios: np.barrios,
-      localidad: np.localidad || localidadGuardada(),
+      localidades: np.localidades && np.localidades.length ? np.localidades : [np.localidad || localidadGuardada()],
+      localidad: (np.localidades && np.localidades[0]) || np.localidad || localidadGuardada(), // compat
     })
   }
   // Autosave con un pequeño retardo, para no pegarle a la base en cada toque.
@@ -104,17 +106,24 @@ export default function NotifPrefs({ user, onToast, onListo }) {
       return np
     })
   }
-  function cambiarLocalidad(l) {
-    recordarLocalidad(l) // queda como tu ciudad por defecto para la próxima
+  function toggleLocalidad(l) {
     setPrefs((p) => {
-      const np = { ...p, localidad: l, barrios: [] } // los barrios cambian según la ciudad
+      const cur = p.localidades && p.localidades.length ? p.localidades : [p.localidad || LOCALIDAD_DEFECTO]
+      let next = cur.includes(l) ? cur.filter((x) => x !== l) : [...cur, l]
+      if (!next.length) next = [l] // no dejar vacío
+      recordarLocalidad(next[0])
+      // Con más de una ciudad los barrios no aplican (avisamos de todos).
+      const barrios = next.length === 1 ? p.barrios : []
+      const np = { ...p, localidades: next, localidad: next[0], barrios }
       guardar(np)
       return np
     })
   }
 
   if (!prefs) return null
-  const loc = prefs.localidad || LOCALIDAD_DEFECTO
+  const locs = prefs.localidades && prefs.localidades.length ? prefs.localidades : [prefs.localidad || LOCALIDAD_DEFECTO]
+  const unaSola = locs.length === 1
+  const loc = locs[0]
   const centro = prefs.centro_lat != null ? [prefs.centro_lat, prefs.centro_lng] : centroDe(loc)
   const todos = (prefs.barrios || []).includes('*')
 
@@ -147,13 +156,13 @@ export default function NotifPrefs({ user, onToast, onListo }) {
         <div className="cerca-box">
           {NOMBRES_LOCALIDADES.length > 1 && (
             <>
-              <div className="cerca-lbl">¿En qué localidad?</div>
+              <div className="cerca-lbl">¿En qué localidades? (podés elegir varias)</div>
               <div className="barrio-chips" style={{ marginBottom: 12 }}>
                 {NOMBRES_LOCALIDADES.map((l) => (
                   <button
                     key={l}
-                    className={'esp-chip' + (loc === l ? ' on' : '')}
-                    onClick={() => cambiarLocalidad(l)}
+                    className={'esp-chip' + (locs.includes(l) ? ' on' : '')}
+                    onClick={() => toggleLocalidad(l)}
                   >
                     {l}
                   </button>
@@ -161,24 +170,32 @@ export default function NotifPrefs({ user, onToast, onListo }) {
               </div>
             </>
           )}
-          <div className="cerca-lbl">¿De qué barrios querés enterarte?</div>
-          <div className="barrio-chips">
-            <button className={'esp-chip' + (todos ? ' on' : '')} onClick={toggleTodos}>
-              🌎 Todos
-            </button>
-            {nombresBarriosDe(loc).map((b) => {
-              const on = !todos && (prefs.barrios || []).includes(b)
-              return (
-                <button
-                  key={b}
-                  className={'esp-chip' + (on ? ' on' : '') + (todos ? ' dim' : '')}
-                  onClick={() => toggleBarrio(b)}
-                >
-                  {b}
+          {unaSola ? (
+            <>
+              <div className="cerca-lbl">¿De qué barrios querés enterarte?</div>
+              <div className="barrio-chips">
+                <button className={'esp-chip' + (todos ? ' on' : '')} onClick={toggleTodos}>
+                  🌎 Todos
                 </button>
-              )
-            })}
-          </div>
+                {nombresBarriosDe(loc).map((b) => {
+                  const on = !todos && (prefs.barrios || []).includes(b)
+                  return (
+                    <button
+                      key={b}
+                      className={'esp-chip' + (on ? ' on' : '') + (todos ? ' dim' : '')}
+                      onClick={() => toggleBarrio(b)}
+                    >
+                      {b}
+                    </button>
+                  )
+                })}
+              </div>
+            </>
+          ) : (
+            <div className="cerca-nota">
+              Te avisamos de <b>todos los barrios</b> de las {locs.length} ciudades que elegiste 🐾
+            </div>
+          )}
 
           <button className="cerca-adv-toggle" onClick={() => setVerMapa((v) => !v)}>
             <span className="mi" style={{ fontSize: 18 }}>{verMapa ? 'expand_less' : 'expand_more'}</span>

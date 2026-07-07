@@ -2677,6 +2677,18 @@ select {
   opacity: 0.5;
 }
 
+/* Nota cuando se eligen varias localidades en "cerca mío" */
+.cerca-nota {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--muted);
+  background: #f2f7ee;
+  border: 1px solid #dce8d2;
+  border-radius: 12px;
+  padding: 10px 12px;
+  line-height: 1.45;
+}
+
 /* Encontré: mensaje cuando no hay perdidos que coincidan */
 .coinc-vacio {
   display: flex;

@@ -634,7 +634,14 @@ export async function getNotifPrefs(userId) {
 
 export async function guardarNotifPrefs(prefs) {
   if (!supabaseConfigurado) return null
-  const { data, error } = await supabase.from('notif_prefs').upsert(prefs, { onConflict: 'user_id' }).select().single()
+  let { data, error } = await supabase.from('notif_prefs').upsert(prefs, { onConflict: 'user_id' }).select().single()
+  // A prueba de balas: si la columna "localidades" todavía no existe, guardá sin ella.
+  if (error && prefs.localidades) {
+    const { localidades, ...resto } = prefs
+    const r = await supabase.from('notif_prefs').upsert(resto, { onConflict: 'user_id' }).select().single()
+    data = r.data
+    error = r.error
+  }
   if (error) throw error
   return data
 }
