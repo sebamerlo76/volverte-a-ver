@@ -402,15 +402,29 @@ export default function MiCuenta({
                   <div style={{ opacity: r.estado === 'resuelto' ? 0.6 : 1 }}>
                     <PetCard r={r} onClick={() => onAbrir(r)} />
                   </div>
-                  {r.estado === 'activo' && diasDe(r.creadoEn) >= DIAS_VIEJO && (
+                  {r.estado === 'activo' && (
                     <div className="renovar-bar">
                       <span>
-                        Hace <b>{diasDe(r.creadoEn)} días</b>. ¿Seguís buscando?
+                        {diasDe(r.creadoEn) >= DIAS_VIEJO ? (
+                          <>
+                            Hace <b>{diasDe(r.creadoEn)} días</b>.
+                          </>
+                        ) : (
+                          '¿Ya está en casa?'
+                        )}
                       </span>
-                      <button onClick={() => renovar(r.id)} disabled={renovando === r.id}>
-                        <span className="mi" style={{ fontSize: 16 }}>refresh</span>
-                        {renovando === r.id ? '…' : 'Renovar'}
-                      </button>
+                      <div className="rb-acc">
+                        {diasDe(r.creadoEn) >= DIAS_VIEJO && (
+                          <button className="rb-sec" onClick={() => renovar(r.id)} disabled={renovando === r.id}>
+                            <span className="mi" style={{ fontSize: 15 }}>refresh</span>
+                            {renovando === r.id ? '…' : 'Renovar'}
+                          </button>
+                        )}
+                        <button className="rb-ok" onClick={() => aparecio(r.id)}>
+                          <span className="mi fill" style={{ fontSize: 15 }}>home</span>
+                          Ya volvió
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>

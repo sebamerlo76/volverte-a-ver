@@ -434,6 +434,40 @@ export async function reactivarReporte(id) {
   guardarLocal(reportes)
 }
 
+// --- Gestión de avisos sin cuenta (token secreto → chicho.ar/g/<token>) ---
+export function nuevoTokenGestion() {
+  try {
+    return (window.crypto && crypto.randomUUID && crypto.randomUUID()) || `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`
+  } catch (e) {
+    return `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`
+  }
+}
+// Registra el token del aviso recién creado. Devuelve true si se guardó.
+export async function publicarGestion(reporteId, token) {
+  if (!supabaseConfigurado || !reporteId || !token) return false
+  const { data, error } = await supabase.rpc('publicar_gestion', { rid: reporteId, tok: token })
+  if (error) throw error
+  return !!data
+}
+export async function getReportePorToken(token) {
+  if (!supabaseConfigurado || !token) return null
+  const { data, error } = await supabase.rpc('reporte_por_token', { tok: token })
+  if (error) throw error
+  return (data && data[0]) || null
+}
+export async function resolverPorToken(token) {
+  if (!supabaseConfigurado || !token) return false
+  const { data, error } = await supabase.rpc('resolver_gestion', { tok: token })
+  if (error) throw error
+  return !!data
+}
+export async function borrarPorToken(token) {
+  if (!supabaseConfigurado || !token) return false
+  const { data, error } = await supabase.rpc('borrar_gestion', { tok: token })
+  if (error) throw error
+  return !!data
+}
+
 // Borra un aviso (solo el dueño).
 export async function eliminarReporte(id) {
   if (supabaseConfigurado) {

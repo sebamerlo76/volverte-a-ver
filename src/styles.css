@@ -2636,6 +2636,90 @@ select {
 .renovar-bar button:disabled {
   opacity: 0.5;
 }
+.rb-acc {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+.renovar-bar .rb-sec {
+  background: #fff;
+  color: var(--navy);
+  border: 1.5px solid #f0e0b8;
+}
+.renovar-bar .rb-ok {
+  background: var(--green);
+}
+
+/* Link de gestión de aviso sin cuenta */
+.gestion-link {
+  margin-top: 12px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: #f3ede4;
+  border: 1px dashed var(--line2);
+  font-family: Nunito, monospace;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--navy);
+  word-break: break-all;
+  line-height: 1.4;
+}
+/* Página /g/<token> */
+.gest-card {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+.gest-card > img {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex: none;
+}
+.gest-noimg {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: #f4ede6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.gest-cerrado {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #2b6b3f;
+  background: #eefbf1;
+  border: 1px solid #cdefd6;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.gest-borrar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 46px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1.5px solid #f0d4cf;
+  color: #c0392b;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+}
+.gest-borrar:disabled {
+  opacity: 0.5;
+}
 
 /* Buscador de dirección (geocoding sobre el mapa) */
 .dir-buscar {

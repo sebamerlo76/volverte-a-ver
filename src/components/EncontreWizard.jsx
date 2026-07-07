@@ -6,7 +6,7 @@ import FechaPicker from './FechaPicker.jsx'
 import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad } from '../lib/localidades.js'
 import BuscarDireccion from './BuscarDireccion.jsx'
 import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
-import { addReporte, addMascota, subirFotos, subirFotoFeed } from '../data/store.js'
+import { addReporte, addMascota, subirFotos, subirFotoFeed, publicarGestion, nuevoTokenGestion } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, linkWhatsApp } from '../lib/formato.js'
 import { similitud } from '../lib/vector.js'
 import { tieneGroseria } from '../lib/moderacion.js'
@@ -49,6 +49,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
   const [matchPreview, setMatchPreview] = useState(null)
   const [enCustodia, setEnCustodia] = useState(false)
   const [guardando, setGuardando] = useState(false)
+  const [gestionLink, setGestionLink] = useState('') // link para gestionar el aviso sin cuenta
 
   const cIni = coordsDeBarrioEn(localidad, 'Centro')
   const [punto, setPunto] = useState({ lat: cIni[0], lng: cIni[1] })
@@ -151,7 +152,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
       }
       const fotosUrls = await subirFotos(fotos) // completas (para el detalle)
       const fotoUrl = await subirFotoFeed(fotos, fotosUrls[0] || '') // recorte para el feed
-      await addReporte({
+      const rep = await addReporte({
         tipo: 'encontrado',
         especie,
         nombre: null,
@@ -194,12 +195,76 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
           console.warn('No se pudo guardar en tránsito:', e)
         }
       }
+      // Sin cuenta: le damos un link secreto para cerrar/borrar el aviso después.
+      if (rep && !rep.userId) {
+        try {
+          const tok = nuevoTokenGestion()
+          if (await publicarGestion(rep.id, tok)) {
+            setGestionLink(`${window.location.origin}/g/${tok}`)
+            setGuardando(false)
+            return // mostramos el panel con el link; cierra desde ahí
+          }
+        } catch (e) {
+          /* si el SQL de gestión no está corrido aún, seguimos normal */
+        }
+      }
       onPublicado()
     } catch (e) {
       console.error(e)
       onToast('No salió. Reintentá en un toque 🔄')
       setGuardando(false)
     }
+  }
+
+  function copiarLink() {
+    try {
+      navigator.clipboard.writeText(gestionLink)
+      onToast('🔗 Link copiado — guardalo')
+    } catch (e) {
+      onToast(gestionLink)
+    }
+  }
+  function compartirLink() {
+    if (navigator.share) {
+      navigator.share({ title: 'Gestionar mi aviso en Chicho', text: 'Link para cerrar mi aviso cuando aparezca la familia', url: gestionLink }).catch(() => {})
+    } else {
+      copiarLink()
+    }
+  }
+
+  if (gestionLink) {
+    return (
+      <div className="view">
+        <div className="fhead">
+          <div className="ftitle">¡Publicado! 🎉</div>
+        </div>
+        <div className="body" style={{ padding: '18px 20px', textAlign: 'center' }}>
+          <div style={{ fontSize: 46 }}>✅</div>
+          <div style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 22, color: 'var(--navy)', marginTop: 6 }}>
+            Tu aviso ya está publicado
+          </div>
+          <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--muted)', lineHeight: 1.5, margin: '10px 0 4px' }}>
+            Como lo hiciste <b>sin cuenta</b>, guardá este link para <b>cerrar o borrar el aviso</b> cuando la mascota vuelva a su familia. Es tu forma de gestionarlo 👇
+          </p>
+          <div className="gestion-link">{gestionLink}</div>
+          <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+            <button className="btn-pub" style={{ flex: 1 }} onClick={copiarLink}>
+              <span className="mi" style={{ fontSize: 20 }}>content_copy</span>
+              Copiar link
+            </button>
+            <button className="btn-share" style={{ flex: 'none' }} onClick={compartirLink} aria-label="Compartir link">
+              <span className="mi" style={{ fontSize: 20 }}>ios_share</span>
+            </button>
+          </div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--faint)', marginTop: 14, lineHeight: 1.5 }}>
+            💡 Mandátelo por WhatsApp a vos mismo para no perderlo. O creá una cuenta y gestionalo desde "Mis avisos".
+          </div>
+          <button className="btn-guardar-prefs" style={{ marginTop: 18 }} onClick={onPublicado}>
+            Listo
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (

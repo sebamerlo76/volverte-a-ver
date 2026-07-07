@@ -2,13 +2,24 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import PerfilPublico from './components/PerfilPublico.jsx'
+import GestionAviso from './components/GestionAviso.jsx'
 import './styles.css'
 
-// Ruteo simple: /m/<id> muestra el perfil público de la mascota (QR del collar).
+// Ruteo simple: /m/<id> = perfil público (QR del collar); /g/<token> = gestionar
+// un aviso publicado sin cuenta (cerrar/borrar).
 const qr = window.location.pathname.match(/^\/m\/([^/]+)/)
+const gest = window.location.pathname.match(/^\/g\/([^/]+)/)
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>{qr ? <PerfilPublico id={decodeURIComponent(qr[1])} /> : <App />}</StrictMode>
+  <StrictMode>
+    {qr ? (
+      <PerfilPublico id={decodeURIComponent(qr[1])} />
+    ) : gest ? (
+      <GestionAviso token={decodeURIComponent(gest[1])} />
+    ) : (
+      <App />
+    )}
+  </StrictMode>
 )
 
 // Service worker: habilita Web Push (notificaciones) e instalar como PWA.
