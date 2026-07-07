@@ -274,7 +274,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                   <span style={{ width: 8, height: 8, borderRadius: '50%', background: seleccionado.tipo === 'perdido' ? '#ff5747' : '#2f7fed' }} />
                   <span style={{ fontSize: 11, fontWeight: 900, color: seleccionado.tipo === 'perdido' ? '#ff5747' : '#2f7fed' }}>
-                    {seleccionado.tipo.toUpperCase()} · {tiempoRelativo(seleccionado.creadoEn)}
+                    {(seleccionado.tipo === 'perdido' ? 'Perdido' : 'En la calle').toUpperCase()} · {tiempoRelativo(seleccionado.creadoEn)}
                   </span>
                 </div>
                 <div style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 17, marginTop: 1 }}>
