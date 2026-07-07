@@ -287,6 +287,7 @@ export default function App() {
   }
   async function salir() {
     if (authActivo) await supabase.auth.signOut()
+    setMenuAbierto(false) // cerrar la sidebar al salir (si no, queda mostrando "Cerrar sesión")
     setVista('feed')
     mostrarToast('Sesión cerrada')
   }
