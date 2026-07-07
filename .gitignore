@@ -6,3 +6,6 @@ dist-ssr
 .env.*
 !.env.example
 .DS_Store
+
+# Workspace local de importación de datos de prueba (no va al repo)
+import/
