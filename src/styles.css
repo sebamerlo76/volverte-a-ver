@@ -504,7 +504,10 @@ select {
 }
 .apoyo-btn {
   flex: none;
-  padding: 8px 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
   border-radius: 999px;
   border: none;
   background: var(--coral);

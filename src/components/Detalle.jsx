@@ -119,12 +119,13 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
     setApoyado(yaApoyado(r?.id))
   }, [r?.id, r?.apoyos])
 
-  async function sumarme() {
+  // Compartir = apoyar: abre el compartir Y suma al contador (una vez por dispositivo).
+  async function compartirYSumar() {
+    compartirFlyer(r, onToast) // maneja sus propios toasts (share nativo o descarga)
     if (apoyado || !r?.id) return
     setApoyado(true)
     setApoyos((n) => n + 1)
     marcarApoyado(r.id)
-    onToast?.('💛 ¡Gracias! Compartilo para llegar a más gente')
     try {
       const total = await sumarApoyo(r.id)
       if (typeof total === 'number') setApoyos(total)
@@ -282,8 +283,9 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
               )}
             </div>
             {r.estado !== 'resuelto' && (
-              <button className={'apoyo-btn' + (apoyado ? ' on' : '')} onClick={sumarme} disabled={apoyado}>
-                {apoyado ? '¡Gracias! 💛' : 'Me sumo'}
+              <button className={'apoyo-btn' + (apoyado ? ' on' : '')} onClick={compartirYSumar}>
+                <span className="mi" style={{ fontSize: 16 }}>ios_share</span>
+                {apoyado ? 'Compartir' : 'Me sumo'}
               </button>
             )}
           </div>
@@ -517,7 +519,7 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
               </span>
             </a>
           ) : null}
-          <button className="btn-share" onClick={() => compartirFlyer(r, onToast)} aria-label="Compartir aviso">
+          <button className="btn-share" onClick={compartirYSumar} aria-label="Compartir aviso">
             <span className="mi" style={{ fontSize: 24 }}>
               share
             </span>
