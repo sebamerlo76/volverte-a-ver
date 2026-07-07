@@ -97,6 +97,25 @@ export const LOCALIDADES = {
       '250 Viviendas': [-31.7622, -60.4668],
     },
   },
+  'General Ramírez': {
+    // Barrios del plano oficial (Municipalidad de Gral. Ramírez). Coords aproximadas.
+    center: [-32.171, -60.208],
+    barrios: {
+      'Centro': [-32.171, -60.208],
+      'Dr. René Favaloro': [-32.165, -60.208],
+      'Evita': [-32.1641, -60.2034],
+      'San Carlos': [-32.166, -60.198],
+      'Pancho Ramírez': [-32.171, -60.2011],
+      'Dr. César Paso': [-32.175, -60.2],
+      'Madre Teresa': [-32.1797, -60.2022],
+      'Las Latas': [-32.177, -60.208],
+      'Tanque': [-32.1779, -60.2126],
+      'Sagrado Corazón': [-32.176, -60.218],
+      'Sur': [-32.171, -60.2149],
+      'Malvinas Argentinas': [-32.167, -60.216],
+      'Martín Fierro': [-32.1623, -60.2137],
+    },
+  },
   // Para sumar otra: copiá un bloque, poné center [lat,lng] y sus barrios.
 }
 

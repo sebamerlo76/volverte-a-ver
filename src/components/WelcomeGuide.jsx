@@ -11,7 +11,7 @@ const PASOS = [
     ic: 'place',
     color: 'var(--coral)',
     t: 'Cerca tuyo',
-    d: 'Ya estamos en Paraná, Crespo, Colonia Avellaneda y San Benito.\n\n¿Tu localidad no aparece? Escribinos y la sumamos. 💜',
+    d: 'Ya estamos en Paraná, Crespo, Colonia Avellaneda, San Benito y General Ramírez.\n\n¿Tu localidad no aparece? Escribinos y la sumamos. 💜',
   },
   {
     ic: 'swap_horiz',

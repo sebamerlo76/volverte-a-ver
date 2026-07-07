@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import PerfilPublico from './components/PerfilPublico.jsx'
 import GestionAviso from './components/GestionAviso.jsx'
+import { Analytics } from '@vercel/analytics/react'
 import './styles.css'
 
 // Ruteo simple: /m/<id> = perfil público (QR del collar); /g/<token> = gestionar
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')).render(
     ) : (
       <App />
     )}
+    <Analytics />
   </StrictMode>
 )
 
