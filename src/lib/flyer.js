@@ -1,6 +1,7 @@
 // Genera una imagen (flyer) del aviso para compartir en WhatsApp/Facebook.
 // 100% en el navegador con <canvas> — sin librerías ni servidor.
 import { nombreMostrado } from './formato.js'
+import QRCode from 'qrcode'
 
 const NAVY = '#1f3852'
 const CREMA = '#faf7f1'
@@ -195,7 +196,7 @@ export async function generarFlyer(r) {
     }
   }
 
-  // ---- Pie: logo + chicho.ar ----
+  // ---- Pie: logo + chicho.ar + QR del aviso ----
   const logo = await cargarImagen('/logo.png', false)
   const footY = H - 150
   ctx.strokeStyle = '#e7ded1'
@@ -211,6 +212,29 @@ export async function generarFlyer(r) {
   ctx.fillStyle = MUTED
   ctx.font = '800 30px Nunito, sans-serif'
   ctx.fillText('Buscá y reportá mascotas perdidas', 160, footY + 84)
+
+  // QR al link directo del aviso (para que quien vea la imagen llegue al aviso).
+  const link = r.id ? `https://chicho.ar/r/${r.id}` : 'https://chicho.ar'
+  try {
+    const qrData = await QRCode.toDataURL(link, { margin: 1, width: 150, color: { dark: NAVY, light: '#ffffff' } })
+    const qrImg = await cargarImagen(qrData, false)
+    if (qrImg) {
+      const qs = 146
+      const qx = W - 48 - qs
+      const qy = footY - 22
+      ctx.fillStyle = '#fff'
+      roundRect(ctx, qx - 8, qy - 8, qs + 16, qs + 16, 14)
+      ctx.fill()
+      ctx.drawImage(qrImg, qx, qy, qs, qs)
+      ctx.fillStyle = MUTED
+      ctx.font = '800 22px Nunito, sans-serif'
+      ctx.textAlign = 'center'
+      ctx.fillText('Escaneá el aviso', qx + qs / 2, qy + qs + 26)
+      ctx.textAlign = 'left'
+    }
+  } catch (e) {
+    /* si el QR falla, el flyer sale igual sin él */
+  }
 
   return await new Promise((resolve, reject) => {
     canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('sin blob'))), 'image/png')

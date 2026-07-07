@@ -519,11 +519,6 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
               </span>
             </a>
           ) : null}
-          <button className="btn-share" onClick={compartirYSumar} aria-label="Compartir aviso">
-            <span className="mi" style={{ fontSize: 24 }}>
-              share
-            </span>
-          </button>
         </div>
       )}
     </div>
