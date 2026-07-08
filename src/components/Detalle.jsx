@@ -21,12 +21,12 @@ export function popupReporte(r) {
   const foto = r.foto ? `<br><img src="${esc(r.foto)}" style="margin-top:6px;width:150px;height:96px;object-fit:cover;border-radius:8px" />` : ''
   const p = puntoDeReporte(r)
   const btn = (href, txt, bg) =>
-    `<a href="${href}" target="_blank" rel="noreferrer" style="flex:1;text-align:center;text-decoration:none;background:${bg};color:#fff;font-weight:800;font-size:12px;padding:7px 4px;border-radius:8px">${txt}</a>`
+    `<a href="${href}" target="_blank" rel="noreferrer" style="flex:1;display:block;text-align:center;text-decoration:none;background:${bg};color:#fff;font-weight:800;font-size:13px;padding:10px 8px;border-radius:10px;white-space:nowrap">${txt}</a>`
   const ir =
     p && p[0] != null
-      ? `<div style="display:flex;gap:6px;margin-top:8px">${btn(linkGoogleMaps(p[0], p[1]), 'Google Maps', '#2f7fed')}${btn(linkWaze(p[0], p[1]), 'Waze', '#20b8f0')}</div>`
+      ? `<div style="margin-top:11px"><div style="font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#a4988c;margin-bottom:6px">Cómo llegar</div><div style="display:flex;gap:8px">${btn(linkGoogleMaps(p[0], p[1]), '🗺️ Maps', '#2f7fed')}${btn(linkWaze(p[0], p[1]), '🚗 Waze', '#20b8f0')}</div></div>`
       : ''
-  return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:150px;line-height:1.45"><b style="font-size:13.5px;color:${color}">${esc(nombreMostrado(r))}</b><br><span style="font-size:12px;color:#8a807a">${est}${r.zona ? ' · ' + esc(r.zona) : ''}</span>${foto}${ir}</div>`
+  return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:184px;line-height:1.45"><b style="font-size:14px;color:${color}">${esc(nombreMostrado(r))}</b><br><span style="font-size:12px;color:#8a807a">${est}${r.zona ? ' · ' + esc(r.zona) : ''}</span>${foto}${ir}</div>`
 }
 
 // ¿Este dispositivo ya apoyó este aviso? (para no contar dos veces)

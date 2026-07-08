@@ -677,19 +677,19 @@ export default function App() {
             onCerrar={() => setBuscadorAbierto(false)}
           />
         )}
+
+        {recuperando && (
+          <NuevaPassword
+            onListo={() => {
+              setRecuperando(false)
+              setVista('feed')
+            }}
+            onToast={mostrarToast}
+          />
+        )}
       </div>
 
       {fotosVer && <Lightbox fotos={fotosVer.fotos} inicio={fotosVer.i} onCerrar={() => setFotosVer(null)} />}
-
-      {recuperando && (
-        <NuevaPassword
-          onListo={() => {
-            setRecuperando(false)
-            setVista('feed')
-          }}
-          onToast={mostrarToast}
-        />
-      )}
 
       <div className={'toast' + (toast ? ' show' : '')}>{toast}</div>
     </div>

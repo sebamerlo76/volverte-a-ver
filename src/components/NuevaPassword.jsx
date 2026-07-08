@@ -26,7 +26,7 @@ export default function NuevaPassword({ onListo, onToast }) {
   }
 
   return (
-    <div className="view" style={{ zIndex: 4700 }}>
+    <div className="view" style={{ position: 'absolute', inset: 0, zIndex: 4700, background: 'var(--cream)' }}>
       <div className="fhead">
         <div className="ftitle">Nueva contraseña</div>
       </div>
