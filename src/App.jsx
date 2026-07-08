@@ -64,9 +64,29 @@ export default function App() {
   // ¿Hay algo "abierto" sobre el feed? (una vista distinta, o un modal)
   const hayCapa =
     vista !== 'feed' || !!fotosVer || menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte
-  const [sentinel, setSentinel] = useState(false) // hay una entrada centinela puesta en el historial
+  // Cuántos "atrás" hacen falta para llegar al feed desde la vista actual.
+  const nivelVista = (v) => {
+    switch (v) {
+      case 'feed':
+        return 0
+      case 'avistamiento':
+      case 'recorrido':
+      case 'mascota':
+      case 'perdido-pick':
+      case 'post-encontre':
+        return 2 // se abren desde otra vista (detalle / cuenta / post-intent)
+      case 'qr':
+        return 3 // cuenta → mascota → qr
+      default:
+        return 1 // detalle, cuenta, post, auth, post-intent, admin, moderacion
+    }
+  }
+  const modalAbierto = menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte
+  // Profundidad = capas apiladas = cantidad de "atrás" hasta el feed.
+  const profundidad = nivelVista(vista) + (fotosVer ? 1 : 0) + (modalAbierto ? 1 : 0)
   const backRef = useRef({ hayCapa: false })
   backRef.current.hayCapa = hayCapa
+  const pushedRef = useRef(0) // cuántas entradas centinela metimos en el historial
   // Snapshot del estado para que el listener (registrado una vez) lea lo actual.
   const estadoRef = useRef({})
   estadoRef.current = { vista, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte }
@@ -101,23 +121,21 @@ export default function App() {
     }
   }
 
-  // Mientras hay una capa abierta, mantenemos UNA entrada "centinela" en el
-  // historial, para que el botón atrás la consuma (y no cierre la app).
+  // Metemos una entrada "centinela" en el historial por CADA nivel que se abre,
+  // así el botón atrás del celu tiene a dónde volver en cada paso (y no cierra la
+  // app). Solo empujamos al bajar de nivel; si algo se cierra por UI dejamos las
+  // entradas de más — el próximo "atrás" las consume sin efecto visible.
   useEffect(() => {
-    if (hayCapa && !sentinel) {
-      setSentinel(true)
-      window.history.pushState({ chicho: true }, '')
-    } else if (!hayCapa && sentinel) {
-      setSentinel(false)
-      window.history.back() // se cerró la última capa por UI → consumimos el centinela
+    while (pushedRef.current < profundidad) {
+      pushedRef.current++
+      window.history.pushState({ chicho: pushedRef.current }, '')
     }
-  }, [hayCapa, sentinel])
+  }, [profundidad])
 
   // Un solo listener de popstate: al apretar atrás, cerramos la capa de arriba.
-  // Al bajar sentinel, el efecto de arriba re-arma el centinela si aún queda capa.
   useEffect(() => {
     function onPop() {
-      setSentinel(false) // el back ya consumió la entrada
+      if (pushedRef.current > 0) pushedRef.current--
       if (backRef.current.hayCapa) retroceder()
     }
     window.addEventListener('popstate', onPop)
