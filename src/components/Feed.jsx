@@ -4,6 +4,8 @@ import MapaLeaflet from './MapaLeaflet.jsx'
 import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
 import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarLocalidadFeed } from '../lib/localidades.js'
+import { puntoDeReporte } from '../lib/parana.js'
+import ComoLlegarSheet from './ComoLlegarSheet.jsx'
 
 const ESPECIE_LBL = { perro: 'Perros', gato: 'Gatos', otro: 'Otros' }
 const TIEMPOS = [
@@ -35,6 +37,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
   const [panelAbierto, setPanelAbierto] = useState(false)
   const [miUbi, setMiUbi] = useState(null)
   const [ciudadSheet, setCiudadSheet] = useState(false)
+  const [irPunto, setIrPunto] = useState(null) // punto para "cómo llegar"
 
   const loc = filtros.localidad // null = todas las localidades
   function elegirCiudad(l) {
@@ -264,25 +267,33 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
             </span>
           </button>
           {seleccionado ? (
-            <button className="mcard" onClick={() => onOpen(seleccionado)}>
-              {seleccionado.foto ? (
-                <img src={seleccionado.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
-              ) : (
-                <div className="noimg" />
-              )}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: seleccionado.tipo === 'perdido' ? '#ff5747' : '#2f7fed' }} />
-                  <span style={{ fontSize: 11, fontWeight: 900, color: seleccionado.tipo === 'perdido' ? '#ff5747' : '#2f7fed' }}>
-                    {(seleccionado.tipo === 'perdido' ? 'Perdido' : 'En la calle').toUpperCase()} · {tiempoRelativo(seleccionado.creadoEn)}
-                  </span>
+            <div className="mcard">
+              <button className="mcard-info" onClick={() => onOpen(seleccionado)}>
+                {seleccionado.foto ? (
+                  <img src={seleccionado.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
+                ) : (
+                  <div className="noimg" />
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: seleccionado.tipo === 'perdido' ? '#ff5747' : '#2f7fed' }} />
+                    <span style={{ fontSize: 11, fontWeight: 900, color: seleccionado.tipo === 'perdido' ? '#ff5747' : '#2f7fed' }}>
+                      {(seleccionado.tipo === 'perdido' ? 'Perdido' : 'En la calle').toUpperCase()} · {tiempoRelativo(seleccionado.creadoEn)}
+                    </span>
+                  </div>
+                  <div style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 17, marginTop: 1 }}>
+                    {nombreMostrado(seleccionado)}
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: '#8a807a' }}>{seleccionado.zona}</div>
                 </div>
-                <div style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 17, marginTop: 1 }}>
-                  {nombreMostrado(seleccionado)}
-                </div>
-                <div style={{ fontSize: 12, fontWeight: 800, color: '#8a807a' }}>{seleccionado.zona}</div>
-              </div>
-            </button>
+              </button>
+              <button className="mcard-ir" onClick={() => setIrPunto(puntoDeReporte(seleccionado))}>
+                <span className="mi fill" style={{ fontSize: 19 }}>
+                  directions
+                </span>
+                Cómo llegar
+              </button>
+            </div>
           ) : (
             <div className="map-hint">Tocá un pin para ver el aviso</div>
           )}
@@ -343,6 +354,8 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
           </div>
         </div>
       )}
+
+      {irPunto && <ComoLlegarSheet punto={irPunto} onCerrar={() => setIrPunto(null)} />}
     </div>
   )
 }

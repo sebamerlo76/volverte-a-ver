@@ -1,5 +1,5 @@
 /* global __BUILD_ID__ */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Feed from './components/Feed.jsx'
 import Detalle from './components/Detalle.jsx'
 import Publicar from './components/Publicar.jsx'
@@ -57,6 +57,68 @@ export default function App() {
   const authActivo = supabaseConfigurado
   const logueado = !authActivo || !!user
   const esAdmin = user?.email === 'sebamerlo76@gmail.com'
+
+  // --- Botón "atrás" del celu: cerrar la capa abierta en vez de cerrar la PWA ---
+  // ¿Hay algo "abierto" sobre el feed? (una vista distinta, o un modal)
+  const hayCapa =
+    vista !== 'feed' || menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte
+  const backRef = useRef({ hayCapa: false, sentinel: false })
+  backRef.current.hayCapa = hayCapa
+  // Snapshot del estado para que el listener (registrado una vez) lea lo actual.
+  const estadoRef = useRef({})
+  estadoRef.current = { vista, detalleOrigen, menuAbierto, buscadorAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte }
+
+  // Cierra la capa de más arriba (modales primero, después vistas).
+  function retroceder() {
+    const s = estadoRef.current
+    if (s.menuAbierto) return setMenuAbierto(false)
+    if (s.buscadorAbierto) return setBuscadorAbierto(false)
+    if (s.notifsAbierto) return setNotifsAbierto(false)
+    if (s.guiaAbierta) return cerrarGuia()
+    if (s.soporteAbierto) return setSoporteAbierto(false)
+    if (s.cartelReporte) return setCartelReporte(null)
+    switch (s.vista) {
+      case 'detalle':
+        return setVista(s.detalleOrigen)
+      case 'avistamiento':
+      case 'recorrido':
+        return setVista('detalle')
+      case 'perdido-pick':
+      case 'post-encontre':
+        return setVista('post-intent')
+      case 'post':
+        return cerrarPublicar()
+      case 'mascota':
+        return setVista('cuenta')
+      case 'qr':
+        return setVista('mascota')
+      default:
+        return setVista('feed') // post-intent, auth, cuenta, admin, moderacion → feed
+    }
+  }
+
+  // Mientras hay una capa abierta, mantenemos UNA entrada "centinela" en el
+  // historial, para que el botón atrás la consuma (y no cierre la app).
+  useEffect(() => {
+    if (hayCapa && !backRef.current.sentinel) {
+      backRef.current.sentinel = true
+      window.history.pushState({ chicho: true }, '')
+    } else if (!hayCapa && backRef.current.sentinel) {
+      backRef.current.sentinel = false
+      window.history.back() // se cerró la última capa por UI → consumimos el centinela
+    }
+  }, [hayCapa])
+
+  // Un solo listener de popstate: al apretar atrás, cerramos la capa de arriba.
+  useEffect(() => {
+    function onPop() {
+      backRef.current.sentinel = false // el back ya consumió la entrada
+      if (backRef.current.hayCapa) retroceder()
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Cargar reportes al iniciar.
   useEffect(() => {

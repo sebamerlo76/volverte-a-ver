@@ -92,3 +92,12 @@ export function linkWhatsAppAvist(whatsapp, reporte) {
   const texto = `Hola! Soy la familia de ${nombre} (Chicho). Vi que dejaste un avistamiento, ¿me podés contar más? 🙏`
   return `https://wa.me/54${numero}?text=${encodeURIComponent(texto)}`
 }
+
+// Cómo llegar: abren la navegación hasta un punto. Links universales (abren la
+// app si está instalada, si no la web). Andan en Android e iOS.
+export function linkGoogleMaps(lat, lng) {
+  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+}
+export function linkWaze(lat, lng) {
+  return `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`
+}

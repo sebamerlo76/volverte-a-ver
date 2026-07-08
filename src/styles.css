@@ -2764,6 +2764,65 @@ select {
   opacity: 0.5;
 }
 
+/* Foto a pantalla completa (lightbox) */
+.foto-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 4600;
+  background: rgba(0, 0, 0, 0.93);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lb-carrusel {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.lb-carrusel::-webkit-scrollbar {
+  display: none;
+}
+.lb-carrusel img {
+  width: 100%;
+  height: 100%;
+  flex: none;
+  object-fit: contain;
+  scroll-snap-align: center;
+}
+.lb-x {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  right: 16px;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lb-dots {
+  position: absolute;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  z-index: 2;
+}
+.lb-dots .ddot {
+  background: rgba(255, 255, 255, 0.45);
+}
+.lb-dots .ddot.on {
+  background: #fff;
+}
+
 /* Nota cuando se eligen varias localidades en "cerca mío" */
 .cerca-nota {
   font-size: 12.5px;
@@ -3408,15 +3467,34 @@ select {
   left: 16px;
   bottom: 20px;
   z-index: 500;
-  max-width: 220px;
+  max-width: 240px;
   background: #fff;
   border-radius: 18px;
   padding: 11px;
   display: flex;
-  gap: 11px;
-  align-items: center;
+  flex-direction: column;
+  gap: 9px;
   box-shadow: 0 10px 24px rgba(80, 50, 30, 0.22);
   text-align: left;
+}
+.mcard-info {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  text-align: left;
+}
+.mcard-ir {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px;
+  border-radius: 12px;
+  background: var(--navy);
+  color: #fff;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 13px;
 }
 .mcard img,
 .mcard .noimg {
