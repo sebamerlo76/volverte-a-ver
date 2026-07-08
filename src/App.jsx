@@ -21,6 +21,7 @@ import Admin from './components/Admin.jsx'
 import Moderacion from './components/Moderacion.jsx'
 import Soporte from './components/Soporte.jsx'
 import Lightbox from './components/Lightbox.jsx'
+import NuevaPassword from './components/NuevaPassword.jsx'
 import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { nombreMostrado } from './lib/formato.js'
@@ -53,6 +54,7 @@ export default function App() {
   const [soporteAbierto, setSoporteAbierto] = useState(false) // hoja de ayuda/soporte
   const [hayUpdate, setHayUpdate] = useState(false) // hay una versión nueva desplegada
   const [fotosVer, setFotosVer] = useState(null) // foto(s) a pantalla completa: { fotos, i }
+  const [recuperando, setRecuperando] = useState(false) // volvió del mail de recupero → elegir nueva pass
 
   const notifsNoLeidas = notifs.filter((n) => !n.leida).length
 
@@ -195,7 +197,10 @@ export default function App() {
   useEffect(() => {
     if (!authActivo) return
     supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null))
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setUser(session?.user ?? null))
+    const { data: sub } = supabase.auth.onAuthStateChange((evento, session) => {
+      setUser(session?.user ?? null)
+      if (evento === 'PASSWORD_RECOVERY') setRecuperando(true)
+    })
     return () => sub.subscription.unsubscribe()
   }, [authActivo])
 
@@ -675,6 +680,16 @@ export default function App() {
       </div>
 
       {fotosVer && <Lightbox fotos={fotosVer.fotos} inicio={fotosVer.i} onCerrar={() => setFotosVer(null)} />}
+
+      {recuperando && (
+        <NuevaPassword
+          onListo={() => {
+            setRecuperando(false)
+            setVista('feed')
+          }}
+          onToast={mostrarToast}
+        />
+      )}
 
       <div className={'toast' + (toast ? ' show' : '')}>{toast}</div>
     </div>

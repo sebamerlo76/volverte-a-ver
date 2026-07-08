@@ -15,7 +15,7 @@ self.addEventListener('push', (event) => {
   const options = {
     body: data.body || '',
     icon: data.icon || '/icon-192.png',
-    badge: '/icon-192.png',
+    badge: '/badge.png', // silueta monocroma (la barra de estado la pinta a un color)
     data: { url: data.url || '/' },
     tag: data.tag,
   }

@@ -13,12 +13,34 @@ function traducirError(msg = '') {
 }
 
 export default function Auth({ onCerrar, onAuth, onToast }) {
-  const [modo, setModo] = useState('ingresar') // ingresar | registrar
+  const [modo, setModo] = useState('ingresar') // ingresar | registrar | recuperar
   const [email, setEmail] = useState('')
   const [pass, setPass] = useState('')
+  const [verPass, setVerPass] = useState(false)
   const [cargando, setCargando] = useState(false)
 
   const esRegistro = modo === 'registrar'
+  const esRecuperar = modo === 'recuperar'
+
+  // Envía el mail con el enlace para restablecer la contraseña.
+  async function recuperar() {
+    if (!email.trim()) {
+      onToast('Escribí tu email para enviarte el enlace')
+      return
+    }
+    setCargando(true)
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: window.location.origin,
+      })
+      if (error) throw error
+      onToast('Te enviamos un enlace a tu correo para cambiar la contraseña')
+      setModo('ingresar')
+    } catch (e) {
+      onToast(traducirError(e.message))
+    }
+    setCargando(false)
+  }
 
   async function conGoogle() {
     try {
@@ -58,7 +80,7 @@ export default function Auth({ onCerrar, onAuth, onToast }) {
         <button className="mi close" onClick={onCerrar}>
           close
         </button>
-        <div className="ftitle">{esRegistro ? 'Crear cuenta' : 'Iniciar sesión'}</div>
+        <div className="ftitle">{esRecuperar ? 'Recuperar contraseña' : esRegistro ? 'Crear cuenta' : 'Iniciar sesión'}</div>
       </div>
 
       <div className="body form-body">
@@ -73,15 +95,19 @@ export default function Auth({ onCerrar, onAuth, onToast }) {
             <span style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 40, color: 'var(--navy)' }}>Chicho</span>
           </div>
           <div style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 20, marginTop: 10 }}>
-            {esRegistro ? 'Creá tu cuenta' : '¡Hola de nuevo!'}
+            {esRecuperar ? 'Restablecé tu contraseña' : esRegistro ? 'Creá tu cuenta' : '¡Hola de nuevo!'}
           </div>
           <div style={{ fontSize: 13.5, color: 'var(--muted)', fontWeight: 700, marginTop: 4, lineHeight: 1.5 }}>
-            {esRegistro
-              ? 'Creá tu cuenta para publicar y gestionar tus avisos.'
-              : 'Ingresá para publicar y gestionar tus avisos.'}
+            {esRecuperar
+              ? 'Ponés tu email y te mandamos un enlace para crear una nueva.'
+              : esRegistro
+                ? 'Creá tu cuenta para publicar y gestionar tus avisos.'
+                : 'Ingresá para publicar y gestionar tus avisos.'}
           </div>
         </div>
 
+        {!esRecuperar && (
+        <>
         <button className="btn-social" onClick={conGoogle} style={{ marginTop: 22 }}>
           <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
             <path
@@ -107,6 +133,8 @@ export default function Auth({ onCerrar, onAuth, onToast }) {
         <div className="divider">
           <span>o con tu email</span>
         </div>
+        </>
+        )}
 
         <div className="flabel">Email</div>
         <div className="inp">
@@ -123,41 +151,66 @@ export default function Auth({ onCerrar, onAuth, onToast }) {
           />
         </div>
 
-        <div className="flabel">Contraseña</div>
-        <div className="inp">
-          <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
-            lock
-          </span>
-          <input
-            type="password"
-            value={pass}
-            onChange={(e) => setPass(e.target.value)}
-            placeholder="Mínimo 6 caracteres"
-            autoComplete={esRegistro ? 'new-password' : 'current-password'}
-            onKeyDown={(e) => e.key === 'Enter' && enviar()}
-          />
-        </div>
+        {!esRecuperar && (
+          <>
+            <div className="flabel">Contraseña</div>
+            <div className="inp">
+              <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
+                lock
+              </span>
+              <input
+                type={verPass ? 'text' : 'password'}
+                value={pass}
+                onChange={(e) => setPass(e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+                autoComplete={esRegistro ? 'new-password' : 'current-password'}
+                onKeyDown={(e) => e.key === 'Enter' && enviar()}
+              />
+              <button
+                type="button"
+                className="inp-eye"
+                onClick={() => setVerPass((v) => !v)}
+                aria-label={verPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              >
+                <span className="mi" style={{ fontSize: 21, color: 'var(--muted)' }}>
+                  {verPass ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            </div>
+
+            {!esRegistro && (
+              <div style={{ textAlign: 'right', marginTop: 8 }}>
+                <button
+                  onClick={() => setModo('recuperar')}
+                  style={{ color: 'var(--coral)', fontWeight: 800, fontSize: 13 }}
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
+            )}
+          </>
+        )}
 
         <div
           style={{ textAlign: 'center', marginTop: 20, fontSize: 13.5, fontWeight: 700, color: 'var(--muted)' }}
         >
-          {esRegistro ? '¿Ya tenés cuenta? ' : '¿No tenés cuenta? '}
+          {esRecuperar ? '' : esRegistro ? '¿Ya tenés cuenta? ' : '¿No tenés cuenta? '}
           <button
-            onClick={() => setModo(esRegistro ? 'ingresar' : 'registrar')}
+            onClick={() => setModo(esRecuperar || esRegistro ? 'ingresar' : 'registrar')}
             style={{ color: 'var(--coral)', fontWeight: 800, fontSize: 13.5 }}
           >
-            {esRegistro ? 'Iniciar sesión' : 'Crear una'}
+            {esRecuperar ? 'Volver a iniciar sesión' : esRegistro ? 'Iniciar sesión' : 'Crear una'}
           </button>
         </div>
         <div style={{ height: 24 }} />
       </div>
 
       <div className="fsubmit">
-        <button className="btn-pub" onClick={enviar} disabled={cargando}>
+        <button className="btn-pub" onClick={esRecuperar ? recuperar : enviar} disabled={cargando}>
           <span className="mi" style={{ fontSize: 23 }}>
-            {esRegistro ? 'person_add' : 'login'}
+            {esRecuperar ? 'mail' : esRegistro ? 'person_add' : 'login'}
           </span>
-          {cargando ? 'Un momento…' : esRegistro ? 'Crear cuenta' : 'Ingresar'}
+          {cargando ? 'Un momento…' : esRecuperar ? 'Enviar enlace' : esRegistro ? 'Crear cuenta' : 'Ingresar'}
         </button>
       </div>
     </div>

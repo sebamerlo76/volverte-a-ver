@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero } from '../data/store.js'
-import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel } from '../lib/formato.js'
+import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel, linkGoogleMaps, linkWaze } from '../lib/formato.js'
 import { compartirFlyer } from '../lib/flyer.js'
 
 // Escapa texto del usuario para meterlo seguro en el HTML del globito.
@@ -14,12 +14,19 @@ export function popupAvist(a, n) {
   const foto = a.foto ? `<br><img src="${esc(a.foto)}" style="margin-top:6px;width:150px;height:96px;object-fit:cover;border-radius:8px" />` : ''
   return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:130px;line-height:1.45"><b style="font-size:13px;color:#1f9d8f">👀 Avistamiento ${n}</b><br><span style="font-size:12.5px;color:#2a2320">${esc(a.nota) || 'Sin detalle'}</span><br><span style="font-size:11.5px;color:#8a807a">${esc(a.autor) || 'Anónimo'} · ${fechaHora(a.creadoEn)}</span>${foto}</div>`
 }
-// Globito del pin de la mascota (su zona / última ubicación).
+// Globito del pin de la mascota (su zona / última ubicación) + cómo llegar.
 export function popupReporte(r) {
   const color = r.tipo === 'perdido' ? '#ff5747' : '#2f7fed'
   const est = r.tipo === 'perdido' ? 'Perdido' : 'En la calle'
   const foto = r.foto ? `<br><img src="${esc(r.foto)}" style="margin-top:6px;width:150px;height:96px;object-fit:cover;border-radius:8px" />` : ''
-  return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:130px;line-height:1.45"><b style="font-size:13.5px;color:${color}">${esc(nombreMostrado(r))}</b><br><span style="font-size:12px;color:#8a807a">${est}${r.zona ? ' · ' + esc(r.zona) : ''}</span>${foto}</div>`
+  const p = puntoDeReporte(r)
+  const btn = (href, txt, bg) =>
+    `<a href="${href}" target="_blank" rel="noreferrer" style="flex:1;text-align:center;text-decoration:none;background:${bg};color:#fff;font-weight:800;font-size:12px;padding:7px 4px;border-radius:8px">${txt}</a>`
+  const ir =
+    p && p[0] != null
+      ? `<div style="display:flex;gap:6px;margin-top:8px">${btn(linkGoogleMaps(p[0], p[1]), 'Google Maps', '#2f7fed')}${btn(linkWaze(p[0], p[1]), 'Waze', '#20b8f0')}</div>`
+      : ''
+  return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:150px;line-height:1.45"><b style="font-size:13.5px;color:${color}">${esc(nombreMostrado(r))}</b><br><span style="font-size:12px;color:#8a807a">${est}${r.zona ? ' · ' + esc(r.zona) : ''}</span>${foto}${ir}</div>`
 }
 
 // ¿Este dispositivo ya apoyó este aviso? (para no contar dos veces)
