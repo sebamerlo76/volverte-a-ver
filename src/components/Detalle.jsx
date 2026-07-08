@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero } from '../data/store.js'
-import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel, linkGoogleMaps, linkWaze } from '../lib/formato.js'
+import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel } from '../lib/formato.js'
 import { compartirFlyer } from '../lib/flyer.js'
 
 // Escapa texto del usuario para meterlo seguro en el HTML del globito.
@@ -20,13 +20,11 @@ export function popupReporte(r) {
   const est = r.tipo === 'perdido' ? 'Perdido' : 'En la calle'
   const foto = r.foto ? `<br><img src="${esc(r.foto)}" style="margin-top:6px;width:150px;height:96px;object-fit:cover;border-radius:8px" />` : ''
   const p = puntoDeReporte(r)
-  const btn = (href, txt, bg) =>
-    `<a href="${href}" target="_blank" rel="noreferrer" style="flex:1;display:block;text-align:center;text-decoration:none;background:${bg};color:#fff;font-weight:800;font-size:13px;padding:10px 8px;border-radius:10px;white-space:nowrap">${txt}</a>`
   const ir =
     p && p[0] != null
-      ? `<div style="margin-top:11px"><div style="font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#a4988c;margin-bottom:6px">Cómo llegar</div><div style="display:flex;gap:8px">${btn(linkGoogleMaps(p[0], p[1]), '🗺️ Maps', '#2f7fed')}${btn(linkWaze(p[0], p[1]), '🚗 Waze', '#20b8f0')}</div></div>`
+      ? `<button type="button" onclick="window.__chichoIr&&window.__chichoIr(${p[0]},${p[1]})" style="display:block;width:100%;margin-top:11px;border:0;cursor:pointer;background:#1f3852;color:#fff;font-family:inherit;font-weight:800;font-size:13.5px;padding:11px 8px;border-radius:11px">🧭 Cómo llegar</button>`
       : ''
-  return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:184px;line-height:1.45"><b style="font-size:14px;color:${color}">${esc(nombreMostrado(r))}</b><br><span style="font-size:12px;color:#8a807a">${est}${r.zona ? ' · ' + esc(r.zona) : ''}</span>${foto}${ir}</div>`
+  return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:170px;line-height:1.45"><b style="font-size:14px;color:${color}">${esc(nombreMostrado(r))}</b><br><span style="font-size:12px;color:#8a807a">${est}${r.zona ? ' · ' + esc(r.zona) : ''}</span>${foto}${ir}</div>`
 }
 
 // ¿Este dispositivo ya apoyó este aviso? (para no contar dos veces)

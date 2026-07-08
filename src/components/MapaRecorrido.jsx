@@ -4,10 +4,12 @@ import { puntoDeReporte } from '../lib/parana.js'
 import { getAvistamientos } from '../data/store.js'
 import { nombreMostrado } from '../lib/formato.js'
 import { popupAvist, popupReporte } from './Detalle.jsx'
+import ComoLlegarSheet from './ComoLlegarSheet.jsx'
 
 // Mapa a pantalla completa para explorar el recorrido (movible y con zoom).
 export default function MapaRecorrido({ reporte, onCerrar }) {
   const [avist, setAvist] = useState([])
+  const [irPunto, setIrPunto] = useState(null) // punto para el que abrimos "cómo llegar"
 
   useEffect(() => {
     if (!reporte?.id) return
@@ -19,6 +21,14 @@ export default function MapaRecorrido({ reporte, onCerrar }) {
       vivo = false
     }
   }, [reporte?.id])
+
+  // Puente para el botón "Cómo llegar" que vive dentro del globito (HTML de Leaflet).
+  useEffect(() => {
+    window.__chichoIr = (lat, lng) => setIrPunto([lat, lng])
+    return () => {
+      delete window.__chichoIr
+    }
+  }, [])
 
   const centro = puntoDeReporte(reporte)
   const marcadores = [
@@ -61,6 +71,8 @@ export default function MapaRecorrido({ reporte, onCerrar }) {
           </div>
         </div>
       </div>
+
+      {irPunto && <ComoLlegarSheet punto={irPunto} onCerrar={() => setIrPunto(null)} />}
     </div>
   )
 }
