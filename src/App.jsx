@@ -187,10 +187,13 @@ export default function App() {
   useEffect(() => {
     const m = window.location.pathname.match(/^\/r\/([\w-]+)/)
     if (!m) return
-    // Dejamos '/' (feed) como entrada base ANTES de abrir el detalle, así el
-    // botón atrás tiene el feed atrás (y no cierra la app). Sincrónico para que
-    // el detalle se apile encima limpio, igual que la navegación interna.
+    // Armamos el historial ANTES del fetch (sincrónico) para que el botón atrás
+    // del celu tenga siempre el feed atrás y no cierre la app: entrada base '/'
+    // (feed) + una entrada apilada para el detalle. No dependemos del efecto de
+    // profundidad (que empuja async y deja una ventana de carrera).
     window.history.replaceState({}, '', '/')
+    window.history.pushState({ chicho: 1 }, '', '/')
+    pushedRef.current = 1 // el sistema ya sabe que hay 1 capa apilada
     getReportePorId(m[1])
       .then((r) => r && abrirDetalle(r, 'feed'))
       .catch(() => {})
