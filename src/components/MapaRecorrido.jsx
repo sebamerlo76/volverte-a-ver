@@ -3,7 +3,7 @@ import MapaLeaflet from './MapaLeaflet.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { getAvistamientos } from '../data/store.js'
 import { nombreMostrado } from '../lib/formato.js'
-import { popupAvist } from './Detalle.jsx'
+import { popupAvist, popupReporte } from './Detalle.jsx'
 
 // Mapa a pantalla completa para explorar el recorrido (movible y con zoom).
 export default function MapaRecorrido({ reporte, onCerrar }) {
@@ -22,7 +22,7 @@ export default function MapaRecorrido({ reporte, onCerrar }) {
 
   const centro = puntoDeReporte(reporte)
   const marcadores = [
-    { id: 'zona', lat: centro[0], lng: centro[1], tipo: reporte.tipo, especie: reporte.especie },
+    { id: 'zona', lat: centro[0], lng: centro[1], tipo: reporte.tipo, especie: reporte.especie, popup: popupReporte(reporte) },
     ...avist.map((a, i) => ({
       id: a.id,
       lat: a.lat,

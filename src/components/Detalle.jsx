@@ -14,6 +14,13 @@ export function popupAvist(a, n) {
   const foto = a.foto ? `<br><img src="${esc(a.foto)}" style="margin-top:6px;width:150px;height:96px;object-fit:cover;border-radius:8px" />` : ''
   return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:130px;line-height:1.45"><b style="font-size:13px;color:#1f9d8f">👀 Avistamiento ${n}</b><br><span style="font-size:12.5px;color:#2a2320">${esc(a.nota) || 'Sin detalle'}</span><br><span style="font-size:11.5px;color:#8a807a">${esc(a.autor) || 'Anónimo'} · ${fechaHora(a.creadoEn)}</span>${foto}</div>`
 }
+// Globito del pin de la mascota (su zona / última ubicación).
+export function popupReporte(r) {
+  const color = r.tipo === 'perdido' ? '#ff5747' : '#2f7fed'
+  const est = r.tipo === 'perdido' ? 'Perdido' : 'En la calle'
+  const foto = r.foto ? `<br><img src="${esc(r.foto)}" style="margin-top:6px;width:150px;height:96px;object-fit:cover;border-radius:8px" />` : ''
+  return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:130px;line-height:1.45"><b style="font-size:13.5px;color:${color}">${esc(nombreMostrado(r))}</b><br><span style="font-size:12px;color:#8a807a">${est}${r.zona ? ' · ' + esc(r.zona) : ''}</span>${foto}</div>`
+}
 
 // ¿Este dispositivo ya apoyó este aviso? (para no contar dos veces)
 function yaApoyado(id) {

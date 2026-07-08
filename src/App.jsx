@@ -64,7 +64,8 @@ export default function App() {
   // ¿Hay algo "abierto" sobre el feed? (una vista distinta, o un modal)
   const hayCapa =
     vista !== 'feed' || !!fotosVer || menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte
-  const backRef = useRef({ hayCapa: false, sentinel: false })
+  const [sentinel, setSentinel] = useState(false) // hay una entrada centinela puesta en el historial
+  const backRef = useRef({ hayCapa: false })
   backRef.current.hayCapa = hayCapa
   // Snapshot del estado para que el listener (registrado una vez) lea lo actual.
   const estadoRef = useRef({})
@@ -103,19 +104,20 @@ export default function App() {
   // Mientras hay una capa abierta, mantenemos UNA entrada "centinela" en el
   // historial, para que el botón atrás la consuma (y no cierre la app).
   useEffect(() => {
-    if (hayCapa && !backRef.current.sentinel) {
-      backRef.current.sentinel = true
+    if (hayCapa && !sentinel) {
+      setSentinel(true)
       window.history.pushState({ chicho: true }, '')
-    } else if (!hayCapa && backRef.current.sentinel) {
-      backRef.current.sentinel = false
+    } else if (!hayCapa && sentinel) {
+      setSentinel(false)
       window.history.back() // se cerró la última capa por UI → consumimos el centinela
     }
-  }, [hayCapa])
+  }, [hayCapa, sentinel])
 
   // Un solo listener de popstate: al apretar atrás, cerramos la capa de arriba.
+  // Al bajar sentinel, el efecto de arriba re-arma el centinela si aún queda capa.
   useEffect(() => {
     function onPop() {
-      backRef.current.sentinel = false // el back ya consumió la entrada
+      setSentinel(false) // el back ya consumió la entrada
       if (backRef.current.hayCapa) retroceder()
     }
     window.addEventListener('popstate', onPop)
