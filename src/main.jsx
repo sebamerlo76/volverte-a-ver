@@ -3,13 +3,15 @@ import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import PerfilPublico from './components/PerfilPublico.jsx'
 import GestionAviso from './components/GestionAviso.jsx'
+import Privacidad from './components/Privacidad.jsx'
 import { Analytics } from '@vercel/analytics/react'
 import './styles.css'
 
 // Ruteo simple: /m/<id> = perfil público (QR del collar); /g/<token> = gestionar
-// un aviso publicado sin cuenta (cerrar/borrar).
+// un aviso publicado sin cuenta (cerrar/borrar); /privacidad = política.
 const qr = window.location.pathname.match(/^\/m\/([^/]+)/)
 const gest = window.location.pathname.match(/^\/g\/([^/]+)/)
+const priv = /^\/privacidad\/?$/.test(window.location.pathname)
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -17,6 +19,8 @@ createRoot(document.getElementById('root')).render(
       <PerfilPublico id={decodeURIComponent(qr[1])} />
     ) : gest ? (
       <GestionAviso token={decodeURIComponent(gest[1])} />
+    ) : priv ? (
+      <Privacidad />
     ) : (
       <App />
     )}
