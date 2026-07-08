@@ -1,0 +1,35 @@
+<!-- Supabase → Authentication → Emails → Templates → "Reset Password"
+     Subject sugerido:  Cambiá tu contraseña de Chicho 🐾  -->
+<div style="margin:0;padding:0;background:#faf7f1;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#faf7f1;padding:24px 0;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:460px;background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #eee5d8;">
+        <tr><td style="background:#1f3852;padding:20px 24px;text-align:center;">
+          <img src="https://chicho.ar/logo.png" width="42" height="42" alt="" style="vertical-align:middle;display:inline-block;">
+          <span style="font-family:'Trebuchet MS',Verdana,sans-serif;font-size:25px;font-weight:bold;color:#ffffff;vertical-align:middle;margin-left:8px;">Chicho</span>
+        </td></tr>
+        <tr><td style="padding:30px 30px 26px;font-family:'Trebuchet MS',Verdana,sans-serif;color:#1f3852;">
+          <h1 style="margin:0 0 12px;font-size:20px;color:#1f3852;">Restablecé tu contraseña</h1>
+          <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#647a86;">
+            Recibimos un pedido para cambiar la contraseña de tu cuenta en Chicho. Tocá el botón y elegí una nueva:
+          </p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 22px;">
+            <tr><td align="center" style="border-radius:12px;background:#ff5747;">
+              <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 30px;font-family:'Trebuchet MS',Verdana,sans-serif;font-size:16px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:12px;">Cambiar mi contraseña</a>
+            </td></tr>
+          </table>
+          <p style="margin:0;font-size:13px;line-height:1.6;color:#647a86;">
+            Si no pediste esto, ignorá este mail — tu contraseña sigue igual.
+          </p>
+          <p style="margin:16px 0 0;font-size:12px;line-height:1.6;color:#a4988c;">
+            Si el botón no funciona, copiá y pegá este enlace:<br>
+            <a href="{{ .ConfirmationURL }}" style="color:#ff5747;word-break:break-all;">{{ .ConfirmationURL }}</a>
+          </p>
+        </td></tr>
+        <tr><td style="padding:16px 24px;background:#faf7f1;text-align:center;font-family:'Trebuchet MS',Verdana,sans-serif;font-size:12px;color:#9a9088;">
+          Chicho · Mascotas perdidas y encontradas · <a href="https://chicho.ar" style="color:#647a86;text-decoration:none;">chicho.ar</a>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</div>
