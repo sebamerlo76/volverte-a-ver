@@ -3,12 +3,16 @@ import { supabase } from '../lib/supabase.js'
 
 // Traduce los errores más comunes de Supabase Auth a algo entendible.
 function traducirError(msg = '') {
-  const m = msg.toLowerCase()
+  const m = String(msg).toLowerCase()
   if (m.includes('invalid login')) return 'Email o contraseña incorrectos.'
   if (m.includes('already registered')) return 'Ese email ya tiene cuenta. Probá iniciar sesión.'
   if (m.includes('at least 6')) return 'La contraseña debe tener al menos 6 caracteres.'
   if (m.includes('not confirmed')) return 'Falta confirmar el email. Revisá tu correo.'
   if (m.includes('unable to validate email')) return 'Ese email no parece válido.'
+  if (m.includes('sending') || m.includes('smtp') || m.includes('email'))
+    return 'No pudimos enviar el mail. Probá de nuevo en un rato.'
+  if (m.includes('rate') || m.includes('too many') || m.includes('seconds'))
+    return 'Esperá unos segundos antes de volver a pedirlo.'
   return msg || 'Ocurrió un error. Probá de nuevo.'
 }
 
@@ -37,7 +41,8 @@ export default function Auth({ onCerrar, onAuth, onToast }) {
       onToast('Te enviamos un enlace a tu correo para cambiar la contraseña')
       setModo('ingresar')
     } catch (e) {
-      onToast(traducirError(e.message))
+      console.error('resetPasswordForEmail', e)
+      onToast(traducirError(e?.message))
     }
     setCargando(false)
   }
