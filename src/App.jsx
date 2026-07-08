@@ -187,10 +187,13 @@ export default function App() {
   useEffect(() => {
     const m = window.location.pathname.match(/^\/r\/([\w-]+)/)
     if (!m) return
+    // Dejamos '/' (feed) como entrada base ANTES de abrir el detalle, así el
+    // botón atrás tiene el feed atrás (y no cierra la app). Sincrónico para que
+    // el detalle se apile encima limpio, igual que la navegación interna.
+    window.history.replaceState({}, '', '/')
     getReportePorId(m[1])
       .then((r) => r && abrirDetalle(r, 'feed'))
       .catch(() => {})
-      .finally(() => window.history.replaceState({}, '', '/'))
   }, [])
 
   // Seguir el estado de la sesión (solo si hay Supabase).
