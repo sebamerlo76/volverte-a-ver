@@ -2764,6 +2764,15 @@ select {
   opacity: 0.5;
 }
 
+/* Mini-mapa del detalle: capa transparente para que tocar (pin o mapa) abra el mapa completo */
+.minimap-tap {
+  position: absolute;
+  inset: 0;
+  z-index: 800;
+  background: transparent;
+  cursor: pointer;
+}
+
 /* Foto a pantalla completa (lightbox) */
 .foto-lightbox {
   position: fixed;

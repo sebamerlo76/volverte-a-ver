@@ -20,6 +20,7 @@ import WelcomeGuide from './components/WelcomeGuide.jsx'
 import Admin from './components/Admin.jsx'
 import Moderacion from './components/Moderacion.jsx'
 import Soporte from './components/Soporte.jsx'
+import Lightbox from './components/Lightbox.jsx'
 import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { nombreMostrado } from './lib/formato.js'
@@ -51,6 +52,7 @@ export default function App() {
   const [guiaAbierta, setGuiaAbierta] = useState(false) // recorrido de bienvenida
   const [soporteAbierto, setSoporteAbierto] = useState(false) // hoja de ayuda/soporte
   const [hayUpdate, setHayUpdate] = useState(false) // hay una versión nueva desplegada
+  const [fotosVer, setFotosVer] = useState(null) // foto(s) a pantalla completa: { fotos, i }
 
   const notifsNoLeidas = notifs.filter((n) => !n.leida).length
 
@@ -61,16 +63,17 @@ export default function App() {
   // --- Botón "atrás" del celu: cerrar la capa abierta en vez de cerrar la PWA ---
   // ¿Hay algo "abierto" sobre el feed? (una vista distinta, o un modal)
   const hayCapa =
-    vista !== 'feed' || menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte
+    vista !== 'feed' || !!fotosVer || menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte
   const backRef = useRef({ hayCapa: false, sentinel: false })
   backRef.current.hayCapa = hayCapa
   // Snapshot del estado para que el listener (registrado una vez) lea lo actual.
   const estadoRef = useRef({})
-  estadoRef.current = { vista, detalleOrigen, menuAbierto, buscadorAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte }
+  estadoRef.current = { vista, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte }
 
-  // Cierra la capa de más arriba (modales primero, después vistas).
+  // Cierra la capa de más arriba (foto y modales primero, después vistas).
   function retroceder() {
     const s = estadoRef.current
+    if (s.fotosVer) return setFotosVer(null)
     if (s.menuAbierto) return setMenuAbierto(false)
     if (s.buscadorAbierto) return setBuscadorAbierto(false)
     if (s.notifsAbierto) return setNotifsAbierto(false)
@@ -500,6 +503,7 @@ export default function App() {
             onReactivar={reactivar}
             onAvistar={() => setVista('avistamiento')}
             onMaximizar={() => setVista('recorrido')}
+            onVerFotos={(fotos, i) => setFotosVer({ fotos, i })}
           />
         )}
         {vista === 'avistamiento' && seleccionado && (
@@ -649,6 +653,8 @@ export default function App() {
           />
         )}
       </div>
+
+      {fotosVer && <Lightbox fotos={fotosVer.fotos} inicio={fotosVer.i} onCerrar={() => setFotosVer(null)} />}
 
       <div className={'toast' + (toast ? ' show' : '')}>{toast}</div>
     </div>

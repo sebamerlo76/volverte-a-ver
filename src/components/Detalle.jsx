@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero } from '../data/store.js'
@@ -79,7 +79,7 @@ function marcarReporteNum(w) {
   }
 }
 
-export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar }) {
+export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar, onVerFotos }) {
   const [avist, setAvist] = useState([])
   const [fotoActiva, setFotoActiva] = useState(0)
   const [apoyos, setApoyos] = useState(r?.apoyos || 0)
@@ -87,16 +87,6 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
   const [reporteAbierto, setReporteAbierto] = useState(false)
   const [numeroSheet, setNumeroSheet] = useState(false)
   const [numReportes, setNumReportes] = useState(0)
-  const [lightbox, setLightbox] = useState(false) // foto a pantalla completa
-  const lbRef = useRef(null)
-
-  // Al abrir el lightbox, lo posiciono en la foto que estaba mirando.
-  useEffect(() => {
-    if (lightbox && lbRef.current) {
-      lbRef.current.scrollLeft = fotoActiva * lbRef.current.clientWidth
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lightbox])
 
   useEffect(() => {
     if (!r?.id) return
@@ -214,7 +204,7 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
                   src={u}
                   alt={nombreMostrado(r)}
                   style={{ cursor: 'zoom-in' }}
-                  onClick={() => setLightbox(true)}
+                  onClick={() => onVerFotos && onVerFotos(fotos, fotoActiva)}
                   onError={(e) => (e.target.style.display = 'none')}
                 />
               ))}
@@ -365,6 +355,8 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
                 open_in_full
               </span>
             </button>
+            {/* Tocar en cualquier parte del mini-mapa (pin incluido) abre el mapa completo */}
+            <button className="minimap-tap" onClick={() => onMaximizar(r)} aria-label="Ver el mapa completo" />
           </div>
           <button className="ver-recorrido" onClick={() => onMaximizar(r)}>
             <span className="mi" style={{ fontSize: 19 }}>
@@ -539,36 +531,6 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
         </div>
       )}
 
-      {lightbox && fotos.length > 0 && (
-        <div className="foto-lightbox" onClick={() => setLightbox(false)}>
-          <button className="lb-x" onClick={() => setLightbox(false)} aria-label="Cerrar">
-            <span className="mi" style={{ fontSize: 26 }}>
-              close
-            </span>
-          </button>
-          <div
-            className="lb-carrusel"
-            ref={lbRef}
-            onClick={(e) => e.stopPropagation()}
-            onScroll={(e) => {
-              const el = e.currentTarget
-              const i = Math.round(el.scrollLeft / el.clientWidth)
-              if (i !== fotoActiva) setFotoActiva(i)
-            }}
-          >
-            {fotos.map((u, i) => (
-              <img key={i} src={u} alt={nombreMostrado(r)} />
-            ))}
-          </div>
-          {fotos.length > 1 && (
-            <div className="lb-dots">
-              {fotos.map((_, i) => (
-                <span key={i} className={'ddot' + (i === fotoActiva ? ' on' : '')} />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   )
 }
