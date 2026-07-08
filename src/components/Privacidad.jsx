@@ -61,7 +61,7 @@ export default function Privacidad() {
             <div style={h}>Contacto</div>
             <p style={p}>
               Por dudas o para borrar tu cuenta, escribinos a{' '}
-              <a href="mailto:hola@chicho.ar" style={{ color: 'var(--coral)', fontWeight: 800 }}>hola@chicho.ar</a>{' '}
+              <a href="mailto:sebamerlo76@gmail.com" style={{ color: 'var(--coral)', fontWeight: 800 }}>sebamerlo76@gmail.com</a>{' '}
               o por WhatsApp al{' '}
               <a href="https://wa.me/5493434054998" target="_blank" rel="noreferrer" style={{ color: 'var(--coral)', fontWeight: 800 }}>+54 9 343 405-4998</a>.
             </p>
