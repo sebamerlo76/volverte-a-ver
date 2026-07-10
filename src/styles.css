@@ -245,6 +245,27 @@ select {
   letter-spacing: 0.3px;
   margin: 10px 0 8px;
 }
+.fp-buscar {
+  width: 100%;
+  height: 42px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  padding: 0 14px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink);
+  outline: none;
+  margin-bottom: 8px;
+}
+.fp-buscar::placeholder {
+  color: #b7aca4;
+}
+.fp-vacio {
+  font-size: 13.5px;
+  color: var(--muted);
+  padding: 4px 2px;
+}
 .fp-limpiar {
   margin-top: 12px;
   font-size: 13px;

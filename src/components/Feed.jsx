@@ -38,11 +38,13 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
   const [miUbi, setMiUbi] = useState(null)
   const [ciudadSheet, setCiudadSheet] = useState(false)
   const [irPunto, setIrPunto] = useState(null) // punto para "cómo llegar"
+  const [qBarrio, setQBarrio] = useState('') // búsqueda de barrio en el filtro (ciudades grandes)
 
   const loc = filtros.localidad // null = todas las localidades
   function elegirCiudad(l) {
     setFiltro('localidad', l)
     setFiltro('zona', null) // los barrios cambian según la ciudad
+    setQBarrio('')
     recordarLocalidadFeed(l) // recuerda la vista del feed (incluido "Todas")
     if (l) recordarLocalidad(l) // el default de publicar sigue una ciudad real
     setCiudadSheet(false)
@@ -206,18 +208,40 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
               </button>
             ))}
           </div>
-          {loc && (
-            <>
-              <div className="fp-label">Barrio</div>
-              <div className="chipsel-wrap">
-                {nombresBarriosDe(loc).map((z) => (
-                  <button key={z} className={'chip' + (filtros.zona === z ? ' on' : '')} onClick={() => setFiltro('zona', filtros.zona === z ? null : z)}>
-                    {z}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+          {loc &&
+            (() => {
+              const barrios = nombresBarriosDe(loc)
+              const grande = barrios.length > 30 // Córdoba (400+): buscador en vez de muro de chips
+              const q = qBarrio.trim().toLowerCase()
+              const mostrar = grande
+                ? q
+                  ? barrios.filter((b) => b.toLowerCase().includes(q)).slice(0, 40)
+                  : filtros.zona
+                    ? [filtros.zona]
+                    : []
+                : barrios
+              return (
+                <>
+                  <div className="fp-label">Barrio</div>
+                  {grande && (
+                    <input
+                      className="fp-buscar"
+                      value={qBarrio}
+                      onChange={(e) => setQBarrio(e.target.value)}
+                      placeholder="Buscá tu barrio…"
+                    />
+                  )}
+                  <div className="chipsel-wrap">
+                    {mostrar.map((z) => (
+                      <button key={z} className={'chip' + (filtros.zona === z ? ' on' : '')} onClick={() => setFiltro('zona', filtros.zona === z ? null : z)}>
+                        {z}
+                      </button>
+                    ))}
+                    {grande && q && mostrar.length === 0 && <span className="fp-vacio">Sin resultados</span>}
+                  </div>
+                </>
+              )
+            })()}
           <div className="fp-label">Cuándo</div>
           <div className="chipsel-wrap">
             {TIEMPOS.map((t) => (
