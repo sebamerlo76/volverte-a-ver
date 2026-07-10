@@ -148,6 +148,16 @@ export function localidadesOrdenadas() {
   const rank = (l) => (provinciaDe(l) === PROVINCIA_DEFECTO ? '0' : '1' + provinciaDe(l)) + '|' + l
   return NOMBRES_LOCALIDADES.slice().sort((a, b) => rank(a).localeCompare(rank(b), 'es'))
 }
+// Texto de ubicación para mostrar: "Barrio · Ciudad, Provincia". No repite la
+// provincia cuando la ciudad se llama igual (ej. Córdoba capital → "Barrio · Córdoba").
+export function ubicacionTexto(localidad, zona) {
+  const ciudad = localidad || LOCALIDAD_DEFECTO
+  const prov = provinciaDe(ciudad)
+  const lugar = ciudad === prov ? ciudad : ciudad + ', ' + prov
+  const b = (zona || '').trim()
+  return b ? b + ' · ' + lugar : lugar
+}
+
 // Igual pero agrupado: [{ provincia, ciudades: [...] }, ...] en orden.
 export function localidadesPorProvincia() {
   const out = []

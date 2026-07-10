@@ -1,4 +1,5 @@
 import { nombreMostrado, tiempoRelativo } from '../lib/formato.js'
+import { ubicacionTexto } from '../lib/localidades.js'
 
 export default function PetCard({ r, onClick }) {
   const perdido = r.tipo === 'perdido'
@@ -45,7 +46,7 @@ export default function PetCard({ r, onClick }) {
           <span className="mi" style={{ fontSize: 16, color: clr }}>
             location_on
           </span>
-          {r.zona}
+          {ubicacionTexto(r.localidad, r.zona)}
         </div>
         {(() => {
           const attrs = [r.tamano, r.color, r.raza, r.sexo && r.sexo !== 'No sé' ? r.sexo : null].filter(Boolean)

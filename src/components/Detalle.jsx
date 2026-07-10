@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
+import { ubicacionTexto } from '../lib/localidades.js'
 import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel } from '../lib/formato.js'
 import { compartirFlyer } from '../lib/flyer.js'
@@ -24,7 +25,7 @@ export function popupReporte(r) {
     p && p[0] != null
       ? `<button type="button" onclick="window.__chichoIr&&window.__chichoIr(${p[0]},${p[1]})" style="display:block;width:100%;margin-top:11px;border:0;cursor:pointer;background:#1f3852;color:#fff;font-family:inherit;font-weight:800;font-size:13.5px;padding:11px 8px;border-radius:11px">🧭 Cómo llegar</button>`
       : ''
-  return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:170px;line-height:1.45"><b style="font-size:14px;color:${color}">${esc(nombreMostrado(r))}</b><br><span style="font-size:12px;color:#8a807a">${est}${r.zona ? ' · ' + esc(r.zona) : ''}</span>${foto}${ir}</div>`
+  return `<div style="font-family:Nunito,system-ui,sans-serif;min-width:170px;line-height:1.45"><b style="font-size:14px;color:${color}">${esc(nombreMostrado(r))}</b><br><span style="font-size:12px;color:#8a807a">${est} · ${esc(ubicacionTexto(r.localidad, r.zona))}</span>${foto}${ir}</div>`
 }
 
 // ¿Este dispositivo ya apoyó este aviso? (para no contar dos veces)
@@ -260,7 +261,7 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
             <span className="mi" style={{ fontSize: 17, color: clr }}>
               location_on
             </span>
-            {r.zona}
+            {ubicacionTexto(r.localidad, r.zona)}
             {r.referencia ? ` · ${r.referencia}` : ''}
           </div>
 
