@@ -3,7 +3,7 @@ import PetCard from './PetCard.jsx'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
-import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarLocalidadFeed, localidadesOrdenadas, provinciaDe } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarLocalidadFeed, localidadesOrdenadas, provinciaDe, ubicacionTexto } from '../lib/localidades.js'
 import { puntoDeReporte } from '../lib/parana.js'
 import ComoLlegarSheet from './ComoLlegarSheet.jsx'
 
@@ -308,7 +308,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
                   <div style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 17, marginTop: 1 }}>
                     {nombreMostrado(seleccionado)}
                   </div>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: '#8a807a' }}>{seleccionado.zona}</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: '#8a807a' }}>{ubicacionTexto(seleccionado.localidad, seleccionado.zona)}</div>
                 </div>
               </button>
               <button className="mcard-ir" onClick={() => setIrPunto(puntoDeReporte(seleccionado))}>

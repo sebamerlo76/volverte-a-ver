@@ -1,6 +1,7 @@
 // Genera una imagen (flyer) del aviso para compartir en WhatsApp/Facebook.
 // 100% en el navegador con <canvas> — sin librerías ni servidor.
 import { nombreMostrado } from './formato.js'
+import { ubicacionTexto } from './localidades.js'
 import QRCode from 'qrcode'
 
 const NAVY = '#1f3852'
@@ -149,7 +150,7 @@ export async function generarFlyer(r) {
 
   ctx.fillStyle = MUTED
   ctx.font = '800 36px Nunito, sans-serif'
-  ctx.fillText(`${r.zona || ''}${r.localidad ? ' · ' + r.localidad : ''}`, 48, y)
+  ctx.fillText(ubicacionTexto(r.localidad, r.zona), 48, y)
   y += 66
 
   // Tags (chips)
@@ -249,7 +250,7 @@ export async function compartirFlyer(r, onToast) {
     const file = new File([blob], `chicho-${r.id || 'aviso'}.png`, { type: 'image/png' })
     const estado = r.estado === 'resuelto' ? 'apareció' : r.tipo === 'perdido' ? 'PERDIDO' : 'EN LA CALLE'
     const link = r.id ? `https://chicho.ar/r/${r.id}` : 'https://chicho.ar'
-    const texto = `${nombreMostrado(r)} — ${estado} en ${r.zona || ''}, ${r.localidad || 'Paraná'}. Mirá y ayudá 🐾\n${link}`
+    const texto = `${nombreMostrado(r)} — ${estado} en ${ubicacionTexto(r.localidad, r.zona)}. Mirá y ayudá 🐾\n${link}`
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({ files: [file], title: 'Chicho', text: texto })
