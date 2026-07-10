@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import PetCard from './PetCard.jsx'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
-import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarLocalidadFeed } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarLocalidadFeed, localidadesOrdenadas, provinciaDe } from '../lib/localidades.js'
 import { puntoDeReporte } from '../lib/parana.js'
 import ComoLlegarSheet from './ComoLlegarSheet.jsx'
 
@@ -366,14 +366,15 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
                 <span className="mi" style={{ marginLeft: 'auto', color: 'var(--navy)' }}>check</span>
               )}
             </button>
-            {NOMBRES_LOCALIDADES.map((l) => (
-              <button key={l} className="pp-op" onClick={() => elegirCiudad(l)}>
-                <span className="mi fill" style={{ fontSize: 20, color: 'var(--navy)' }}>location_on</span>
-                {l}
-                {loc === l && (
-                  <span className="mi" style={{ marginLeft: 'auto', color: 'var(--navy)' }}>check</span>
-                )}
-              </button>
+            {localidadesOrdenadas().map((l, i, arr) => (
+              <Fragment key={l}>
+                {i > 0 && provinciaDe(l) !== provinciaDe(arr[i - 1]) && <div className="ciudad-sep" />}
+                <button className="pp-op" onClick={() => elegirCiudad(l)}>
+                  <span className="mi fill" style={{ fontSize: 20, color: 'var(--navy)' }}>location_on</span>
+                  {l}
+                  {loc === l && <span className="mi" style={{ marginLeft: 'auto', color: 'var(--navy)' }}>check</span>}
+                </button>
+              </Fragment>
             ))}
           </div>
         </div>

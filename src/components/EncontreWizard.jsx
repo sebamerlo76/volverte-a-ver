@@ -4,7 +4,7 @@ import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import FechaPicker from './FechaPicker.jsx'
 import SelectorBarrio from './SelectorBarrio.jsx'
-import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad, localidadesPorProvincia } from '../lib/localidades.js'
 import BuscarDireccion from './BuscarDireccion.jsx'
 import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
 import { addReporte, addMascota, subirFotos, subirFotoFeed, publicarGestion, nuevoTokenGestion } from '../data/store.js'
@@ -378,10 +378,14 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
                       setPunto({ lat: c[0], lng: c[1] })
                     }}
                   >
-                    {NOMBRES_LOCALIDADES.map((l) => (
-                      <option key={l} value={l}>
-                        {l}
-                      </option>
+                    {localidadesPorProvincia().map((g) => (
+                      <optgroup key={g.provincia} label={g.provincia}>
+                        {g.ciudades.map((l) => (
+                          <option key={l} value={l}>
+                            {l}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                 </div>

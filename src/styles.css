@@ -266,6 +266,12 @@ select {
   color: var(--muted);
   padding: 4px 2px;
 }
+/* Separador fino entre provincias en el selector de ciudad */
+.ciudad-sep {
+  height: 1px;
+  background: var(--line);
+  margin: 6px 16px;
+}
 .fp-limpiar {
   margin-top: 12px;
   font-size: 13px;

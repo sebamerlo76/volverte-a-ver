@@ -128,6 +128,38 @@ export const LOCALIDADES = {
 
 export const NOMBRES_LOCALIDADES = Object.keys(LOCALIDADES)
 
+// Provincia de cada ciudad, para agrupar/ordenar el selector. La provincia "de
+// casa" va primero. Al sumar una ciudad nueva, agregala también acá.
+const PROVINCIA_POR_CIUDAD = {
+  'Paraná': 'Entre Ríos',
+  'Crespo': 'Entre Ríos',
+  'Colonia Avellaneda': 'Entre Ríos',
+  'San Benito': 'Entre Ríos',
+  'General Ramírez': 'Entre Ríos',
+  'Córdoba': 'Córdoba',
+}
+export const PROVINCIA_DEFECTO = 'Entre Ríos'
+export function provinciaDe(loc) {
+  return PROVINCIA_POR_CIUDAD[loc] || 'Otras'
+}
+// Ciudades ordenadas: la provincia "de casa" primero y el resto alfabético; dentro
+// de cada provincia, alfabético.
+export function localidadesOrdenadas() {
+  const rank = (l) => (provinciaDe(l) === PROVINCIA_DEFECTO ? '0' : '1' + provinciaDe(l)) + '|' + l
+  return NOMBRES_LOCALIDADES.slice().sort((a, b) => rank(a).localeCompare(rank(b), 'es'))
+}
+// Igual pero agrupado: [{ provincia, ciudades: [...] }, ...] en orden.
+export function localidadesPorProvincia() {
+  const out = []
+  for (const l of localidadesOrdenadas()) {
+    const p = provinciaDe(l)
+    let g = out.find((x) => x.provincia === p)
+    if (!g) out.push((g = { provincia: p, ciudades: [] }))
+    g.ciudades.push(l)
+  }
+  return out
+}
+
 export function centroDe(loc) {
   return (LOCALIDADES[loc] || LOCALIDADES[LOCALIDAD_DEFECTO]).center
 }

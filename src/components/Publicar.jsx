@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { coordsDeBarrio, puntoDeReporte } from '../lib/parana.js'
-import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad, localidadesPorProvincia } from '../lib/localidades.js'
 import BuscarDireccion from './BuscarDireccion.jsx'
 import { addReporte, actualizarReporte, addMascota, subirFotos, subirFotoFeed, guardarEmbedding } from '../data/store.js'
 import SelectChips from './SelectChips.jsx'
@@ -228,10 +228,14 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
                 location_city
               </span>
               <select value={localidad} onChange={(e) => cambiarLocalidad(e.target.value)}>
-                {NOMBRES_LOCALIDADES.map((l) => (
-                  <option key={l} value={l}>
-                    {l}
-                  </option>
+                {localidadesPorProvincia().map((g) => (
+                  <optgroup key={g.provincia} label={g.provincia}>
+                    {g.ciudades.map((l) => (
+                      <option key={l} value={l}>
+                        {l}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>
