@@ -20,6 +20,7 @@ const DEFECTO = {
 export default function NotifPrefs({ user, onToast, onListo }) {
   const [prefs, setPrefs] = useState(null)
   const [verMapa, setVerMapa] = useState(false)
+  const [qBarrio, setQBarrio] = useState('') // búsqueda de barrio (ciudades grandes)
   const timer = useRef(null)
 
   useEffect(() => {
@@ -173,23 +174,47 @@ export default function NotifPrefs({ user, onToast, onListo }) {
           {unaSola ? (
             <>
               <div className="cerca-lbl">¿De qué barrios querés enterarte?</div>
-              <div className="barrio-chips">
-                <button className={'esp-chip' + (todos ? ' on' : '')} onClick={toggleTodos}>
-                  🌎 Todos
-                </button>
-                {nombresBarriosDe(loc).map((b) => {
-                  const on = !todos && (prefs.barrios || []).includes(b)
-                  return (
-                    <button
-                      key={b}
-                      className={'esp-chip' + (on ? ' on' : '') + (todos ? ' dim' : '')}
-                      onClick={() => toggleBarrio(b)}
-                    >
-                      {b}
-                    </button>
-                  )
-                })}
-              </div>
+              {(() => {
+                const barrios = nombresBarriosDe(loc)
+                const grande = barrios.length > 30 // Córdoba (400+): buscador
+                const q = qBarrio.trim().toLowerCase()
+                const sel = (prefs.barrios || []).filter((b) => b !== '*')
+                const mostrar = grande
+                  ? Array.from(
+                      new Set([...(todos ? [] : sel), ...(q ? barrios.filter((b) => b.toLowerCase().includes(q)) : [])])
+                    ).slice(0, 60)
+                  : barrios
+                return (
+                  <>
+                    {grande && (
+                      <input
+                        className="fp-buscar"
+                        value={qBarrio}
+                        onChange={(e) => setQBarrio(e.target.value)}
+                        placeholder="Buscá tu barrio…"
+                      />
+                    )}
+                    <div className="barrio-chips">
+                      <button className={'esp-chip' + (todos ? ' on' : '')} onClick={toggleTodos}>
+                        🌎 Todos
+                      </button>
+                      {mostrar.map((b) => {
+                        const on = !todos && (prefs.barrios || []).includes(b)
+                        return (
+                          <button
+                            key={b}
+                            className={'esp-chip' + (on ? ' on' : '') + (todos ? ' dim' : '')}
+                            onClick={() => toggleBarrio(b)}
+                          >
+                            {b}
+                          </button>
+                        )
+                      })}
+                      {grande && q && mostrar.length === 0 && <span className="fp-vacio">Sin resultados</span>}
+                    </div>
+                  </>
+                )
+              })()}
             </>
           ) : (
             <div className="cerca-nota">
