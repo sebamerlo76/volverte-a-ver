@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { nombreMostrado } from '../lib/formato.js'
+import { ubicacionTexto } from '../lib/localidades.js'
 
 // Saca acentos y pasa a minúsculas: así "marron" encuentra "Marrón".
 function normaliza(s) {
@@ -105,7 +106,7 @@ export default function BuscadorOverlay({ reportes, q, onQ, onOpen, onCerrar }) 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="bres-nombre">{nombreMostrado(r)}</div>
                   <div className="bres-sub">
-                    {r.zona} · {r.especie === 'perro' ? 'Perro' : r.especie === 'gato' ? 'Gato' : 'Otro'}
+                    {ubicacionTexto(r.localidad, r.zona)} · {r.especie === 'perro' ? 'Perro' : r.especie === 'gato' ? 'Gato' : 'Otro'}
                     {r.color ? ` · ${r.color}` : ''}
                   </div>
                 </div>

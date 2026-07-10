@@ -4,7 +4,7 @@ import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import FechaPicker from './FechaPicker.jsx'
 import SelectorBarrio from './SelectorBarrio.jsx'
-import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad, localidadesPorProvincia } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad, localidadesPorProvincia, ubicacionTexto } from '../lib/localidades.js'
 import BuscarDireccion from './BuscarDireccion.jsx'
 import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
 import { addReporte, addMascota, subirFotos, subirFotoFeed, publicarGestion, nuevoTokenGestion } from '../data/store.js'
@@ -498,7 +498,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="bres-nombre">{nombreMostrado(r)}</div>
                   <div className="bres-sub">
-                    {r.zona} · Perdido · {tiempoRelativo(r.creadoEn)}
+                    {ubicacionTexto(r.localidad, r.zona)} · Perdido · {tiempoRelativo(r.creadoEn)}
                   </div>
                 </div>
                 <span className="mi" style={{ fontSize: 22, color: '#c3b8b0' }}>
@@ -575,7 +575,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
               <span className="mi" style={{ fontSize: 16, color: 'var(--navy)' }}>
                 location_on
               </span>
-              {matchPreview.zona} · Perdido · {tiempoRelativo(matchPreview.creadoEn)}
+              {ubicacionTexto(matchPreview.localidad, matchPreview.zona)} · Perdido · {tiempoRelativo(matchPreview.creadoEn)}
             </div>
             <div className="match-tags">
               {matchPreview.sexo && matchPreview.sexo !== 'No sé' ? <span className="tag">{matchPreview.sexo}</span> : null}
