@@ -1808,6 +1808,57 @@ select {
   margin: -4px -6px -4px 0;
   cursor: pointer;
 }
+/* Selector de barrio con búsqueda */
+.barrio-sel {
+  position: relative;
+  z-index: 900; /* por encima del mapa de Leaflet (z-index 500) para que el desplegable no quede tapado */
+}
+.barrio-sel .inp {
+  cursor: pointer;
+}
+.barrio-lista {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 1500;
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 12px 34px rgba(70, 45, 30, 0.18);
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 5px;
+}
+.barrio-op {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: 0;
+  background: none;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink);
+  border-radius: 9px;
+  cursor: pointer;
+}
+.barrio-op:hover,
+.barrio-op.on {
+  background: var(--cream);
+}
+.barrio-op.otro {
+  color: var(--coral);
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  margin-top: 3px;
+}
+.barrio-vacio {
+  padding: 12px;
+  font-size: 13.5px;
+  color: var(--muted);
+  text-align: center;
+}
 .ta {
   min-height: 88px;
   border-radius: 14px;

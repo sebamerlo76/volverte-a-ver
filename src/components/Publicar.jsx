@@ -7,6 +7,7 @@ import { addReporte, actualizarReporte, addMascota, subirFotos, subirFotoFeed, g
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import FechaPicker from './FechaPicker.jsx'
+import SelectorBarrio from './SelectorBarrio.jsx'
 import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
 import { tieneGroseria } from '../lib/moderacion.js'
 
@@ -238,19 +239,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
         )}
 
         <div className="flabel">Zona / barrio</div>
-        <div className="inp">
-          <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
-            location_on
-          </span>
-          <select value={nombresBarriosDe(localidad).includes(zona) ? zona : 'Otro'} onChange={(e) => cambiarZonaSel(e.target.value)}>
-            {nombresBarriosDe(localidad).map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-            <option value="Otro">Otro…</option>
-          </select>
-        </div>
+        <SelectorBarrio opciones={nombresBarriosDe(localidad)} value={zona} onSelect={cambiarZonaSel} />
         {!nombresBarriosDe(localidad).includes(zona) && (
           <div className="inp" style={{ marginTop: 8 }}>
             <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>

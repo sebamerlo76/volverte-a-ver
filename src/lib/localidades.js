@@ -6,6 +6,8 @@
 // ubicación exacta, y como centro del radio. El matching de notificaciones por
 // barrio es por NOMBRE, así que las coords no necesitan ser exactas. Se pueden
 // refinar con el tiempo.
+import { CORDOBA_BARRIOS, CORDOBA_CENTER } from './cordoba.js'
+
 export const LOCALIDAD_DEFECTO = 'Paraná'
 
 export const LOCALIDADES = {
@@ -115,6 +117,11 @@ export const LOCALIDADES = {
       'Malvinas Argentinas': [-32.167, -60.216],
       'Martín Fierro': [-32.1623, -60.2137],
     },
+  },
+  'Córdoba': {
+    // Barrios oficiales de Córdoba capital (KMZ oficial de la Municipalidad).
+    center: CORDOBA_CENTER,
+    barrios: CORDOBA_BARRIOS,
   },
   // Para sumar otra: copiá un bloque, poné center [lat,lng] y sus barrios.
 }
