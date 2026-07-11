@@ -350,7 +350,18 @@ export async function getReencontrados() {
 // Crea un reporte nuevo. Devuelve el reporte creado.
 export async function addReporte(datos) {
   if (supabaseConfigurado) {
-    const { data, error } = await supabase.from('reportes').insert(haciaFila(datos)).select().single()
+    const fila = haciaFila(datos)
+    // "Publicado por": nombre de pila del que publica (si está logueado). Si no
+    // hay sesión (ej. "Encontré" sin cuenta), queda 'Anónimo' por el default de la base.
+    try {
+      const { data: auth } = await supabase.auth.getUser()
+      const full = auth?.user?.user_metadata?.full_name || auth?.user?.user_metadata?.name || ''
+      const pila = full.trim().split(/\s+/)[0]
+      if (pila) fila.autor = pila
+    } catch (e) {
+      /* sin nombre: queda Anónimo */
+    }
+    const { data, error } = await supabase.from('reportes').insert(fila).select().single()
     if (error) throw error
     return desdeFila(data)
   }
