@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import PetCard from './PetCard.jsx'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { getReencontrados } from '../data/store.js'
@@ -26,7 +26,7 @@ function jitter(base, id = '') {
   return [base[0] + dy, base[1] + dx]
 }
 
-export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, user, onLogin, onMenu, onNotifs, notifsNoLeidas = 0, hayNudge, modo, filtros, setFiltro, resetInicio }) {
+export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, user, onLogin, onMenu, onNotifs, notifsNoLeidas = 0, hayNudge, modo, filtros, setFiltro, resetInicio, scrollRef }) {
   const avatar = avatarDe(user)
   const [finales, setFinales] = useState(null)
   const [sel, setSel] = useState(null)
@@ -35,6 +35,12 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
   const [ciudadSheet, setCiudadSheet] = useState(false)
   const [irPunto, setIrPunto] = useState(null) // punto para "cómo llegar"
   const [qBarrio, setQBarrio] = useState('') // búsqueda de barrio en el filtro (ciudades grandes)
+  const bodyRef = useRef(null) // contenedor scrolleable de la lista, para recordar la posición
+
+  // Al volver de un aviso (el Feed se re-monta), restaurar dónde estaba el scroll.
+  useEffect(() => {
+    if (bodyRef.current && scrollRef) bodyRef.current.scrollTop = scrollRef.current || 0
+  }, [])
 
   const loc = filtros.localidad // null = todas las localidades
   function elegirCiudad(l) {
@@ -321,7 +327,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
           )}
         </div>
       ) : (
-        <div className="body">
+        <div className="body" ref={bodyRef} onScroll={(e) => { if (scrollRef) scrollRef.current = e.currentTarget.scrollTop }}>
           {verFinales && finales === null ? (
             <div className="empty">Cargando finales felices…</div>
           ) : filtrados.length === 0 ? (

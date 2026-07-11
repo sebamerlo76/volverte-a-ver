@@ -58,6 +58,7 @@ export default function App() {
   const [recuperando, setRecuperando] = useState(false) // volvió del mail de recupero → elegir nueva pass
   const [nudge, setNudge] = useState(false) // avisar "primeros pasos" (desde el 2º login, si falta algo)
   const contadoRef = useRef(false)
+  const feedScrollRef = useRef(0) // recuerda el scroll del feed al entrar a un aviso
 
   const notifsNoLeidas = notifs.filter((n) => !n.leida).length
 
@@ -281,6 +282,7 @@ export default function App() {
     setFiltros(FILTROS_INI)
     setHomeModo('lista')
     setVista('feed')
+    feedScrollRef.current = 0
     const b = document.querySelector('.body')
     if (b) b.scrollTop = 0
   }
@@ -531,6 +533,7 @@ export default function App() {
             filtros={filtros}
             setFiltro={setFiltro}
             resetInicio={resetInicio}
+            scrollRef={feedScrollRef}
           />
         )}
         {vista === 'detalle' && (
