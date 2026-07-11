@@ -268,7 +268,7 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
               location_on
             </span>
             {ubicacionTexto(r.localidad, r.zona)}
-            {r.referencia ? ` · ${r.referencia}` : ''}
+            {r.referencia && r.referencia !== r.zona ? ` · ${r.referencia}` : ''}
           </div>
 
           <div className="tags" style={{ marginTop: 14 }}>
