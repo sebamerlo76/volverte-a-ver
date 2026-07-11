@@ -6,6 +6,7 @@ import GestionAviso from './components/GestionAviso.jsx'
 import Privacidad from './components/Privacidad.jsx'
 import EliminarCuenta from './components/EliminarCuenta.jsx'
 import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import './styles.css'
 
 // Ruteo simple: /m/<id> = perfil público (QR del collar); /g/<token> = gestionar
@@ -30,6 +31,7 @@ createRoot(document.getElementById('root')).render(
       <App />
     )}
     <Analytics />
+    <SpeedInsights />
   </StrictMode>
 )
 
