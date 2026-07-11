@@ -65,13 +65,13 @@ export default function Admin({ onVolver, stats }) {
               <Card n={s.usuarios} label="Usuarios" color="var(--navy)" />
               <Card n={s.avisos} label="Avisos totales" color="var(--navy)" />
               <Card n={s.activos} label="Activos" color="var(--teal)" />
-              <Card n={s.enCasa} label="En casa 🏠" color="var(--amber)" />
+              <Card n={s.enCasa} label="Ya en casa 🏠" color="var(--amber)" />
             </div>
 
             <div className="adm-exito">
               <div className="adm-exito-n">{exito}%</div>
               <div>
-                de los avisos terminaron <b>En casa</b> 🎉
+                de los avisos terminaron <b>Ya en casa</b> 🎉
               </div>
             </div>
 
@@ -95,8 +95,8 @@ export default function Admin({ onVolver, stats }) {
               <div className="adm-grid tres" style={{ marginTop: 10 }}>
                 <Card n={rango.avisos} label="Avisos" color="var(--navy)" />
                 <Card n={rango.perdidos} label="Perdidos" color="var(--coral)" />
-                <Card n={rango.enLaCalle} label="En la calle" color="var(--blue)" />
-                <Card n={rango.enCasa} label="En casa" color="var(--amber)" />
+                <Card n={rango.enLaCalle} label="Encontrados" color="var(--blue)" />
+                <Card n={rango.enCasa} label="Ya en casa" color="var(--amber)" />
                 <Card n={rango.usuarios} label="Usuarios" />
                 <Card n={rango.avistamientos} label="Avistamientos" />
               </div>
@@ -105,8 +105,8 @@ export default function Admin({ onVolver, stats }) {
             <div className="adm-sub">Por tipo</div>
             <div className="adm-grid tres">
               <Card n={s.perdidos} label="Perdidos" color="var(--coral)" />
-              <Card n={s.enLaCalle} label="En la calle" color="var(--blue)" />
-              <Card n={s.enCasa} label="En casa" color="var(--amber)" />
+              <Card n={s.enLaCalle} label="Encontrados" color="var(--blue)" />
+              <Card n={s.enCasa} label="Ya en casa" color="var(--amber)" />
             </div>
 
             <div className="adm-sub">Por especie</div>

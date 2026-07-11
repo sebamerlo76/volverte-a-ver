@@ -2,6 +2,7 @@
 // 100% en el navegador con <canvas> — sin librerías ni servidor.
 import { nombreMostrado } from './formato.js'
 import { ubicacionTexto } from './localidades.js'
+import { textoEstado, textoTipo } from './estados.js'
 import QRCode from 'qrcode'
 
 const NAVY = '#1f3852'
@@ -103,8 +104,8 @@ export async function generarFlyer(r) {
 
   const resuelto = r.estado === 'resuelto'
   const perdido = r.tipo === 'perdido'
-  const estadoColor = resuelto ? '#e0a300' : perdido ? '#ff5747' : '#2f7fed'
-  const estadoTxt = resuelto ? 'EN CASA' : perdido ? 'PERDIDO' : 'EN LA CALLE'
+  const estadoColor = resuelto ? '#e0a300' : perdido ? '#ff5747' : r.enCustodia ? '#1f9d8f' : '#2f7fed'
+  const estadoTxt = textoEstado(r).toUpperCase()
 
   // ---- Foto ----
   const fotoSrc = (r.fotos && r.fotos[0]) || r.foto
@@ -248,7 +249,7 @@ export async function compartirFlyer(r, onToast) {
     onToast?.('Generando imagen…')
     const blob = await generarFlyer(r)
     const file = new File([blob], `chicho-${r.id || 'aviso'}.png`, { type: 'image/png' })
-    const estado = r.estado === 'resuelto' ? 'apareció' : r.tipo === 'perdido' ? 'PERDIDO' : 'EN LA CALLE'
+    const estado = r.estado === 'resuelto' ? 'apareció' : textoTipo(r.tipo, r.enCustodia)
     const link = r.id ? `https://chicho.ar/r/${r.id}` : 'https://chicho.ar'
     const texto = `${nombreMostrado(r)} — ${estado} en ${ubicacionTexto(r.localidad, r.zona)}. Mirá y ayudá 🐾\n${link}`
     if (navigator.canShare && navigator.canShare({ files: [file] })) {

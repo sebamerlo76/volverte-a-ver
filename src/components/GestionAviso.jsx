@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getReportePorToken, resolverPorToken, borrarPorToken } from '../data/store.js'
 import { ubicacionTexto } from '../lib/localidades.js'
+import { textoTipo } from '../lib/estados.js'
 
 // Página para gestionar un aviso publicado SIN cuenta (link chicho.ar/g/<token>).
 // Deja cerrarlo ("ya volvió a casa") o borrarlo, sin login.
@@ -79,7 +80,7 @@ export default function GestionAviso({ token }) {
                     {r.nombre || (r.especie === 'gato' ? 'Gato' : r.especie === 'otro' ? 'Mascota' : 'Perro')}
                   </div>
                   <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--muted)' }}>
-                    {r.tipo === 'perdido' ? 'Perdido' : 'En la calle'}
+                    {textoTipo(r.tipo, r.enCustodia)}
                     {r.zona ? ` · ${r.localidad ? ubicacionTexto(r.localidad, r.zona) : r.zona}` : ''}
                   </div>
                   {cerrado && <div className="gest-cerrado">🏠 Cerrado</div>}

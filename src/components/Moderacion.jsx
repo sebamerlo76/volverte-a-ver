@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getModeracion, desbloquearReporte, borrarReporteAdmin, banearUsuario, desbanearUsuario } from '../data/store.js'
 import { tiempoRelativo } from '../lib/formato.js'
+import { textoTipo } from '../lib/estados.js'
 
 export default function Moderacion({ onVolver, data: dataProp }) {
   const [data, setData] = useState(dataProp || null)
@@ -70,7 +71,7 @@ export default function Moderacion({ onVolver, data: dataProp }) {
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="mod-nombre">
-                        {a.nombre || (a.tipo === 'perdido' ? 'Perdido' : 'En la calle')}
+                        {a.nombre || textoTipo(a.tipo, a.enCustodia)}
                         {a.bloqueado && <span className="mod-badge">Bloqueado</span>}
                       </div>
                       <div className="mod-sub">

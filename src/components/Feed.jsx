@@ -5,6 +5,7 @@ import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
 import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarLocalidadFeed, localidadesOrdenadas, provinciaDe, ubicacionTexto } from '../lib/localidades.js'
 import { puntoDeReporte } from '../lib/parana.js'
+import { TABS_ESTADO, textoTipo } from '../lib/estados.js'
 import ComoLlegarSheet from './ComoLlegarSheet.jsx'
 
 const ESPECIE_LBL = { perro: 'Perros', gato: 'Gatos', otro: 'Otros' }
@@ -14,12 +15,7 @@ const TIEMPOS = [
   { k: 'semana', t: 'Esta semana' },
   { k: 'mes', t: 'Este mes' },
 ]
-const TABS = [
-  { k: 'todos', t: 'Todos' },
-  { k: 'perdido', t: 'Perdidos' },
-  { k: 'encontrado', t: 'En la calle' },
-  { k: 'finales', t: 'En casa', icono: 'home' },
-]
+const TABS = TABS_ESTADO
 
 // Desplazamiento determinístico para que no se superpongan los pines del barrio.
 function jitter(base, id = '') {
@@ -268,7 +264,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
           <div className="mlegend">
             {verFinales ? (
               <div className="l" style={{ background: '#e0a300' }}>
-                En casa · {filtrados.length}
+                Ya en casa · {filtrados.length}
               </div>
             ) : (
               <>
@@ -279,7 +275,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
                 )}
                 {filtros.estado !== 'perdido' && (
                   <div className="l" style={{ background: '#2f7fed' }}>
-                    En la calle · {encontrados}
+                    Encontrados · {encontrados}
                   </div>
                 )}
               </>
@@ -302,7 +298,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                     <span style={{ width: 8, height: 8, borderRadius: '50%', background: seleccionado.tipo === 'perdido' ? '#ff5747' : '#2f7fed' }} />
                     <span style={{ fontSize: 11, fontWeight: 900, color: seleccionado.tipo === 'perdido' ? '#ff5747' : '#2f7fed' }}>
-                      {(seleccionado.tipo === 'perdido' ? 'Perdido' : 'En la calle').toUpperCase()} · {tiempoRelativo(seleccionado.creadoEn)}
+                      {textoTipo(seleccionado.tipo, seleccionado.enCustodia).toUpperCase()} · {tiempoRelativo(seleccionado.creadoEn)}
                     </span>
                   </div>
                   <div style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 17, marginTop: 1 }}>

@@ -1,5 +1,6 @@
 import { nombreMostrado, tiempoRelativo } from '../lib/formato.js'
 import { ubicacionTexto } from '../lib/localidades.js'
+import { badgeEstado, subLinea } from '../lib/estados.js'
 
 export default function PetCard({ r, onClick }) {
   const perdido = r.tipo === 'perdido'
@@ -15,21 +16,17 @@ export default function PetCard({ r, onClick }) {
             pets
           </span>
         )}
-        {resuelto ? (
-          <span className="badge encasa">
-            <span className="mi fill" style={{ fontSize: 16 }}>
-              celebration
+        {(() => {
+          const b = badgeEstado(r)
+          return (
+            <span className={'badge ' + b.clase}>
+              <span className={'mi' + (b.fill ? ' fill' : '')} style={{ fontSize: 16 }}>
+                {b.icono}
+              </span>
+              {b.t}
             </span>
-            En casa
-          </span>
-        ) : (
-          <span className={'badge ' + (perdido ? 'lost' : 'found')}>
-            <span className={'mi' + (perdido ? '' : ' fill')} style={{ fontSize: 16 }}>
-              {perdido ? 'error_outline' : 'pets'}
-            </span>
-            {perdido ? 'Perdido' : 'En la calle'}
-          </span>
-        )}
+          )
+        })()}
         <span className="time">{tiempoRelativo(r.creadoEn)}</span>
       </div>
       <div className="cbody">
@@ -39,7 +36,7 @@ export default function PetCard({ r, onClick }) {
             <span className="mi fill" style={{ fontSize: 14 }}>
               {perdido ? 'search' : 'volunteer_activism'}
             </span>
-            {perdido ? 'Su familia lo busca' : 'Busca a su familia'}
+            {subLinea(r)}
           </div>
         )}
         <div className="cmeta">

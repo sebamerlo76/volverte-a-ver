@@ -1238,6 +1238,10 @@ select {
   background: var(--amber);
   box-shadow: 0 4px 10px rgba(224, 163, 0, 0.4);
 }
+.badge.transito {
+  background: #1f9d8f;
+  box-shadow: 0 4px 10px rgba(31, 157, 143, 0.4);
+}
 .time {
   position: absolute;
   top: 13px;

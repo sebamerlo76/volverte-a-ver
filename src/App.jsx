@@ -437,7 +437,7 @@ export default function App() {
       await marcarResuelto(id)
       await cargar()
       setVista(detalleOrigen)
-      mostrarToast('🎉 ¡Marcado como reencontrado!')
+      mostrarToast('🎉 ¡Ya está en casa!')
     } catch (e) {
       console.error(e)
       mostrarToast('No se pudo actualizar 😕')

@@ -16,8 +16,8 @@ const PASOS = [
   {
     ic: 'swap_horiz',
     color: 'var(--navy)',
-    t: 'Perdido vs. En la calle',
-    d: '🔴 Perdido: su familia lo busca.\n🔵 En la calle: alguien lo encontró y busca a su familia.',
+    t: 'Perdido, Encontrado, Ya en casa',
+    d: '🔴 Perdido: su familia lo busca.\n🔵 Encontrado: alguien lo vio, o lo tiene a resguardo (en tránsito), y busca a su familia.\n🏠 Ya en casa: volvió con su familia. 🎉',
   },
   {
     ic: 'pets',

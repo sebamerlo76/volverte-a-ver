@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { nombreMostrado } from '../lib/formato.js'
 import { ubicacionTexto } from '../lib/localidades.js'
+import { textoEstado } from '../lib/estados.js'
 
 // Saca acentos y pasa a minúsculas: así "marron" encuentra "Marrón".
 function normaliza(s) {
@@ -114,7 +115,7 @@ export default function BuscadorOverlay({ reportes, q, onQ, onOpen, onCerrar }) 
                   className="bres-badge"
                   style={{ background: resuelto ? '#e0a300' : perdido ? '#ff5747' : '#2f7fed' }}
                 >
-                  {resuelto ? 'En casa' : perdido ? 'Perdido' : 'En la calle'}
+                  {textoEstado(r)}
                 </span>
               </button>
             )

@@ -352,7 +352,7 @@ export default function MiCuenta({
                           <span className="mi" style={{ fontSize: 17 }}>
                             celebration
                           </span>
-                          ¡Apareció!
+                          ¡Ya está en casa!
                         </button>
                       ) : (
                         <button className="masc-perdi" onClick={() => onPublicarMascota(m)}>
@@ -390,7 +390,7 @@ export default function MiCuenta({
               const conNovedad = (notifs || []).some((n) => !n.leida && n.reporteId === r.id)
               return (
                 <div key={r.id} style={{ position: 'relative' }}>
-                  {r.estado === 'resuelto' && <div className="resuelto-chip">🏠 En casa</div>}
+                  {r.estado === 'resuelto' && <div className="resuelto-chip">🏠 Ya en casa</div>}
                   {conNovedad && (
                     <div className="novedad-chip">
                       <span className="mi fill" style={{ fontSize: 14 }}>

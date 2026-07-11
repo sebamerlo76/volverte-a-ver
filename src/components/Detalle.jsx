@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { ubicacionTexto } from '../lib/localidades.js'
+import { badgeEstado, subLinea, textoTipo } from '../lib/estados.js'
 import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel } from '../lib/formato.js'
 import { compartirFlyer } from '../lib/flyer.js'
@@ -18,7 +19,7 @@ export function popupAvist(a, n) {
 // Globito del pin de la mascota (su zona / última ubicación) + cómo llegar.
 export function popupReporte(r) {
   const color = r.tipo === 'perdido' ? '#ff5747' : '#2f7fed'
-  const est = r.tipo === 'perdido' ? 'Perdido' : 'En la calle'
+  const est = textoTipo(r.tipo, r.enCustodia)
   const foto = r.foto ? `<br><img src="${esc(r.foto)}" style="margin-top:6px;width:150px;height:96px;object-fit:cover;border-radius:8px" />` : ''
   const p = puntoDeReporte(r)
   const ir =
@@ -239,12 +240,17 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
               arrow_back
             </span>
           </button>
-          <span className={'badge ' + (resuelto ? 'encasa' : perdido ? 'lost' : 'found')} style={{ top: 16, left: 'auto', right: 16 }}>
-            <span className="mi" style={{ fontSize: 16 }}>
-              {resuelto ? 'celebration' : perdido ? 'error_outline' : 'pets'}
-            </span>
-            {resuelto ? 'En casa' : perdido ? 'Perdido' : 'En la calle'} · {tiempoRelativo(r.creadoEn)}
-          </span>
+          {(() => {
+            const b = badgeEstado(r)
+            return (
+              <span className={'badge ' + b.clase} style={{ top: 16, left: 'auto', right: 16 }}>
+                <span className={'mi' + (b.fill ? ' fill' : '')} style={{ fontSize: 16 }}>
+                  {b.icono}
+                </span>
+                {b.t} · {tiempoRelativo(r.creadoEn)}
+              </span>
+            )
+          })()}
         </div>
 
         <div className="dpad">
@@ -254,7 +260,7 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
               <span className="mi fill" style={{ fontSize: 15 }}>
                 {perdido ? 'search' : 'volunteer_activism'}
               </span>
-              {perdido ? 'Su familia lo busca' : 'Busca a su familia'}
+              {subLinea(r)}
             </div>
           )}
           <div className="cmeta" style={{ fontSize: 14, marginTop: 5 }}>
@@ -506,7 +512,7 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
               <span className="mi fill" style={{ fontSize: 24 }}>
                 check_circle
               </span>
-              {r.tipo === 'perdido' ? 'Marcar reencontrado' : 'Marcar resuelto'}
+              {r.tipo === 'perdido' ? 'Marcar: ya está en casa' : 'Marcar: encontró su familia'}
             </button>
           )}
           <button className="btn-share" onClick={() => onEditar(r)} aria-label="Editar aviso">

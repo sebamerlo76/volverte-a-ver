@@ -61,7 +61,7 @@ export default function Mapa({ reportes, onAbrir, onToast }) {
             Perdidos · {perdidos}
           </div>
           <div className="l" style={{ background: '#2f7fed' }}>
-            En la calle · {encontrados}
+            Encontrados · {encontrados}
           </div>
         </div>
 
@@ -95,7 +95,7 @@ export default function Mapa({ reportes, onAbrir, onToast }) {
                     color: seleccionado.tipo === 'perdido' ? '#ff5747' : '#2f7fed',
                   }}
                 >
-                  {(seleccionado.tipo === 'perdido' ? 'Perdido' : 'En la calle').toUpperCase()} · {tiempoRelativo(seleccionado.creadoEn)}
+                  {(seleccionado.tipo === 'perdido' ? 'Perdido' : 'Encontrado').toUpperCase()} · {tiempoRelativo(seleccionado.creadoEn)}
                 </span>
               </div>
               <div style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 17, marginTop: 1 }}>
