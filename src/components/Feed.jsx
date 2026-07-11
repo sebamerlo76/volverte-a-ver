@@ -1,9 +1,9 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import PetCard from './PetCard.jsx'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
-import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarLocalidadFeed, localidadesOrdenadas, provinciaDe, ubicacionTexto } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarScopeFeed, provinciasOrdenadas, ciudadesDeProvincia, provinciaDe, ubicacionTexto } from '../lib/localidades.js'
 import { puntoDeReporte } from '../lib/parana.js'
 import { TABS_ESTADO, textoTipo } from '../lib/estados.js'
 import ComoLlegarSheet from './ComoLlegarSheet.jsx'
@@ -33,6 +33,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
   const [panelAbierto, setPanelAbierto] = useState(false)
   const [miUbi, setMiUbi] = useState(null)
   const [ciudadSheet, setCiudadSheet] = useState(false)
+  const [provSel, setProvSel] = useState(null) // provincia abierta dentro del selector (drill-down)
   const [irPunto, setIrPunto] = useState(null) // punto para "cómo llegar"
   const [qBarrio, setQBarrio] = useState('') // búsqueda de barrio en el filtro (ciudades grandes)
   const bodyRef = useRef(null) // contenedor scrolleable de la lista, para recordar la posición
@@ -43,12 +44,34 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
   }, [])
 
   const loc = filtros.localidad // null = todas las localidades
+  const prov = filtros.provincia // toda una provincia (localidad === null)
+  function abrirCiudadSheet() {
+    setProvSel(loc ? provinciaDe(loc) : prov || null) // si ya hay algo elegido, entrar directo a su provincia
+    setCiudadSheet(true)
+  }
   function elegirCiudad(l) {
     setFiltro('localidad', l)
+    setFiltro('provincia', null)
     setFiltro('zona', null) // los barrios cambian según la ciudad
     setQBarrio('')
-    recordarLocalidadFeed(l) // recuerda la vista del feed (incluido "Todas")
+    recordarScopeFeed(l, null)
     if (l) recordarLocalidad(l) // el default de publicar sigue una ciudad real
+    setCiudadSheet(false)
+  }
+  function elegirProvincia(p) {
+    setFiltro('localidad', null)
+    setFiltro('provincia', p)
+    setFiltro('zona', null)
+    setQBarrio('')
+    recordarScopeFeed(null, p)
+    setCiudadSheet(false)
+  }
+  function elegirTodas() {
+    setFiltro('localidad', null)
+    setFiltro('provincia', null)
+    setFiltro('zona', null)
+    setQBarrio('')
+    recordarScopeFeed(null, null)
     setCiudadSheet(false)
   }
 
@@ -77,6 +100,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
     const texto = (filtros.q || '').trim().toLowerCase()
     const fuente = verFinales ? finales || [] : reportes
     let arr = fuente.filter((r) => {
+      if (prov && provinciaDe(r.localidad || 'Paraná') !== prov) return false
       if (loc && (r.localidad || 'Paraná') !== loc) return false
       if (filtros.estado === 'perdido' || filtros.estado === 'encontrado') {
         if (r.tipo !== filtros.estado) return false
@@ -175,9 +199,9 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
 
         {/* Barra de filtros (breadcrumb) */}
         <div className="fbar">
-          <button className="fbar-ciudad" onClick={() => setCiudadSheet(true)}>
+          <button className="fbar-ciudad" onClick={abrirCiudadSheet}>
             <span className="mi" style={{ fontSize: 16 }}>place</span>
-            {loc || 'Todas'}
+            {loc || prov || 'Todas'}
             <span className="mi" style={{ fontSize: 15 }}>expand_more</span>
           </button>
           <button className={'fbar-tune' + (panelAbierto ? ' on' : '')} onClick={() => setPanelAbierto((v) => !v)}>
@@ -362,24 +386,48 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
       {ciudadSheet && (
         <div className="pp-sheet-ov" onClick={() => setCiudadSheet(false)}>
           <div className="pp-sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="report-sheet-t">¿Qué localidad querés ver?</div>
-            <button className="pp-op" onClick={() => elegirCiudad(null)}>
-              <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>public</span>
-              Todas
-              {!loc && (
-                <span className="mi" style={{ marginLeft: 'auto', color: 'var(--navy)' }}>check</span>
-              )}
-            </button>
-            {localidadesOrdenadas().map((l, i, arr) => (
-              <Fragment key={l}>
-                {i > 0 && provinciaDe(l) !== provinciaDe(arr[i - 1]) && <div className="ciudad-sep" />}
-                <button className="pp-op" onClick={() => elegirCiudad(l)}>
-                  <span className="mi fill" style={{ fontSize: 20, color: 'var(--navy)' }}>location_on</span>
-                  {l}
-                  {loc === l && <span className="mi" style={{ marginLeft: 'auto', color: 'var(--navy)' }}>check</span>}
+            {provSel === null ? (
+              <>
+                <div className="report-sheet-t">¿Qué provincia querés ver?</div>
+                <button className="pp-op" onClick={elegirTodas}>
+                  <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>public</span>
+                  Todas
+                  {!loc && !prov && <span className="mi" style={{ marginLeft: 'auto', color: 'var(--navy)' }}>check</span>}
                 </button>
-              </Fragment>
-            ))}
+                <div className="ciudad-sep" />
+                {provinciasOrdenadas().map((p) => (
+                  <button className="pp-op" key={p} onClick={() => setProvSel(p)}>
+                    <span className="mi fill" style={{ fontSize: 20, color: 'var(--navy)' }}>location_on</span>
+                    {p}
+                    <span className="mi" style={{ marginLeft: 'auto', fontSize: 20, color: '#b9ada3' }}>chevron_right</span>
+                  </button>
+                ))}
+              </>
+            ) : (
+              <>
+                <button className="pp-sheet-back" onClick={() => setProvSel(null)}>
+                  <span className="mi" style={{ fontSize: 22 }}>arrow_back</span>
+                  {provSel}
+                </button>
+                {ciudadesDeProvincia(provSel).length > 1 && (
+                  <>
+                    <button className="pp-op" onClick={() => elegirProvincia(provSel)}>
+                      <span className="mi fill" style={{ fontSize: 20, color: 'var(--navy)' }}>select_all</span>
+                      Toda la provincia
+                      {prov === provSel && <span className="mi" style={{ marginLeft: 'auto', color: 'var(--navy)' }}>check</span>}
+                    </button>
+                    <div className="ciudad-sep" />
+                  </>
+                )}
+                {ciudadesDeProvincia(provSel).map((l) => (
+                  <button className="pp-op" key={l} onClick={() => elegirCiudad(l)}>
+                    <span className="mi fill" style={{ fontSize: 20, color: 'var(--navy)' }}>location_on</span>
+                    {l}
+                    {loc === l && <span className="mi" style={{ marginLeft: 'auto', color: 'var(--navy)' }}>check</span>}
+                  </button>
+                ))}
+              </>
+            )}
           </div>
         </div>
       )}

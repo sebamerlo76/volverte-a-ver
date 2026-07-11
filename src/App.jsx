@@ -26,12 +26,13 @@ import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, elimina
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { contarLogin, logins, pasosOk } from './lib/pasos.js'
 import { nombreMostrado } from './lib/formato.js'
-import { localidadFeedGuardada } from './lib/localidades.js'
+import { scopeFeedGuardado } from './lib/localidades.js'
 
 export default function App() {
   const [vista, setVista] = useState('feed') // feed | detalle | post | auth | cuenta | avistamiento | recorrido
   const [homeModo, setHomeModo] = useState('lista') // lista | mapa (vista del inicio)
-  const FILTROS_INI = { q: '', estado: 'todos', especie: null, zona: null, tiempo: 'todos', orden: 'recientes', localidad: localidadFeedGuardada() }
+  const SCOPE_INI = scopeFeedGuardado()
+  const FILTROS_INI = { q: '', estado: 'todos', especie: null, zona: null, tiempo: 'todos', orden: 'recientes', localidad: SCOPE_INI.localidad, provincia: SCOPE_INI.provincia }
   const [filtros, setFiltros] = useState(FILTROS_INI) // filtros del inicio (se conservan entre vistas)
   const [buscadorAbierto, setBuscadorAbierto] = useState(false)
   const [selReporte, setSelReporte] = useState(null) // aviso abierto en el detalle

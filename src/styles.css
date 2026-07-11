@@ -2613,6 +2613,8 @@ select {
 .pp-sheet {
   width: 100%;
   max-width: 440px;
+  max-height: 72vh;
+  overflow-y: auto;
   background: var(--cream);
   border-radius: 22px 22px 0 0;
   padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
@@ -2673,6 +2675,20 @@ select {
   font-size: 16px;
   color: var(--navy);
   padding: 6px 10px 10px;
+}
+.pp-sheet-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px 10px;
+  background: transparent;
+  border: none;
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--navy);
+  cursor: pointer;
 }
 
 /* Aviso anti-estafa en el detalle */
@@ -3701,7 +3717,7 @@ textarea:focus-visible {
 
 /* Checklist "Primeros pasos" (Mi cuenta) */
 .pp-card {
-  padding: 4px 2px 8px;
+  padding: 12px 18px 18px;
 }
 .pp-top {
   display: flex;

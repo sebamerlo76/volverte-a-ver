@@ -221,6 +221,25 @@ export function localidadesPorProvincia() {
   return out
 }
 
+// Provincia de la ciudad guardada (la "de casa"), para ordenar sin asumir Entre Ríos.
+export function provinciaGuardada() {
+  return provinciaDe(localidadGuardada())
+}
+// Provincias en orden: la "de casa" primero, el resto alfabético.
+export function provinciasOrdenadas() {
+  const home = provinciaGuardada()
+  const provs = [...new Set(NOMBRES_LOCALIDADES.map(provinciaDe))]
+  return provs.sort((a, b) => {
+    if (a === home) return -1
+    if (b === home) return 1
+    return a.localeCompare(b, 'es')
+  })
+}
+// Ciudades de una provincia, alfabético.
+export function ciudadesDeProvincia(prov) {
+  return NOMBRES_LOCALIDADES.filter((l) => provinciaDe(l) === prov).sort((a, b) => a.localeCompare(b, 'es'))
+}
+
 export function centroDe(loc) {
   return (LOCALIDADES[loc] || LOCALIDADES[LOCALIDAD_DEFECTO]).center
 }
@@ -259,23 +278,24 @@ export function recordarLocalidad(loc) {
   }
 }
 
-// Preferencia de ciudad del FEED. A diferencia de la de arriba, acá SÍ se puede
-// elegir "Todas" (null). Es una clave aparte para no pisar el default de publicar
-// (que siempre tiene que ser una ciudad real).
+// "Scope" del FEED: una ciudad, toda una provincia, o "Todas". Es una clave
+// aparte para no pisar el default de publicar (que siempre es una ciudad real).
+// Guardado: nombre de ciudad | '*' (Todas) | 'P:<provincia>' (toda la provincia).
 const LS_FEED_LOC = 'chicho_feed_loc'
-export function localidadFeedGuardada() {
+export function scopeFeedGuardado() {
   try {
     const v = localStorage.getItem(LS_FEED_LOC)
-    if (v === '*') return null // el usuario eligió "Todas"
-    if (v && LOCALIDADES[v]) return v
+    if (v === '*') return { localidad: null, provincia: null }
+    if (v && v.slice(0, 2) === 'P:') return { localidad: null, provincia: v.slice(2) }
+    if (v && LOCALIDADES[v]) return { localidad: v, provincia: null }
   } catch (e) {
     /* ignore */
   }
-  return localidadGuardada() // primera vez: arranca en tu ciudad
+  return { localidad: localidadGuardada(), provincia: null } // primera vez: tu ciudad
 }
-export function recordarLocalidadFeed(loc) {
+export function recordarScopeFeed(localidad, provincia) {
   try {
-    localStorage.setItem(LS_FEED_LOC, loc && LOCALIDADES[loc] ? loc : '*')
+    localStorage.setItem(LS_FEED_LOC, provincia ? 'P:' + provincia : localidad && LOCALIDADES[localidad] ? localidad : '*')
   } catch (e) {
     /* ignore */
   }
