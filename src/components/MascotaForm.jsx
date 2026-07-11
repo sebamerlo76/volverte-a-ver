@@ -3,6 +3,7 @@ import { addMascota, actualizarMascota, eliminarMascota, subirFotos } from '../d
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS } from '../lib/opciones.js'
+import { confirmar } from '../lib/confirmar.js'
 
 export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, onVerQR }) {
   const editando = !!inicial
@@ -53,7 +54,7 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, on
   }
 
   async function borrar() {
-    if (!window.confirm('¿Sacar esta mascota de tu perfil? Se puede volver a cargar cuando quieras.')) return
+    if (!(await confirmar({ mensaje: '¿Sacar esta mascota de tu perfil? Se puede volver a cargar cuando quieras.', aceptar: 'Sacar', peligro: true }))) return
     try {
       await eliminarMascota(inicial.id)
       onGuardado()

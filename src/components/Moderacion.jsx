@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getModeracion, desbloquearReporte, borrarReporteAdmin, banearUsuario, desbanearUsuario } from '../data/store.js'
 import { tiempoRelativo } from '../lib/formato.js'
 import { textoTipo } from '../lib/estados.js'
+import { confirmar } from '../lib/confirmar.js'
 
 export default function Moderacion({ onVolver, data: dataProp }) {
   const [data, setData] = useState(dataProp || null)
@@ -94,15 +95,15 @@ export default function Moderacion({ onVolver, data: dataProp }) {
                     </button>
                     <button
                       className="mod-btn del"
-                      onClick={() => window.confirm('¿Borrar este aviso? No se puede deshacer.') && accion(borrarReporteAdmin, a.id)}
+                      onClick={async () => (await confirmar({ mensaje: '¿Borrar este aviso? No se puede deshacer.', aceptar: 'Borrar', peligro: true })) && accion(borrarReporteAdmin, a.id)}
                     >
                       Borrar
                     </button>
                     {a.userId && (
                       <button
                         className="mod-btn ban"
-                        onClick={() =>
-                          window.confirm('¿Banear al autor? No podrá publicar y se ocultan sus avisos.') && accion(banearUsuario, a.userId)
+                        onClick={async () =>
+                          (await confirmar({ mensaje: '¿Banear al autor? No podrá publicar y se ocultan sus avisos.', aceptar: 'Banear', peligro: true })) && accion(banearUsuario, a.userId)
                         }
                       >
                         Banear autor

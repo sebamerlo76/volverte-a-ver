@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase.js'
 import NotifPrefs from './NotifPrefs.jsx'
 import MisUbicaciones from './MisUbicaciones.jsx'
 import PrimerosPasos from './PrimerosPasos.jsx'
+import { confirmar } from '../lib/confirmar.js'
 
 const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
 const DIAS_VIEJO = 30 // a partir de acá, ofrecemos renovar el aviso
@@ -136,7 +137,7 @@ export default function MiCuenta({
 
   const desactivada = !!user?.user_metadata?.desactivada
   async function desactivar() {
-    if (!window.confirm('¿Desactivar tu cuenta? Tus avisos dejan de verse y no vas a recibir notificaciones. Podés reactivarla cuando quieras.')) return
+    if (!(await confirmar({ mensaje: '¿Desactivar tu cuenta? Tus avisos dejan de verse y no vas a recibir notificaciones. Podés reactivarla cuando quieras.', aceptar: 'Desactivar', peligro: true }))) return
     try {
       await desactivarCuenta(user.id)
       await desactivarPush().catch(() => {})

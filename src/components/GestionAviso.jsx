@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getReportePorToken, resolverPorToken, borrarPorToken } from '../data/store.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { textoTipo } from '../lib/estados.js'
+import { confirmar } from '../lib/confirmar.js'
 
 // Página para gestionar un aviso publicado SIN cuenta (link chicho.ar/g/<token>).
 // Deja cerrarlo ("ya volvió a casa") o borrarlo, sin login.
@@ -29,7 +30,7 @@ export default function GestionAviso({ token }) {
     }
   }
   async function borrar() {
-    if (!window.confirm('¿Borrar el aviso? No se puede deshacer.')) return
+    if (!(await confirmar({ mensaje: '¿Borrar el aviso? No se puede deshacer.', aceptar: 'Borrar', peligro: true }))) return
     setBusy(true)
     try {
       await borrarPorToken(token)

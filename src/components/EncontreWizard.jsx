@@ -9,6 +9,7 @@ import BuscarDireccion from './BuscarDireccion.jsx'
 import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
 import { addReporte, addMascota, subirFotos, subirFotoFeed, publicarGestion, nuevoTokenGestion } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, linkWhatsApp } from '../lib/formato.js'
+import { SITIO_URL } from '../lib/sitio.js'
 import { similitud } from '../lib/vector.js'
 import { tieneGroseria } from '../lib/moderacion.js'
 
@@ -201,7 +202,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
         try {
           const tok = nuevoTokenGestion()
           if (await publicarGestion(rep.id, tok)) {
-            setGestionLink(`${window.location.origin}/g/${tok}`)
+            setGestionLink(`${SITIO_URL}/g/${tok}`)
             setGuardando(false)
             return // mostramos el panel con el link; cierra desde ahí
           }

@@ -27,6 +27,7 @@ import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { contarLogin, logins, pasosOk } from './lib/pasos.js'
 import { nombreMostrado } from './lib/formato.js'
 import { scopeFeedGuardado } from './lib/localidades.js'
+import { confirmar } from './lib/confirmar.js'
 
 export default function App() {
   const [vista, setVista] = useState('feed') // feed | detalle | post | auth | cuenta | avistamiento | recorrido
@@ -471,7 +472,7 @@ export default function App() {
     }
   }
   async function borrar(id) {
-    if (!window.confirm('¿Seguro que querés borrar este aviso? No se puede deshacer.')) return
+    if (!(await confirmar({ mensaje: '¿Seguro que querés borrar este aviso? No se puede deshacer.', aceptar: 'Borrar', peligro: true }))) return
     try {
       await eliminarReporte(id)
       await cargar()

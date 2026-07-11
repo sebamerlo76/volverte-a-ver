@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLeaflet.jsx'
 import { centroDe, localidadGuardada } from '../lib/localidades.js'
 import { getUbicaciones, addUbicacion, actualizarUbicacion, eliminarUbicacion } from '../data/store.js'
+import { confirmar } from '../lib/confirmar.js'
 
 export default function MisUbicaciones({ user, onToast }) {
   const centroIni = centroDe(localidadGuardada()) // el mapa arranca en tu ciudad, no siempre en Paraná
@@ -68,8 +69,8 @@ export default function MisUbicaciones({ user, onToast }) {
     }
   }
 
-  function borrar(u) {
-    if (!window.confirm(`¿Borrar "${u.nombre}"?`)) return
+  async function borrar(u) {
+    if (!(await confirmar({ mensaje: `¿Borrar "${u.nombre}"?`, aceptar: 'Borrar', peligro: true }))) return
     setLista((l) => l.filter((x) => x.id !== u.id))
     eliminarUbicacion(u.id).catch(() => {})
   }

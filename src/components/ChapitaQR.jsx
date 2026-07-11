@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
+import { SITIO_URL } from '../lib/sitio.js'
 
 // Muestra el QR de una mascota para imprimir y poner en el collar.
 export default function ChapitaQR({ mascota, onCerrar, onToast }) {
   const [dataUrl, setDataUrl] = useState('')
-  const url = `${window.location.origin}/m/${mascota.id}`
+  // Dominio canónico (chicho.ar), no el de la sesión: el QR va impreso en el collar.
+  const url = `${SITIO_URL}/m/${mascota.id}`
   const nombre = mascota.nombre || 'tu mascota'
 
   useEffect(() => {
