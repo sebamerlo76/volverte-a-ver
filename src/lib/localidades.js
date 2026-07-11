@@ -7,6 +7,7 @@
 // barrio es por NOMBRE, así que las coords no necesitan ser exactas. Se pueden
 // refinar con el tiempo.
 import { CORDOBA_BARRIOS, CORDOBA_CENTER } from './cordoba.js'
+import { NEUQUEN_BARRIOS, NEUQUEN_CENTER } from './neuquen.js'
 
 export const LOCALIDAD_DEFECTO = 'Paraná'
 
@@ -153,6 +154,21 @@ export const LOCALIDADES = {
       'Oeste': [-31.735, -60.318],
     },
   },
+  'Neuquén': {
+    // 49 barrios oficiales de Neuquén capital (coords reales de OSM donde matchearon).
+    center: NEUQUEN_CENTER,
+    barrios: NEUQUEN_BARRIOS,
+  },
+  'San Martín de los Andes': {
+    center: [-40.1579, -71.3534],
+    barrios: {
+      'Centro': [-40.1579, -71.3534],
+      'Norte': [-40.1499, -71.3534],
+      'Sur': [-40.1659, -71.3534],
+      'Este': [-40.1579, -71.3444],
+      'Oeste': [-40.1579, -71.3624],
+    },
+  },
   // Para sumar otra: copiá un bloque, poné center [lat,lng] y sus barrios.
 }
 
@@ -170,6 +186,8 @@ const PROVINCIA_POR_CIUDAD = {
   'Sauce Montrull': 'Entre Ríos',
   'La Picada': 'Entre Ríos',
   'Córdoba': 'Córdoba',
+  'Neuquén': 'Neuquén',
+  'San Martín de los Andes': 'Neuquén',
 }
 export const PROVINCIA_DEFECTO = 'Entre Ríos'
 export function provinciaDe(loc) {
