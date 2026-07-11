@@ -23,8 +23,8 @@ export default function Privacidad() {
             </div>
 
             <p style={{ ...p, marginTop: 18 }}>
-              Chicho es una aplicación gratuita para ayudar a reunir mascotas perdidas con sus familias en Paraná y
-              alrededores. Cuidamos tus datos y solo usamos lo mínimo necesario para que la app funcione.
+              Chicho es una aplicación gratuita para ayudar a reunir mascotas perdidas con sus familias en distintas
+              ciudades de Argentina. Cuidamos tus datos y solo usamos lo mínimo necesario para que la app funcione.
             </p>
 
             <div style={h}>Qué datos recopilamos</div>

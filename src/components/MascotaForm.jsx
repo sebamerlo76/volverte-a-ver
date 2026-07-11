@@ -57,7 +57,7 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, on
     if (!(await confirmar({ mensaje: '¿Sacar esta mascota de tu perfil? Se puede volver a cargar cuando quieras.', aceptar: 'Sacar', peligro: true }))) return
     try {
       await eliminarMascota(inicial.id)
-      onGuardado()
+      onGuardado(true) // sacada, no guardada
     } catch (e) {
       console.error(e)
       onToast('No se borró. Probá de nuevo 🔄')

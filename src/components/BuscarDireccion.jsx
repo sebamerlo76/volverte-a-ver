@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { provinciaDe } from '../lib/localidades.js'
 
 // Busca una dirección (calle + altura) y devuelve el punto para ubicarlo en el
 // mapa. Usa Nominatim (OpenStreetMap), gratis. Búsqueda al enviar (no por tecla),
@@ -13,7 +14,8 @@ export default function BuscarDireccion({ localidad, onEncontrado, onToast }) {
     if (!texto || busy) return
     setBusy(true)
     try {
-      const query = `${texto}, ${localidad || 'Paraná'}, Entre Ríos, Argentina`
+      const ciudad = localidad || 'Paraná'
+      const query = `${texto}, ${ciudad}, ${provinciaDe(ciudad)}, Argentina`
       const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ar&addressdetails=0&q=${encodeURIComponent(query)}`
       const res = await fetch(url, { headers: { Accept: 'application/json' } })
       const data = await res.json()

@@ -8,6 +8,7 @@
 // refinar con el tiempo.
 import { CORDOBA_BARRIOS, CORDOBA_CENTER } from './cordoba.js'
 import { NEUQUEN_BARRIOS, NEUQUEN_CENTER } from './neuquen.js'
+import { OLAVARRIA_BARRIOS, OLAVARRIA_CENTER } from './olavarria.js'
 
 export const LOCALIDAD_DEFECTO = 'Paraná'
 
@@ -170,14 +171,9 @@ export const LOCALIDADES = {
     },
   },
   'Olavarría': {
-    center: [-36.8937, -60.3233],
-    barrios: {
-      'Centro': [-36.8937, -60.3233],
-      'Norte': [-36.8787, -60.3233],
-      'Sur': [-36.9087, -60.3233],
-      'Este': [-36.8937, -60.3053],
-      'Oeste': [-36.8937, -60.3413],
-    },
+    // Barrios reales de Olavarría (OpenStreetMap).
+    center: OLAVARRIA_CENTER,
+    barrios: OLAVARRIA_BARRIOS,
   },
   // Para sumar otra: copiá un bloque, poné center [lat,lng] y sus barrios.
 }

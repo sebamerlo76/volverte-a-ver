@@ -72,7 +72,8 @@ export function nombreUsuario(user) {
 // Arma el link de WhatsApp con un mensaje ya escrito.
 export function linkWhatsApp(r) {
   const nombre = nombreMostrado(r)
-  const texto = `Hola! Vi el reporte de ${nombre} en Chicho (${r.zona}, Paraná). ¿Tenés novedades?`
+  const lugar = [r.zona, r.localidad].filter(Boolean).join(', ')
+  const texto = `Hola! Vi el reporte de ${nombre} en Chicho${lugar ? ` (${lugar})` : ''}. ¿Tenés novedades?`
   const numero = (r.whatsapp || '').replace(/\D/g, '')
   const base = numero ? `https://wa.me/54${numero}` : 'https://wa.me/'
   return `${base}?text=${encodeURIComponent(texto)}`

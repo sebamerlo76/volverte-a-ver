@@ -493,9 +493,9 @@ export default function App() {
     setMascotaEditando(m)
     setVista('mascota')
   }
-  function mascotaGuardada() {
+  function mascotaGuardada(sacada) {
     setVista('cuenta')
-    mostrarToast('🐾 Mascota guardada')
+    mostrarToast(sacada ? '🐾 Mascota sacada de tu perfil' : '🐾 Mascota guardada')
   }
   function publicarMascota(m) {
     // Prellena un aviso "perdido" con los datos de la mascota (y la deja vinculada).

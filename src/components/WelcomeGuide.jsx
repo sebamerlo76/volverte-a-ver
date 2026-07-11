@@ -1,4 +1,10 @@
 import { useRef, useState } from 'react'
+import { provinciasOrdenadas } from '../lib/localidades.js'
+
+// Lista de provincias donde ya está Chicho, en prosa ("A, B y C"). Se arma sola
+// de los datos, así no se queda vieja al sumar provincias.
+const PROVS = provinciasOrdenadas()
+const PROVINCIAS_TXT = PROVS.length > 1 ? PROVS.slice(0, -1).join(', ') + ' y ' + PROVS[PROVS.length - 1] : PROVS[0]
 
 // Recorrido de bienvenida (carrusel). Se muestra la primera vez y desde el menú "Guía".
 const PASOS = [
@@ -11,7 +17,7 @@ const PASOS = [
     ic: 'place',
     color: 'var(--coral)',
     t: 'Cerca tuyo',
-    d: 'Ya estamos en Paraná, Crespo, Colonia Avellaneda, San Benito y General Ramírez.\n\n¿Tu localidad no aparece? Escribinos y la sumamos. 💜',
+    d: `Ya estamos en ${PROVINCIAS_TXT}, y sumando ciudades todo el tiempo.\n\n¿Tu localidad no aparece? Escribinos y la sumamos. 💜`,
   },
   {
     ic: 'swap_horiz',
