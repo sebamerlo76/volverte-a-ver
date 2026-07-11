@@ -169,6 +169,16 @@ export const LOCALIDADES = {
       'Oeste': [-40.1579, -71.3624],
     },
   },
+  'Olavarría': {
+    center: [-36.8937, -60.3233],
+    barrios: {
+      'Centro': [-36.8937, -60.3233],
+      'Norte': [-36.8787, -60.3233],
+      'Sur': [-36.9087, -60.3233],
+      'Este': [-36.8937, -60.3053],
+      'Oeste': [-36.8937, -60.3413],
+    },
+  },
   // Para sumar otra: copiá un bloque, poné center [lat,lng] y sus barrios.
 }
 
@@ -188,6 +198,7 @@ const PROVINCIA_POR_CIUDAD = {
   'Córdoba': 'Córdoba',
   'Neuquén': 'Neuquén',
   'San Martín de los Andes': 'Neuquén',
+  'Olavarría': 'Buenos Aires',
 }
 export const PROVINCIA_DEFECTO = 'Entre Ríos'
 export function provinciaDe(loc) {
