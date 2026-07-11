@@ -123,6 +123,36 @@ export const LOCALIDADES = {
     center: CORDOBA_CENTER,
     barrios: CORDOBA_BARRIOS,
   },
+  'Villa Urquiza': {
+    center: [-31.65, -60.367],
+    barrios: {
+      'Centro': [-31.65, -60.367],
+      'Norte': [-31.642, -60.367],
+      'Sur': [-31.658, -60.367],
+      'Este': [-31.65, -60.358],
+      'Oeste': [-31.65, -60.376],
+    },
+  },
+  'Sauce Montrull': {
+    center: [-31.745, -60.355],
+    barrios: {
+      'Centro': [-31.745, -60.355],
+      'Norte': [-31.737, -60.355],
+      'Sur': [-31.753, -60.355],
+      'Este': [-31.745, -60.346],
+      'Oeste': [-31.745, -60.364],
+    },
+  },
+  'La Picada': {
+    center: [-31.735, -60.309],
+    barrios: {
+      'Centro': [-31.735, -60.309],
+      'Norte': [-31.727, -60.309],
+      'Sur': [-31.743, -60.309],
+      'Este': [-31.735, -60.3],
+      'Oeste': [-31.735, -60.318],
+    },
+  },
   // Para sumar otra: copiá un bloque, poné center [lat,lng] y sus barrios.
 }
 
@@ -136,6 +166,9 @@ const PROVINCIA_POR_CIUDAD = {
   'Colonia Avellaneda': 'Entre Ríos',
   'San Benito': 'Entre Ríos',
   'General Ramírez': 'Entre Ríos',
+  'Villa Urquiza': 'Entre Ríos',
+  'Sauce Montrull': 'Entre Ríos',
+  'La Picada': 'Entre Ríos',
   'Córdoba': 'Córdoba',
 }
 export const PROVINCIA_DEFECTO = 'Entre Ríos'
