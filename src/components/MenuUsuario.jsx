@@ -2,6 +2,7 @@ import { avatarDe, nombreUsuario } from '../lib/formato.js'
 
 // Menú desplegable desde la cara (arriba a la izquierda).
 const ITEMS = [
+  { k: 'primeros-pasos', ic: 'flag', t: 'Primeros pasos' },
   { k: 'animalitos', ic: 'pets', t: 'Mis animalitos' },
   { k: 'ubicaciones', ic: 'location_on', t: 'Mis ubicaciones' },
   { k: 'notificaciones', ic: 'notifications', t: 'Notificaciones' },
@@ -11,7 +12,7 @@ const ITEMS = [
   { k: 'ayuda', ic: 'support_agent', t: 'Ayuda / Soporte' },
 ]
 
-export default function MenuUsuario({ user, esAdmin, onSeccion, onLogout, onCerrar }) {
+export default function MenuUsuario({ user, esAdmin, hayNudge, onSeccion, onLogout, onCerrar }) {
   const nombre = nombreUsuario(user)
   const email = user?.email || 'Tu cuenta'
   const avatar = avatarDe(user)
@@ -43,6 +44,7 @@ export default function MenuUsuario({ user, esAdmin, onSeccion, onLogout, onCerr
             <button key={it.k} className="menu-item" onClick={() => onSeccion(it.k)}>
               <span className="mi menu-ico">{it.ic}</span>
               {it.t}
+              {hayNudge && it.k === 'primeros-pasos' && <span className="menu-dot" />}
               <span className="mi menu-arrow">chevron_right</span>
             </button>
           ))}

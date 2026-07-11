@@ -9,7 +9,7 @@ const ICONO = {
   novedad: 'edit',
 }
 
-export default function NotifPanel({ notifs, onClose, onAbrir, onMarcarTodas }) {
+export default function NotifPanel({ notifs, onClose, onAbrir, onMarcarTodas, mostrarNudge, onPrimerosPasos }) {
   const lista = notifs || []
   const hayNoLeidas = lista.some((n) => !n.leida)
 
@@ -29,7 +29,18 @@ export default function NotifPanel({ notifs, onClose, onAbrir, onMarcarTodas }) 
         </div>
 
         <div className="notif-lista">
-          {lista.length === 0 ? (
+          {mostrarNudge && (
+            <button className="notif-nudge" onClick={onPrimerosPasos}>
+              <span className="notif-nudge-ico mi fill">flag</span>
+              <div className="notif-item-txt">
+                <div className="notif-item-t">Completá tus primeros pasos 🐾</div>
+                <div className="notif-item-c">Ubicación, mascotas, notificaciones y más</div>
+              </div>
+              <span className="mi notif-nudge-arrow">chevron_right</span>
+            </button>
+          )}
+
+          {lista.length === 0 && !mostrarNudge ? (
             <div className="notif-vacio">
               <span className="mi" style={{ fontSize: 42, color: '#cabeb5' }}>
                 notifications_none

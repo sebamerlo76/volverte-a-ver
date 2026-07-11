@@ -24,6 +24,7 @@ import Lightbox from './components/Lightbox.jsx'
 import NuevaPassword from './components/NuevaPassword.jsx'
 import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
+import { contarLogin, logins, pasosOk } from './lib/pasos.js'
 import { nombreMostrado } from './lib/formato.js'
 import { localidadFeedGuardada } from './lib/localidades.js'
 
@@ -55,6 +56,8 @@ export default function App() {
   const [hayUpdate, setHayUpdate] = useState(false) // hay una versión nueva desplegada
   const [fotosVer, setFotosVer] = useState(null) // foto(s) a pantalla completa: { fotos, i }
   const [recuperando, setRecuperando] = useState(false) // volvió del mail de recupero → elegir nueva pass
+  const [nudge, setNudge] = useState(false) // avisar "primeros pasos" (desde el 2º login, si falta algo)
+  const contadoRef = useRef(false)
 
   const notifsNoLeidas = notifs.filter((n) => !n.leida).length
 
@@ -209,6 +212,16 @@ export default function App() {
     })
     return () => sub.subscription.unsubscribe()
   }, [authActivo])
+
+  // Contá una sesión por carga con usuario y decidí si mostrar el aviso de
+  // "primeros pasos" (recién desde el 2º login, y solo si no completó todo).
+  useEffect(() => {
+    if (user && !contadoRef.current) {
+      contadoRef.current = true
+      contarLogin()
+    }
+    setNudge(!!user && logins() >= 2 && !pasosOk())
+  }, [user])
 
   // Avisos que sigue el usuario (para el botón Seguir / Siguiendo).
   useEffect(() => {
@@ -513,6 +526,7 @@ export default function App() {
             onMenu={() => setMenuAbierto(true)}
             onNotifs={abrirNotifs}
             notifsNoLeidas={notifsNoLeidas}
+            hayNudge={nudge}
             modo={homeModo}
             filtros={filtros}
             setFiltro={setFiltro}
@@ -600,6 +614,8 @@ export default function App() {
             onNuevaMascota={nuevaMascota}
             onEditarMascota={editarMascota}
             onPublicarMascota={publicarMascota}
+            onIrSeccion={setCuentaSeccion}
+            onCompletoPasos={() => setNudge(false)}
             onToast={mostrarToast}
           />
         )}
@@ -659,12 +675,17 @@ export default function App() {
         {soporteAbierto && <Soporte onCerrar={() => setSoporteAbierto(false)} />}
 
         {menuAbierto && (
-          <MenuUsuario user={user} esAdmin={esAdmin} onSeccion={irSeccion} onLogout={salir} onCerrar={() => setMenuAbierto(false)} />
+          <MenuUsuario user={user} esAdmin={esAdmin} hayNudge={nudge} onSeccion={irSeccion} onLogout={salir} onCerrar={() => setMenuAbierto(false)} />
         )}
 
         {notifsAbierto && (
           <NotifPanel
             notifs={notifs}
+            mostrarNudge={nudge}
+            onPrimerosPasos={() => {
+              setNotifsAbierto(false)
+              irSeccion('primeros-pasos')
+            }}
             onClose={() => setNotifsAbierto(false)}
             onAbrir={abrirDesdeNotif}
             onMarcarTodas={marcarTodasNotifs}

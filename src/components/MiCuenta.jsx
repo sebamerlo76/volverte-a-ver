@@ -6,6 +6,7 @@ import { soportado as pushSoportado, yaSuscripto, activarPush, desactivarPush } 
 import { supabase } from '../lib/supabase.js'
 import NotifPrefs from './NotifPrefs.jsx'
 import MisUbicaciones from './MisUbicaciones.jsx'
+import PrimerosPasos from './PrimerosPasos.jsx'
 
 const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
 const DIAS_VIEJO = 30 // a partir de acá, ofrecemos renovar el aviso
@@ -19,6 +20,7 @@ const TITULOS = {
   notificaciones: 'Notificaciones',
   avisos: 'Mis avisos',
   cuenta: 'Mi cuenta',
+  'primeros-pasos': 'Primeros pasos',
 }
 
 export default function MiCuenta({
@@ -31,6 +33,8 @@ export default function MiCuenta({
   onNuevaMascota,
   onEditarMascota,
   onPublicarMascota,
+  onIrSeccion,
+  onCompletoPasos,
   onToast,
 }) {
   const [mios, setMios] = useState(null)
@@ -168,6 +172,17 @@ export default function MiCuenta({
       </div>
 
       <div className="body">
+        {/* ---------------- Primeros pasos ---------------- */}
+        {seccion === 'primeros-pasos' && (
+          <PrimerosPasos
+            user={user}
+            onIrSeccion={onIrSeccion}
+            onNuevaMascota={onNuevaMascota}
+            onCompleto={onCompletoPasos}
+            onToast={onToast}
+          />
+        )}
+
         {/* ---------------- Mi cuenta ---------------- */}
         {seccion === 'cuenta' && (
           <>

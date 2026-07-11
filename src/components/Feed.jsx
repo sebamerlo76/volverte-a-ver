@@ -26,7 +26,7 @@ function jitter(base, id = '') {
   return [base[0] + dy, base[1] + dx]
 }
 
-export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, user, onLogin, onMenu, onNotifs, notifsNoLeidas = 0, modo, filtros, setFiltro, resetInicio }) {
+export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, user, onLogin, onMenu, onNotifs, notifsNoLeidas = 0, hayNudge, modo, filtros, setFiltro, resetInicio }) {
   const avatar = avatarDe(user)
   const [finales, setFinales] = useState(null)
   const [sel, setSel] = useState(null)
@@ -145,6 +145,8 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
                 </span>
                 {notifsNoLeidas > 0 ? (
                   <span className="hd-bell-badge">{notifsNoLeidas > 9 ? '9+' : notifsNoLeidas}</span>
+                ) : hayNudge ? (
+                  <span className="hd-bell-dot" />
                 ) : null}
               </button>
             ) : null}
