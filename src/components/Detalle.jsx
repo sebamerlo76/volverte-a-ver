@@ -526,7 +526,7 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
             </span>
           </button>
         </div>
-      ) : (
+      ) : r.whatsapp ? (
         <div className="cta">
           <a
             className="btn-wa"
@@ -540,13 +540,25 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
             </span>
             Contactar por WhatsApp
           </a>
-          {r.whatsapp ? (
-            <a className="btn-share" href={linkTel(r.whatsapp)} aria-label="Llamar por teléfono">
-              <span className="mi fill" style={{ fontSize: 24, color: 'var(--teal)' }}>
-                call
-              </span>
-            </a>
-          ) : null}
+          <a className="btn-share" href={linkTel(r.whatsapp)} aria-label="Llamar por teléfono">
+            <span className="mi fill" style={{ fontSize: 24, color: 'var(--teal)' }}>
+              call
+            </span>
+          </a>
+        </div>
+      ) : (
+        <div className="cta cta-col">
+          <div className="btn-wa sin-numero">
+            <span className="mi" style={{ fontSize: 22 }}>
+              info
+            </span>
+            Sin número de contacto
+          </div>
+          {r.tipo === 'perdido' && r.estado !== 'resuelto' && (
+            <div className="sin-num-hint">
+              Este aviso no dejó teléfono. Si lo viste, tocá <b>“¡Lo vi acá!”</b> y le avisamos a la familia. 🐾
+            </div>
+          )}
         </div>
       )}
 

@@ -1725,6 +1725,25 @@ select {
   box-shadow: 0 10px 20px rgba(37, 211, 102, 0.4);
   text-decoration: none;
 }
+.btn-wa.sin-numero {
+  background: #ece5dc;
+  color: #8a7f74;
+  box-shadow: none;
+  cursor: default;
+}
+.cta.cta-col {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+.sin-num-hint {
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #8a7f74;
+  line-height: 1.45;
+  padding: 0 8px;
+}
 .btn-share {
   flex: none;
   width: 56px;
