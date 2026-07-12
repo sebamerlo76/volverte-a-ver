@@ -66,22 +66,30 @@ export default function BuscadorOverlay({ reportes, q, onQ, onOpen, onCerrar }) 
         <button className="mi bus-back" onClick={onCerrar} aria-label="Cerrar">
           arrow_back
         </button>
-        <div className="buscador-input">
+        <form
+          className="buscador-input"
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (texto) onCerrar() // Enter → cerrar y quedar en el feed ya filtrado
+          }}
+        >
           <span className="mi" style={{ fontSize: 20, color: '#c9beb6' }}>
             search
           </span>
           <input
             autoFocus
+            type="search"
+            enterKeyHint="search"
             value={q}
             onChange={(e) => onQ(e.target.value)}
             placeholder="Ej: perro marrón, gato con collar, Centro…"
           />
           {q ? (
-            <button className="mi" style={{ fontSize: 20, color: '#b7aca4' }} onClick={() => onQ('')} aria-label="Borrar">
+            <button type="button" className="mi" style={{ fontSize: 20, color: '#b7aca4' }} onClick={() => onQ('')} aria-label="Borrar">
               close
             </button>
           ) : null}
-        </div>
+        </form>
       </div>
 
       <div className="buscador-res">
