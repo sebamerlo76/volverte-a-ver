@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getAdminStats, getAdminStatsRango, getActividadReciente, getPerdidosParaEmpujar } from '../data/store.js'
+import { getAdminStats, getAdminStatsRango, getActividadReciente, getPerdidosParaEmpujar, getActivosPorProvincia } from '../data/store.js'
 import { tiempoRelativo, nombreMostrado } from '../lib/formato.js'
 import { badgeEstado } from '../lib/estados.js'
 import { ubicacionTexto } from '../lib/localidades.js'
@@ -37,10 +37,12 @@ export default function Admin({ onVolver, onOpen, stats }) {
   const [rangoBusy, setRangoBusy] = useState(false)
   const [recientes, setRecientes] = useState(null)
   const [empujar, setEmpujar] = useState(null)
+  const [porProv, setPorProv] = useState(null)
 
   useEffect(() => {
     getActividadReciente(15).then(setRecientes).catch(() => setRecientes([]))
     getPerdidosParaEmpujar(7, 20).then(setEmpujar).catch(() => setEmpujar([]))
+    getActivosPorProvincia().then(setPorProv).catch(() => setPorProv([]))
   }, [])
 
   async function verRango() {
@@ -167,6 +169,31 @@ export default function Admin({ onVolver, onOpen, stats }) {
               <Card n={s.gato} label="🐈 Gatos" />
               <Card n={s.otro} label="🐾 Otros" />
             </div>
+
+            {porProv && porProv.length > 0 && (
+              <>
+                <div className="adm-sub">Actividad por provincia (activos)</div>
+                <div className="adm-zonas">
+                  {porProv.map((p) => {
+                    const maxProv = Math.max(1, ...porProv.map((x) => x.total))
+                    return (
+                      <div className="adm-zona" key={p.provincia}>
+                        <div className="adm-zona-t">
+                          <span>{p.provincia}</span>
+                          <b>{p.total}</b>
+                        </div>
+                        <div className="adm-zona-bar">
+                          <div style={{ width: `${(p.total / maxProv) * 100}%` }} />
+                        </div>
+                        <div className="adm-zona-s">
+                          🔴 {p.perdidos} perdidos · 🔵 {p.encontrados} encontrados
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </>
+            )}
 
             <div className="adm-sub">Avisos por mes (últimos 12)</div>
             <div className="adm-chart">

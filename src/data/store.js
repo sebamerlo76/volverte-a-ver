@@ -8,6 +8,7 @@
 // Toda la app usa estas funciones y no sabe en qué modo está. Todas son async.
 // ---------------------------------------------------------------------------
 import { supabase, supabaseConfigurado } from '../lib/supabase.js'
+import { provinciaDe } from '../lib/localidades.js'
 import { SEED_REPORTES } from './seed.js'
 
 const CLAVE = 'vav_reportes_v1'
@@ -209,6 +210,28 @@ export async function getActividadReciente(limite = 15) {
     .limit(limite)
   if (error) throw error
   return (data || []).map(desdeFila)
+}
+
+// Actividad (avisos activos) agrupada por provincia: dónde prende la app.
+export async function getActivosPorProvincia() {
+  if (!supabaseConfigurado) return []
+  const { data, error } = await supabase
+    .from('reportes')
+    .select('localidad, tipo')
+    .eq('estado', 'activo')
+    .eq('oculto', false)
+    .eq('bloqueado', false)
+  if (error) throw error
+  const map = new Map()
+  for (const r of data || []) {
+    const p = provinciaDe(r.localidad || 'Paraná')
+    const g = map.get(p) || { provincia: p, total: 0, perdidos: 0, encontrados: 0 }
+    g.total++
+    if (r.tipo === 'perdido') g.perdidos++
+    else g.encontrados++
+    map.set(p, g)
+  }
+  return [...map.values()].sort((a, b) => b.total - a.total)
 }
 
 // Perdidos activos hace más de `dias` días: los que necesitan un empujón (difundir o cerrar).
