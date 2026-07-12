@@ -197,6 +197,38 @@ export async function getAdminStatsRango(desde, hasta) {
   return data
 }
 
+// Últimos avisos subidos (para el "chequeo de qué entró"). Lee la tabla pública.
+export async function getActividadReciente(limite = 15) {
+  if (!supabaseConfigurado) return []
+  const { data, error } = await supabase
+    .from('reportes')
+    .select('*')
+    .eq('oculto', false)
+    .eq('bloqueado', false)
+    .order('creado_en', { ascending: false })
+    .limit(limite)
+  if (error) throw error
+  return (data || []).map(desdeFila)
+}
+
+// Perdidos activos hace más de `dias` días: los que necesitan un empujón (difundir o cerrar).
+export async function getPerdidosParaEmpujar(dias = 7, limite = 20) {
+  if (!supabaseConfigurado) return []
+  const corte = new Date(Date.now() - dias * 86400000).toISOString()
+  const { data, error } = await supabase
+    .from('reportes')
+    .select('*')
+    .eq('estado', 'activo')
+    .eq('tipo', 'perdido')
+    .eq('oculto', false)
+    .eq('bloqueado', false)
+    .lt('creado_en', corte)
+    .order('creado_en', { ascending: true })
+    .limit(limite)
+  if (error) throw error
+  return (data || []).map(desdeFila)
+}
+
 // ---------------------------------------------------------------------------
 // Moderación: reportar avisos (sin login) + acciones de admin.
 // ---------------------------------------------------------------------------

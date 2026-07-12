@@ -251,6 +251,9 @@ async function manejarReporteUpdate(rec: any, old: any) {
     if (segs.length) {
       await enviarAUsuarios(segs, { title: '🎉 ¡Apareció!', body: `${nombre} volvió a casa. 🏠`, url: '/' }, { reporteId: rec.id, tipo: 'aparecio' })
     }
+    // Aviso al admin: cada final feliz (son pocos y son la mejor noticia).
+    const lugar = [rec.zona, rec.localidad].filter(Boolean).join(', ')
+    await pushAAdmin({ title: '🎉 ¡Final feliz en Chicho!', body: `${nombre} volvió a casa${lugar ? ` (${lugar})` : ''}. 🏠`, url: '/' })
     return
   }
 

@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
-import { getAdminStats, getAdminStatsRango } from '../data/store.js'
+import { getAdminStats, getAdminStatsRango, getActividadReciente, getPerdidosParaEmpujar } from '../data/store.js'
+import { tiempoRelativo, nombreMostrado } from '../lib/formato.js'
+import { badgeEstado } from '../lib/estados.js'
+import { ubicacionTexto } from '../lib/localidades.js'
 
 function Card({ n, label, color }) {
   return (
@@ -10,13 +13,35 @@ function Card({ n, label, color }) {
   )
 }
 
-export default function Admin({ onVolver, stats }) {
+// Fila de un aviso en las listas del panel (actividad / empujón).
+function AvisoRow({ r, onOpen }) {
+  const b = badgeEstado(r)
+  return (
+    <button className="adm-row" onClick={() => onOpen && onOpen(r)}>
+      <span className={'adm-row-badge ' + b.clase}>{b.t}</span>
+      <div className="adm-row-txt">
+        <div className="adm-row-t">{nombreMostrado(r)}</div>
+        <div className="adm-row-s">{ubicacionTexto(r.localidad, r.zona)}</div>
+      </div>
+      <span className="adm-row-time">{tiempoRelativo(r.creadoEn)}</span>
+    </button>
+  )
+}
+
+export default function Admin({ onVolver, onOpen, stats }) {
   const [s, setS] = useState(stats || null)
   const [error, setError] = useState('')
   const [desde, setDesde] = useState('')
   const [hasta, setHasta] = useState('')
   const [rango, setRango] = useState(null)
   const [rangoBusy, setRangoBusy] = useState(false)
+  const [recientes, setRecientes] = useState(null)
+  const [empujar, setEmpujar] = useState(null)
+
+  useEffect(() => {
+    getActividadReciente(15).then(setRecientes).catch(() => setRecientes([]))
+    getPerdidosParaEmpujar(7, 20).then(setEmpujar).catch(() => setEmpujar([]))
+  }, [])
 
   async function verRango() {
     if (!desde || !hasta) return
@@ -73,6 +98,33 @@ export default function Admin({ onVolver, stats }) {
               <div>
                 de los avisos terminaron <b>Ya en casa</b> 🎉
               </div>
+            </div>
+
+            {empujar && empujar.length > 0 && (
+              <>
+                <div className="adm-sub">
+                  Perdidos que necesitan empujón <span className="adm-sub-n">{empujar.length}</span>
+                </div>
+                <div className="adm-nota" style={{ marginTop: 0, marginBottom: 8 }}>
+                  Perdidos activos hace +7 días. Tocá para abrir y difundir, o pedile al dueño que lo cierre.
+                </div>
+                <div className="adm-lista">
+                  {empujar.map((r) => (
+                    <AvisoRow key={r.id} r={r} onOpen={onOpen} />
+                  ))}
+                </div>
+              </>
+            )}
+
+            <div className="adm-sub">Actividad reciente</div>
+            <div className="adm-lista">
+              {recientes === null ? (
+                <div className="adm-nota" style={{ marginTop: 0 }}>Cargando…</div>
+              ) : recientes.length === 0 ? (
+                <div className="adm-nota" style={{ marginTop: 0 }}>Todavía no hay avisos.</div>
+              ) : (
+                recientes.map((r) => <AvisoRow key={r.id} r={r} onOpen={onOpen} />)
+              )}
             </div>
 
             <div className="adm-sub">Avisos nuevos</div>

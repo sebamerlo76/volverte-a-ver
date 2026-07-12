@@ -672,7 +672,7 @@ export default function App() {
         )}
         {vista === 'feed' && <BottomNav modo={homeModo} onNav={navBarra} />}
 
-        {vista === 'admin' && esAdmin && <Admin onVolver={() => setVista('feed')} />}
+        {vista === 'admin' && esAdmin && <Admin onVolver={() => setVista('feed')} onOpen={(r) => abrirDetalle(r, 'admin')} />}
         {vista === 'moderacion' && esAdmin && <Moderacion onVolver={() => setVista('feed')} />}
 
         {guiaAbierta && <WelcomeGuide onClose={cerrarGuia} />}
