@@ -353,14 +353,14 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
       ) : (
         <div className="body" ref={bodyRef} onScroll={(e) => { if (scrollRef) scrollRef.current = e.currentTarget.scrollTop }}>
           {verFinales && finales === null ? (
-            <div className="empty">Cargando finales felices…</div>
+            <div className="empty">Cargando reencuentros…</div>
           ) : filtrados.length === 0 ? (
             <div className="empty">
               {verFinales ? (
                 <>
                   🐾 Todavía no hay reencuentros publicados.
                   <br />
-                  ¡Ojalá pronto haya muchos finales felices!
+                  ¡Ojalá pronto haya muchos reencuentros!
                 </>
               ) : (
                 <>

@@ -360,7 +360,7 @@ export async function getMisReportes(userId) {
     .sort((a, b) => (a.creadoEn < b.creadoEn ? 1 : -1))
 }
 
-// Reencontrados (finales felices): avisos ya resueltos, más nuevo primero.
+// Reencontrados (reencuentros): avisos ya resueltos, más nuevo primero.
 export async function getReencontrados() {
   if (supabaseConfigurado) {
     const { data, error } = await supabase

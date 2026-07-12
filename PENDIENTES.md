@@ -21,7 +21,7 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
 
 **Publicar**
 - **Dos caminos**: "Se me perdió" (rápido desde tus mascotas) / "Encontré" (paso a paso).
-- Editar / borrar / marcar **reencontrado**; pestaña **🏠 En casa** (finales felices).
+- Editar / borrar / marcar **reencontrado**; pestaña **🏠 En casa** (reencuentros).
 - **Ubicación exacta** en el mapa al publicar (tocás el punto / GPS).
 - Campos clickeables (color, sexo, tamaño, collar, edad) + **recompensa** (con aviso anti-estafa).
 - **En tránsito**: marcar que retenés a la mascota que encontraste (queda en Mi cuenta).
