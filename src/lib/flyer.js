@@ -31,29 +31,6 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath()
 }
 
-// Dibuja la imagen recortada tipo "cover" dentro de un rect redondeado.
-function drawCover(ctx, img, x, y, w, h, r) {
-  const ir = img.width / img.height
-  const dr = w / h
-  let sw, sh, sx, sy
-  if (ir > dr) {
-    sh = img.height
-    sw = sh * dr
-    sx = (img.width - sw) / 2
-    sy = 0
-  } else {
-    sw = img.width
-    sh = sw / dr
-    sx = 0
-    sy = (img.height - sh) / 2
-  }
-  ctx.save()
-  roundRect(ctx, x, y, w, h, r)
-  ctx.clip()
-  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h)
-  ctx.restore()
-}
-
 function wrap(ctx, text, maxW, maxLines) {
   const words = String(text || '').split(/\s+/)
   const lines = []
@@ -107,18 +84,35 @@ export async function generarFlyer(r) {
   const estadoColor = resuelto ? '#e0a300' : perdido ? '#ff5747' : r.enCustodia ? '#1f9d8f' : '#2f7fed'
   const estadoTxt = textoEstado(r).toUpperCase()
 
-  // ---- Foto ----
+  // ---- Foto (modo "contain": nunca recorta; se ve entera, centrada, y el fondo
+  // crema rellena lo que sobra. Sirve igual para fotos verticales de celular que
+  // para flyers ya armados que la gente sube como foto). ----
   const fotoSrc = (r.fotos && r.fotos[0]) || r.foto
   const foto = await cargarImagen(fotoSrc, true)
   const px = 48
   const py = 48
-  const pw = W - 96
-  const ph = 632
+  const maxW = W - 96 // 984
+  const maxH = 720 // alto máximo de la foto (deja lugar para el contenido)
+  let pw = maxW
+  let ph = 632
+  let fx = px // x de la foto (se centra si queda más angosta que el recuadro)
   if (foto) {
-    drawCover(ctx, foto, px, py, pw, ph, 36)
+    const ir = foto.width / foto.height
+    pw = maxW
+    ph = Math.round(pw / ir)
+    if (ph > maxH) {
+      ph = maxH
+      pw = Math.round(ph * ir)
+    }
+    fx = Math.round(px + (maxW - pw) / 2)
+    ctx.save()
+    roundRect(ctx, fx, py, pw, ph, 36)
+    ctx.clip()
+    ctx.drawImage(foto, fx, py, pw, ph) // entera, sin recorte
+    ctx.restore()
   } else {
     ctx.fillStyle = '#e7eaed'
-    roundRect(ctx, px, py, pw, ph, 36)
+    roundRect(ctx, px, py, maxW, ph, 36)
     ctx.fill()
     ctx.fillStyle = '#b9c4cc'
     ctx.textAlign = 'center'
@@ -130,7 +124,7 @@ export async function generarFlyer(r) {
   // ---- Badge de estado sobre la foto ----
   ctx.font = '800 44px Nunito, sans-serif'
   const btw = ctx.measureText(estadoTxt).width
-  const bx = px + 28
+  const bx = fx + 28
   const by = py + 28
   const bh = 74
   const bpad = 30
