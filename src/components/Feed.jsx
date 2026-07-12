@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import PetCard from './PetCard.jsx'
-import MapaLeaflet from './MapaLeaflet.jsx'
+import MapaLeaflet from './MapaLazy.jsx'
 import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
 import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarScopeFeed, provinciasOrdenadas, ciudadesDeProvincia, provinciaDe, ubicacionTexto } from '../lib/localidades.js'

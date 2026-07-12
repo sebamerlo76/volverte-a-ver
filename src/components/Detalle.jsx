@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import MapaLeaflet from './MapaLeaflet.jsx'
+import MapaLeaflet from './MapaLazy.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { badgeEstado, subLinea, textoTipo } from '../lib/estados.js'

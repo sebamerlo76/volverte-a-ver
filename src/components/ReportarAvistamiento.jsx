@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import MapaLeaflet from './MapaLeaflet.jsx'
+import MapaLeaflet from './MapaLazy.jsx'
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import { puntoDeReporte } from '../lib/parana.js'

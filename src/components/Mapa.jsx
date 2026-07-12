@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import MapaLeaflet from './MapaLeaflet.jsx'
+import MapaLeaflet from './MapaLazy.jsx'
 import { PARANA_CENTER, coordsDeBarrio } from '../lib/parana.js'
 import { nombreMostrado, tiempoRelativo } from '../lib/formato.js'
 

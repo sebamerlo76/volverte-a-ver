@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import MapaLeaflet from './MapaLeaflet.jsx'
+import MapaLeaflet from './MapaLazy.jsx'
 import { centroDe, localidadGuardada } from '../lib/localidades.js'
 import { getUbicaciones, addUbicacion, actualizarUbicacion, eliminarUbicacion } from '../data/store.js'
 import { confirmar } from '../lib/confirmar.js'

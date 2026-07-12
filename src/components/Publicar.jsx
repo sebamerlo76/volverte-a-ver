@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import MapaLeaflet from './MapaLeaflet.jsx'
+import MapaLeaflet from './MapaLazy.jsx'
 import { coordsDeBarrio, puntoDeReporte } from '../lib/parana.js'
 import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad, localidadesPorProvincia } from '../lib/localidades.js'
 import BuscarDireccion from './BuscarDireccion.jsx'

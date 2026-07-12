@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import MapaLeaflet from './MapaLeaflet.jsx'
+import MapaLeaflet from './MapaLazy.jsx'
 import { getNotifPrefs, guardarNotifPrefs } from '../data/store.js'
 import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, centroDe, localidadGuardada, recordarLocalidad } from '../lib/localidades.js'
 

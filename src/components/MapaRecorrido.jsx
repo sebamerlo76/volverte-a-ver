@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import MapaLeaflet from './MapaLeaflet.jsx'
+import MapaLeaflet from './MapaLazy.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { getAvistamientos } from '../data/store.js'
 import { nombreMostrado } from '../lib/formato.js'

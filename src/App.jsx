@@ -226,6 +226,19 @@ export default function App() {
     setNudge(!!user && logins() >= 2 && !pasosOk())
   }, [user])
 
+  // Prefetch del mapa en segundo plano: no viaja en el bundle inicial (para que
+  // la app abra rápido), pero apenas el navegador queda libre lo bajamos, así
+  // cuando el usuario toca "Mapa" o abre un aviso ya está listo, sin espera.
+  useEffect(() => {
+    const bajarMapa = () => import('./components/MapaLeaflet.jsx').catch(() => {})
+    if ('requestIdleCallback' in window) {
+      const id = requestIdleCallback(bajarMapa, { timeout: 3000 })
+      return () => cancelIdleCallback(id)
+    }
+    const t = setTimeout(bajarMapa, 1500)
+    return () => clearTimeout(t)
+  }, [])
+
   // Avisos que sigue el usuario (para el botón Seguir / Siguiendo).
   useEffect(() => {
     if (user?.id) getSeguidos(user.id).then(setSeguidos).catch(() => setSeguidos([]))

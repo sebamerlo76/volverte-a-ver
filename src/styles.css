@@ -1616,6 +1616,20 @@ select {
   border: 1.5px solid var(--line);
   height: 150px;
 }
+/* Fallback mientras el mapa (Leaflet) se baja en diferido */
+.mapa-cargando {
+  width: 100%;
+  height: 100%;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef1ee;
+  color: #8a807a;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+}
 .minimap .lbl {
   position: absolute;
   left: 12px;
