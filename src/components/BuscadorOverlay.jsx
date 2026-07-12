@@ -78,7 +78,6 @@ export default function BuscadorOverlay({ reportes, q, onQ, onOpen, onCerrar }) 
           </span>
           <input
             autoFocus
-            type="search"
             enterKeyHint="search"
             value={q}
             onChange={(e) => onQ(e.target.value)}
