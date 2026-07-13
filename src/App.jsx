@@ -1,5 +1,5 @@
 /* global __BUILD_ID__ */
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Feed from './components/Feed.jsx'
 import Detalle from './components/Detalle.jsx'
 import Publicar from './components/Publicar.jsx'
@@ -26,7 +26,7 @@ import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, elimina
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { contarLogin, logins, pasosOk } from './lib/pasos.js'
 import { nombreMostrado } from './lib/formato.js'
-import { scopeFeedGuardado } from './lib/localidades.js'
+import { scopeFeedGuardado, provinciaDe } from './lib/localidades.js'
 import { confirmar } from './lib/confirmar.js'
 import { compartirFlyer } from './lib/flyer.js'
 import FestejoReencuentro from './components/FestejoReencuentro.jsx'
@@ -296,6 +296,20 @@ export default function App() {
   function setFiltro(campo, valor) {
     setFiltros((f) => ({ ...f, [campo]: valor }))
   }
+
+  // El buscador (lupa) respeta el scope del feed: busca solo dentro de la
+  // provincia/localidad elegida, no en toda la base.
+  const reportesEnScope = useMemo(() => {
+    const loc = filtros.localidad
+    const prov = filtros.provincia
+    if (!loc && !prov) return reportes
+    return reportes.filter((r) => {
+      if (prov && provinciaDe(r.localidad || 'Paraná') !== prov) return false
+      if (loc && (r.localidad || 'Paraná') !== loc) return false
+      return true
+    })
+  }, [reportes, filtros.localidad, filtros.provincia])
+  const ambitoBusqueda = filtros.localidad || filtros.provincia || null
   function resetInicio() {
     setFiltros(FILTROS_INI)
     setHomeModo('lista')
@@ -717,7 +731,8 @@ export default function App() {
 
         {buscadorAbierto && (
           <BuscadorOverlay
-            reportes={reportes}
+            reportes={reportesEnScope}
+            ambito={ambitoBusqueda}
             q={filtros.q}
             onQ={(v) => setFiltro('q', v)}
             onOpen={(r) => {

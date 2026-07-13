@@ -1071,6 +1071,23 @@ select {
   font-family: inherit;
   color: var(--ink);
 }
+.buscador-ambito {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 16px 10px;
+  font-family: Nunito, sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #8a807a;
+  border-bottom: 1px solid #efe6dd;
+}
+.buscador-ambito b {
+  color: var(--navy);
+}
+.buscador-ambito .mi {
+  color: var(--coral);
+}
 .buscador-res {
   flex: 1;
   overflow-y: auto;

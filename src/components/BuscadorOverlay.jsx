@@ -5,7 +5,7 @@ import { textoEstado } from '../lib/estados.js'
 import { coincideBusqueda } from '../lib/buscar.js'
 
 // Buscador flotante (se abre desde la barra inferior). Resultados en vivo.
-export default function BuscadorOverlay({ reportes, q, onQ, onOpen, onCerrar }) {
+export default function BuscadorOverlay({ reportes, ambito, q, onQ, onOpen, onCerrar }) {
   const texto = q.trim()
 
   const res = useMemo(() => {
@@ -45,11 +45,16 @@ export default function BuscadorOverlay({ reportes, q, onQ, onOpen, onCerrar }) 
         </form>
       </div>
 
+      <div className="buscador-ambito">
+        <span className="mi" style={{ fontSize: 15 }}>place</span>
+        Buscando en <b>{ambito || 'todas las localidades'}</b>
+      </div>
+
       <div className="buscador-res">
         {!texto ? (
           <div className="empty">Escribí para buscar entre los avisos 🐾</div>
         ) : res.length === 0 ? (
-          <div className="empty">Sin resultados para “{q}”.</div>
+          <div className="empty">Sin resultados para “{q}”{ambito ? ` en ${ambito}` : ''}.</div>
         ) : (
           res.map((r) => {
             const perdido = r.tipo === 'perdido'
