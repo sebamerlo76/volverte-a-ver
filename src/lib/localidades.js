@@ -10,6 +10,7 @@ import { CORDOBA_BARRIOS, CORDOBA_CENTER } from './cordoba.js'
 import { NEUQUEN_BARRIOS, NEUQUEN_CENTER } from './neuquen.js'
 import { OLAVARRIA_BARRIOS, OLAVARRIA_CENTER } from './olavarria.js'
 import { SANTAFE_BARRIOS, SANTAFE_CENTER } from './santafe.js'
+import { RAFAELA_BARRIOS, RAFAELA_CENTER } from './rafaela.js'
 
 export const LOCALIDAD_DEFECTO = 'Paraná'
 
@@ -181,6 +182,31 @@ export const LOCALIDADES = {
     center: SANTAFE_CENTER,
     barrios: SANTAFE_BARRIOS,
   },
+  'Rafaela': {
+    // Barrios reales de Rafaela (OpenStreetMap).
+    center: RAFAELA_CENTER,
+    barrios: RAFAELA_BARRIOS,
+  },
+  'Ceres': {
+    center: [-29.8814, -61.945],
+    barrios: {
+      'Centro': [-29.8814, -61.945],
+      'Norte': [-29.8734, -61.945],
+      'Sur': [-29.8894, -61.945],
+      'Este': [-29.8814, -61.935],
+      'Oeste': [-29.8814, -61.955],
+    },
+  },
+  'Selva': {
+    center: [-29.7628, -62.0503],
+    barrios: {
+      'Centro': [-29.7628, -62.0503],
+      'Norte': [-29.7548, -62.0503],
+      'Sur': [-29.7708, -62.0503],
+      'Este': [-29.7628, -62.0413],
+      'Oeste': [-29.7628, -62.0593],
+    },
+  },
   // Para sumar otra: copiá un bloque, poné center [lat,lng] y sus barrios.
 }
 
@@ -202,6 +228,9 @@ const PROVINCIA_POR_CIUDAD = {
   'San Martín de los Andes': 'Neuquén',
   'Olavarría': 'Buenos Aires',
   'Santa Fe': 'Santa Fe',
+  'Rafaela': 'Santa Fe',
+  'Ceres': 'Santa Fe',
+  'Selva': 'Santiago del Estero',
 }
 export const PROVINCIA_DEFECTO = 'Entre Ríos'
 export function provinciaDe(loc) {
