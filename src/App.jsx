@@ -98,6 +98,8 @@ export default function App() {
   const backRef = useRef({ hayCapa: false })
   backRef.current.hayCapa = hayCapa
   const pushedRef = useRef(0) // cuántas entradas centinela metimos en el historial
+  const aRemover = useRef(0) // centinelas de más por sacar del historial (cierre por UI)
+  const removiendo = useRef(false) // estamos sacando centinelas nosotros (ignorar esos popstate)
   // Snapshot del estado para que el listener (registrado una vez) lea lo actual.
   const estadoRef = useRef({})
   estadoRef.current = { vista, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte }
@@ -137,15 +139,34 @@ export default function App() {
   // app). Solo empujamos al bajar de nivel; si algo se cierra por UI dejamos las
   // entradas de más — el próximo "atrás" las consume sin efecto visible.
   useEffect(() => {
+    // Subir: empujar centinelas hasta igualar la profundidad.
     while (pushedRef.current < profundidad) {
       pushedRef.current++
       window.history.pushState({ chicho: pushedRef.current }, '')
+    }
+    // Bajar (capa cerrada por UI): sacar los centinelas de más del historial, uno
+    // por uno, marcándolos como remoción propia para no disparar "retroceder".
+    // Así, al volver al feed, el "atrás" del celu sale de la app (no queda colgado).
+    if (pushedRef.current > profundidad) {
+      aRemover.current += pushedRef.current - profundidad
+      pushedRef.current = profundidad
+      if (!removiendo.current) {
+        removiendo.current = true
+        window.history.back()
+      }
     }
   }, [profundidad])
 
   // Un solo listener de popstate: al apretar atrás, cerramos la capa de arriba.
   useEffect(() => {
     function onPop() {
+      // ¿Es un popstate nuestro (estamos sacando centinelas de más)? Lo ignoramos.
+      if (removiendo.current) {
+        aRemover.current--
+        if (aRemover.current > 0) window.history.back() // seguir sacando el siguiente
+        else removiendo.current = false
+        return
+      }
       if (pushedRef.current > 0) pushedRef.current--
       if (backRef.current.hayCapa) retroceder()
     }
