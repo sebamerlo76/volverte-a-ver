@@ -621,6 +621,7 @@ export default function App() {
         {vista === 'post-encontre' && (
           <EncontreWizard
             reportes={reportes}
+            scopeProvincia={filtros.provincia}
             telefonoGuardado={user?.user_metadata?.telefono || ''}
             onVerAviso={abrirDetalle}
             onCerrar={() => setVista('post-intent')}

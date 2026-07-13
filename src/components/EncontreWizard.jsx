@@ -4,7 +4,7 @@ import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import FechaPicker from './FechaPicker.jsx'
 import SelectorBarrio from './SelectorBarrio.jsx'
-import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad, localidadesPorProvincia, ubicacionTexto } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad, localidadesPorProvincia, ubicacionTexto, provinciaDe } from '../lib/localidades.js'
 import BuscarDireccion from './BuscarDireccion.jsx'
 import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
 import { addReporte, addMascota, subirFotos, subirFotoFeed, publicarGestion, nuevoTokenGestion } from '../data/store.js'
@@ -30,7 +30,7 @@ const TITULOS = [
   '¿Cómo te contactan?',
 ]
 
-export default function EncontreWizard({ reportes = [], telefonoGuardado = '', onVerAviso, onCerrar, onPublicado, onToast }) {
+export default function EncontreWizard({ reportes = [], scopeProvincia = null, telefonoGuardado = '', onVerAviso, onCerrar, onPublicado, onToast }) {
   const [paso, setPaso] = useState(1)
   const [especie, setEspecie] = useState('') // sin asumir: se elige en el paso 1
   const [color, setColor] = useState('')
@@ -113,10 +113,11 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
       if (!r[campo]) return true // si el otro no especificó, no lo descarto
       return r[campo] === valor
     }
-    // Solo perdidos de la MISMA localidad (igual que el matching de notificaciones).
-    let arr = reportes.filter(
-      (r) => r.tipo === 'perdido' && r.estado === 'activo' && r.especie === especie && (r.localidad || 'Paraná') === localidad,
-    )
+    // Ámbito: si en el feed hay una provincia entera elegida, buscamos en toda la
+    // provincia; si no, en la localidad (igual que el matching de notificaciones).
+    const enAmbito = (r) =>
+      scopeProvincia ? provinciaDe(r.localidad || 'Paraná') === scopeProvincia : (r.localidad || 'Paraná') === localidad
+    let arr = reportes.filter((r) => r.tipo === 'perdido' && r.estado === 'activo' && r.especie === especie && enAmbito(r))
     if (paso >= 2) {
       arr = arr.filter((r) => compat(r, 'color', color) && compat(r, 'tamano', tamano) && compat(r, 'sexo', sexo, true))
     }
@@ -134,7 +135,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
       arr = arr.filter((r) => compat(r, 'zona', zona))
     }
     return [...arr].sort((a, b) => (a.zona === zona ? 0 : 1) - (b.zona === zona ? 0 : 1)).slice(0, 4)
-  }, [reportes, especie, color, tamano, sexo, zona, paso, huella, localidad])
+  }, [reportes, especie, color, tamano, sexo, zona, paso, huella, localidad, scopeProvincia])
 
   async function publicar() {
     if (tieneGroseria(`${descripcion} ${raza}`)) {
