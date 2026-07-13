@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import MapaLeaflet from './MapaLazy.jsx'
 import { getNotifPrefs, guardarNotifPrefs } from '../data/store.js'
-import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, centroDe, localidadGuardada, recordarLocalidad } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, centroDe, localidadGuardada, recordarLocalidad, localidadesPorProvincia } from '../lib/localidades.js'
 
 const DEFECTO = {
   avisar_match: true,
@@ -120,6 +120,20 @@ export default function NotifPrefs({ user, onToast, onListo }) {
       return np
     })
   }
+  // Marca/desmarca todas las ciudades de una provincia de una.
+  function toggleProvincia(ciudades) {
+    setPrefs((p) => {
+      const cur = p.localidades && p.localidades.length ? p.localidades : [p.localidad || LOCALIDAD_DEFECTO]
+      const todas = ciudades.every((c) => cur.includes(c))
+      let next = todas ? cur.filter((c) => !ciudades.includes(c)) : [...new Set([...cur, ...ciudades])]
+      if (!next.length) next = [ciudades[0]]
+      recordarLocalidad(next[0])
+      const barrios = next.length === 1 ? p.barrios : []
+      const np = { ...p, localidades: next, localidad: next[0], barrios }
+      guardar(np)
+      return np
+    })
+  }
 
   if (!prefs) return null
   const locs = prefs.localidades && prefs.localidades.length ? prefs.localidades : [prefs.localidad || LOCALIDAD_DEFECTO]
@@ -157,18 +171,36 @@ export default function NotifPrefs({ user, onToast, onListo }) {
         <div className="cerca-box">
           {NOMBRES_LOCALIDADES.length > 1 && (
             <>
-              <div className="cerca-lbl">¿En qué localidades? (podés elegir varias)</div>
-              <div className="barrio-chips" style={{ marginBottom: 12 }}>
-                {NOMBRES_LOCALIDADES.map((l) => (
-                  <button
-                    key={l}
-                    className={'esp-chip' + (locs.includes(l) ? ' on' : '')}
-                    onClick={() => toggleLocalidad(l)}
-                  >
-                    {l}
-                  </button>
-                ))}
-              </div>
+              <div className="cerca-lbl">¿De qué zonas querés enterarte? (podés elegir varias)</div>
+              {localidadesPorProvincia().map((g) => {
+                const todasProv = g.ciudades.every((c) => locs.includes(c))
+                return (
+                  <div key={g.provincia} className="cerca-prov">
+                    <div className="cerca-prov-h">
+                      <span className="cerca-prov-n">{g.provincia}</span>
+                      {g.ciudades.length > 1 && (
+                        <button
+                          className={'cerca-prov-toda' + (todasProv ? ' on' : '')}
+                          onClick={() => toggleProvincia(g.ciudades)}
+                        >
+                          {todasProv ? '✓ Toda la provincia' : 'Toda la provincia'}
+                        </button>
+                      )}
+                    </div>
+                    <div className="barrio-chips">
+                      {g.ciudades.map((l) => (
+                        <button
+                          key={l}
+                          className={'esp-chip' + (locs.includes(l) ? ' on' : '')}
+                          onClick={() => toggleLocalidad(l)}
+                        >
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
             </>
           )}
           {unaSola ? (
