@@ -28,6 +28,8 @@ import { contarLogin, logins, pasosOk } from './lib/pasos.js'
 import { nombreMostrado } from './lib/formato.js'
 import { scopeFeedGuardado } from './lib/localidades.js'
 import { confirmar } from './lib/confirmar.js'
+import { compartirFlyer } from './lib/flyer.js'
+import FestejoReencuentro from './components/FestejoReencuentro.jsx'
 
 export default function App() {
   const [vista, setVista] = useState('feed') // feed | detalle | post | auth | cuenta | avistamiento | recorrido
@@ -61,6 +63,7 @@ export default function App() {
   const [nudge, setNudge] = useState(false) // avisar "primeros pasos" (desde el 2º login, si falta algo)
   const contadoRef = useRef(false)
   const feedScrollRef = useRef(0) // recuerda el scroll del feed al entrar a un aviso
+  const [festejo, setFestejo] = useState(null) // aviso recién resuelto, para ofrecer compartir el reencuentro
 
   const notifsNoLeidas = notifs.filter((n) => !n.leida).length
 
@@ -464,10 +467,12 @@ export default function App() {
   }
   async function resolver(id) {
     try {
+      const rep = seleccionado // capturamos el aviso antes de recargar
       await marcarResuelto(id)
       await cargar()
       setVista(detalleOrigen)
-      mostrarToast('🎉 ¡Ya está en casa!')
+      if (rep) setFestejo({ ...rep, estado: 'resuelto' }) // ofrecer compartir la buena noticia
+      else mostrarToast('🎉 ¡Ya está en casa!')
     } catch (e) {
       console.error(e)
       mostrarToast('No se pudo actualizar 😕')
@@ -720,6 +725,17 @@ export default function App() {
               abrirDetalle(r)
             }}
             onCerrar={() => setBuscadorAbierto(false)}
+          />
+        )}
+
+        {festejo && (
+          <FestejoReencuentro
+            r={festejo}
+            onCompartir={() => {
+              compartirFlyer(festejo, mostrarToast)
+              setFestejo(null)
+            }}
+            onCerrar={() => setFestejo(null)}
           />
         )}
 

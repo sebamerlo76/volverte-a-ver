@@ -11,6 +11,10 @@
 
 alter table public.reportes add column if not exists resuelto_en timestamptz;
 
+-- Fecha del último recordatorio enviado al dueño (perdidos viejos). La setea la
+-- función resumen-diario; acá solo creamos la columna.
+alter table public.reportes add column if not exists recordatorio_en timestamptz;
+
 create or replace function public.set_resuelto_en()
 returns trigger language plpgsql as $$
 begin

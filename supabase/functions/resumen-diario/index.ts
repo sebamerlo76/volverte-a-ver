@@ -14,9 +14,77 @@ webpush.setVapidDetails(
   Deno.env.get('VAPID_PRIVATE')!,
 )
 
+const ESP: Record<string, string> = { perro: 'perro', gato: 'gato', otro: 'animal' }
+
 async function contar(query: any): Promise<number> {
   const { count } = await query
   return count || 0
+}
+
+// Push + inbox a un usuario puntual (para los recordatorios a dueños).
+async function pushAUsuario(uid: string, payload: any, meta: any = {}) {
+  try {
+    await sb.from('notificaciones').insert({
+      user_id: uid,
+      titulo: payload.title,
+      cuerpo: payload.body,
+      reporte_id: meta.reporteId ?? null,
+      tipo: meta.tipo ?? null,
+    })
+  } catch (e) {
+    console.error('inbox recordatorio:', e)
+  }
+  const { data: subs } = await sb.from('push_subs').select('*').eq('user_id', uid)
+  for (const s of subs || []) {
+    try {
+      await webpush.sendNotification(
+        { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+        JSON.stringify(payload),
+      )
+    } catch (e: any) {
+      if (e?.statusCode === 404 || e?.statusCode === 410) await sb.from('push_subs').delete().eq('endpoint', s.endpoint)
+    }
+  }
+}
+
+// Recordatorio a los dueños de perdidos activos hace +7 días: que renueven o
+// cierren. Una sola vez por ciclo (recordatorio_en); si renuevan, creado_en se
+// actualiza y vuelve a ser elegible 7 días después.
+async function enviarRecordatorios(): Promise<number> {
+  const corte7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  let viejos: any[] = []
+  try {
+    const { data } = await sb
+      .from('reportes')
+      .select('id, nombre, especie, user_id, creado_en, recordatorio_en')
+      .eq('estado', 'activo')
+      .eq('tipo', 'perdido')
+      .eq('oculto', false)
+      .eq('bloqueado', false)
+      .lt('creado_en', corte7)
+      .not('user_id', 'is', null)
+    viejos = data || []
+  } catch (_e) {
+    return -1 // la columna recordatorio_en todavía no existe
+  }
+  let n = 0
+  for (const r of viejos) {
+    // Comparación de ISO como string: ordena bien. Ya recordado este ciclo → saltar.
+    if (r.recordatorio_en && r.recordatorio_en >= r.creado_en) continue
+    const nombre = r.nombre || (ESP[r.especie] || 'tu mascota')
+    await pushAUsuario(
+      r.user_id,
+      {
+        title: '🔔 ¿Cómo va la búsqueda?',
+        body: `¿Novedades de ${nombre}? Si ya volvió, marcalo 🏠. Si no, renovalo para que vuelva arriba. 🐾`,
+        url: '/',
+      },
+      { reporteId: r.id, tipo: 'recordatorio' },
+    )
+    await sb.from('reportes').update({ recordatorio_en: new Date().toISOString() }).eq('id', r.id)
+    n++
+  }
+  return n
 }
 
 async function armarResumen() {
@@ -106,7 +174,8 @@ Deno.serve(async () => {
   try {
     const r = await armarResumen()
     await avisarAdmin('📊 Resumen de Chicho', textoResumen(r))
-    return new Response(JSON.stringify({ ok: true, ...r }), { headers: { 'Content-Type': 'application/json' } })
+    const recordatorios = await enviarRecordatorios()
+    return new Response(JSON.stringify({ ok: true, ...r, recordatorios }), { headers: { 'Content-Type': 'application/json' } })
   } catch (e) {
     console.error('resumen-diario error:', e)
     return new Response('error', { status: 200 })

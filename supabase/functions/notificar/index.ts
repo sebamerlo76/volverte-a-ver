@@ -174,6 +174,15 @@ async function manejarReporte(nuevo: any) {
       )
     }
   }
+
+  // 3) CIUDAD NUEVA: si este es el primer aviso de esa localidad, avisamos al admin.
+  {
+    const loc = nuevo.localidad || 'Paraná'
+    const { count } = await sb.from('reportes').select('*', { count: 'exact', head: true }).eq('localidad', loc)
+    if (count === 1) {
+      await pushAAdmin({ title: '🌱 ¡Nueva ciudad en Chicho!', body: `Primer aviso en ${loc}. ¡Prendió! 🎉`, url: '/' })
+    }
+  }
 }
 
 async function seguidoresDe(reporteId: string) {
