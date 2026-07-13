@@ -146,17 +146,22 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
       <div className="home-top">
         {/* Fila mini: menú (cara) · logo · campana */}
         <div className="hmini">
-          <div className="hmini-side">
+          <div className={'hmini-side' + (authActivo && !logueado ? ' hmini-side-auto' : '')}>
             {authActivo ? (
-              <button onClick={logueado ? onMenu : onLogin} aria-label={logueado ? 'Menú' : 'Iniciar sesión'}>
-                {logueado && avatar ? (
-                  <img className="hd-av" src={avatar} alt="Menú" referrerPolicy="no-referrer" />
-                ) : (
-                  <span className="mi" style={{ fontSize: 27, color: logueado ? 'var(--navy)' : '#c3b8b0' }}>
-                    {logueado ? 'menu' : 'login'}
-                  </span>
-                )}
-              </button>
+              logueado ? (
+                <button onClick={onMenu} aria-label="Menú">
+                  {avatar ? (
+                    <img className="hd-av" src={avatar} alt="Menú" referrerPolicy="no-referrer" />
+                  ) : (
+                    <span className="mi" style={{ fontSize: 27, color: 'var(--navy)' }}>menu</span>
+                  )}
+                </button>
+              ) : (
+                <button className="hd-entrar" onClick={onLogin} aria-label="Iniciar sesión">
+                  <span className="mi" style={{ fontSize: 19 }}>login</span>
+                  Entrar
+                </button>
+              )
             ) : null}
           </div>
 
@@ -165,7 +170,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
             Chicho
           </button>
 
-          <div className="hmini-side hmini-side-r">
+          <div className={'hmini-side hmini-side-r' + (authActivo && !logueado ? ' hmini-side-auto' : '')}>
             {authActivo && logueado ? (
               <button className="hd-bell" onClick={onNotifs} aria-label="Notificaciones">
                 <span className="mi" style={{ fontSize: 26, color: 'var(--navy)' }}>
@@ -177,6 +182,12 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
                   <span className="hd-bell-dot" />
                 ) : null}
               </button>
+            ) : authActivo && !logueado ? (
+              // Espaciador invisible = mismo ancho que "Entrar", para centrar el logo.
+              <span className="hd-entrar" aria-hidden="true" style={{ visibility: 'hidden' }}>
+                <span className="mi" style={{ fontSize: 19 }}>login</span>
+                Entrar
+              </span>
             ) : null}
           </div>
         </div>

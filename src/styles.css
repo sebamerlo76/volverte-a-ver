@@ -324,8 +324,31 @@ select {
   display: flex;
   align-items: center;
 }
+.hmini-side.hmini-side-auto {
+  width: auto;
+}
 .hmini-side-r {
   justify-content: flex-end;
+}
+/* Botón "Entrar" (cuando no está logueado) — visible, tipo pill */
+.hd-entrar {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 36px;
+  padding: 0 15px 0 11px;
+  border-radius: 999px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(31, 56, 82, 0.28);
+}
+.hd-entrar:active {
+  transform: scale(0.97);
 }
 .hmini-logo {
   flex: 1;
