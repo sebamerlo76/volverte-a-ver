@@ -6,6 +6,7 @@ import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/
 import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarScopeFeed, provinciasOrdenadas, ciudadesDeProvincia, provinciaDe, ubicacionTexto } from '../lib/localidades.js'
 import { puntoDeReporte } from '../lib/parana.js'
 import { TABS_ESTADO, textoTipo } from '../lib/estados.js'
+import { coincideBusqueda } from '../lib/buscar.js'
 import ComoLlegarSheet from './ComoLlegarSheet.jsx'
 
 const ESPECIE_LBL = { perro: 'Perros', gato: 'Gatos', otro: 'Otros' }
@@ -108,10 +109,7 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
       if (filtros.especie && r.especie !== filtros.especie) return false
       if (filtros.zona && r.zona !== filtros.zona) return false
       if (!dentroDeRango(r.creadoEn, filtros.tiempo)) return false
-      if (texto) {
-        const hay = `${r.nombre || ''} ${r.raza || ''} ${r.color || ''} ${r.zona || ''} ${r.especie}`.toLowerCase()
-        if (!hay.includes(texto)) return false
-      }
+      if (texto && !coincideBusqueda(r, texto)) return false
       return true
     })
     return arr
