@@ -1,4 +1,4 @@
-/* Service worker de "Volverte a ver" — Web Push (notificaciones). */
+/* Service worker de Chicho — Web Push (notificaciones). */
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()))

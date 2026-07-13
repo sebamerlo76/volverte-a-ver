@@ -1,5 +1,5 @@
 -- ===========================================================================
--- "Volverte a ver" — Campos extra en avisos y mascotas
+-- Chicho — Campos extra en avisos y mascotas
 -- Pegá TODO esto en Supabase -> SQL Editor -> New query -> Run.
 -- ===========================================================================
 

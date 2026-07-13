@@ -1,5 +1,5 @@
 -- ===========================================================================
--- "Volverte a ver" — Mis mascotas (perfiles guardados de cada usuario)
+-- Chicho — Mis mascotas (perfiles guardados de cada usuario)
 -- Pegá TODO esto en Supabase -> SQL Editor -> New query -> Run.
 -- ===========================================================================
 

@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Capa de datos de "Volverte a ver".
+// Capa de datos de Chicho.
 //
 // Funciona en DOS modos, automáticamente:
 //   - Con claves de Supabase (.env) -> nube (compartido) + fotos en Storage.

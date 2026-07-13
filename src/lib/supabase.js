@@ -10,5 +10,5 @@ export const supabaseConfigurado = Boolean(url && anonKey)
 export const supabase = supabaseConfigurado ? createClient(url, anonKey) : null
 
 if (!supabaseConfigurado) {
-  console.info('[Volverte a ver] Supabase no configurado — usando almacenamiento local del navegador.')
+  console.info('[Chicho] Supabase no configurado — usando almacenamiento local del navegador.')
 }

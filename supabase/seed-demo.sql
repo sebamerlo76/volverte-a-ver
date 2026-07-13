@@ -1,5 +1,5 @@
 -- ===========================================================================
--- "Volverte a ver" — 20 avisos de PRUEBA (datos de ejemplo para testear)
+-- Chicho — 20 avisos de PRUEBA (datos de ejemplo para testear)
 -- Pegá TODO esto en Supabase -> SQL Editor -> New query -> Run.
 --
 -- Todos quedan con autor "DEMO" para poder borrarlos después fácil:

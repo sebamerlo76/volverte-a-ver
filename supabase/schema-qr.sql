@@ -1,5 +1,5 @@
 -- ===========================================================================
--- "Volverte a ver" — QR para el collar (perfil público de la mascota)
+-- Chicho — QR para el collar (perfil público de la mascota)
 -- Pegá TODO esto en Supabase -> SQL Editor -> New query -> Run.
 -- ===========================================================================
 

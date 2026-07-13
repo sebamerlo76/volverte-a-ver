@@ -1,5 +1,5 @@
 -- ===========================================================================
--- "Volverte a ver" — Enlazar cada aviso con la mascota de tu perfil (opcional)
+-- Chicho — Enlazar cada aviso con la mascota de tu perfil (opcional)
 -- Pegá TODO esto en Supabase -> SQL Editor -> New query -> Run.
 -- ===========================================================================
 

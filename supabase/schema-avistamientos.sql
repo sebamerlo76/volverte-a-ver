@@ -1,5 +1,5 @@
 -- ===========================================================================
--- "Volverte a ver" — Avistamientos ("¡Lo vi acá!")
+-- Chicho — Avistamientos ("¡Lo vi acá!")
 -- Pegá TODO esto en Supabase -> SQL Editor -> New query -> Run.
 -- ===========================================================================
 

@@ -1,5 +1,5 @@
 -- ===========================================================================
--- "Volverte a ver" — Ubicación exacta de cada aviso (punto en el mapa)
+-- Chicho — Ubicación exacta de cada aviso (punto en el mapa)
 -- Pegá TODO esto en Supabase -> SQL Editor -> New query -> Run.
 -- ===========================================================================
 

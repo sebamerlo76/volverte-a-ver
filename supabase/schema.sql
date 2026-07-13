@@ -1,5 +1,5 @@
 -- ===========================================================================
--- "Volverte a ver" — esquema inicial para Supabase
+-- Chicho — esquema inicial para Supabase
 -- Pegá TODO esto en Supabase -> SQL Editor -> New query -> Run.
 -- ===========================================================================
 

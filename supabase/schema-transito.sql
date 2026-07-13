@@ -1,5 +1,5 @@
 -- ===========================================================================
--- "Volverte a ver" — En tránsito (retengo a la mascota que encontré)
+-- Chicho — En tránsito (retengo a la mascota que encontré)
 -- Pegá TODO esto en Supabase -> SQL Editor -> New query -> Run.
 -- ===========================================================================
 

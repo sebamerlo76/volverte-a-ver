@@ -1,5 +1,5 @@
 -- ===========================================================================
--- "Volverte a ver" — Cuentas de usuario y dueño de cada aviso
+-- Chicho — Cuentas de usuario y dueño de cada aviso
 -- Pegá TODO esto en Supabase -> SQL Editor -> New query -> Run.
 -- (Es seguro correrlo aunque ya hayas corrido el schema.sql anterior.)
 -- ===========================================================================
