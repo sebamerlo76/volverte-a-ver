@@ -132,14 +132,17 @@ async function manejarReporte(nuevo: any) {
       .filter((p: any) => p.user_id !== nuevo.user_id)
       .filter((p: any) => p.especie === 'todas' || p.especie === nuevo.especie)
       .filter((p: any) => {
-        // Una o varias localidades (compat: si no hay array, usa la vieja columna localidad).
+        // Match por localidad (lista de ciudades) O por provincia entera elegida.
         const locs =
           Array.isArray(p.localidades) && p.localidades.length ? p.localidades : [p.localidad || 'Paraná']
-        if (!locs.includes(nuevo.localidad || 'Paraná')) return false
-        // Con varias ciudades elegidas, avisamos de todos los barrios de esas ciudades.
-        const variasCiudades = locs.length > 1
+        const provs = Array.isArray(p.provincias) ? p.provincias : []
+        const enLocalidad = locs.includes(nuevo.localidad || 'Paraná')
+        const enProvincia = !!nuevo.provincia && provs.includes(nuevo.provincia)
+        if (!enLocalidad && !enProvincia) return false
+        // Provincia entera o varias ciudades: avisamos de todos los barrios.
+        const variasZonas = enProvincia || locs.length > 1
         const porBarrio =
-          variasCiudades ||
+          variasZonas ||
           (Array.isArray(p.barrios) && (p.barrios.includes('*') || (nuevo.zona && p.barrios.includes(nuevo.zona))))
         const porRadio =
           p.centro_lat != null &&

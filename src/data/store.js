@@ -76,6 +76,7 @@ function haciaFila(r) {
     en_custodia: r.enCustodia ?? false,
     embedding: r.embedding ?? null,
     localidad: r.localidad ?? 'Paraná',
+    provincia: provinciaDe(r.localidad ?? 'Paraná'), // para el matching por provincia
   }
 }
 
@@ -735,7 +736,14 @@ export async function getNotifPrefs(userId) {
 export async function guardarNotifPrefs(prefs) {
   if (!supabaseConfigurado) return null
   let { data, error } = await supabase.from('notif_prefs').upsert(prefs, { onConflict: 'user_id' }).select().single()
-  // A prueba de balas: si la columna "localidades" todavía no existe, guardá sin ella.
+  // A prueba de balas: si la columna "provincias" todavía no existe, guardá sin ella.
+  if (error && prefs.provincias) {
+    const { provincias, ...resto } = prefs
+    const r = await supabase.from('notif_prefs').upsert(resto, { onConflict: 'user_id' }).select().single()
+    data = r.data
+    error = r.error
+  }
+  // Idem "localidades".
   if (error && prefs.localidades) {
     const { localidades, ...resto } = prefs
     const r = await supabase.from('notif_prefs').upsert(resto, { onConflict: 'user_id' }).select().single()

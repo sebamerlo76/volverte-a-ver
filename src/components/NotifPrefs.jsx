@@ -14,6 +14,7 @@ const DEFECTO = {
   barrios: [],
   localidad: 'Paraná',
   localidades: null, // una o varias ciudades para "cerca mío"
+  provincias: [], // provincias enteras ("toda la provincia" — incluye ciudades futuras)
 }
 
 // Preferencias de notificación del usuario (qué avisos quiere recibir).
@@ -31,7 +32,12 @@ export default function NotifPrefs({ user, onToast, onListo }) {
           vivo &&
           setPrefs(
             p
-              ? { ...DEFECTO, ...p, localidades: p.localidades && p.localidades.length ? p.localidades : [p.localidad || localidadGuardada()] }
+              ? {
+                  ...DEFECTO,
+                  ...p,
+                  localidades: p.localidades && p.localidades.length ? p.localidades : [p.localidad || localidadGuardada()],
+                  provincias: Array.isArray(p.provincias) ? p.provincias : [],
+                }
               : { ...DEFECTO, localidades: [localidadGuardada()] }
           )
       )
@@ -54,6 +60,7 @@ export default function NotifPrefs({ user, onToast, onListo }) {
       barrios: np.barrios,
       localidades: np.localidades && np.localidades.length ? np.localidades : [np.localidad || localidadGuardada()],
       localidad: (np.localidades && np.localidades[0]) || np.localidad || localidadGuardada(), // compat
+      provincias: np.provincias || [],
     })
   }
   // Autosave con un pequeño retardo, para no pegarle a la base en cada toque.
@@ -111,25 +118,28 @@ export default function NotifPrefs({ user, onToast, onListo }) {
     setPrefs((p) => {
       const cur = p.localidades && p.localidades.length ? p.localidades : [p.localidad || LOCALIDAD_DEFECTO]
       let next = cur.includes(l) ? cur.filter((x) => x !== l) : [...cur, l]
-      if (!next.length) next = [l] // no dejar vacío
-      recordarLocalidad(next[0])
-      // Con más de una ciudad los barrios no aplican (avisamos de todos).
-      const barrios = next.length === 1 ? p.barrios : []
-      const np = { ...p, localidades: next, localidad: next[0], barrios }
+      const provs = p.provincias || []
+      if (!next.length && !provs.length) next = [l] // no dejar todo vacío
+      if (next[0]) recordarLocalidad(next[0])
+      // Barrios solo si es UNA sola ciudad y ninguna provincia entera.
+      const barrios = next.length === 1 && !provs.length ? p.barrios : []
+      const np = { ...p, localidades: next, localidad: next[0] || p.localidad, barrios }
       guardar(np)
       return np
     })
   }
-  // Marca/desmarca todas las ciudades de una provincia de una.
-  function toggleProvincia(ciudades) {
+  // "Toda la provincia": marca/desmarca la PROVINCIA entera (incluye ciudades
+  // futuras). Al activarla, saca las ciudades sueltas de esa provincia (redundantes).
+  function toggleProvincia(g) {
     setPrefs((p) => {
-      const cur = p.localidades && p.localidades.length ? p.localidades : [p.localidad || LOCALIDAD_DEFECTO]
-      const todas = ciudades.every((c) => cur.includes(c))
-      let next = todas ? cur.filter((c) => !ciudades.includes(c)) : [...new Set([...cur, ...ciudades])]
-      if (!next.length) next = [ciudades[0]]
-      recordarLocalidad(next[0])
-      const barrios = next.length === 1 ? p.barrios : []
-      const np = { ...p, localidades: next, localidad: next[0], barrios }
+      const provs = p.provincias || []
+      const on = provs.includes(g.provincia)
+      const nextProvs = on ? provs.filter((x) => x !== g.provincia) : [...provs, g.provincia]
+      let locs = p.localidades && p.localidades.length ? p.localidades : []
+      if (!on) locs = locs.filter((c) => !g.ciudades.includes(c))
+      if (!locs.length && !nextProvs.length) locs = [g.ciudades[0]] // no dejar todo vacío
+      const barrios = locs.length === 1 && !nextProvs.length ? p.barrios : []
+      const np = { ...p, provincias: nextProvs, localidades: locs, localidad: locs[0] || g.ciudades[0], barrios }
       guardar(np)
       return np
     })
@@ -137,7 +147,9 @@ export default function NotifPrefs({ user, onToast, onListo }) {
 
   if (!prefs) return null
   const locs = prefs.localidades && prefs.localidades.length ? prefs.localidades : [prefs.localidad || LOCALIDAD_DEFECTO]
-  const unaSola = locs.length === 1
+  const provsSel = prefs.provincias || []
+  // Barrios solo si hay UNA sola ciudad y ninguna provincia entera elegida.
+  const unaSola = locs.length === 1 && provsSel.length === 0
   const loc = locs[0]
   const centro = prefs.centro_lat != null ? [prefs.centro_lat, prefs.centro_lng] : centroDe(loc)
   const todos = (prefs.barrios || []).includes('*')
@@ -173,17 +185,17 @@ export default function NotifPrefs({ user, onToast, onListo }) {
             <>
               <div className="cerca-lbl">¿De qué zonas querés enterarte? (podés elegir varias)</div>
               {localidadesPorProvincia().map((g) => {
-                const todasProv = g.ciudades.every((c) => locs.includes(c))
+                const provEntera = provsSel.includes(g.provincia)
                 return (
                   <div key={g.provincia} className="cerca-prov">
                     <div className="cerca-prov-h">
                       <span className="cerca-prov-n">{g.provincia}</span>
                       {g.ciudades.length > 1 && (
                         <button
-                          className={'cerca-prov-toda' + (todasProv ? ' on' : '')}
-                          onClick={() => toggleProvincia(g.ciudades)}
+                          className={'cerca-prov-toda' + (provEntera ? ' on' : '')}
+                          onClick={() => toggleProvincia(g)}
                         >
-                          {todasProv ? '✓ Toda la provincia' : 'Toda la provincia'}
+                          {provEntera ? '✓ Toda la provincia' : 'Toda la provincia'}
                         </button>
                       )}
                     </div>
@@ -191,8 +203,8 @@ export default function NotifPrefs({ user, onToast, onListo }) {
                       {g.ciudades.map((l) => (
                         <button
                           key={l}
-                          className={'esp-chip' + (locs.includes(l) ? ' on' : '')}
-                          onClick={() => toggleLocalidad(l)}
+                          className={'esp-chip' + (provEntera || locs.includes(l) ? ' on' : '') + (provEntera ? ' dim' : '')}
+                          onClick={() => !provEntera && toggleLocalidad(l)}
                         >
                           {l}
                         </button>
@@ -250,7 +262,8 @@ export default function NotifPrefs({ user, onToast, onListo }) {
             </>
           ) : (
             <div className="cerca-nota">
-              Te avisamos de <b>todos los barrios</b> de las {locs.length} ciudades que elegiste 🐾
+              Te avisamos de <b>todos los avisos</b> de lo que marcaste
+              {provsSel.length > 0 ? ' (las provincias enteras incluyen también las ciudades que sumemos más adelante)' : ''}. 🐾
             </div>
           )}
 

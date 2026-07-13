@@ -113,7 +113,10 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
       if (!r[campo]) return true // si el otro no especificó, no lo descarto
       return r[campo] === valor
     }
-    let arr = reportes.filter((r) => r.tipo === 'perdido' && r.estado === 'activo' && r.especie === especie)
+    // Solo perdidos de la MISMA localidad (igual que el matching de notificaciones).
+    let arr = reportes.filter(
+      (r) => r.tipo === 'perdido' && r.estado === 'activo' && r.especie === especie && (r.localidad || 'Paraná') === localidad,
+    )
     if (paso >= 2) {
       arr = arr.filter((r) => compat(r, 'color', color) && compat(r, 'tamano', tamano) && compat(r, 'sexo', sexo, true))
     }
@@ -131,7 +134,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
       arr = arr.filter((r) => compat(r, 'zona', zona))
     }
     return [...arr].sort((a, b) => (a.zona === zona ? 0 : 1) - (b.zona === zona ? 0 : 1)).slice(0, 4)
-  }, [reportes, especie, color, tamano, sexo, zona, paso, huella])
+  }, [reportes, especie, color, tamano, sexo, zona, paso, huella, localidad])
 
   async function publicar() {
     if (tieneGroseria(`${descripcion} ${raza}`)) {
