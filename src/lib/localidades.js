@@ -9,6 +9,7 @@
 import { CORDOBA_BARRIOS, CORDOBA_CENTER } from './cordoba.js'
 import { NEUQUEN_BARRIOS, NEUQUEN_CENTER } from './neuquen.js'
 import { OLAVARRIA_BARRIOS, OLAVARRIA_CENTER } from './olavarria.js'
+import { SANTAFE_BARRIOS, SANTAFE_CENTER } from './santafe.js'
 
 export const LOCALIDAD_DEFECTO = 'Paraná'
 
@@ -175,6 +176,11 @@ export const LOCALIDADES = {
     center: OLAVARRIA_CENTER,
     barrios: OLAVARRIA_BARRIOS,
   },
+  'Santa Fe': {
+    // Barrios reales de Santa Fe capital (OpenStreetMap).
+    center: SANTAFE_CENTER,
+    barrios: SANTAFE_BARRIOS,
+  },
   // Para sumar otra: copiá un bloque, poné center [lat,lng] y sus barrios.
 }
 
@@ -195,6 +201,7 @@ const PROVINCIA_POR_CIUDAD = {
   'Neuquén': 'Neuquén',
   'San Martín de los Andes': 'Neuquén',
   'Olavarría': 'Buenos Aires',
+  'Santa Fe': 'Santa Fe',
 }
 export const PROVINCIA_DEFECTO = 'Entre Ríos'
 export function provinciaDe(loc) {
