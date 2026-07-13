@@ -93,7 +93,7 @@ function marcarReporteNum(w) {
   }
 }
 
-export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar, onVerFotos }) {
+export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir, siguiendo, onSeguir, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar, onVerFotos }) {
   const [avist, setAvist] = useState([])
   const [fotoActiva, setFotoActiva] = useState(0)
   const [apoyos, setApoyos] = useState(r?.apoyos || 0)
@@ -457,6 +457,14 @@ export default function Detalle({ r, esMio, puedeSeguir, siguiendo, onSeguir, on
             Reportar este aviso
           </button>
         </div>
+        {esAdmin && !esMio && (
+          <div style={{ textAlign: 'center', padding: '4px 20px 2px' }}>
+            <button className="btn-admin-borrar" onClick={() => onBorrarAdmin(r.id)}>
+              <span className="mi" style={{ fontSize: 16 }}>shield</span>
+              Borrar (admin)
+            </button>
+          </div>
+        )}
         <div style={{ height: 18 }} />
       </div>
 

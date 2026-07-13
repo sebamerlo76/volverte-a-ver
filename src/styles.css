@@ -2793,6 +2793,23 @@ select {
   color: #a99e96;
   padding: 6px 10px;
 }
+.btn-admin-borrar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 12px;
+  border: 1.5px solid #e7b3ad;
+  background: #fdeeec;
+  color: #c9483c;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+}
+.btn-admin-borrar:active {
+  transform: scale(0.98);
+}
 .report-sheet-t {
   font-family: Fredoka, sans-serif;
   font-weight: 600;

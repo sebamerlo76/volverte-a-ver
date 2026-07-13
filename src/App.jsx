@@ -22,7 +22,7 @@ import Moderacion from './components/Moderacion.jsx'
 import Soporte from './components/Soporte.jsx'
 import Lightbox from './components/Lightbox.jsx'
 import NuevaPassword from './components/NuevaPassword.jsx'
-import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte } from './data/store.js'
+import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, borrarReporteAdmin, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { contarLogin, logins, pasosOk } from './lib/pasos.js'
 import { nombreMostrado } from './lib/formato.js'
@@ -477,6 +477,20 @@ export default function App() {
     }
   }
 
+  // Borrar un aviso ajeno (solo admin). Usa el RPC que valida por email.
+  async function borrarAdmin(id) {
+    if (!(await confirmar({ mensaje: '¿Borrar este aviso como admin? No se puede deshacer.', aceptar: 'Borrar', peligro: true }))) return
+    try {
+      await borrarReporteAdmin(id)
+      await cargar()
+      setVista(detalleOrigen)
+      mostrarToast('Aviso borrado')
+    } catch (e) {
+      console.error(e)
+      mostrarToast('No se pudo borrar 😕')
+    }
+  }
+
   // --- Flujo de publicar (dos caminos) ---
   function elegirMascotaPerdida(m) {
     setPlantilla({ ...m, tipo: 'perdido', mascotaId: m.id })
@@ -595,6 +609,8 @@ export default function App() {
           <Detalle
             r={seleccionado}
             esMio={esMio}
+            esAdmin={esAdmin}
+            onBorrarAdmin={borrarAdmin}
             puedeSeguir={!esMio}
             siguiendo={seleccionado ? seguidos.includes(seleccionado.id) : false}
             onSeguir={() => toggleSeguir(seleccionado)}
