@@ -58,6 +58,14 @@ export default function Privacidad() {
             <div style={h}>Menores de edad</div>
             <p style={p}>Chicho no está dirigida a menores de 13 años y no recopilamos datos de ellos a sabiendas.</p>
 
+            <div style={h}>Recompensas y trato entre usuarios</div>
+            <p style={p}>
+              Chicho es solo un espacio para conectar personas y ayudar a que las mascotas vuelvan a casa. No participamos ni
+              intervenimos en recompensas, pagos, transferencias ni ningún acuerdo de dinero entre usuarios: eso queda por fuera
+              de la aplicación y bajo la responsabilidad de cada uno. Nadie debería pedirte dinero; si te lo piden, desconfiá —
+              puede ser una estafa. Chicho no se hace responsable por acuerdos, pagos ni estafas entre usuarios.
+            </p>
+
             <div style={h}>Contacto</div>
             <p style={p}>
               Por dudas o para borrar tu cuenta, escribinos a{' '}

@@ -439,7 +439,7 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
                   <b>Ojo: {numReportes} personas reportaron este número como sospechoso. Verificá bien antes de coordinar.</b>
                 ) : (
                   <>
-                    <b>Cuidá tu plata:</b> quien la encontró no debería pedirte dinero por adelantado.
+                    <b>Nadie tiene que pedirte dinero.</b> Si te piden plata —transferencia, seña, recarga, lo que sea— es una estafa. No pagues.
                   </>
                 )}
                 <button className="scam-report" onClick={abrirNumero}>
