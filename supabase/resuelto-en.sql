@@ -15,6 +15,10 @@ alter table public.reportes add column if not exists resuelto_en timestamptz;
 -- función resumen-diario; acá solo creamos la columna.
 alter table public.reportes add column if not exists recordatorio_en timestamptz;
 
+-- Fecha del push "compartí el aviso" (al día siguiente de publicar). Idem, la
+-- setea resumen-diario.
+alter table public.reportes add column if not exists compartir_en timestamptz;
+
 create or replace function public.set_resuelto_en()
 returns trigger language plpgsql as $$
 begin

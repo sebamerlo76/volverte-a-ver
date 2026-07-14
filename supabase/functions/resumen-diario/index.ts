@@ -170,12 +170,56 @@ async function avisarAdmin(titulo: string, cuerpo: string) {
   }
 }
 
+// Empujón temprano: al día siguiente de publicar un perdido, invitamos al dueño
+// a compartir el aviso (difundir es lo que más rápido lo encuentra). Una sola
+// vez por ciclo (compartir_en). Ventana 24-72 h para tolerar que el cron falte
+// algún día (y no molestar a avisos viejos, que no reciben este push).
+async function enviarRecordatorioCompartir(): Promise<number> {
+  const ahora = Date.now()
+  const min24 = new Date(ahora - 24 * 60 * 60 * 1000).toISOString()
+  const max72 = new Date(ahora - 72 * 60 * 60 * 1000).toISOString()
+  let recientes: any[] = []
+  try {
+    const { data } = await sb
+      .from('reportes')
+      .select('id, nombre, especie, user_id, creado_en, compartir_en')
+      .eq('estado', 'activo')
+      .eq('tipo', 'perdido')
+      .eq('oculto', false)
+      .eq('bloqueado', false)
+      .lt('creado_en', min24) // publicado hace +24 h
+      .gt('creado_en', max72) // ...pero no más de 72 h (recién publicado)
+      .not('user_id', 'is', null)
+    recientes = data || []
+  } catch (_e) {
+    return -1 // la columna compartir_en todavía no existe
+  }
+  let n = 0
+  for (const r of recientes) {
+    if (r.compartir_en && r.compartir_en >= r.creado_en) continue
+    const nombre = r.nombre || (ESP[r.especie] || 'tu mascota')
+    await pushAUsuario(
+      r.user_id,
+      {
+        title: '📣 Ayudá a que vuelva a casa',
+        body: `Compartí el aviso de ${nombre} con tus vecinos y en tus redes. Cuanta más gente lo vea, más rápido aparece. 🐾`,
+        url: `/r/${r.id}`,
+      },
+      { reporteId: r.id, tipo: 'compartir' },
+    )
+    await sb.from('reportes').update({ compartir_en: new Date().toISOString() }).eq('id', r.id)
+    n++
+  }
+  return n
+}
+
 Deno.serve(async () => {
   try {
     const r = await armarResumen()
     await avisarAdmin('📊 Resumen de Chicho', textoResumen(r))
     const recordatorios = await enviarRecordatorios()
-    return new Response(JSON.stringify({ ok: true, ...r, recordatorios }), { headers: { 'Content-Type': 'application/json' } })
+    const compartir = await enviarRecordatorioCompartir()
+    return new Response(JSON.stringify({ ok: true, ...r, recordatorios, compartir }), { headers: { 'Content-Type': 'application/json' } })
   } catch (e) {
     console.error('resumen-diario error:', e)
     return new Response('error', { status: 200 })
