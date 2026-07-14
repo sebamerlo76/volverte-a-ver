@@ -11,6 +11,7 @@ import { NEUQUEN_BARRIOS, NEUQUEN_CENTER } from './neuquen.js'
 import { OLAVARRIA_BARRIOS, OLAVARRIA_CENTER } from './olavarria.js'
 import { SANTAFE_BARRIOS, SANTAFE_CENTER } from './santafe.js'
 import { RAFAELA_BARRIOS, RAFAELA_CENTER } from './rafaela.js'
+import { SANJUAN_BARRIOS, SANJUAN_CENTER } from './sanjuan.js'
 
 export const LOCALIDAD_DEFECTO = 'Paraná'
 
@@ -193,6 +194,11 @@ export const LOCALIDADES = {
     center: SANTAFE_CENTER,
     barrios: SANTAFE_BARRIOS,
   },
+  'San Juan': {
+    // Barrios reconocibles de San Juan capital (curados de OSM, que tiene 500+).
+    center: SANJUAN_CENTER,
+    barrios: SANJUAN_BARRIOS,
+  },
   'Rafaela': {
     // Barrios reales de Rafaela (OpenStreetMap).
     center: RAFAELA_CENTER,
@@ -243,6 +249,7 @@ const PROVINCIA_POR_CIUDAD = {
   'Rafaela': 'Santa Fe',
   'Ceres': 'Santa Fe',
   'Selva': 'Santiago del Estero',
+  'San Juan': 'San Juan',
 }
 export const PROVINCIA_DEFECTO = 'Entre Ríos'
 export function provinciaDe(loc) {
