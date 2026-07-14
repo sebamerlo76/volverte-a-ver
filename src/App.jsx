@@ -41,6 +41,7 @@ export default function App() {
   const [selReporte, setSelReporte] = useState(null) // aviso abierto en el detalle
   const [detalleOrigen, setDetalleOrigen] = useState('feed') // a dónde volver al cerrar el detalle
   const [reportes, setReportes] = useState([])
+  const [cargandoReportes, setCargandoReportes] = useState(true) // 1ª carga: distinguir "cargando" de "vacío"
   const [toast, setToast] = useState('')
   const [user, setUser] = useState(null)
   const [editando, setEditando] = useState(null) // aviso en edición, o null
@@ -288,6 +289,8 @@ export default function App() {
     } catch (e) {
       console.error('No se pudieron cargar los reportes:', e)
       mostrarToast('No se pudieron cargar los reportes 😕')
+    } finally {
+      setCargandoReportes(false)
     }
   }
 
@@ -588,6 +591,7 @@ export default function App() {
         {vista === 'feed' && (
           <Feed
             reportes={reportes}
+            cargando={cargandoReportes}
             onOpen={abrirDetalle}
             onToast={mostrarToast}
             authActivo={authActivo}

@@ -27,7 +27,7 @@ function jitter(base, id = '') {
   return [base[0] + dy, base[1] + dx]
 }
 
-export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, user, onLogin, onMenu, onNotifs, notifsNoLeidas = 0, hayNudge, modo, filtros, setFiltro, resetInicio, scrollRef }) {
+export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, logueado, user, onLogin, onMenu, onNotifs, notifsNoLeidas = 0, hayNudge, modo, filtros, setFiltro, resetInicio, scrollRef }) {
   const avatar = avatarDe(user)
   const [finales, setFinales] = useState(null)
   const [sel, setSel] = useState(null)
@@ -361,7 +361,9 @@ export default function Feed({ reportes, onOpen, onToast, authActivo, logueado, 
         </div>
       ) : (
         <div className="body" ref={bodyRef} onScroll={(e) => { if (scrollRef) scrollRef.current = e.currentTarget.scrollTop }}>
-          {verFinales && finales === null ? (
+          {cargando && !verFinales ? (
+            <div className="empty">Cargando avisos… 🐾</div>
+          ) : verFinales && finales === null ? (
             <div className="empty">Cargando reencuentros…</div>
           ) : filtrados.length === 0 ? (
             <div className="empty">
