@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 // usuario elige qué franja horizontal se muestra en el feed (mismo formato que
 // la tarjeta). Devuelve { full, thumb }: la imagen entera + el recorte del feed.
 const RATIO = 2 // feed 2:1 (ancho:alto)
-const THUMB_W = 1080
+const THUMB_W = 800 // recorte del feed: la tarjeta se ve a ~360px, con 800 alcanza y pesa menos (LCP)
 const FULL_MAX = 1440
 
 export default function ImageCropper({ file, onConfirm, onCancel }) {
@@ -98,7 +98,7 @@ export default function ImageCropper({ file, onConfirm, onCancel }) {
       c2.toBlob((full) => {
         if (thumb && full) onConfirm({ full, thumb })
       }, 'image/jpeg', 0.85)
-    }, 'image/jpeg', 0.85)
+    }, 'image/jpeg', 0.8) // el recorte del feed va un poco más comprimido (se ve chico)
   }
 
   return (

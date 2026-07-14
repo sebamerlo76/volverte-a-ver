@@ -388,7 +388,7 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
               )}
             </div>
           ) : (
-            filtrados.map((r) => <PetCard key={r.id} r={r} onClick={() => onOpen(r)} />)
+            filtrados.map((r, i) => <PetCard key={r.id} r={r} onClick={() => onOpen(r)} prioridad={i === 0} />)
           )}
           <div style={{ height: 18 }} />
         </div>

@@ -2,7 +2,7 @@ import { nombreMostrado, tiempoRelativo } from '../lib/formato.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { badgeEstado, subLinea } from '../lib/estados.js'
 
-export default function PetCard({ r, onClick }) {
+export default function PetCard({ r, onClick, prioridad = false }) {
   const perdido = r.tipo === 'perdido'
   const resuelto = r.estado === 'resuelto'
   const clr = perdido ? '#ff6b5e' : '#2f7fed'
@@ -10,7 +10,16 @@ export default function PetCard({ r, onClick }) {
     <button className="card" onClick={onClick}>
       <div className={'ci' + (perdido ? '' : ' g')}>
         {r.foto ? (
-          <img src={r.foto} alt={nombreMostrado(r)} onError={(e) => (e.target.style.display = 'none')} />
+          <img
+            src={r.foto}
+            alt={nombreMostrado(r)}
+            // La 1ª tarjeta es casi siempre el LCP: la priorizamos. El resto,
+            // lazy (así no compiten por ancho de banda con la primera foto).
+            loading={prioridad ? 'eager' : 'lazy'}
+            fetchPriority={prioridad ? 'high' : 'auto'}
+            decoding="async"
+            onError={(e) => (e.target.style.display = 'none')}
+          />
         ) : (
           <span className="ph-pet mi fill" style={{ fontSize: 52 }}>
             pets
