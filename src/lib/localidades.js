@@ -177,6 +177,17 @@ export const LOCALIDADES = {
     center: OLAVARRIA_CENTER,
     barrios: OLAVARRIA_BARRIOS,
   },
+  'Cañuelas': {
+    // Cañuelas tiene pocos barrios cargados en OSM; se usan esos + Centro.
+    center: [-35.0533, -58.76],
+    barrios: {
+      'Centro': [-35.0533, -58.76],
+      'Los Aromos': [-35.0404, -58.73926],
+      'Libertad': [-35.04252, -58.76841],
+      'Los Fresnos': [-35.05407, -58.73948],
+      'Maestra María Angélica Guzzetti': [-35.06225, -58.77471],
+    },
+  },
   'Santa Fe': {
     // Barrios reales de Santa Fe capital (OpenStreetMap).
     center: SANTAFE_CENTER,
@@ -227,6 +238,7 @@ const PROVINCIA_POR_CIUDAD = {
   'Neuquén': 'Neuquén',
   'San Martín de los Andes': 'Neuquén',
   'Olavarría': 'Buenos Aires',
+  'Cañuelas': 'Buenos Aires',
   'Santa Fe': 'Santa Fe',
   'Rafaela': 'Santa Fe',
   'Ceres': 'Santa Fe',
