@@ -145,7 +145,7 @@ export async function sumarAplauso(reporteId) {
 // Mis ubicaciones (lugares guardados + zonas de aviso)
 // ---------------------------------------------------------------------------
 function ubicDesdeFila(u) {
-  return { id: u.id, nombre: u.nombre, lat: u.lat, lng: u.lng, radioKm: u.radio_km, avisar: u.avisar }
+  return { id: u.id, nombre: u.nombre, localidad: u.localidad, zona: u.zona || '', avisar: u.avisar }
 }
 
 export async function getUbicaciones(userId) {
@@ -155,11 +155,11 @@ export async function getUbicaciones(userId) {
   return (data || []).map(ubicDesdeFila)
 }
 
-export async function addUbicacion({ userId, nombre, lat, lng, radioKm, avisar }) {
+export async function addUbicacion({ userId, nombre, localidad, zona, avisar }) {
   if (!supabaseConfigurado) return null
   const { data, error } = await supabase
     .from('ubicaciones')
-    .insert({ user_id: userId, nombre, lat, lng, radio_km: radioKm, avisar })
+    .insert({ user_id: userId, nombre, localidad, zona: zona || null, avisar })
     .select()
     .single()
   if (error) throw error
@@ -170,10 +170,9 @@ export async function actualizarUbicacion(id, campos) {
   if (!id || !supabaseConfigurado) return
   const fila = {}
   if (campos.avisar != null) fila.avisar = campos.avisar
-  if (campos.radioKm != null) fila.radio_km = campos.radioKm
   if (campos.nombre != null) fila.nombre = campos.nombre
-  if (campos.lat != null) fila.lat = campos.lat
-  if (campos.lng != null) fila.lng = campos.lng
+  if (campos.localidad != null) fila.localidad = campos.localidad
+  if (campos.zona != null) fila.zona = campos.zona || null // '' = sin barrio, no "no lo toques"
   await supabase.from('ubicaciones').update(fila).eq('id', id)
 }
 

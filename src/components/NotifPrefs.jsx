@@ -1,15 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import MapaLeaflet from './MapaLazy.jsx'
-import { getNotifPrefs, guardarNotifPrefs } from '../data/store.js'
-import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, centroDe, localidadGuardada, recordarLocalidad, localidadesPorProvincia } from '../lib/localidades.js'
+import { getNotifPrefs, guardarNotifPrefs, getUbicaciones } from '../data/store.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, nombresBarriosDe, localidadGuardada, localidadesPorProvincia } from '../lib/localidades.js'
 
 const DEFECTO = {
   avisar_match: true,
   avisar_avistamiento: true,
   avisar_cerca: false,
-  centro_lat: null,
-  centro_lng: null,
-  radio_km: 5,
   especie: 'todas',
   barrios: [],
   localidad: 'Paraná',
@@ -18,11 +14,24 @@ const DEFECTO = {
 }
 
 // Preferencias de notificación del usuario (qué avisos quiere recibir).
+//
+// Acá había además un "marcá un punto y radio exacto" con mapa. Se fue: hacía lo
+// mismo que "Mis ubicaciones" (los dos mandaban la notificación "cerca" y se
+// unían en la Edge Function), y era la peor versión — uno solo y sin nombre.
 export default function NotifPrefs({ user, onToast, onListo }) {
   const [prefs, setPrefs] = useState(null)
-  const [verMapa, setVerMapa] = useState(false)
+  const [misLugares, setMisLugares] = useState([]) // para decir que ya están incluidos
   const [qBarrio, setQBarrio] = useState('') // búsqueda de barrio (ciudades grandes)
   const timer = useRef(null)
+
+  // Tus lugares ya notifican por su cuenta. Los mostramos para que se entienda
+  // por qué te llegan avisos de ahí sin haberlos tildado en esta pantalla.
+  useEffect(() => {
+    if (!user?.id) return
+    getUbicaciones(user.id)
+      .then((us) => setMisLugares(us.filter((u) => u.avisar && u.localidad)))
+      .catch(() => {})
+  }, [user?.id])
 
   useEffect(() => {
     let vivo = true
@@ -53,9 +62,6 @@ export default function NotifPrefs({ user, onToast, onListo }) {
       avisar_match: np.avisar_match,
       avisar_avistamiento: np.avisar_avistamiento,
       avisar_cerca: np.avisar_cerca,
-      centro_lat: np.centro_lat,
-      centro_lng: np.centro_lng,
-      radio_km: np.radio_km,
       especie: np.especie,
       barrios: np.barrios,
       localidades: np.localidades && np.localidades.length ? np.localidades : [np.localidad || localidadGuardada()],
@@ -90,13 +96,6 @@ export default function NotifPrefs({ user, onToast, onListo }) {
       return np
     })
   }
-  function setCentro(pt) {
-    setPrefs((p) => {
-      const np = { ...p, centro_lat: pt.lat, centro_lng: pt.lng }
-      guardar(np)
-      return np
-    })
-  }
   function toggleBarrio(b) {
     setPrefs((p) => {
       const cur = (p.barrios || []).filter((x) => x !== '*') // si estaba en "todos", salgo
@@ -120,7 +119,8 @@ export default function NotifPrefs({ user, onToast, onListo }) {
       let next = cur.includes(l) ? cur.filter((x) => x !== l) : [...cur, l]
       const provs = p.provincias || []
       if (!next.length && !provs.length) next = [l] // no dejar todo vacío
-      if (next[0]) recordarLocalidad(next[0])
+      // Ojo: acá NO se toca tu ciudad. Guardaba next[0], o sea una cualquiera de
+      // las que tildaste. Tu ciudad sale de "Mis ubicaciones" (ver App.jsx).
       // Barrios solo si es UNA sola ciudad y ninguna provincia entera.
       const barrios = next.length === 1 && !provs.length ? p.barrios : []
       const np = { ...p, localidades: next, localidad: next[0] || p.localidad, barrios }
@@ -151,7 +151,6 @@ export default function NotifPrefs({ user, onToast, onListo }) {
   // Barrios solo si hay UNA sola ciudad y ninguna provincia entera elegida.
   const unaSola = locs.length === 1 && provsSel.length === 0
   const loc = locs[0]
-  const centro = prefs.centro_lat != null ? [prefs.centro_lat, prefs.centro_lng] : centroDe(loc)
   const todos = (prefs.barrios || []).includes('*')
 
   const Check = ({ campo, children }) => (
@@ -181,6 +180,27 @@ export default function NotifPrefs({ user, onToast, onListo }) {
 
       {prefs.avisar_cerca && (
         <div className="cerca-box">
+          {/* Tus lugares notifican solos. Sin decirlo, no se entiende por qué te
+              llegan avisos de una ciudad que no tildaste acá. */}
+          {misLugares.length > 0 && (
+            <div className="cerca-lugares">
+              <span className="mi fill" style={{ fontSize: 17, color: 'var(--navy)' }}>
+                home
+              </span>
+              <div>
+                Ya te avisamos de tus lugares:{' '}
+                {misLugares.map((u, i) => (
+                  <span key={u.id}>
+                    {i > 0 && ', '}
+                    <b>
+                      {u.nombre} ({u.localidad})
+                    </b>
+                  </span>
+                ))}
+                . Acá sumás más.
+              </div>
+            </div>
+          )}
           {NOMBRES_LOCALIDADES.length > 1 && (
             <>
               <div className="cerca-lbl">¿De qué zonas querés enterarte? (podés elegir varias)</div>
@@ -267,35 +287,6 @@ export default function NotifPrefs({ user, onToast, onListo }) {
             </div>
           )}
 
-          <button className="cerca-adv-toggle" onClick={() => setVerMapa((v) => !v)}>
-            <span className="mi" style={{ fontSize: 18 }}>{verMapa ? 'expand_less' : 'expand_more'}</span>
-            Marcar un punto y radio exacto (opcional)
-          </button>
-          {verMapa && (
-            <div className="cerca-adv">
-              <div className="cerca-lbl">Tocá el mapa para marcar tu punto (centro del radio)</div>
-              <div className="mappick" style={{ height: 170 }}>
-                <MapaLeaflet
-                  center={centro}
-                  zoom={13}
-                  interactivo
-                  onGps={setCentro}
-                  onMapaClick={setCentro}
-                  marcadores={[{ id: 'centro', lat: centro[0], lng: centro[1], tipo: 'encontrado' }]}
-                />
-              </div>
-              <div className="cerca-radio">
-                <span>Radio: <b>{prefs.radio_km} km</b></span>
-                <input
-                  type="range"
-                  min="1"
-                  max="20"
-                  value={prefs.radio_km}
-                  onChange={(e) => set('radio_km', +e.target.value)}
-                />
-              </div>
-            </div>
-          )}
 
           <div className="cerca-lbl" style={{ marginTop: 12 }}>¿Qué especie?</div>
           <div className="cerca-esp">

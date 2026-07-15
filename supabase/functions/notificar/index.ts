@@ -30,15 +30,6 @@ function similitud(a: any, b: any) {
   for (let i = 0; i < a.length; i++) s += a[i] * b[i]
   return s
 }
-function distanciaKm(lat1: number, lng1: number, lat2: number, lng2: number) {
-  const R = 6371
-  const rad = (d: number) => (d * Math.PI) / 180
-  const dLat = rad(lat2 - lat1)
-  const dLng = rad(lng2 - lng1)
-  const x = Math.sin(dLat / 2) ** 2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLng / 2) ** 2
-  return 2 * R * Math.asin(Math.sqrt(x))
-}
-
 async function prefsDe(userIds: string[]) {
   const ids = [...new Set(userIds.filter(Boolean))]
   const map = new Map<string, any>()
@@ -141,27 +132,26 @@ async function manejarReporte(nuevo: any) {
         if (!enLocalidad && !enProvincia) return false
         // Provincia entera o varias ciudades: avisamos de todos los barrios.
         const variasZonas = enProvincia || locs.length > 1
-        const porBarrio =
+        // Antes esto era `porBarrio || porRadio`, con un punto+radio propio. Se
+        // fue: hacía lo mismo que "Mis ubicaciones" (ver abajo) y los dos caían
+        // en el mismo destC. A los que tenían punto marcado el SQL de migración
+        // les abre todos los barrios, así no pierden alcance sin enterarse.
+        return (
           variasZonas ||
           (Array.isArray(p.barrios) && (p.barrios.includes('*') || (nuevo.zona && p.barrios.includes(nuevo.zona))))
-        const porRadio =
-          p.centro_lat != null &&
-          nuevo.lat != null &&
-          nuevo.lng != null &&
-          distanciaKm(p.centro_lat, p.centro_lng, nuevo.lat, nuevo.lng) <= (p.radio_km || 5)
-        return porBarrio || porRadio
+        )
       })
       .map((p: any) => p.user_id)
 
-    // Zonas guardadas en "Mis ubicaciones" (avisar=true) dentro del radio del nuevo aviso.
-    let destUbic: string[] = []
-    if (nuevo.lat != null && nuevo.lng != null) {
-      const { data: ubis } = await sb.from('ubicaciones').select('user_id, lat, lng, radio_km').eq('avisar', true)
-      destUbic = (ubis || [])
-        .filter((u: any) => u.user_id !== nuevo.user_id)
-        .filter((u: any) => distanciaKm(u.lat, u.lng, nuevo.lat, nuevo.lng) <= (u.radio_km || 3))
-        .map((u: any) => u.user_id)
-    }
+    // Lugares de "Mis ubicaciones" (avisar=true) en la misma ciudad que el aviso.
+    // Antes era geométrico (lat/lng + radio). Ahora es por nombre de ciudad: el
+    // barrio no sirve de llave (el 38% viene escrito a mano) y así también
+    // avisamos de los avisos que no traen coords.
+    const { data: ubis } = await sb.from('ubicaciones').select('user_id, localidad').eq('avisar', true)
+    const destUbic = (ubis || [])
+      .filter((u: any) => u.user_id !== nuevo.user_id)
+      .filter((u: any) => u.localidad && u.localidad === (nuevo.localidad || 'Paraná'))
+      .map((u: any) => u.user_id)
 
     const destC = [...new Set([...destPrefs, ...destUbic])]
     if (destC.length) {

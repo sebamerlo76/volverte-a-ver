@@ -320,6 +320,35 @@ export function coordsDeBarrioEn(loc, barrio) {
   return barriosDe(loc)[barrio] || centroDe(loc)
 }
 
+// Distancia en km entre dos puntos (haversine).
+export function distanciaKm(lat1, lng1, lat2, lng2) {
+  const R = 6371
+  const rad = (d) => (d * Math.PI) / 180
+  const dLat = rad(lat2 - lat1)
+  const dLng = rad(lng2 - lng1)
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLng / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(a))
+}
+
+// La ciudad cargada más cercana a un punto, o null si no hay ninguna cerca.
+// El tope existe para no mentir: un punto en el medio del campo no "es" la ciudad
+// que quedó a 200 km. 60 km cubre a los que viven en las afueras de una ciudad
+// cargada, sin llegar a la de al lado.
+export function ciudadMasCercana(lat, lng, topeKm = 60) {
+  if (lat == null || lng == null) return null
+  let mejor = null
+  let mejorKm = Infinity
+  for (const l of NOMBRES_LOCALIDADES) {
+    const c = centroDe(l)
+    const km = distanciaKm(lat, lng, c[0], c[1])
+    if (km < mejorKm) {
+      mejorKm = km
+      mejor = l
+    }
+  }
+  return mejorKm <= topeKm ? mejor : null
+}
+
 // --- Ciudad recordada (la última que usó el usuario en este dispositivo) ---
 // Así un vecino de Crespo no tiene que cambiar el selector cada vez que publica.
 const LS_LOCALIDAD = 'chicho_localidad'

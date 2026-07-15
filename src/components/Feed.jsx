@@ -55,7 +55,9 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
     setFiltro('zona', null) // los barrios cambian según la ciudad
     setQBarrio('')
     recordarScopeFeed(l, null)
-    if (l) recordarLocalidad(l) // el default de publicar sigue una ciudad real
+    // Ojo: acá NO se toca tu ciudad. Mirar no es mudarse — antes, curiosear otra
+    // ciudad en el feed te cambiaba desde dónde publicabas. Tu ciudad sale de
+    // "Mis ubicaciones" (ver App.jsx).
     setCiudadSheet(false)
   }
   function elegirProvincia(p) {

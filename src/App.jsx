@@ -22,11 +22,11 @@ import Moderacion from './components/Moderacion.jsx'
 import Soporte from './components/Soporte.jsx'
 import Lightbox from './components/Lightbox.jsx'
 import NuevaPassword from './components/NuevaPassword.jsx'
-import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, borrarReporteAdmin, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte } from './data/store.js'
+import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, borrarReporteAdmin, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte, getUbicaciones } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { contarLogin, logins, pasosOk } from './lib/pasos.js'
 import { nombreMostrado } from './lib/formato.js'
-import { scopeFeedGuardado, provinciaDe } from './lib/localidades.js'
+import { scopeFeedGuardado, provinciaDe, recordarLocalidad } from './lib/localidades.js'
 import { confirmar } from './lib/confirmar.js'
 import { compartirFlyer } from './lib/flyer.js'
 import FestejoReencuentro from './components/FestejoReencuentro.jsx'
@@ -274,6 +274,22 @@ export default function App() {
   useEffect(() => {
     if (user?.id) getNotificaciones(user.id).then(setNotifs).catch(() => setNotifs([]))
     else setNotifs([])
+  }, [user?.id])
+
+  // Tu ciudad sale de tu primer lugar guardado (tu "Casa"): es lo único que
+  // declaraste a propósito. Antes salía del último toque en cualquier lado —
+  // incluso de mirar otra ciudad en el feed— y terminabas publicando desde una
+  // ciudad en la que nunca estuviste.
+  // La cacheamos en chicho_localidad (en vez de pasarla por props) para que los
+  // seis lugares que la leen la sigan leyendo sync, sin esperar a la base.
+  useEffect(() => {
+    if (!user?.id) return
+    getUbicaciones(user.id)
+      .then((us) => {
+        const casa = us.find((u) => u.localidad)
+        if (casa) recordarLocalidad(casa.localidad)
+      })
+      .catch(() => {}) // si falla, queda la última que elegiste: como antes
   }, [user?.id])
 
   // Refrescar al entrar a Mi cuenta, para que el chip "Novedad" esté al día.

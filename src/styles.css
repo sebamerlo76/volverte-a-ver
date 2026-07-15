@@ -950,22 +950,6 @@ select {
   flex: 0 1 auto;
   padding: 7px 12px;
 }
-.cerca-adv-toggle {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 12px;
-  padding: 6px 0;
-  border: none;
-  background: none;
-  color: var(--navy);
-  font-family: Nunito, sans-serif;
-  font-weight: 800;
-  font-size: 13px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-color: #c9d2da;
-}
 .esp-chip.dim {
   opacity: 0.4;
 }
@@ -983,9 +967,6 @@ select {
   font-family: Nunito, sans-serif;
   font-weight: 800;
   font-size: 14.5px;
-}
-.cerca-adv {
-  margin-top: 8px;
 }
 .esp-chip {
   flex: 1;
@@ -3334,6 +3315,29 @@ select {
   border-radius: 12px;
   padding: 10px 12px;
   line-height: 1.45;
+}
+/* "Ya te avisamos de tus lugares (Casa, Trabajo)". Es un dato, no una acción:
+   explica de dónde salen avisos que el usuario no tildó en esta pantalla. */
+.cerca-lugares {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #eef3fb;
+  border: 1px solid #d5e2f4;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #5c6a7d;
+  line-height: 1.45;
+}
+.cerca-lugares > .mi {
+  flex: none;
+  margin-top: 1px;
+}
+.cerca-lugares b {
+  color: var(--navy);
 }
 
 /* Encontré: mensaje cuando no hay perdidos que coincidan */
