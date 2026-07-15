@@ -521,6 +521,26 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
           </>
         )}
 
+        {/* En qué ciudad estamos buscando. Va afuera del bloque de coincidencias y no
+            mira cuántas hay: sin resultados es JUSTO cuando más hace falta, porque si
+            no la pantalla queda vacía y no se entiende por qué. Hasta el paso 4 la
+            ciudad es una suposición (la última que usaste), así que la decimos y
+            dejamos corregirla acá mismo. En el paso 4 no va: ahí el selector ya está
+            a la vista. */}
+        {especie && paso <= 3 && NOMBRES_LOCALIDADES.length > 1 && (
+          <div className="coinc-ambito">
+            <span className="mi" style={{ fontSize: 15 }}>
+              place
+            </span>
+            <span className="coinc-ambito-txt">
+              Buscando en <b>{localidad}</b> y alrededores
+            </span>
+            <button type="button" className="coinc-ambito-btn" onClick={() => setCiudadSheet(true)}>
+              Cambiar
+            </button>
+          </div>
+        )}
+
         {coincidencias.length > 0 && (
           <div className="coinc">
             <div className="coinc-t">
@@ -534,22 +554,6 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
                 ? 'Ordenados por parecido a tu foto 🔍'
                 : 'Fijate si su familia ya lo está buscando — así lo devolvés al toque.'}
             </div>
-            {/* De dónde salen estas coincidencias. Hasta el paso 4 la ciudad es una
-                suposición (la última que usaste), así que la decimos y dejamos
-                corregirla acá mismo: si lo encontraste viajando, si no, no se
-                entiende por qué aparecen perdidos de otro lado. En el paso 4 no va:
-                ahí el selector de ciudad ya está a la vista. */}
-            {paso !== 4 && NOMBRES_LOCALIDADES.length > 1 && (
-              <div className="coinc-ambito">
-                <span className="mi" style={{ fontSize: 15 }}>place</span>
-                <span className="coinc-ambito-txt">
-                  Buscando en <b>{localidad}</b> y alrededores
-                </span>
-                <button type="button" className="coinc-ambito-btn" onClick={() => setCiudadSheet(true)}>
-                  Cambiar
-                </button>
-              </div>
-            )}
             {coincidencias.map((r) => (
               <button className="bres-row" key={r.id} onClick={() => setMatchPreview(r)}>
                 <div className="bres-foto">
@@ -575,9 +579,11 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
           </div>
         )}
 
-        {/* Sin coincidencias: avisamos igual, así no queda la duda de qué pasó.
-            En el paso de la foto (3), recién cuando terminó de analizar y hay foto. */}
-        {especie && coincidencias.length === 0 && paso >= 2 && (paso !== 3 || (fotos.length > 0 && !analizando)) && (
+        {/* Sin coincidencias: avisamos igual, así no queda la duda de qué pasó. Desde
+            el paso 1: apenas elegís la especie ya buscamos, y si no hay nada la
+            pantalla quedaba en blanco sin decir ni por qué. En el paso de la foto (3),
+            recién cuando terminó de analizar y hay foto. */}
+        {especie && paso <= 4 && coincidencias.length === 0 && (paso !== 3 || (fotos.length > 0 && !analizando)) && (
           <div className="coinc-vacio">
             <span className="mi" style={{ fontSize: 21, color: 'var(--muted)' }}>
               search_off

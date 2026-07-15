@@ -1196,9 +1196,18 @@ select {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 0 0 9px;
+  margin: 20px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
   min-height: 26px;
   color: var(--muted);
+}
+/* Cuando abajo vienen las coincidencias, la línea de arriba la pone este bloque:
+   si la pusieran los dos quedarían dos rayas pegadas. */
+.coinc-ambito + .coinc {
+  margin-top: 10px;
+  border-top: none;
+  padding-top: 0;
 }
 .coinc-ambito-txt {
   flex: 1;
