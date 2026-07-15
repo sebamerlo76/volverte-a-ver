@@ -114,10 +114,13 @@ export default function EncontreWizard({ reportes = [], scopeProvincia = null, t
       if (!r[campo]) return true // si el otro no especificó, no lo descarto
       return r[campo] === valor
     }
-    // Ámbito: si en el feed hay una provincia entera elegida, buscamos en toda la
-    // provincia; si no, en la localidad (igual que el matching de notificaciones).
-    const enAmbito = (r) =>
-      scopeProvincia ? provinciaDe(r.localidad || 'Paraná') === scopeProvincia : (r.localidad || 'Paraná') === localidad
+    // Ámbito: la provincia manda. Si el feed tiene una elegida, esa; si no
+    // (incluido "Todas"), la de la ciudad donde lo encontraste. Antes, sin
+    // provincia en el feed, se buscaba solo en esa ciudad y se perdían los
+    // vecinos del ejido: un perdido a 10 cuadras pero del otro lado del límite
+    // no aparecía. El país entero, en cambio, sería puro ruido.
+    const ambito = scopeProvincia || provinciaDe(localidad)
+    const enAmbito = (r) => provinciaDe(r.localidad || 'Paraná') === ambito
     let arr = reportes.filter((r) => r.tipo === 'perdido' && r.estado === 'activo' && r.especie === especie && enAmbito(r))
     if (paso >= 2) {
       arr = arr.filter((r) => compat(r, 'color', color) && compat(r, 'tamano', tamano) && compat(r, 'sexo', sexo, true))
@@ -133,9 +136,22 @@ export default function EncontreWizard({ reportes = [], scopeProvincia = null, t
         .map((o) => o.r)
     }
     if (paso >= 4) {
-      arr = arr.filter((r) => compat(r, 'zona', zona))
+      // El barrio solo discrimina dentro de tu ciudad: los nombres se repiten
+      // ("Centro" está en todas), así que un "Centro" de la ciudad de al lado
+      // pasaría como si fuera tu barrio. A las otras ciudades de la provincia no
+      // les aplicamos el filtro: ya quedan últimas por cercanía.
+      arr = arr.filter((r) => ((r.localidad || 'Paraná') === localidad ? compat(r, 'zona', zona) : true))
     }
-    return [...arr].sort((a, b) => (a.zona === zona ? 0 : 1) - (b.zona === zona ? 0 : 1)).slice(0, 4)
+    // Cercanía: mismo barrio primero, después el resto de tu ciudad, y al final
+    // las otras ciudades de la provincia. Solo mostramos 4, así que arriba tienen
+    // que quedar los más probables. (Pedir el mismo barrio sin mirar la ciudad
+    // empataría un "Centro" de otra ciudad con el tuyo.)
+    const cerca = (r) => {
+      const mismaCiudad = (r.localidad || 'Paraná') === localidad
+      if (mismaCiudad && r.zona === zona) return 0
+      return mismaCiudad ? 1 : 2
+    }
+    return [...arr].sort((a, b) => cerca(a) - cerca(b)).slice(0, 4)
   }, [reportes, especie, color, tamano, sexo, zona, paso, huella, localidad, scopeProvincia])
 
   // --- Acordeón del paso 2 ---
