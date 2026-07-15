@@ -38,11 +38,19 @@ update public.notif_prefs
 
 
 -- ===========================================================================
--- PASO C — DESTRUCTIVO. Recién cuando el paso B esté verificado a ojo.
--- Los lat/lng originales no se recuperan después de esto.
+-- PASO C — DESTRUCTIVO. Recién cuando el paso B esté verificado a ojo, y con la
+-- app nueva andando en el celu. Los lat/lng originales no se recuperan.
+--
+-- OJO: correr SOLO este bloque, no el archivo entero (los pasos A y B ya
+-- corrieron). Seleccionalo y dale Run.
+--
+-- Antes estaba comentado con "--" para que no se disparara sin querer, pero eso
+-- confunde más de lo que protege: Postgres ignora la línea y te contesta
+-- "Success" igual, así que parece que corrió y no corrió nada.
 -- ===========================================================================
--- alter table public.ubicaciones drop column lat, drop column lng, drop column radio_km;
--- alter table public.ubicaciones alter column localidad set not null;
+alter table public.ubicaciones drop column lat, drop column lng, drop column radio_km;
+alter table public.ubicaciones alter column localidad set not null;
 
--- Idem notif_prefs: su punto+radio ya no lo lee nadie.
--- alter table public.notif_prefs drop column centro_lat, drop column centro_lng, drop column radio_km;
+-- Idem notif_prefs: su punto+radio ya no lo lee nadie. Ojo: esto va DESPUÉS del
+-- update de barrios del paso B, que necesita centro_lat para saber a quién tocar.
+alter table public.notif_prefs drop column centro_lat, drop column centro_lng, drop column radio_km;
