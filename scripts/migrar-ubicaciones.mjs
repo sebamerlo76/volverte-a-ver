@@ -32,6 +32,13 @@ if (!URL_SB || !KEY) {
   console.error('✗ Faltan las variables SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY.')
   process.exit(1)
 }
+// Se pega la plantilla tal cual más seguido de lo que uno quisiera, y el error que
+// sale (fetch failed) no ayuda en nada: parece un problema de red.
+if (/TU-REF|TU_SERVICE|tu-ref/i.test(URL_SB) || /TU_SERVICE|TU-SERVICE/i.test(KEY)) {
+  console.error('✗ Las variables tienen el texto de ejemplo, no tus datos reales.')
+  console.error('  La URL sale de Supabase → Settings → API → Project URL.')
+  process.exit(1)
+}
 const sb = createClient(URL_SB, KEY)
 
 const { data: ubis, error } = await sb.from('ubicaciones').select('id, nombre, lat, lng, localidad').order('creado_en')
@@ -39,6 +46,13 @@ if (error) {
   console.error('✗ No se pudieron leer las ubicaciones:', error.message)
   if (/column .* does not exist/i.test(error.message)) {
     console.error('  ¿Corriste el PASO A de supabase/schema-ubicaciones-ciudad.sql?')
+  }
+  if (/fetch failed/i.test(error.message)) {
+    console.error(`  No se pudo llegar a ${URL_SB} — es un problema de red, no de permisos.`)
+    console.error('  Fijate que la URL sea la tuya (Supabase → Settings → API → Project URL).')
+  }
+  if (/JWT|Unauthorized|invalid/i.test(error.message)) {
+    console.error('  La key no es la correcta: tiene que ser la service_role (un JWT largo que arranca con eyJ).')
   }
   process.exit(1)
 }
