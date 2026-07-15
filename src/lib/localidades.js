@@ -312,6 +312,13 @@ export function distanciaKm(lat1, lng1, lat2, lng2) {
 // El tope existe para no mentir: un punto en el medio del campo no "es" la ciudad
 // que quedó a 200 km. 60 km cubre a los que viven en las afueras de una ciudad
 // cargada, sin llegar a la de al lado.
+//
+// OJO, NO SIRVE PARA PARTIR UNA CIUDAD EN BARRIOS. Compara contra el `center`, que
+// es un punto, no un límite. En un conurbano miente feo: el centro de Colonia
+// Avellaneda está a 4,2 km del de Paraná, pero Paraná (250 mil hab.) es más ancha
+// que eso — así que medio Paraná "cae" en Colonia Avellaneda. Comprobado: con esto
+// el barrio llamado "Ciudad de Paraná" da Colonia Avellaneda. Vale para "¿en qué
+// zona del país está este punto?", no para "¿de qué ciudad es este barrio?".
 export function ciudadMasCercana(lat, lng, topeKm = 60) {
   if (lat == null || lng == null) return null
   let mejor = null
