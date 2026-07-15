@@ -1,5 +1,9 @@
+// ⚠️ YA SE CORRIÓ Y NO SE PUEDE VOLVER A CORRER (2026-07-15, 13 ubicaciones).
+// Queda como registro de cómo se migró. Hoy tira "column ubicaciones.lat does not
+// exist": el PASO C borró lat/lng, que es justo lo que este script lee.
+//
 // Traduce las "Mis ubicaciones" viejas (lat/lng + radio) al vocabulario nuevo
-// (ciudad + barrio). Es el PASO B de supabase/schema-ubicaciones-ciudad.sql.
+// (ciudad + barrio). Era el PASO B de supabase/schema-ubicaciones-ciudad.sql.
 //
 // POR QUÉ UN SCRIPT Y NO SQL:
 // - Importa el localidades.js REAL, así que usa los mismos centros de ciudad que

@@ -28,9 +28,11 @@ create table if not exists public.notif_prefs (
   avisar_match boolean not null default true,
   avisar_avistamiento boolean not null default true,
   avisar_cerca boolean not null default false,
-  centro_lat double precision,
-  centro_lng double precision,
-  radio_km integer not null default 5,
+  -- Acá había centro_lat/centro_lng/radio_km (un punto y un radio). Se borraron el
+  -- 2026-07-15: hacían lo mismo que "Mis ubicaciones" y las dos ramas terminaban en
+  -- el mismo destC de la función notificar. El alcance ahora se define por nombre,
+  -- con las columnas que agregan schema-localidad.sql y provincia-notifs.sql
+  -- (localidades[], provincias[], barrios[]). Ver schema-ubicaciones-ciudad.sql.
   especie text not null default 'todas',
   creado_en timestamptz not null default now()
 );

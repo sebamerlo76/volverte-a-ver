@@ -1,14 +1,20 @@
--- "Mis ubicaciones": lugares guardados del usuario (casa, trabajo) que además
--- pueden funcionar como zonas de aviso ("avisame de avisos cerca de acá").
+-- "Mis ubicaciones": los lugares del usuario (casa, trabajo). Son la única fuente
+-- de "dónde estás": de acá sale su ciudad por defecto al publicar y a quién
+-- notificar.
+--
+-- OJO: esto tenía lat/lng + radio_km y se migró a ciudad + barrio (2026-07-15).
+-- La historia y el porqué están en schema-ubicaciones-ciudad.sql. Este archivo
+-- quedó actualizado al schema REAL: si armás un proyecto nuevo desde acá, tiene
+-- que quedar como está en producción. (Con las columnas viejas, la app no arranca:
+-- lat era obligatoria y el código ya no la manda.)
 
 create table if not exists public.ubicaciones (
   id         uuid primary key default gen_random_uuid(),
   user_id    uuid not null references auth.users(id) on delete cascade,
-  nombre     text not null,
-  lat        double precision not null,
-  lng        double precision not null,
-  radio_km   int not null default 3,
-  avisar     boolean not null default true, -- usar como zona de aviso
+  nombre     text not null,             -- lo escribe el usuario: "Casa", "Trabajo"
+  localidad  text not null,             -- ciudad; es lo que matchea notificar
+  zona       text,                      -- barrio, opcional: sólo para reconocer el lugar
+  avisar     boolean not null default true, -- ¿te avisamos de los avisos de esta ciudad?
   creado_en  timestamptz not null default now()
 );
 

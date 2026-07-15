@@ -1,11 +1,14 @@
 // Ciudades y sus barrios. Para sumar una ciudad nueva (ej. Santa Fe) basta
 // agregar un objeto acá — no hay que tocar el resto del código.
 //
-// NOTA: las coordenadas de los barrios son APROXIMADAS (un punto central por
-// barrio). Se usan como fallback para ubicar un pin cuando el aviso no tiene
-// ubicación exacta, y como centro del radio. El matching de notificaciones por
-// barrio es por NOMBRE, así que las coords no necesitan ser exactas. Se pueden
-// refinar con el tiempo.
+// NOTA: las coordenadas de los barrios son un punto por barrio, no un polígono —
+// no hay límites en ningún lado. Se usan para ubicar el pin cuando el aviso no
+// trae ubicación exacta, y para proponer el barrio de un punto (barrioMasCercano).
+// El matching de notificaciones es por NOMBRE, no por geometría.
+//
+// Las de las ciudades bajadas de OSM son buenas (un nodo real por barrio); las
+// cargadas a mano son aproximadas. Se puede ver cuál es cuál por el tamaño de la
+// lista: OSM da decenas o cientos, a mano dan 5 (Centro/Norte/Sur/Este/Oeste).
 import { CORDOBA_BARRIOS, CORDOBA_CENTER } from './cordoba.js'
 import { NEUQUEN_BARRIOS, NEUQUEN_CENTER } from './neuquen.js'
 import { OLAVARRIA_BARRIOS, OLAVARRIA_CENTER } from './olavarria.js'

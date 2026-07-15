@@ -38,7 +38,7 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
 
 **Inteligente**
 - **Reconocimiento visual** 🐶🔍: al cargar un "Encontré", sugiere los perdidos **parecidos por foto** (modelo CLIP corriendo en el navegador, gratis y privado).
-- **Notificaciones push** 🔔: "apareció una parecida" (usa el reconocimiento), "alguien vio a tu mascota", "nuevo aviso en tu zona" (por **barrios** o punto+radio). PWA + Edge Function en Supabase.
+- **Notificaciones push** 🔔: "apareció una parecida" (usa el reconocimiento), "alguien vio a tu mascota", "nuevo aviso en tu zona" (por **ciudad o provincia**, más los barrios si elegiste una sola ciudad; y tus lugares de "Mis ubicaciones" van solos). PWA + Edge Function en Supabase.
 - **Seguir una mascota**: botón Seguir en el aviso + cartelito para crear cuenta al dejar un avistamiento → te llegan las novedades y el "🎉 ¡apareció!".
 - **QR para el collar**: chapita imprimible que abre el perfil público (`/m/<id>`) con WhatsApp.
 
