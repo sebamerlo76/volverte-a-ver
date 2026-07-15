@@ -211,12 +211,18 @@ export default function NotifPrefs({ user, onToast, onListo }) {
                     <div className="cerca-prov-h">
                       <span className="cerca-prov-n">{g.provincia}</span>
                       {g.ciudades.length > 1 && (
-                        <button
-                          className={'cerca-prov-toda' + (provEntera ? ' on' : '')}
-                          onClick={() => toggleProvincia(g)}
-                        >
-                          {provEntera ? '✓ Toda la provincia' : 'Toda la provincia'}
-                        </button>
+                        <div className="cerca-prov-toda">
+                          <span>Toda la provincia</span>
+                          <button
+                            className={'switch sm' + (provEntera ? ' on' : '')}
+                            onClick={() => toggleProvincia(g)}
+                            role="switch"
+                            aria-checked={provEntera}
+                            aria-label={`Toda la provincia de ${g.provincia}`}
+                          >
+                            <span className="switch-k" />
+                          </button>
+                        </div>
                       )}
                     </div>
                     <div className="barrio-chips">
