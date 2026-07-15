@@ -36,6 +36,7 @@ export default function MisUbicaciones({ user, onToast }) {
   const [guardando, setGuardando] = useState(false)
   const [editId, setEditId] = useState(null)
   const [ciudadSheet, setCiudadSheet] = useState(false)
+  const [mapaGrande, setMapaGrande] = useState(false) // 180px no alcanza para buscar una calle
   // Punto del mapa. NO se guarda: es sólo para encontrar el barrio y mirarlo.
   const [punto, setPunto] = useState(() => {
     const c = centroDe(localidadGuardada())
@@ -183,15 +184,29 @@ export default function MisUbicaciones({ user, onToast }) {
 
         <div className="flabel">¿No sabés el barrio? Buscá tu calle</div>
         <BuscarDireccion localidad={localidad} onEncontrado={irAlPunto} onToast={onToast} />
-        <div className="mappick" style={{ height: 180, marginTop: 8 }}>
+        {/* Se agranda acá mismo, sin abrir otra pantalla: si fuera una vista aparte
+            este componente se desmonta y perdés lo que venías cargando. Crece el
+            contenedor nomás — el ResizeObserver de MapaLeaflet se encarga del resto. */}
+        <div className="mappick" style={{ height: mapaGrande ? '62vh' : 180, marginTop: 8 }}>
           <MapaLeaflet
             center={[punto.lat, punto.lng]}
-            zoom={14}
+            zoom={mapaGrande ? 16 : 14}
             interactivo
             onGps={irAlPunto}
             onMapaClick={irAlPunto}
             marcadores={[{ id: 'u', lat: punto.lat, lng: punto.lng, tipo: 'avistamiento' }]}
           />
+          <button
+            type="button"
+            className="map-expand"
+            onClick={() => setMapaGrande((v) => !v)}
+            aria-label={mapaGrande ? 'Achicar el mapa' : 'Agrandar el mapa'}
+            aria-expanded={mapaGrande}
+          >
+            <span className="mi" style={{ fontSize: 20, color: '#2a2320' }}>
+              {mapaGrande ? 'close_fullscreen' : 'open_in_full'}
+            </span>
+          </button>
           <div className="hint">Tocá el mapa y te decimos el barrio 👆</div>
         </div>
         <div className="ubic-nota">

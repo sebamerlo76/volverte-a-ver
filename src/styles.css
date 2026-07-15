@@ -2285,6 +2285,9 @@ select {
   overflow: hidden;
   border: 1.5px solid var(--line);
   height: 130px;
+  /* Para el mapa que se agranda (Mis ubicaciones). Los demás no cambian de alto,
+     así que no les cambia nada. */
+  transition: height 0.22s ease;
 }
 .mappick .hint {
   position: absolute;

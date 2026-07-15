@@ -75,7 +75,17 @@ export default function MapaLeaflet({
     // Leaflet a veces necesita recalcular tamaño cuando el contenedor recién apareció.
     setTimeout(() => m.invalidateSize(), 250)
 
+    // Y cada vez que el contenedor cambia de tamaño: Leaflet mide una sola vez y se
+    // queda con eso, así que si crece después le quedan tiles grises al costado.
+    // Pasa al agrandar el mapa para buscar una dirección, o al rotar el celu.
+    let ro = null
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(() => m.invalidateSize())
+      ro.observe(contRef.current)
+    }
+
     return () => {
+      ro?.disconnect()
       m.remove()
       mapRef.current = null
     }
