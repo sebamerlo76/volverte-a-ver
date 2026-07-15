@@ -147,13 +147,22 @@ async function manejarReporte(nuevo: any) {
     // Antes era geométrico (lat/lng + radio). Ahora es por nombre de ciudad: el
     // barrio no sirve de llave (el 38% viene escrito a mano) y así también
     // avisamos de los avisos que no traen coords.
-    const { data: ubis } = await sb.from('ubicaciones').select('user_id, localidad').eq('avisar', true)
+    const { data: ubis, error: errUbis } = await sb.from('ubicaciones').select('user_id, localidad').eq('avisar', true)
+    // El error se loguea SÍ o SÍ. Sin esto, `ubis || []` lo tapa: la consulta
+    // falla, no avisamos a nadie, la función devuelve 200 y nadie se entera nunca.
+    // Es justo lo que pasaría corriendo la versión vieja contra el schema nuevo.
+    if (errUbis) console.error('notificar: no se pudieron leer las ubicaciones →', errUbis.message)
     const destUbic = (ubis || [])
       .filter((u: any) => u.user_id !== nuevo.user_id)
       .filter((u: any) => u.localidad && u.localidad === (nuevo.localidad || 'Paraná'))
       .map((u: any) => u.user_id)
 
     const destC = [...new Set([...destPrefs, ...destUbic])]
+    // Rastro para poder responder "¿anduvo?" sin adivinar. Cero destinatarios es
+    // un resultado válido, pero hay que poder distinguirlo de que algo se rompió.
+    console.log(
+      `notificar cerca: aviso en ${nuevo.localidad || 'Paraná'} · ${destPrefs.length} por prefs + ${destUbic.length} por ubicaciones = ${destC.length} a notificar`
+    )
     if (destC.length) {
       const tipoTxt = nuevo.tipo === 'perdido' ? 'perdido' : 'encontrado'
       await enviarAUsuarios(
