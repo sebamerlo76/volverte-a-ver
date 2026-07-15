@@ -3,7 +3,7 @@ import MapaLeaflet from './MapaLazy.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { badgeEstado, subLinea, textoTipo } from '../lib/estados.js'
-import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero } from '../data/store.js'
+import { getAvistamientos, sumarApoyo, sumarAplauso, denunciarReporte, reportarNumero, reportesDeNumero } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel } from '../lib/formato.js'
 import { compartirFlyer } from '../lib/flyer.js'
 
@@ -43,6 +43,25 @@ function marcarApoyado(id) {
     if (!a.includes(id)) {
       a.push(id)
       localStorage.setItem('chicho_apoyos', JSON.stringify(a))
+    }
+  } catch (e) {
+    /* ignore */
+  }
+}
+// ¿Este dispositivo ya aplaudió este reencuentro? (mismo patrón que los apoyos)
+function yaAplaudido(id) {
+  try {
+    return JSON.parse(localStorage.getItem('chicho_aplausos') || '[]').includes(id)
+  } catch (e) {
+    return false
+  }
+}
+function marcarAplaudido(id) {
+  try {
+    const a = JSON.parse(localStorage.getItem('chicho_aplausos') || '[]')
+    if (!a.includes(id)) {
+      a.push(id)
+      localStorage.setItem('chicho_aplausos', JSON.stringify(a))
     }
   } catch (e) {
     /* ignore */
@@ -98,6 +117,8 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
   const [fotoActiva, setFotoActiva] = useState(0)
   const [apoyos, setApoyos] = useState(r?.apoyos || 0)
   const [apoyado, setApoyado] = useState(false)
+  const [aplausos, setAplausos] = useState(r?.aplausos || 0)
+  const [aplaudido, setAplaudido] = useState(false)
   const [reporteAbierto, setReporteAbierto] = useState(false)
   const [numeroSheet, setNumeroSheet] = useState(false)
   const [numReportes, setNumReportes] = useState(0)
@@ -132,6 +153,26 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
     setApoyos(r?.apoyos || 0)
     setApoyado(yaApoyado(r?.id))
   }, [r?.id, r?.apoyos])
+
+  // Idem el de aplausos (reencuentros).
+  useEffect(() => {
+    setAplausos(r?.aplausos || 0)
+    setAplaudido(yaAplaudido(r?.id))
+  }, [r?.id, r?.aplausos])
+
+  // Aplaudir un reencuentro: una vez por dispositivo, sin login.
+  async function aplaudir() {
+    if (aplaudido || !r?.id) return
+    setAplaudido(true)
+    setAplausos((n) => n + 1)
+    marcarAplaudido(r.id) // antes del await: evita que un doble toque dispare 2 RPC
+    try {
+      const total = await sumarAplauso(r.id)
+      if (typeof total === 'number') setAplausos(total)
+    } catch (e) {
+      console.error(e) // el +1 optimista queda igual
+    }
+  }
 
   // Compartir = apoyar: abre el compartir Y suma al contador (una vez por dispositivo).
   async function compartirYSumar() {
@@ -290,33 +331,52 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
             </button>
           )}
 
-          <button className="btn-compartir" onClick={() => compartirFlyer(r, onToast)}>
-            <span className="mi" style={{ fontSize: 20 }}>
-              share
-            </span>
-            Compartir para ayudar
-          </button>
-
-          <div className="apoyo-box">
-            <span className="mi fill apoyo-ico">volunteer_activism</span>
-            <div className="apoyo-txt">
-              {apoyos > 0 ? (
-                <>
-                  <b>{apoyos}</b> {apoyos === 1 ? 'persona' : 'personas'} ayudando a difundir
-                </>
-              ) : (
-                <>Sumate a difundir a {nombreMostrado(r)}</>
-              )}
-            </div>
-            {r.estado !== 'resuelto' && (
-              <button className={'apoyo-btn' + (apoyado ? ' on' : '')} onClick={compartirYSumar}>
-                <span className="mi" style={{ fontSize: 16 }}>ios_share</span>
-                {apoyado ? 'Compartir' : 'Me sumo'}
+          {/* Ya en casa: nada de difundir/buscar — se festeja. Si sigue activo, lo de siempre. */}
+          {resuelto ? (
+            <div className="aplauso-box">
+              <span className="mi fill aplauso-ico">celebration</span>
+              <div className="aplauso-txt">
+                {aplausos > 0 ? (
+                  <>
+                    <b>{aplausos}</b> {aplausos === 1 ? 'aplauso' : 'aplausos'} 👏
+                  </>
+                ) : (
+                  <>¡Volvió a casa! Festejalo 👏</>
+                )}
+              </div>
+              <button className={'aplauso-btn' + (aplaudido ? ' on' : '')} onClick={aplaudir} disabled={aplaudido}>
+                {aplaudido ? '¡Aplaudiste! ✓' : '👏 Aplaudir'}
               </button>
-            )}
-          </div>
+            </div>
+          ) : (
+            <>
+              <button className="btn-compartir" onClick={() => compartirFlyer(r, onToast)}>
+                <span className="mi" style={{ fontSize: 20 }}>
+                  share
+                </span>
+                Compartir para ayudar
+              </button>
 
-          {r.enCustodia ? (
+              <div className="apoyo-box">
+                <span className="mi fill apoyo-ico">volunteer_activism</span>
+                <div className="apoyo-txt">
+                  {apoyos > 0 ? (
+                    <>
+                      <b>{apoyos}</b> {apoyos === 1 ? 'persona' : 'personas'} ayudando a difundir
+                    </>
+                  ) : (
+                    <>Sumate a difundir a {nombreMostrado(r)}</>
+                  )}
+                </div>
+                <button className={'apoyo-btn' + (apoyado ? ' on' : '')} onClick={compartirYSumar}>
+                  <span className="mi" style={{ fontSize: 16 }}>ios_share</span>
+                  {apoyado ? 'Compartir' : 'Me sumo'}
+                </button>
+              </div>
+            </>
+          )}
+
+          {!resuelto && r.enCustodia ? (
             <div className="en-custodia">
               <span className="mi" style={{ fontSize: 19, color: '#177f73' }}>
                 volunteer_activism
@@ -325,7 +385,7 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
             </div>
           ) : null}
 
-          {r.recompensa ? (
+          {!resuelto && r.recompensa ? (
             <div className="recompensa-box">
               <div className="recompensa-top">
                 <span className="mi fill" style={{ fontSize: 20 }}>
@@ -347,16 +407,31 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
           ) : null}
 
           <div className="facts">
-            <div className="factbox">
-              <div className="k">{perdido ? 'Se perdió' : 'Se encontró'}</div>
-              <div className="v">{fechaLegible(r.fechaEvento || r.creadoEn)}</div>
-            </div>
+            {/* Resuelto: no tiene sentido "Se perdió"; mostramos cuándo volvió (si lo
+                sabemos — los reencuentros viejos no tienen la fecha). */}
+            {resuelto ? (
+              r.resueltoEn ? (
+                <div className="factbox">
+                  <div className="k">Volvió a casa</div>
+                  <div className="v">{fechaLegible(r.resueltoEn)}</div>
+                </div>
+              ) : null
+            ) : (
+              <div className="factbox">
+                <div className="k">{perdido ? 'Se perdió' : 'Se encontró'}</div>
+                <div className="v">{fechaLegible(r.fechaEvento || r.creadoEn)}</div>
+              </div>
+            )}
             <div className="factbox">
               <div className="k">Publicado por</div>
               <div className="v">{r.autor || 'Anónimo'}</div>
             </div>
           </div>
 
+          {/* Mapa, recorrido y avistamientos: solo mientras se busca. En un reencuentro
+              ya no aplican (y el "Escribirle" de cada avistador sería contacto). */}
+          {!resuelto && (
+            <>
           <div className="sec-t" style={{ marginTop: 18, color: 'var(--teal)' }}>
             {avist.length > 0 ? `Recorrido · ${avist.length} avistamiento${avist.length === 1 ? '' : 's'}` : 'Última zona conocida'}
           </div>
@@ -384,14 +459,12 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
             Ver el mapa completo (mover y hacer zoom)
           </button>
 
-          {r.estado !== 'resuelto' && (
-            <button className="btn-avistar" onClick={() => onAvistar(r)}>
-              <span className="mi" style={{ fontSize: 22 }}>
-                visibility
-              </span>
-              ¡Lo vi acá!
-            </button>
-          )}
+          <button className="btn-avistar" onClick={() => onAvistar(r)}>
+            <span className="mi" style={{ fontSize: 22 }}>
+              visibility
+            </span>
+            ¡Lo vi acá!
+          </button>
 
           {avist.length > 0 && (
             <div className="avist-lista">
@@ -427,8 +500,10 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
               ))}
             </div>
           )}
+            </>
+          )}
         </div>
-        {!esMio && r.whatsapp && (
+        {!esMio && !resuelto && r.whatsapp && (
           <div style={{ padding: '2px 20px 6px' }}>
             <div className={'scam-tip' + (numReportes >= 3 ? ' danger' : '')}>
               <span className="mi fill" style={{ fontSize: 19 }}>
@@ -534,7 +609,8 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
             </span>
           </button>
         </div>
-      ) : r.whatsapp ? (
+      ) : resuelto ? null : ( // ya volvió a casa: sin datos de contacto (el dueño sí ve su rama)
+        r.whatsapp ? (
         <div className="cta">
           <a
             className="btn-wa"
@@ -562,12 +638,13 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
             </span>
             Sin número de contacto
           </div>
-          {r.tipo === 'perdido' && r.estado !== 'resuelto' && (
+          {r.tipo === 'perdido' && (
             <div className="sin-num-hint">
               Este aviso no dejó teléfono. Si lo viste, tocá <b>“¡Lo vi acá!”</b> y le avisamos a la familia. 🐾
             </div>
           )}
         </div>
+        )
       )}
 
     </div>

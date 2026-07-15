@@ -46,6 +46,10 @@ function desdeFila(row) {
     embedding: row.embedding, // huella visual (para sugerir parecidos)
     localidad: row.localidad || 'Paraná',
     apoyos: row.apoyos || 0, // prueba social: cuánta gente se sumó a difundir
+    aplausos: row.aplausos || 0, // 👏 en los reencuentros
+    resueltoEn: row.resuelto_en || null, // cuándo volvió a casa (lo estampa un trigger)
+    // OJO: apoyos/aplausos NO van en haciaFila — solo los toca su RPC. Si entraran
+    // en el update, cada edición del aviso pisaría el contador a 0.
   }
 }
 function haciaFila(r) {
@@ -120,6 +124,17 @@ export async function sumarApoyo(reporteId) {
   if (!reporteId) return null
   if (supabaseConfigurado) {
     const { data, error } = await supabase.rpc('sumar_apoyo', { rid: reporteId })
+    if (error) throw error
+    return data
+  }
+  return null // modo local: el cliente ya muestra el +1 optimista
+}
+
+// Suma 1 aplauso 👏 a un reencuentro. Devuelve el nuevo total, o null.
+export async function sumarAplauso(reporteId) {
+  if (!reporteId) return null
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase.rpc('sumar_aplauso', { rid: reporteId })
     if (error) throw error
     return data
   }

@@ -571,6 +571,53 @@ select {
   color: #8a7a68;
 }
 
+/* Aplausos 👏 en los avisos que ya volvieron a casa. Mismo molde que .apoyo-box,
+   pero en verde: acá se festeja, no se pide ayuda. */
+.aplauso-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px 13px;
+  border-radius: 14px;
+  background: #eafaf4;
+  border: 1px solid #c9eee0;
+}
+.aplauso-ico {
+  font-size: 21px;
+  color: var(--teal);
+  flex: none;
+}
+.aplauso-txt {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.8px;
+  font-weight: 700;
+  color: #4d6b61;
+  line-height: 1.35;
+}
+.aplauso-txt b {
+  color: var(--teal);
+}
+.aplauso-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  background: var(--teal);
+  color: #fff;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 12.5px;
+}
+.aplauso-btn.on {
+  background: #dceee7;
+  color: #6f8a80;
+}
+
 /* Botón para compartir el aviso como imagen (flyer) */
 .btn-compartir {
   display: flex;
