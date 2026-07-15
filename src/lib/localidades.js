@@ -298,6 +298,45 @@ export function coordsDeBarrioEn(loc, barrio) {
   return barriosDe(loc)[barrio] || centroDe(loc)
 }
 
+// ¿Este nombre suelto es un barrio nuestro? Devuelve el nombre TAL COMO lo tenemos
+// (no el que vino), o '' si no lo conocemos. Se usa para lo que dice OSM, que
+// escribe distinto: "Barrio General Espejo" es nuestro "General Espejo". Gana
+// siempre nuestra forma, así no se ensucian los strings que ya están en la base.
+export function barrioDeLaLista(loc, suelto) {
+  const norm = (s) =>
+    (s || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/^barrio\s+/, '')
+      .replace(/[^a-z0-9 ]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+  const k = norm(suelto)
+  if (!k) return ''
+  return Object.keys(barriosDe(loc)).find((b) => norm(b) === k) || ''
+}
+
+// El barrio de una ciudad más cercano a un punto. La inversa de coordsDeBarrioEn:
+// sirve para proponer el barrio cuando alguien marca una dirección en el mapa.
+// Acá el centroide sí es razonable (a diferencia de ciudadMasCercana, ver abajo):
+// los barrios de una misma ciudad son chicos y están pegados, así que el más
+// cercano casi siempre es el que contiene el punto. Igual es una PROPUESTA: se la
+// mostramos a la persona para que confirme, no la damos por cierta.
+export function barrioMasCercano(loc, lat, lng) {
+  if (lat == null || lng == null) return ''
+  let mejor = ''
+  let mejorKm = Infinity
+  for (const [b, c] of Object.entries(barriosDe(loc))) {
+    const km = distanciaKm(lat, lng, c[0], c[1])
+    if (km < mejorKm) {
+      mejorKm = km
+      mejor = b
+    }
+  }
+  return mejor
+}
+
 // Distancia en km entre dos puntos (haversine).
 export function distanciaKm(lat1, lng1, lat2, lng2) {
   const R = 6371

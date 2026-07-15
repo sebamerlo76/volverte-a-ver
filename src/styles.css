@@ -1180,6 +1180,19 @@ select {
   line-height: 1.45;
 }
 
+/* "Tu dirección no se guarda". Va abajo del mapa de Mis ubicaciones, donde recién
+   escribiste tu calle: es justo donde surge la duda. */
+.ubic-nota {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.ubic-nota b {
+  color: var(--navy);
+}
+
 /* Aviso de en qué ciudad se están buscando las coincidencias, con su "Cambiar".
    Discreto a propósito: es un dato, no una acción que queramos empujar. */
 .coinc-ambito {

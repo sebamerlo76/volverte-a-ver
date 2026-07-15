@@ -1,17 +1,31 @@
 import { useEffect, useState } from 'react'
+import MapaLeaflet from './MapaLazy.jsx'
 import SelectorCiudad from './SelectorCiudad.jsx'
 import SelectorBarrio from './SelectorBarrio.jsx'
-import { nombresBarriosDe, localidadGuardada, ubicacionTexto, NOMBRES_LOCALIDADES } from '../lib/localidades.js'
+import BuscarDireccion from './BuscarDireccion.jsx'
+import {
+  nombresBarriosDe,
+  coordsDeBarrioEn,
+  centroDe,
+  barrioMasCercano,
+  barrioDeLaLista,
+  localidadGuardada,
+  ubicacionTexto,
+  NOMBRES_LOCALIDADES,
+} from '../lib/localidades.js'
 import { getUbicaciones, addUbicacion, actualizarUbicacion, eliminarUbicacion } from '../data/store.js'
 import { confirmar } from '../lib/confirmar.js'
 
 // Tus lugares (casa, trabajo). Son la única fuente de "dónde estás": de acá sale
 // tu ciudad por defecto al publicar y a quién notificar.
 //
-// Antes esto era un punto en el mapa + un radio en km. Se sacó porque hacía lo
-// mismo que el punto+radio de Notificaciones (los dos mandaban la notificación
-// "cerca"), y porque el resto de la app habla en ciudades y barrios: un lat/lng
-// suelto no se podía cruzar con nada.
+// Lo que se guarda es ciudad + barrio, nada más. El mapa y el buscador de dirección
+// son sólo para ENCONTRAR el barrio y verlo: mucha gente sabe su calle y no el
+// nombre de su barrio. La dirección no se guarda en ningún lado — el domicilio
+// exacto de alguien no es un dato que esta app necesite tener.
+//
+// (Antes acá había un mapa con un radio en km. Eso sí se fue, y no vuelve: hacía lo
+// mismo que el punto+radio de Notificaciones. Este mapa no define alcance, muestra.)
 export default function MisUbicaciones({ user, onToast }) {
   const [lista, setLista] = useState(null)
   const [modo, setModo] = useState('lista') // lista | nuevo
@@ -22,6 +36,11 @@ export default function MisUbicaciones({ user, onToast }) {
   const [guardando, setGuardando] = useState(false)
   const [editId, setEditId] = useState(null)
   const [ciudadSheet, setCiudadSheet] = useState(false)
+  // Punto del mapa. NO se guarda: es sólo para encontrar el barrio y mirarlo.
+  const [punto, setPunto] = useState(() => {
+    const c = centroDe(localidadGuardada())
+    return { lat: c[0], lng: c[1] }
+  })
 
   async function cargar() {
     try {
@@ -38,16 +57,24 @@ export default function MisUbicaciones({ user, onToast }) {
   function nuevo() {
     setEditId(null)
     setNombre('')
-    setLocalidad(localidadGuardada())
+    const loc = localidadGuardada()
+    setLocalidad(loc)
     setZona('')
+    const c = centroDe(loc)
+    setPunto({ lat: c[0], lng: c[1] })
     setAvisar(true)
     setModo('nuevo')
   }
   function editar(u) {
     setEditId(u.id)
     setNombre(u.nombre)
-    setLocalidad(u.localidad || localidadGuardada())
+    const loc = u.localidad || localidadGuardada()
+    setLocalidad(loc)
     setZona(u.zona || '')
+    // El mapa arranca en tu barrio, no en el centro de la ciudad: al editar querés
+    // ver dónde quedó. (El punto no está guardado, sale del barrio.)
+    const c = u.zona ? coordsDeBarrioEn(loc, u.zona) : centroDe(loc)
+    setPunto({ lat: c[0], lng: c[1] })
     setAvisar(u.avisar)
     setModo('nuevo')
   }
@@ -56,7 +83,29 @@ export default function MisUbicaciones({ user, onToast }) {
   function cambiarCiudad(loc) {
     setLocalidad(loc)
     setZona('')
+    const c = centroDe(loc)
+    setPunto({ lat: c[0], lng: c[1] })
     setCiudadSheet(false)
+  }
+
+  // --- Los dos sentidos entre el mapa y el barrio ---
+  // Del mapa AL barrio: marcaste un punto (tocando o buscando la dirección) y te
+  // proponemos el barrio. Es una propuesta: queda en el selector para que la mires.
+  function irAlPunto(p, barrioDeOSM) {
+    setPunto(p)
+    // Primero lo que dice OSM (sale de sus polígonos, no de adivinar); si no lo
+    // conocemos con ese nombre, el barrio nuestro más cercano al punto.
+    const propuesto = barrioDeLaLista(localidad, barrioDeOSM) || barrioMasCercano(localidad, p.lat, p.lng)
+    if (propuesto) setZona(propuesto)
+  }
+  // Del barrio AL mapa: tocaste un barrio y te lo mostramos, para confirmar que es
+  // ese. Es la mitad que faltaba: el que sabe su barrio no tiene que buscar nada.
+  function cambiarZona(z) {
+    setZona(z)
+    if (z) {
+      const c = coordsDeBarrioEn(localidad, z)
+      setPunto({ lat: c[0], lng: c[1] })
+    }
   }
 
   async function guardar() {
@@ -128,9 +177,26 @@ export default function MisUbicaciones({ user, onToast }) {
         <SelectorBarrio
           opciones={nombresBarriosDe(localidad)}
           value={zona}
-          onSelect={setZona}
+          onSelect={cambiarZona}
           vacio="Toda la ciudad (sin barrio)"
         />
+
+        <div className="flabel">¿No sabés el barrio? Buscá tu calle</div>
+        <BuscarDireccion localidad={localidad} onEncontrado={irAlPunto} onToast={onToast} />
+        <div className="mappick" style={{ height: 180, marginTop: 8 }}>
+          <MapaLeaflet
+            center={[punto.lat, punto.lng]}
+            zoom={14}
+            interactivo
+            onGps={irAlPunto}
+            onMapaClick={irAlPunto}
+            marcadores={[{ id: 'u', lat: punto.lat, lng: punto.lng, tipo: 'avistamiento' }]}
+          />
+          <div className="hint">Tocá el mapa y te decimos el barrio 👆</div>
+        </div>
+        <div className="ubic-nota">
+          Tu dirección <b>no se guarda</b>: sirve para encontrar el barrio, nada más. 🔒
+        </div>
 
         <button className="check-row" style={{ marginTop: 16 }} onClick={() => setAvisar((v) => !v)}>
           <span className={'check-box' + (avisar ? ' on' : '')}>
