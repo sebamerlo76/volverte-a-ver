@@ -2,13 +2,17 @@ import { useState } from 'react'
 
 // Selector de opciones en chips. Todo clickeable; si permitirOtro, deja escribir
 // un valor libre para los casos que no están en la lista.
-export default function SelectChips({ opciones, valor, onChange, otro = false, placeholder = 'Otro…' }) {
+// onElegir (opcional): avisa SOLO cuando se elige un chip de verdad — no al
+// tocar "Otro", ni al tipear, ni al deseleccionar. Sirve para auto-avanzar.
+export default function SelectChips({ opciones, valor, onChange, onElegir, otro = false, placeholder = 'Otro…' }) {
   const enLista = opciones.includes(valor)
   const [modoOtro, setModoOtro] = useState(!!valor && !enLista)
 
   function elegir(o) {
     setModoOtro(false)
-    onChange(valor === o ? '' : o)
+    const nuevo = valor === o ? '' : o
+    onChange(nuevo)
+    if (nuevo) onElegir?.(nuevo)
   }
   function activarOtro() {
     if (modoOtro) {

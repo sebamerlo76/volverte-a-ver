@@ -1176,6 +1176,69 @@ select {
   height: 100%;
   object-fit: cover;
 }
+/* Coincidencias del asistente "Encontré": foto grande (~60/40) para reconocerla
+   de un vistazo. Scopeado a .coinc para no tocar los resultados del buscador. */
+.coinc .bres-row {
+  gap: 12px;
+  padding: 10px 12px;
+}
+.coinc .bres-foto {
+  flex: 0 0 58%;
+  width: auto;
+  height: auto;
+  aspect-ratio: 2 / 1;
+}
+
+/* Acordeón del paso 2 de "Encontré": una sección por vez; al elegir salta sola a
+   la siguiente, así el formulario ocupa poco y se ven antes las fotos de abajo. */
+.acc-lista {
+  margin-top: 8px;
+}
+.acc {
+  border-bottom: 1px solid var(--line);
+}
+.acc-h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 2px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+.acc-t {
+  flex: none;
+  font-size: 13px;
+  font-weight: 900;
+  color: #7a6f66;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.acc-v {
+  margin-left: auto;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 13.5px;
+  color: var(--navy);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.acc-v.vacio {
+  color: #b9ada3;
+  font-weight: 700;
+}
+.acc-ch {
+  flex: none;
+  font-size: 20px;
+  color: #b9ada3;
+}
+.acc-b {
+  padding: 0 0 14px;
+}
+
 .bres-nombre {
   font-family: Fredoka, sans-serif;
   font-weight: 600;

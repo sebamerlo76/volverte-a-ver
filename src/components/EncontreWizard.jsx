@@ -52,6 +52,7 @@ export default function EncontreWizard({ reportes = [], scopeProvincia = null, t
   const [enCustodia, setEnCustodia] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [gestionLink, setGestionLink] = useState('') // link para gestionar el aviso sin cuenta
+  const [accAbierta, setAccAbierta] = useState('color') // acordeón del paso 2
 
   const cIni = coordsDeBarrioEn(localidad, 'Centro')
   const [punto, setPunto] = useState({ lat: cIni[0], lng: cIni[1] })
@@ -136,6 +137,51 @@ export default function EncontreWizard({ reportes = [], scopeProvincia = null, t
     }
     return [...arr].sort((a, b) => (a.zona === zona ? 0 : 1) - (b.zona === zona ? 0 : 1)).slice(0, 4)
   }, [reportes, especie, color, tamano, sexo, zona, paso, huella, localidad, scopeProvincia])
+
+  // --- Acordeón del paso 2 ---
+  // Se abre una sección por vez y al elegir salta sola a la siguiente, así el
+  // formulario ocupa poco y se ven antes las fotos de los posibles dueños.
+  const SECS = [
+    { k: 'color', t: 'Color', v: color },
+    { k: 'tamano', t: 'Tamaño', v: tamano },
+    ...(especie !== 'otro' ? [{ k: 'raza', t: 'Raza', v: raza }] : []),
+    { k: 'sexo', t: 'Sexo', v: sexo },
+    { k: 'collar', t: 'Collar / chapita', v: collar },
+    { k: 'senas', t: 'Señas particulares', v: descripcion },
+  ]
+  function saltarA(k) {
+    const i = SECS.findIndex((s) => s.k === k)
+    setAccAbierta(SECS[i + 1]?.k || null) // la última cierra todo
+  }
+  function cuerpoSec(k) {
+    if (k === 'color')
+      return <SelectChips opciones={COLORES} valor={color} onChange={setColor} onElegir={() => saltarA('color')} otro placeholder="Otro color" />
+    if (k === 'tamano') return <SelectChips opciones={TAMANOS} valor={tamano} onChange={setTamano} onElegir={() => saltarA('tamano')} />
+    if (k === 'raza')
+      return (
+        <SelectChips
+          opciones={especie === 'gato' ? RAZAS_GATO : RAZAS_PERRO}
+          valor={raza}
+          onChange={setRaza}
+          onElegir={() => saltarA('raza')}
+          otro
+          placeholder="Otra raza"
+        />
+      )
+    if (k === 'sexo') return <SelectChips opciones={SEXOS} valor={sexo} onChange={setSexo} onElegir={() => saltarA('sexo')} />
+    if (k === 'collar')
+      return (
+        <SelectChips opciones={COLLAR} valor={collar} onChange={setCollar} onElegir={() => saltarA('collar')} otro placeholder="Detalle, ej: collar rojo" />
+      )
+    return (
+      <textarea
+        className="ta"
+        value={descripcion}
+        onChange={(e) => setDescripcion(e.target.value)}
+        placeholder="Collar, raza aproximada, si es manso o asustadizo…"
+      />
+    )
+  }
 
   async function publicar() {
     if (tieneGroseria(`${descripcion} ${raza}`)) {
@@ -314,35 +360,22 @@ export default function EncontreWizard({ reportes = [], scopeProvincia = null, t
         )}
 
         {paso === 2 && (
-          <>
-            <div className="flabel">Color</div>
-            <SelectChips opciones={COLORES} valor={color} onChange={setColor} otro placeholder="Otro color" />
-            <div className="flabel">Tamaño</div>
-            <SelectChips opciones={TAMANOS} valor={tamano} onChange={setTamano} />
-            {especie !== 'otro' && (
-              <>
-                <div className="flabel">Raza</div>
-                <SelectChips
-                  opciones={especie === 'gato' ? RAZAS_GATO : RAZAS_PERRO}
-                  valor={raza}
-                  onChange={setRaza}
-                  otro
-                  placeholder="Otra raza"
-                />
-              </>
-            )}
-            <div className="flabel">Sexo</div>
-            <SelectChips opciones={SEXOS} valor={sexo} onChange={setSexo} />
-            <div className="flabel">Collar / chapita</div>
-            <SelectChips opciones={COLLAR} valor={collar} onChange={setCollar} otro placeholder="Detalle, ej: collar rojo" />
-            <div className="flabel">Señas particulares</div>
-            <textarea
-              className="ta"
-              value={descripcion}
-              onChange={(e) => setDescripcion(e.target.value)}
-              placeholder="Collar, raza aproximada, si es manso o asustadizo…"
-            />
-          </>
+          <div className="acc-lista">
+            {SECS.map((s) => (
+              <div className="acc" key={s.k}>
+                <button
+                  type="button"
+                  className={'acc-h' + (accAbierta === s.k ? ' on' : '')}
+                  onClick={() => setAccAbierta(accAbierta === s.k ? null : s.k)}
+                >
+                  <span className="acc-t">{s.t}</span>
+                  <span className={'acc-v' + (s.v ? '' : ' vacio')}>{s.v || 'Elegir'}</span>
+                  <span className="mi acc-ch">{accAbierta === s.k ? 'expand_less' : 'expand_more'}</span>
+                </button>
+                {accAbierta === s.k && <div className="acc-b">{cuerpoSec(s.k)}</div>}
+              </div>
+            ))}
+          </div>
         )}
 
         {paso === 3 && (
