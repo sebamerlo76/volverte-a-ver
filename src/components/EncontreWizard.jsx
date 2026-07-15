@@ -514,13 +514,15 @@ export default function EncontreWizard({ reportes = [], scopeProvincia = null, t
           </div>
         )}
 
-        {especie && coincidencias.length === 0 && paso >= 2 && paso !== 3 && (
+        {/* Sin coincidencias: avisamos igual, así no queda la duda de qué pasó.
+            En el paso de la foto (3), recién cuando terminó de analizar y hay foto. */}
+        {especie && coincidencias.length === 0 && paso >= 2 && (paso !== 3 || (fotos.length > 0 && !analizando)) && (
           <div className="coinc-vacio">
             <span className="mi" style={{ fontSize: 21, color: 'var(--muted)' }}>
               search_off
             </span>
             <div>
-              <b>Todavía no hay perdidos que coincidan.</b>
+              <b>{paso === 3 ? 'No encontramos ninguno parecido a tu foto.' : 'Todavía no hay perdidos que coincidan.'}</b>
               <div style={{ marginTop: 2 }}>
                 Igual publicá tu hallazgo 👇 — su familia lo va a encontrar acá cuando lo busque.
               </div>
