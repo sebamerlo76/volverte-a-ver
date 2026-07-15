@@ -210,20 +210,22 @@ export default function NotifPrefs({ user, onToast, onListo }) {
                   <div key={g.provincia} className="cerca-prov">
                     <div className="cerca-prov-h">
                       <span className="cerca-prov-n">{g.provincia}</span>
-                      {g.ciudades.length > 1 && (
-                        <div className="cerca-prov-toda">
-                          <span>Toda la provincia</span>
-                          <button
-                            className={'switch sm' + (provEntera ? ' on' : '')}
-                            onClick={() => toggleProvincia(g)}
-                            role="switch"
-                            aria-checked={provEntera}
-                            aria-label={`Toda la provincia de ${g.provincia}`}
-                          >
-                            <span className="switch-k" />
-                          </button>
-                        </div>
-                      )}
+                      {/* Va siempre, aunque la provincia tenga una sola ciudad: no es
+                          lo mismo que tildar esa ciudad. Prenderlo es pedir también
+                          las ciudades que sumemos después, sin volver a entrar acá —
+                          y en una provincia con una sola ciudad es cuando más sirve. */}
+                      <div className="cerca-prov-toda">
+                        <span>Toda la provincia</span>
+                        <button
+                          className={'switch sm' + (provEntera ? ' on' : '')}
+                          onClick={() => toggleProvincia(g)}
+                          role="switch"
+                          aria-checked={provEntera}
+                          aria-label={`Toda la provincia de ${g.provincia}`}
+                        >
+                          <span className="switch-k" />
+                        </button>
+                      </div>
                     </div>
                     <div className="barrio-chips">
                       {g.ciudades.map((l) => (
