@@ -3,7 +3,8 @@ import PetCard from './PetCard.jsx'
 import MapaLeaflet from './MapaLazy.jsx'
 import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
-import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarScopeFeed, provinciasOrdenadas, ciudadesDeProvincia, provinciaDe, ubicacionTexto } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarScopeFeed, provinciaDe, ubicacionTexto } from '../lib/localidades.js'
+import SelectorCiudad from './SelectorCiudad.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { TABS_ESTADO, textoTipo } from '../lib/estados.js'
 import { coincideBusqueda } from '../lib/buscar.js'
@@ -34,7 +35,6 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
   const [panelAbierto, setPanelAbierto] = useState(false)
   const [miUbi, setMiUbi] = useState(null)
   const [ciudadSheet, setCiudadSheet] = useState(false)
-  const [provSel, setProvSel] = useState(null) // provincia abierta dentro del selector (drill-down)
   const [irPunto, setIrPunto] = useState(null) // punto para "cómo llegar"
   const [qBarrio, setQBarrio] = useState('') // búsqueda de barrio en el filtro (ciudades grandes)
   const bodyRef = useRef(null) // contenedor scrolleable de la lista, para recordar la posición
@@ -47,8 +47,7 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
   const loc = filtros.localidad // null = todas las localidades
   const prov = filtros.provincia // toda una provincia (localidad === null)
   function abrirCiudadSheet() {
-    setProvSel(loc ? provinciaDe(loc) : prov || null) // si ya hay algo elegido, entrar directo a su provincia
-    setCiudadSheet(true)
+    setCiudadSheet(true) // el drill-down (y en qué provincia abre) vive en SelectorCiudad
   }
   function elegirCiudad(l) {
     setFiltro('localidad', l)
@@ -395,52 +394,16 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
       )}
 
       {ciudadSheet && (
-        <div className="pp-sheet-ov" onClick={() => setCiudadSheet(false)}>
-          <div className="pp-sheet" onClick={(e) => e.stopPropagation()}>
-            {provSel === null ? (
-              <>
-                <div className="report-sheet-t">¿Qué provincia querés ver?</div>
-                <button className="pp-op" onClick={elegirTodas}>
-                  <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>public</span>
-                  Todas
-                  {!loc && !prov && <span className="mi" style={{ marginLeft: 'auto', color: 'var(--navy)' }}>check</span>}
-                </button>
-                <div className="ciudad-sep" />
-                {provinciasOrdenadas().map((p) => (
-                  <button className="pp-op" key={p} onClick={() => setProvSel(p)}>
-                    <span className="mi fill" style={{ fontSize: 20, color: 'var(--navy)' }}>location_on</span>
-                    {p}
-                    <span className="mi" style={{ marginLeft: 'auto', fontSize: 20, color: '#b9ada3' }}>chevron_right</span>
-                  </button>
-                ))}
-              </>
-            ) : (
-              <>
-                <button className="pp-sheet-back" onClick={() => setProvSel(null)}>
-                  <span className="mi" style={{ fontSize: 22 }}>arrow_back</span>
-                  {provSel}
-                </button>
-                {ciudadesDeProvincia(provSel).length > 1 && (
-                  <>
-                    <button className="pp-op" onClick={() => elegirProvincia(provSel)}>
-                      <span className="mi fill" style={{ fontSize: 20, color: 'var(--navy)' }}>select_all</span>
-                      Toda la provincia
-                      {prov === provSel && <span className="mi" style={{ marginLeft: 'auto', color: 'var(--navy)' }}>check</span>}
-                    </button>
-                    <div className="ciudad-sep" />
-                  </>
-                )}
-                {ciudadesDeProvincia(provSel).map((l) => (
-                  <button className="pp-op" key={l} onClick={() => elegirCiudad(l)}>
-                    <span className="mi fill" style={{ fontSize: 20, color: 'var(--navy)' }}>location_on</span>
-                    {l}
-                    {loc === l && <span className="mi" style={{ marginLeft: 'auto', color: 'var(--navy)' }}>check</span>}
-                  </button>
-                ))}
-              </>
-            )}
-          </div>
-        </div>
+        <SelectorCiudad
+          titulo="¿Qué provincia querés ver?"
+          ciudad={loc}
+          provincia={prov}
+          todas={!loc && !prov}
+          onCiudad={elegirCiudad}
+          onProvincia={elegirProvincia}
+          onTodas={elegirTodas}
+          onCerrar={() => setCiudadSheet(false)}
+        />
       )}
 
       {irPunto && <ComoLlegarSheet punto={irPunto} onCerrar={() => setIrPunto(null)} />}

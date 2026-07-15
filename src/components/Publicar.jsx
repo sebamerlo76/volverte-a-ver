@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import MapaLeaflet from './MapaLazy.jsx'
 import { coordsDeBarrio, puntoDeReporte } from '../lib/parana.js'
-import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad, localidadesPorProvincia } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad } from '../lib/localidades.js'
+import SelectorCiudad from './SelectorCiudad.jsx'
 import BuscarDireccion from './BuscarDireccion.jsx'
 import { addReporte, actualizarReporte, addMascota, subirFotos, subirFotoFeed, guardarEmbedding } from '../data/store.js'
 import SelectChips from './SelectChips.jsx'
@@ -38,6 +39,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
   const [descripcion, setDescripcion] = useState(base?.descripcion || '')
   const [whatsapp, setWhatsapp] = useState(base?.whatsapp || telefonoGuardado || '')
   const [guardarMasc, setGuardarMasc] = useState(true) // guardar en "Mis mascotas"
+  const [ciudadSheet, setCiudadSheet] = useState(false) // hoja para elegir ciudad
   const [enCustodia, setEnCustodia] = useState(base?.enCustodia || false) // la tengo conmigo (encontrado)
   const [guardando, setGuardando] = useState(false)
 
@@ -223,22 +225,15 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
         {NOMBRES_LOCALIDADES.length > 1 && (
           <>
             <div className="flabel">Ciudad</div>
-            <div className="inp">
+            <button type="button" className="inp inp-btn" onClick={() => setCiudadSheet(true)}>
               <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
                 location_city
               </span>
-              <select value={localidad} onChange={(e) => cambiarLocalidad(e.target.value)}>
-                {localidadesPorProvincia().map((g) => (
-                  <optgroup key={g.provincia} label={g.provincia}>
-                    {g.ciudades.map((l) => (
-                      <option key={l} value={l}>
-                        {l}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            </div>
+              <span className="inp-btn-val">{localidad}</span>
+              <span className="mi" style={{ fontSize: 22, color: 'var(--muted)' }}>
+                expand_more
+              </span>
+            </button>
           </>
         )}
 
@@ -340,6 +335,18 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
           {guardando ? 'Guardando…' : editando ? 'Guardar cambios' : 'Publicar reporte'}
         </button>
       </div>
+
+      {ciudadSheet && (
+        <SelectorCiudad
+          titulo="¿En qué ciudad?"
+          ciudad={localidad}
+          onCiudad={(l) => {
+            cambiarLocalidad(l)
+            setCiudadSheet(false)
+          }}
+          onCerrar={() => setCiudadSheet(false)}
+        />
+      )}
     </div>
   )
 }

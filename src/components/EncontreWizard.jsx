@@ -4,7 +4,8 @@ import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import FechaPicker from './FechaPicker.jsx'
 import SelectorBarrio from './SelectorBarrio.jsx'
-import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad, localidadesPorProvincia, ubicacionTexto, provinciaDe } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad, ubicacionTexto, provinciaDe } from '../lib/localidades.js'
+import SelectorCiudad from './SelectorCiudad.jsx'
 import BuscarDireccion from './BuscarDireccion.jsx'
 import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
 import { addReporte, addMascota, subirFotos, subirFotoFeed, publicarGestion, nuevoTokenGestion } from '../data/store.js'
@@ -32,7 +33,7 @@ const TITULOS = [
 
 export default function EncontreWizard({ reportes = [], telefonoGuardado = '', onVerAviso, onCerrar, onPublicado, onToast }) {
   const [paso, setPaso] = useState(1)
-  const [cambiarCiudadAbierto, setCambiarCiudadAbierto] = useState(false) // el "Cambiar" del aviso de alcance
+  const [ciudadSheet, setCiudadSheet] = useState(false) // hoja para elegir ciudad (el "Cambiar" y el paso 4)
   const [especie, setEspecie] = useState('') // sin asumir: se elige en el paso 1
   const [color, setColor] = useState('')
   const [tamano, setTamano] = useState('')
@@ -429,22 +430,15 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
             {NOMBRES_LOCALIDADES.length > 1 && (
               <>
                 <div className="flabel">Ciudad</div>
-                <div className="inp">
+                <button type="button" className="inp inp-btn" onClick={() => setCiudadSheet(true)}>
                   <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
                     location_city
                   </span>
-                  <select value={localidad} onChange={(e) => cambiarCiudad(e.target.value)}>
-                    {localidadesPorProvincia().map((g) => (
-                      <optgroup key={g.provincia} label={g.provincia}>
-                        {g.ciudades.map((l) => (
-                          <option key={l} value={l}>
-                            {l}
-                          </option>
-                        ))}
-                      </optgroup>
-                    ))}
-                  </select>
-                </div>
+                  <span className="inp-btn-val">{localidad}</span>
+                  <span className="mi" style={{ fontSize: 22, color: 'var(--muted)' }}>
+                    expand_more
+                  </span>
+                </button>
               </>
             )}
             <div className="flabel">Zona / barrio</div>
@@ -548,36 +542,12 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
             {paso !== 4 && NOMBRES_LOCALIDADES.length > 1 && (
               <div className="coinc-ambito">
                 <span className="mi" style={{ fontSize: 15 }}>place</span>
-                {cambiarCiudadAbierto ? (
-                  <select
-                    className="coinc-ambito-sel"
-                    value={localidad}
-                    autoFocus
-                    onChange={(e) => {
-                      cambiarCiudad(e.target.value)
-                      setCambiarCiudadAbierto(false)
-                    }}
-                  >
-                    {localidadesPorProvincia().map((g) => (
-                      <optgroup key={g.provincia} label={g.provincia}>
-                        {g.ciudades.map((l) => (
-                          <option key={l} value={l}>
-                            {l}
-                          </option>
-                        ))}
-                      </optgroup>
-                    ))}
-                  </select>
-                ) : (
-                  <>
-                    <span className="coinc-ambito-txt">
-                      Buscando en <b>{localidad}</b> y alrededores
-                    </span>
-                    <button type="button" className="coinc-ambito-btn" onClick={() => setCambiarCiudadAbierto(true)}>
-                      Cambiar
-                    </button>
-                  </>
-                )}
+                <span className="coinc-ambito-txt">
+                  Buscando en <b>{localidad}</b> y alrededores
+                </span>
+                <button type="button" className="coinc-ambito-btn" onClick={() => setCiudadSheet(true)}>
+                  Cambiar
+                </button>
               </div>
             )}
             {coincidencias.map((r) => (
@@ -711,6 +681,18 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
             </button>
           </div>
         </div>
+      )}
+
+      {ciudadSheet && (
+        <SelectorCiudad
+          titulo="¿En qué ciudad lo encontraste?"
+          ciudad={localidad}
+          onCiudad={(l) => {
+            cambiarCiudad(l)
+            setCiudadSheet(false)
+          }}
+          onCerrar={() => setCiudadSheet(false)}
+        />
       )}
     </div>
   )
