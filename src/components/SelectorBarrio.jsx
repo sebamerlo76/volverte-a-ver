@@ -3,13 +3,19 @@ import { useEffect, useRef, useState } from 'react'
 // Selector de barrio con búsqueda. En ciudades chicas funciona como un desplegable
 // normal (tocás y ves la lista); en las grandes (Córdoba, 400+ barrios) escribís y
 // filtra. onSelect recibe el nombre del barrio, o 'Otro' para cargarlo a mano.
-export default function SelectorBarrio({ opciones, value, onSelect }) {
+//
+// vacio: si viene un texto (ej. "Toda la ciudad"), el barrio es OPCIONAL: esa
+// opción reemplaza a "Otro…" y devuelve ''. Sin esto no había forma de volver a
+// vacío una vez elegido un barrio. Donde el barrio es obligatorio (publicar, un
+// avistamiento) no se pasa y queda el "Otro… (escribir a mano)" de siempre.
+export default function SelectorBarrio({ opciones, value, onSelect, vacio = null }) {
   const [abierto, setAbierto] = useState(false)
   const [q, setQ] = useState('')
   const boxRef = useRef(null)
 
   const esConocido = opciones.includes(value)
-  const texto = abierto ? q : esConocido ? value : 'Otro…'
+  const enVacio = !!vacio && !value
+  const texto = abierto ? q : esConocido ? value : enVacio ? vacio : 'Otro…'
 
   useEffect(() => {
     if (!abierto) return
@@ -63,9 +69,15 @@ export default function SelectorBarrio({ opciones, value, onSelect }) {
             </button>
           ))}
           {filtro && lista.length === 0 && <div className="barrio-vacio">Sin resultados</div>}
-          <button type="button" className="barrio-op otro" onClick={() => elegir('Otro')}>
-            Otro… (escribir a mano)
-          </button>
+          {vacio ? (
+            <button type="button" className={'barrio-op ninguno' + (enVacio ? ' on' : '')} onClick={() => elegir('')}>
+              {vacio}
+            </button>
+          ) : (
+            <button type="button" className="barrio-op otro" onClick={() => elegir('Otro')}>
+              Otro… (escribir a mano)
+            </button>
+          )}
         </div>
       )}
     </div>

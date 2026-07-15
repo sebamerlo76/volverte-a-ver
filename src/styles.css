@@ -2215,6 +2215,15 @@ select {
   border-radius: 0;
   margin-top: 3px;
 }
+/* "Toda la ciudad (sin barrio)": la salida cuando el barrio es opcional. Va
+   separada como "Otro…" pero en gris, no en coral: no es una acción, es la
+   opción de no elegir nada. */
+.barrio-op.ninguno {
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  margin-top: 3px;
+}
 .barrio-vacio {
   padding: 12px;
   font-size: 13.5px;

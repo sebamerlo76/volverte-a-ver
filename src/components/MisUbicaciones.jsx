@@ -58,9 +58,6 @@ export default function MisUbicaciones({ user, onToast }) {
     setZona('')
     setCiudadSheet(false)
   }
-  function cambiarZonaSel(v) {
-    setZona(v === 'Otro' ? '' : v)
-  }
 
   async function guardar() {
     if (!nombre.trim()) {
@@ -126,7 +123,14 @@ export default function MisUbicaciones({ user, onToast }) {
         )}
 
         <div className="flabel">Zona / barrio (opcional)</div>
-        <SelectorBarrio opciones={nombresBarriosDe(localidad)} value={zona} onSelect={cambiarZonaSel} />
+        {/* El barrio acá no filtra nada: las notificaciones van por ciudad. Es para
+            que reconozcas tus lugares de un vistazo. Por eso se puede dejar vacío. */}
+        <SelectorBarrio
+          opciones={nombresBarriosDe(localidad)}
+          value={zona}
+          onSelect={setZona}
+          vacio="Toda la ciudad (sin barrio)"
+        />
 
         <button className="check-row" style={{ marginTop: 16 }} onClick={() => setAvisar((v) => !v)}>
           <span className={'check-box' + (avisar ? ' on' : '')}>
