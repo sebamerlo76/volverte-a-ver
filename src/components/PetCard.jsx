@@ -2,7 +2,9 @@ import { nombreMostrado, tiempoRelativo } from '../lib/formato.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { badgeEstado, subLinea } from '../lib/estados.js'
 
-export default function PetCard({ r, onClick, prioridad = false }) {
+// posicion: lugar en la lista del feed. Sirve para decidir qué fotos cargar ya.
+// Por defecto 99 = "no está arriba de todo" (así entra sin tocar quien no la pase).
+export default function PetCard({ r, onClick, posicion = 99 }) {
   const perdido = r.tipo === 'perdido'
   const resuelto = r.estado === 'resuelto'
   const clr = perdido ? '#ff6b5e' : '#2f7fed'
@@ -13,10 +15,12 @@ export default function PetCard({ r, onClick, prioridad = false }) {
           <img
             src={r.foto}
             alt={nombreMostrado(r)}
-            // La 1ª tarjeta es casi siempre el LCP: la priorizamos. El resto,
-            // lazy (así no compiten por ancho de banda con la primera foto).
-            loading={prioridad ? 'eager' : 'lazy'}
-            fetchPriority={prioridad ? 'high' : 'auto'}
+            // Las 2 primeras entran en pantalla al abrir el feed: si esperan al
+            // lazy-load aparecen tarde y se ve el flash. Van eager. De la 3ª en
+            // adelante, lazy. La 1ª es casi siempre el LCP y encima va con
+            // prioridad alta; la 2ª queda en auto para no robarle ancho de banda.
+            loading={posicion < 2 ? 'eager' : 'lazy'}
+            fetchpriority={posicion === 0 ? 'high' : 'auto'}
             decoding="async"
             onError={(e) => (e.target.style.display = 'none')}
           />
