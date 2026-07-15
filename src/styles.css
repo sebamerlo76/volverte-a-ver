@@ -1131,6 +1131,54 @@ select {
   line-height: 1.45;
 }
 
+/* Aviso de en qué ciudad se están buscando las coincidencias, con su "Cambiar".
+   Discreto a propósito: es un dato, no una acción que queramos empujar. */
+.coinc-ambito {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 9px;
+  min-height: 26px;
+  color: var(--muted);
+}
+.coinc-ambito-txt {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.coinc-ambito-txt b {
+  color: var(--navy);
+}
+.coinc-ambito-btn {
+  flex: none;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 4px 11px;
+  font-family: Nunito, sans-serif;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--navy);
+  cursor: pointer;
+}
+.coinc-ambito-sel {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  border: 1.5px solid var(--navy);
+  border-radius: 9px;
+  background: #fff;
+  padding: 0 6px;
+  font-family: Nunito, sans-serif;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
 /* ===== Buscador flotante ===== */
 .buscador {
   position: absolute;

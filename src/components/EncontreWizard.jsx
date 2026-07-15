@@ -30,8 +30,9 @@ const TITULOS = [
   '¿Cómo te contactan?',
 ]
 
-export default function EncontreWizard({ reportes = [], scopeProvincia = null, telefonoGuardado = '', onVerAviso, onCerrar, onPublicado, onToast }) {
+export default function EncontreWizard({ reportes = [], telefonoGuardado = '', onVerAviso, onCerrar, onPublicado, onToast }) {
   const [paso, setPaso] = useState(1)
+  const [cambiarCiudadAbierto, setCambiarCiudadAbierto] = useState(false) // el "Cambiar" del aviso de alcance
   const [especie, setEspecie] = useState('') // sin asumir: se elige en el paso 1
   const [color, setColor] = useState('')
   const [tamano, setTamano] = useState('')
@@ -65,6 +66,18 @@ export default function EncontreWizard({ reportes = [], scopeProvincia = null, t
   function cambiarZonaSel(v) {
     if (v === 'Otro') setZona('') // barrio libre: lo escriben y ubican con el buscador/mapa
     else cambiarZona(v)
+  }
+
+  // Cambiar de ciudad arrastra al barrio y al punto del mapa: los de la ciudad
+  // anterior no existen acá. Se elige en dos lugares (el aviso de arriba de las
+  // coincidencias y el paso 4), así que vive en una sola función.
+  function cambiarCiudad(loc) {
+    setLocalidad(loc)
+    recordarLocalidad(loc) // queda como tu ciudad por defecto para la próxima
+    const z = nombresBarriosDe(loc)[0] || ''
+    setZona(z)
+    const c = coordsDeBarrioEn(loc, z)
+    setPunto({ lat: c[0], lng: c[1] })
   }
 
   // Precargamos el modelo (bajo demanda) al abrir el asistente, para que la foto se analice rápido.
@@ -114,13 +127,13 @@ export default function EncontreWizard({ reportes = [], scopeProvincia = null, t
       if (!r[campo]) return true // si el otro no especificó, no lo descarto
       return r[campo] === valor
     }
-    // Ámbito: la provincia manda. Si el feed tiene una elegida, esa; si no
-    // (incluido "Todas"), la de la ciudad donde lo encontraste. Antes, sin
-    // provincia en el feed, se buscaba solo en esa ciudad y se perdían los
-    // vecinos del ejido: un perdido a 10 cuadras pero del otro lado del límite
-    // no aparecía. El país entero, en cambio, sería puro ruido.
-    const ambito = scopeProvincia || provinciaDe(localidad)
-    const enAmbito = (r) => provinciaDe(r.localidad || 'Paraná') === ambito
+    // Ámbito: la provincia de la ciudad donde lo encontraste. No la del feed:
+    // el filtro del feed es para mirar, no dice nada de dónde apareció este
+    // animal, y cuando difería solo servía para buscar en la provincia
+    // equivocada. La ciudad sola tampoco alcanza (se perdían los vecinos del
+    // ejido, a 10 cuadras pero del otro lado del límite) y el país entero sería
+    // puro ruido: un perdido en Neuquén no es coincidencia de uno de Paraná.
+    const enAmbito = (r) => provinciaDe(r.localidad || 'Paraná') === provinciaDe(localidad)
     let arr = reportes.filter((r) => r.tipo === 'perdido' && r.estado === 'activo' && r.especie === especie && enAmbito(r))
     if (paso >= 2) {
       arr = arr.filter((r) => compat(r, 'color', color) && compat(r, 'tamano', tamano) && compat(r, 'sexo', sexo, true))
@@ -152,7 +165,7 @@ export default function EncontreWizard({ reportes = [], scopeProvincia = null, t
       return mismaCiudad ? 1 : 2
     }
     return [...arr].sort((a, b) => cerca(a) - cerca(b)).slice(0, 4)
-  }, [reportes, especie, color, tamano, sexo, zona, paso, huella, localidad, scopeProvincia])
+  }, [reportes, especie, color, tamano, sexo, zona, paso, huella, localidad])
 
   // --- Acordeón del paso 2 ---
   // Se abre una sección por vez y al elegir salta sola a la siguiente, así el
@@ -420,18 +433,7 @@ export default function EncontreWizard({ reportes = [], scopeProvincia = null, t
                   <span className="mi" style={{ fontSize: 20, color: 'var(--navy)' }}>
                     location_city
                   </span>
-                  <select
-                    value={localidad}
-                    onChange={(e) => {
-                      const loc = e.target.value
-                      setLocalidad(loc)
-                      recordarLocalidad(loc) // queda como tu ciudad por defecto para la próxima
-                      const z = nombresBarriosDe(loc)[0] || ''
-                      setZona(z)
-                      const c = coordsDeBarrioEn(loc, z)
-                      setPunto({ lat: c[0], lng: c[1] })
-                    }}
-                  >
+                  <select value={localidad} onChange={(e) => cambiarCiudad(e.target.value)}>
                     {localidadesPorProvincia().map((g) => (
                       <optgroup key={g.provincia} label={g.provincia}>
                         {g.ciudades.map((l) => (
@@ -538,6 +540,46 @@ export default function EncontreWizard({ reportes = [], scopeProvincia = null, t
                 ? 'Ordenados por parecido a tu foto 🔍'
                 : 'Fijate si su familia ya lo está buscando — así lo devolvés al toque.'}
             </div>
+            {/* De dónde salen estas coincidencias. Hasta el paso 4 la ciudad es una
+                suposición (la última que usaste), así que la decimos y dejamos
+                corregirla acá mismo: si lo encontraste viajando, si no, no se
+                entiende por qué aparecen perdidos de otro lado. En el paso 4 no va:
+                ahí el selector de ciudad ya está a la vista. */}
+            {paso !== 4 && NOMBRES_LOCALIDADES.length > 1 && (
+              <div className="coinc-ambito">
+                <span className="mi" style={{ fontSize: 15 }}>place</span>
+                {cambiarCiudadAbierto ? (
+                  <select
+                    className="coinc-ambito-sel"
+                    value={localidad}
+                    autoFocus
+                    onChange={(e) => {
+                      cambiarCiudad(e.target.value)
+                      setCambiarCiudadAbierto(false)
+                    }}
+                  >
+                    {localidadesPorProvincia().map((g) => (
+                      <optgroup key={g.provincia} label={g.provincia}>
+                        {g.ciudades.map((l) => (
+                          <option key={l} value={l}>
+                            {l}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                ) : (
+                  <>
+                    <span className="coinc-ambito-txt">
+                      Buscando en <b>{localidad}</b> y alrededores
+                    </span>
+                    <button type="button" className="coinc-ambito-btn" onClick={() => setCambiarCiudadAbierto(true)}>
+                      Cambiar
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
             {coincidencias.map((r) => (
               <button className="bres-row" key={r.id} onClick={() => setMatchPreview(r)}>
                 <div className="bres-foto">
