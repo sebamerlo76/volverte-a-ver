@@ -12,38 +12,16 @@ import { OLAVARRIA_BARRIOS, OLAVARRIA_CENTER } from './olavarria.js'
 import { SANTAFE_BARRIOS, SANTAFE_CENTER } from './santafe.js'
 import { RAFAELA_BARRIOS, RAFAELA_CENTER } from './rafaela.js'
 import { SANJUAN_BARRIOS, SANJUAN_CENTER } from './sanjuan.js'
+import { PARANA_BARRIOS } from './parana-barrios.js'
 
 export const LOCALIDAD_DEFECTO = 'Paraná'
 
 export const LOCALIDADES = {
   'Paraná': {
+    // El center NO se toca: los avisos viejos que nunca movieron el pin están
+    // justo acá, y ciudadMasCercana los devuelve a Paraná por este punto.
     center: [-31.7405, -60.523],
-    barrios: {
-      'Centro': [-31.7333, -60.5238],
-      'Parque Urquiza': [-31.7285, -60.5305],
-      'Puerto Viejo': [-31.726, -60.531],
-      'Puerto Nuevo': [-31.72, -60.524],
-      'San Agustín': [-31.755, -60.503],
-      'Bajada Grande': [-31.756, -60.548],
-      'Villa Sarmiento': [-31.744, -60.516],
-      'Belgrano': [-31.742, -60.528],
-      'La Floresta': [-31.76, -60.52],
-      'San Martín': [-31.745, -60.51],
-      'Villa Almendral': [-31.75, -60.522],
-      'Mosconi': [-31.762, -60.51],
-      'Toma Vieja': [-31.715, -60.505],
-      'Thompson': [-31.735, -60.512],
-      'El Sol': [-31.768, -60.508],
-      'Los Berros': [-31.758, -60.5],
-      'San Roque': [-31.748, -60.5],
-      'Anacleto Medina': [-31.708, -60.498],
-      '25 de Mayo': [-31.74, -60.519],
-      'Humberto Primo': [-31.752, -60.515],
-      'Paraná V': [-31.77, -60.525],
-      'Villa Uranga': [-31.766, -60.5],
-      'La Milagrosa': [-31.755, -60.49],
-      'Paracao': [-31.703, -60.476],
-    },
+    barrios: PARANA_BARRIOS, // 177: los 24 de antes + 153 de OSM (ver parana-barrios.js)
   },
   'Crespo': {
     // Barrios del plano oficial 2022 (Municipalidad de Crespo). Coords aproximadas.
