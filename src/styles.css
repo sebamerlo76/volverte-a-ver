@@ -694,6 +694,15 @@ select {
   font-weight: 800;
   font-size: 14.5px;
 }
+/* Nota bajo "Compartir para ayudar": el link va al portapapeles al compartir, y
+   esto lo avisa antes de tocar (la hoja del sistema tapa cualquier toast). */
+.compartir-tip {
+  margin: 7px 2px 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1.4;
+}
 
 /* Miniatura de la foto de un avistamiento (en el recorrido) */
 .avist-thumb {

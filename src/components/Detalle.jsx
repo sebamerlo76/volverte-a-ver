@@ -356,6 +356,11 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
                 </span>
                 Compartir para ayudar
               </button>
+              {/* La hoja de compartir del sistema tapa cualquier toast, así que el aviso
+                  va fijo acá: se lee antes de tocar, que es el único momento que sirve. */}
+              <div className="compartir-tip">
+                Te copiamos el link por si lo pegás en un grupo de Facebook 🔗
+              </div>
 
               <div className="apoyo-box">
                 <span className="mi fill apoyo-ico">volunteer_activism</span>
