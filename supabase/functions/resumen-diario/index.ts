@@ -213,13 +213,103 @@ async function enviarRecordatorioCompartir(): Promise<number> {
   return n
 }
 
+// Pre-aviso de pausa: a un perdido activo hace +57 días le avisamos que, si no hay
+// novedad, en unos días vamos a pausar el aviso. Una vez por ciclo (preaviso_en).
+// La regla de oro del auto-archivar: nunca pausar de sorpresa.
+async function preavisarPausa(): Promise<number> {
+  const corte57 = new Date(Date.now() - 57 * 24 * 60 * 60 * 1000).toISOString()
+  let viejos: any[] = []
+  try {
+    const { data } = await sb
+      .from('reportes')
+      .select('id, nombre, especie, user_id, creado_en, preaviso_en')
+      .eq('estado', 'activo')
+      .eq('tipo', 'perdido')
+      .eq('oculto', false)
+      .eq('bloqueado', false)
+      .lt('creado_en', corte57)
+      .not('user_id', 'is', null)
+    viejos = data || []
+  } catch (_e) {
+    return -1 // la columna preaviso_en todavía no existe (falta correr schema-pausar.sql)
+  }
+  let n = 0
+  for (const r of viejos) {
+    if (r.preaviso_en && r.preaviso_en >= r.creado_en) continue // ya avisado este ciclo
+    const nombre = r.nombre || (ESP[r.especie] || 'tu mascota')
+    await pushAUsuario(
+      r.user_id,
+      {
+        title: `⏸️ ¿Seguimos buscando a ${nombre}?`,
+        body: `Si no hay novedad, en unos días pausamos el aviso. Renovalo para que siga, o marcalo 🏠 si ya volvió. 🐾`,
+        url: `/r/${r.id}`,
+      },
+      { reporteId: r.id, tipo: 'preaviso' },
+    )
+    await sb.from('reportes').update({ preaviso_en: new Date().toISOString() }).eq('id', r.id)
+    n++
+  }
+  return n
+}
+
+// Pausar: perdido activo hace +60 días que YA recibió el pre-aviso (hace ≥2 días) y
+// no renovó ni cerró. Pasa a 'pausado': sale del feed, queda en Mi cuenta con
+// Reactivar. No se borra ni se marca "Ya en casa". Reversible siempre.
+async function pausarInactivos(): Promise<number> {
+  const corte60 = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString()
+  const hace2d = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+  let viejos: any[] = []
+  try {
+    const { data } = await sb
+      .from('reportes')
+      .select('id, nombre, especie, user_id, creado_en, preaviso_en')
+      .eq('estado', 'activo')
+      .eq('tipo', 'perdido')
+      .eq('oculto', false)
+      .eq('bloqueado', false)
+      .lt('creado_en', corte60)
+      .not('preaviso_en', 'is', null)
+      .not('user_id', 'is', null)
+    viejos = data || []
+  } catch (_e) {
+    return -1
+  }
+  let n = 0
+  for (const r of viejos) {
+    // Doble seguridad: pre-aviso de este ciclo Y que tenga al menos 2 días, para que
+    // el dueño haya tenido tiempo de reaccionar aunque el cron se haya salteado un día.
+    if (!r.preaviso_en || r.preaviso_en < r.creado_en) continue
+    if (r.preaviso_en >= hace2d) continue
+    const nombre = r.nombre || (ESP[r.especie] || 'tu mascota')
+    await sb.from('reportes').update({ estado: 'pausado', pausado_en: new Date().toISOString() }).eq('id', r.id)
+    await pushAUsuario(
+      r.user_id,
+      {
+        title: `⏸️ Pausamos el aviso de ${nombre}`,
+        body: `Estaba sin novedad hace tiempo. Está guardado: reactivalo cuando quieras desde Mi cuenta. 🐾`,
+        url: `/r/${r.id}`,
+      },
+      { reporteId: r.id, tipo: 'pausado' },
+    )
+    n++
+  }
+  return n
+}
+
 Deno.serve(async () => {
   try {
     const r = await armarResumen()
     await avisarAdmin('📊 Resumen de Chicho', textoResumen(r))
     const recordatorios = await enviarRecordatorios()
     const compartir = await enviarRecordatorioCompartir()
-    return new Response(JSON.stringify({ ok: true, ...r, recordatorios, compartir }), { headers: { 'Content-Type': 'application/json' } })
+    // El pre-aviso ANTES de pausar: si a alguien le toca el pre-aviso hoy, la guarda
+    // de "≥2 días" evita que se pause en la misma corrida.
+    const preaviso = await preavisarPausa()
+    const pausados = await pausarInactivos()
+    return new Response(
+      JSON.stringify({ ok: true, ...r, recordatorios, compartir, preaviso, pausados }),
+      { headers: { 'Content-Type': 'application/json' } },
+    )
   } catch (e) {
     console.error('resumen-diario error:', e)
     return new Response('error', { status: 200 })

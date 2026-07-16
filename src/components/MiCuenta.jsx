@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import PetCard from './PetCard.jsx'
-import { getMisReportes, getMisMascotas, marcarResuelto, renovarReporte, desactivarCuenta, reactivarCuenta } from '../data/store.js'
+import { getMisReportes, getMisMascotas, marcarResuelto, renovarReporte, reactivarReporte, desactivarCuenta, reactivarCuenta } from '../data/store.js'
 import { avatarDe, nombreUsuario } from '../lib/formato.js'
 import { soportado as pushSoportado, yaSuscripto, activarPush, desactivarPush } from '../lib/push.js'
 import { supabase } from '../lib/supabase.js'
@@ -61,6 +61,20 @@ export default function MiCuenta({
     } catch (e) {
       console.error(e)
       onToast?.('No se renovó. Probá de nuevo 🔄')
+    } finally {
+      setRenovando(null)
+    }
+  }
+  // Sacar un aviso de pausa: vuelve al feed, arriba y con el ciclo reiniciado.
+  async function reactivarAviso(id) {
+    setRenovando(id)
+    try {
+      await reactivarReporte(id)
+      onToast?.('🟢 ¡Aviso reactivado! Vuelve al feed')
+      await cargar()
+    } catch (e) {
+      console.error(e)
+      onToast?.('No se reactivó. Probá de nuevo 🔄')
     } finally {
       setRenovando(null)
     }
@@ -418,9 +432,22 @@ export default function MiCuenta({
                       Novedad
                     </div>
                   )}
-                  <div style={{ opacity: r.estado === 'resuelto' ? 0.6 : 1 }}>
+                  <div style={{ opacity: r.estado !== 'activo' ? 0.6 : 1 }}>
                     <PetCard r={r} onClick={() => onAbrir(r)} />
                   </div>
+                  {r.estado === 'pausado' && (
+                    <div className="renovar-bar">
+                      <span>
+                        En pausa por inactividad. Está guardado.
+                      </span>
+                      <div className="rb-acc">
+                        <button className="rb-ok" onClick={() => reactivarAviso(r.id)} disabled={renovando === r.id}>
+                          <span className="mi" style={{ fontSize: 15 }}>refresh</span>
+                          {renovando === r.id ? '…' : 'Reactivar'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   {r.estado === 'activo' && (
                     <div className="renovar-bar">
                       <span>

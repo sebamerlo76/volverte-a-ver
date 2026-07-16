@@ -15,6 +15,8 @@ export const TABS_ESTADO = [
 // Devuelve el texto + la clase CSS de color + el ícono.
 export function badgeEstado(r) {
   if (r.estado === 'resuelto') return { t: 'Ya en casa', clase: 'encasa', icono: 'celebration', fill: true }
+  // Pausado: fuera del feed por inactividad. Solo se ve en Mi cuenta y en el panel.
+  if (r.estado === 'pausado') return { t: 'En pausa', clase: 'pausa', icono: 'pause', fill: false }
   if (r.tipo === 'perdido') return { t: 'Perdido', clase: 'lost', icono: 'error_outline', fill: false }
   if (r.enCustodia) return { t: 'En tránsito', clase: 'transito', icono: 'volunteer_activism', fill: true }
   return { t: 'Visto', clase: 'found', icono: 'visibility', fill: true }

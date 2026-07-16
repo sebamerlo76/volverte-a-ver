@@ -1542,6 +1542,10 @@ select {
   background: #1f9d8f;
   box-shadow: 0 4px 10px rgba(31, 157, 143, 0.4);
 }
+.badge.pausa {
+  background: #8a807a; /* gris: está inactivo, no es una alarma */
+  box-shadow: 0 4px 10px rgba(80, 70, 62, 0.35);
+}
 .time {
   position: absolute;
   top: 13px;
@@ -2678,6 +2682,7 @@ select {
 .adm-row-badge.found { background: var(--blue); }
 .adm-row-badge.encasa { background: var(--amber); }
 .adm-row-badge.transito { background: #1f9d8f; }
+.adm-row-badge.pausa { background: #8a807a; }
 .adm-row-txt { flex: 1; min-width: 0; }
 .adm-row-t { font-family: Fredoka, sans-serif; font-weight: 600; font-size: 14.5px; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .adm-row-s { font-size: 12px; font-weight: 700; color: #8a807a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

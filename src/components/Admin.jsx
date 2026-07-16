@@ -113,6 +113,12 @@ export default function Admin({ onVolver, onOpen, stats }) {
               </div>
             </div>
 
+            {s.enPausa > 0 && (
+              <div className="adm-nota" style={{ marginTop: 10 }}>
+                🗂️ {s.enPausa} aviso{s.enPausa === 1 ? '' : 's'} en pausa por inactividad (60+ días sin novedad).
+              </div>
+            )}
+
             {empujar && empujar.length > 0 && (
               <>
                 <div className="adm-sub">

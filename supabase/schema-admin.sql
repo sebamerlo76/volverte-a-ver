@@ -28,6 +28,7 @@ begin
     'perdidos',       (select count(*) from reportes where tipo = 'perdido'),
     'enLaCalle',      (select count(*) from reportes where tipo = 'encontrado'),
     'enCasa',         (select count(*) from reportes where estado = 'resuelto'),
+    'enPausa',        (select count(*) from reportes where estado = 'pausado'),
     'perro',          (select count(*) from reportes where especie = 'perro'),
     'gato',           (select count(*) from reportes where especie = 'gato'),
     'otro',           (select count(*) from reportes where especie = 'otro'),

@@ -116,7 +116,7 @@ export async function getReportes() {
     return data.map(desdeFila)
   }
   return leerLocal()
-    .filter((r) => r.estado !== 'resuelto')
+    .filter((r) => r.estado === 'activo') // ni resueltos ni pausados en el feed
     .sort((a, b) => (a.creadoEn < b.creadoEn ? 1 : -1))
 }
 
@@ -507,12 +507,19 @@ export async function renovarReporte(id) {
 
 // Vuelve a activar un aviso que estaba resuelto.
 export async function reactivarReporte(id) {
+  // Reactivar (un resuelto o un pausado) le da fecha fresca: vuelve arriba del feed
+  // y reinicia el ciclo de recordatorio/pausa. Antes solo cambiaba el estado, así
+  // que un pausado (60+ días) volvía con su fecha vieja y se pausaba de nuevo enseguida.
+  const ahora = new Date().toISOString()
   if (supabaseConfigurado) {
-    const { error } = await supabase.from('reportes').update({ estado: 'activo' }).eq('id', id)
+    const { error } = await supabase
+      .from('reportes')
+      .update({ estado: 'activo', creado_en: ahora, preaviso_en: null, pausado_en: null })
+      .eq('id', id)
     if (error) throw error
     return
   }
-  const reportes = leerLocal().map((r) => (r.id === id ? { ...r, estado: 'activo' } : r))
+  const reportes = leerLocal().map((r) => (r.id === id ? { ...r, estado: 'activo', creadoEn: ahora } : r))
   guardarLocal(reportes)
 }
 
