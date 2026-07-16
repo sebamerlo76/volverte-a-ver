@@ -240,24 +240,28 @@ export async function generarFlyer(r) {
 // Genera el flyer y abre el menú de compartir (o lo descarga si no se puede).
 export async function compartirFlyer(r, onToast) {
   try {
-    onToast?.('Generando imagen…')
-    const blob = await generarFlyer(r)
-    const file = new File([blob], `chicho-${r.id || 'aviso'}.png`, { type: 'image/png' })
     const estado = r.estado === 'resuelto' ? 'apareció' : textoTipo(r.tipo, r.enCustodia)
     const link = r.id ? `https://chicho.ar/r/${r.id}` : 'https://chicho.ar'
     const texto = `${nombreMostrado(r)} — ${estado} en ${ubicacionTexto(r.localidad, r.zona)}. Mirá y ayudá 🐾\n${link}`
+
+    // Copiamos el texto+link PRIMERO, antes de generar la imagen. Es clave que sea
+    // acá: writeText necesita el "permiso del toque" (la activación transitoria), y
+    // si copiáramos después de generarFlyer (canvas + QR, tarda) esa activación ya
+    // venció y el navegador pide permiso de portapapeles — un cartel de Android que
+    // encima dice "ver el texto copiado", alarmante, cuando sólo estamos escribiendo.
+    // Acá arriba la activación está fresca, igual que los otros "Copiar link" de la
+    // app, que nunca pidieron permiso. Es la red para Facebook: sus grupos descartan
+    // el texto cuando va una imagen adjunta, así que el que comparte lo pega a mano.
+    try {
+      await navigator.clipboard?.writeText(texto)
+    } catch (e) {
+      /* sin portapapeles: seguimos igual, la imagen se comparte lo mismo */
+    }
+
+    onToast?.('Generando imagen…')
+    const blob = await generarFlyer(r)
+    const file = new File([blob], `chicho-${r.id || 'aviso'}.png`, { type: 'image/png' })
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      // Copiamos el texto+link al portapapeles. Es la red para Facebook: sus grupos
-      // descartan el texto cuando va una imagen adjunta, así que el que comparte pega
-      // el link a mano en el posteo. En WhatsApp el texto ya viaja con la imagen.
-      // No avisamos con un toast: la hoja de compartir del sistema lo tapa al toque.
-      // El aviso está fijo abajo del botón "Compartir para ayudar" (Detalle), que se
-      // lee ANTES de tocar. Falla en silencio si no hay permiso: es un extra.
-      try {
-        await navigator.clipboard?.writeText(texto)
-      } catch (e) {
-        /* sin portapapeles: seguimos igual, la imagen se comparte lo mismo */
-      }
       try {
         await navigator.share({ files: [file], title: 'Chicho', text: texto })
         return
