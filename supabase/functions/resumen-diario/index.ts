@@ -77,7 +77,7 @@ async function enviarRecordatorios(): Promise<number> {
       {
         title: '🔔 ¿Cómo va la búsqueda?',
         body: `¿Novedades de ${nombre}? Si ya volvió, marcalo 🏠. Si no, renovalo para que vuelva arriba. 🐾`,
-        url: '/',
+        url: `/r/${r.id}`, // al aviso, no al feed (igual que el recordatorio de "compartí")
       },
       { reporteId: r.id, tipo: 'recordatorio' },
     )

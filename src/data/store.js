@@ -48,6 +48,7 @@ function desdeFila(row) {
     apoyos: row.apoyos || 0, // prueba social: cuánta gente se sumó a difundir
     aplausos: row.aplausos || 0, // 👏 en los reencuentros
     resueltoEn: row.resuelto_en || null, // cuándo volvió a casa (lo estampa un trigger)
+    recordatorioEn: row.recordatorio_en || null, // último recordatorio al dueño (panel admin)
     // OJO: apoyos/aplausos NO van en haciaFila — solo los toca su RPC. Si entraran
     // en el update, cada edición del aviso pisaría el contador a 0.
   }

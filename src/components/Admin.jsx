@@ -14,7 +14,8 @@ function Card({ n, label, color }) {
 }
 
 // Fila de un aviso en las listas del panel (actividad / empujón).
-function AvisoRow({ r, onOpen }) {
+// pie (opcional): línea extra abajo — en el empujón dice si ya le avisamos al dueño.
+function AvisoRow({ r, onOpen, pie }) {
   const b = badgeEstado(r)
   return (
     <button className="adm-row" onClick={() => onOpen && onOpen(r)}>
@@ -22,10 +23,20 @@ function AvisoRow({ r, onOpen }) {
       <div className="adm-row-txt">
         <div className="adm-row-t">{nombreMostrado(r)}</div>
         <div className="adm-row-s">{ubicacionTexto(r.localidad, r.zona)}</div>
+        {pie && <div className="adm-row-pie">{pie}</div>}
       </div>
       <span className="adm-row-time">{tiempoRelativo(r.creadoEn)}</span>
     </button>
   )
+}
+
+// ¿Ya le avisamos al dueño y no hizo nada? Renovar bumpea creado_en, así que si el
+// recordatorio es POSTERIOR a la creación, fue avisado y no renovó desde entonces.
+function pieEmpujon(r) {
+  if (r.recordatorioEn && r.recordatorioEn >= r.creadoEn) {
+    return `🔔 Avisado al dueño ${tiempoRelativo(r.recordatorioEn)} · sin acción`
+  }
+  return '🔕 Todavía sin avisar al dueño'
 }
 
 export default function Admin({ onVolver, onOpen, stats }) {
@@ -112,7 +123,7 @@ export default function Admin({ onVolver, onOpen, stats }) {
                 </div>
                 <div className="adm-lista">
                   {empujar.map((r) => (
-                    <AvisoRow key={r.id} r={r} onOpen={onOpen} />
+                    <AvisoRow key={r.id} r={r} onOpen={onOpen} pie={pieEmpujon(r)} />
                   ))}
                 </div>
               </>

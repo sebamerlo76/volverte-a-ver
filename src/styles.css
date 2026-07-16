@@ -2682,6 +2682,7 @@ select {
 .adm-row-t { font-family: Fredoka, sans-serif; font-weight: 600; font-size: 14.5px; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .adm-row-s { font-size: 12px; font-weight: 700; color: #8a807a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .adm-row-time { flex: none; font-size: 11px; font-weight: 800; color: var(--faint); }
+.adm-row-pie { font-size: 11px; font-weight: 700; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .adm-rango { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .adm-rango input[type='date'] { flex: 1; min-width: 120px; padding: 9px 10px; border-radius: 12px; border: 1px solid var(--line); background: #fff; font-family: Nunito, sans-serif; font-weight: 700; font-size: 13px; color: #2a2320; }
 .adm-rango span { color: var(--muted); font-weight: 800; }
