@@ -42,6 +42,12 @@ async function prefsDe(userIds: string[]) {
 async function enviarAUsuarios(userIds: string[], payload: any, meta: any = {}) {
   const ids = [...new Set(userIds.filter(Boolean))]
   if (!ids.length) return 0
+  // La notificación tiene que llevar al AVISO, no al feed. Todas las llamadas ya
+  // pasan meta.reporteId (es el mismo que se guarda en el inbox), así que la url sale
+  // de ahí, en un solo lugar. Antes cada payload traía url:'/' y el toque caía
+  // siempre en el feed — la notificación decía "Fido volvió a casa" y no te llevaba
+  // a Fido. Sin reporteId (no pasa hoy), el service worker cae a '/'.
+  if (meta.reporteId) payload = { ...payload, url: `/r/${meta.reporteId}` }
   // Guardar en el "inbox" de cada usuario, aunque no tenga push activado.
   try {
     const { error } = await sb.from('notificaciones').insert(
@@ -110,7 +116,6 @@ async function manejarReporte(nuevo: any) {
       {
         title: '🐾 ¿Será el tuyo?',
         body: `Apareció un ${ESP[nuevo.especie] || 'animal'} parecido en ${nuevo.zona || 'Paraná'}.`,
-        url: '/',
       },
       { reporteId: nuevo.id, tipo: 'match' },
     )
@@ -170,7 +175,6 @@ async function manejarReporte(nuevo: any) {
         {
           title: '📍 Nuevo aviso cerca tuyo',
           body: `Un ${ESP[nuevo.especie] || 'animal'} ${tipoTxt} en ${nuevo.zona || 'Paraná'}.`,
-          url: '/',
         },
         { reporteId: nuevo.id, tipo: 'cerca' },
       )
@@ -220,7 +224,6 @@ async function manejarAvistamiento(rec: any) {
         {
           title: '👀 ¡Vieron a tu mascota!',
           body: rec.nota ? `Nuevo avistamiento: ${rec.nota}` : `Alguien reportó ver a tu ${ESP[rep.especie] || 'mascota'}.`,
-          url: '/',
         },
         { reporteId: rec.reporte_id, tipo: 'avistamiento' },
       )
@@ -235,7 +238,6 @@ async function manejarAvistamiento(rec: any) {
       {
         title: `👀 Novedad de ${nombre}`,
         body: rec.nota ? `Nuevo avistamiento: ${rec.nota}` : 'Alguien lo vio.',
-        url: '/',
       },
       { reporteId: rec.reporte_id, tipo: 'avistamiento' },
     )
@@ -260,7 +262,7 @@ async function manejarReporteUpdate(rec: any, old: any) {
   if (old?.estado === 'activo' && rec.estado === 'resuelto') {
     const segs = (await seguidoresDe(rec.id)).filter((u: string) => u !== rec.user_id)
     if (segs.length) {
-      await enviarAUsuarios(segs, { title: '🎉 ¡Apareció!', body: `${nombre} volvió a casa. 🏠`, url: '/' }, { reporteId: rec.id, tipo: 'aparecio' })
+      await enviarAUsuarios(segs, { title: '🎉 ¡Apareció!', body: `${nombre} volvió a casa. 🏠` }, { reporteId: rec.id, tipo: 'aparecio' })
     }
     // Aviso al admin: cada reencuentro (son pocos y son la mejor noticia).
     const lugar = [rec.zona, rec.localidad].filter(Boolean).join(', ')
@@ -290,7 +292,6 @@ async function manejarReporteUpdate(rec: any, old: any) {
       {
         title: `📝 Novedad de ${nombre}`,
         body: 'La familia actualizó el aviso. Tocá para ver.',
-        url: '/',
       },
       { reporteId: rec.id, tipo: 'novedad' },
     )
