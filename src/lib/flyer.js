@@ -247,6 +247,17 @@ export async function compartirFlyer(r, onToast) {
     const link = r.id ? `https://chicho.ar/r/${r.id}` : 'https://chicho.ar'
     const texto = `${nombreMostrado(r)} — ${estado} en ${ubicacionTexto(r.localidad, r.zona)}. Mirá y ayudá 🐾\n${link}`
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      // Copiamos el texto+link ANTES de abrir el menú (share no devuelve el control
+      // hasta que se cierra). Es la red para Facebook: sus grupos descartan el texto
+      // cuando va una imagen adjunta, así que el que comparte pega el link a mano en
+      // el posteo. En WhatsApp el texto ya viaja con la imagen; copiarlo de más no
+      // molesta. Falla en silencio si no hay permiso de portapapeles: es un extra.
+      try {
+        await navigator.clipboard?.writeText(texto)
+        onToast?.('🔗 Link copiado — si compartís a un grupo de Facebook, pegalo en el texto')
+      } catch (e) {
+        /* sin portapapeles: seguimos igual, la imagen se comparte lo mismo */
+      }
       try {
         await navigator.share({ files: [file], title: 'Chicho', text: texto })
         return
