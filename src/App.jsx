@@ -75,7 +75,7 @@ export default function App() {
   // --- Botón "atrás" del celu: cerrar la capa abierta en vez de cerrar la PWA ---
   // ¿Hay algo "abierto" sobre el feed? (una vista distinta, o un modal)
   const hayCapa =
-    vista !== 'feed' || !!fotosVer || menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte
+    vista !== 'feed' || !!fotosVer || menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo
   // Cuántos "atrás" hacen falta para llegar al feed desde la vista actual.
   const nivelVista = (v) => {
     switch (v) {
@@ -93,7 +93,9 @@ export default function App() {
         return 1 // detalle, cuenta, post, auth, post-intent, admin, moderacion
     }
   }
-  const modalAbierto = menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte
+  // El festejo cuenta como capa: si no, el "atrás" del celu te saca de la pantalla
+  // en vez de cerrarlo. Antes salía sólo desde el aviso; ahora también en Mi cuenta.
+  const modalAbierto = menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo
   // Profundidad = capas apiladas = cantidad de "atrás" hasta el feed.
   const profundidad = nivelVista(vista) + (fotosVer ? 1 : 0) + (modalAbierto ? 1 : 0)
   const backRef = useRef({ hayCapa: false })
@@ -103,12 +105,13 @@ export default function App() {
   const removiendo = useRef(false) // estamos sacando centinelas nosotros (ignorar esos popstate)
   // Snapshot del estado para que el listener (registrado una vez) lea lo actual.
   const estadoRef = useRef({})
-  estadoRef.current = { vista, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte }
+  estadoRef.current = { vista, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte, festejo }
 
   // Cierra la capa de más arriba (foto y modales primero, después vistas).
   function retroceder() {
     const s = estadoRef.current
     if (s.fotosVer) return setFotosVer(null)
+    if (s.festejo) return setFestejo(null)
     if (s.menuAbierto) return setMenuAbierto(false)
     if (s.buscadorAbierto) return setBuscadorAbierto(false)
     if (s.notifsAbierto) return setNotifsAbierto(false)
@@ -546,6 +549,16 @@ export default function App() {
       mostrarToast('No se pudo actualizar 😕')
     }
   }
+
+  // Cerrar un aviso desde Mi cuenta. Mismo festejo que desde el aviso: antes acá
+  // sólo salía un toast, así que se perdía el momento de compartir el reencuentro
+  // — que es donde más se cierra y el contenido que más ayuda a que la app crezca.
+  // Recibe el aviso entero (no el id) porque acá no hay "seleccionado" que capturar.
+  async function resolverDesdeCuenta(rep) {
+    await marcarResuelto(rep.id)
+    await cargar()
+    setFestejo({ ...rep, estado: 'resuelto' })
+  }
   async function reactivar(id) {
     try {
       await reactivarReporte(id)
@@ -710,6 +723,7 @@ export default function App() {
             onPublicarMascota={publicarMascota}
             onIrSeccion={setCuentaSeccion}
             onCompletoPasos={() => setNudge(false)}
+            onResuelto={resolverDesdeCuenta}
             onToast={mostrarToast}
           />
         )}

@@ -19,7 +19,7 @@ function diasDe(iso) {
   return isNaN(ms) ? 0 : Math.floor(ms / 86400000)
 }
 const TITULOS = {
-  animalitos: 'Mis animalitos',
+  animalitos: 'Mis mascotas',
   ubicaciones: 'Mis ubicaciones',
   notificaciones: 'Notificaciones',
   avisos: 'Mis avisos',
@@ -39,6 +39,7 @@ export default function MiCuenta({
   onPublicarMascota,
   onIrSeccion,
   onCompletoPasos,
+  onResuelto,
   onToast,
 }) {
   const [mios, setMios] = useState(null)
@@ -97,11 +98,14 @@ export default function MiCuenta({
   function avisoActivoDe(m) {
     return (mios || []).find((r) => r.mascotaId === m.id && r.estado === 'activo') || null
   }
-  async function aparecio(avisoId) {
+  // Recibe el aviso entero: App lo necesita para armar el festejo (la pantalla que
+  // ofrece compartir el reencuentro). Antes acá se marcaba resuelto a mano y sólo
+  // salía un toast, así que cerrando desde Mi cuenta se perdía ese momento.
+  async function aparecio(rep) {
     try {
-      await marcarResuelto(avisoId)
-      await cargar()
-      onToast?.('🎉 ¡Qué alegría! Tu mascota volvió a casa')
+      if (onResuelto) await onResuelto(rep) // marca resuelto + festejo (App)
+      else await marcarResuelto(rep.id) // sin el prop: al menos que cierre
+      await cargar() // refrescar mi lista
     } catch (e) {
       console.error(e)
       onToast?.('No se actualizó. Probá de nuevo 🔄')
@@ -328,11 +332,11 @@ export default function MiCuenta({
             </div>
           ))}
 
-        {/* ---------------- Mis animalitos ---------------- */}
+        {/* ---------------- Mis mascotas ---------------- */}
         {seccion === 'animalitos' && (
           <>
             <div className="sec-head">
-              <span>Mis animalitos</span>
+              <span>Mis mascotas</span>
               <button className="sec-add" onClick={onNuevaMascota}>
                 <span className="mi" style={{ fontSize: 18 }}>
                   add
@@ -381,7 +385,7 @@ export default function MiCuenta({
                         </div>
                       </button>
                       {perdido ? (
-                        <button className="masc-aparecio" onClick={() => aparecio(aviso.id)}>
+                        <button className="masc-aparecio" onClick={() => aparecio(aviso)}>
                           <span className="mi" style={{ fontSize: 17 }}>
                             celebration
                           </span>
@@ -466,7 +470,7 @@ export default function MiCuenta({
                             {renovando === r.id ? '…' : 'Renovar'}
                           </button>
                         )}
-                        <button className="rb-ok" onClick={() => aparecio(r.id)}>
+                        <button className="rb-ok" onClick={() => aparecio(r)}>
                           <span className="mi fill" style={{ fontSize: 15 }}>home</span>
                           Ya volvió
                         </button>

@@ -3,7 +3,7 @@ import { avatarDe, nombreUsuario } from '../lib/formato.js'
 // Menú desplegable desde la cara (arriba a la izquierda).
 const ITEMS = [
   { k: 'primeros-pasos', ic: 'flag', t: 'Primeros pasos' },
-  { k: 'animalitos', ic: 'pets', t: 'Mis animalitos' },
+  { k: 'animalitos', ic: 'pets', t: 'Mis mascotas' }, // la clave queda 'animalitos' (routing); el texto dice mascotas, como el resto
   { k: 'ubicaciones', ic: 'location_on', t: 'Mis ubicaciones' },
   { k: 'notificaciones', ic: 'notifications', t: 'Notificaciones' },
   { k: 'avisos', ic: 'campaign', t: 'Mis avisos' },
