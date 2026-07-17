@@ -1,6 +1,10 @@
 // Reportes de ejemplo para que la app no arranque vacía.
-// Cuando se conecte Supabase, estos datos vivirán en la base y esto
-// quedará solo como "datos demo" para desarrollo.
+//
+// DOBLE FUNCIÓN: esto es lo que se ve en el "Chicho demo" — la copia que corre sin
+// Supabase (variables de entorno vacías), para grabar tutoriales sin tocar la base
+// real ni exponer avisos de gente de verdad. Todo acá es INVENTADO (nombres, fotos,
+// teléfonos). La app real ignora este archivo (usa Supabase), así que se puede
+// editar libre para que la demo quede linda.
 export const SEED_REPORTES = [
   {
     id: 'seed-1',
@@ -94,5 +98,26 @@ export const SEED_REPORTES = [
     fechaEvento: '2026-06-25',
     creadoEn: '2026-06-25T16:00:00',
     estado: 'activo',
+  },
+  {
+    // Un "Ya en casa" para poder mostrar esa pestaña y el aplauso en los tutoriales.
+    id: 'seed-6',
+    tipo: 'perdido',
+    especie: 'perro',
+    nombre: 'Lola',
+    zona: 'Paracao',
+    referencia: 'zona Paracao',
+    color: 'Marrón',
+    tamano: 'Mediano',
+    raza: 'Mestizo',
+    descripcion: 'Volvió a casa a los tres días, la reconoció un vecino por el aviso. 🎉',
+    foto: 'https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=600&h=420&fit=crop&q=80',
+    whatsapp: '3434111222',
+    autor: 'Flor D.',
+    fechaEvento: '2026-06-20',
+    creadoEn: '2026-06-20T12:00:00',
+    resueltoEn: '2026-06-23T15:00:00',
+    aplausos: 7,
+    estado: 'resuelto',
   },
 ]
