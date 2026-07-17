@@ -30,6 +30,26 @@ function similitud(a: any, b: any) {
   for (let i = 0; i < a.length; i++) s += a[i] * b[i]
   return s
 }
+// Compara barrios sin depender de espacios, mayúsculas ni acentos.
+//
+// Por qué: los avisos viejos traen el barrio escrito a mano ("Antonini " con un
+// espacio al final), y con comparación exacta el que se suscribió a "Antonini" no
+// recibía nada. La alternativa era "arreglar" reportes.zona, pero zona está entre
+// los campos que disparan el push de "la familia actualizó el aviso": limpiar un
+// espacio invisible le mandaría una notificación a cada seguidor. Mejor tolerar acá
+// que tocar los datos de la gente.
+//
+// Es estrictamente más permisivo: sólo puede sumar destinatarios, nunca sacarlos.
+function normBarrio(s: string) {
+  return (s || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // acentos (las marcas que deja el NFD)
+    .replace(/^barrio\s+/, '')
+    .replace(/[^a-z0-9 ]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
 async function prefsDe(userIds: string[]) {
   const ids = [...new Set(userIds.filter(Boolean))]
   const map = new Map<string, any>()
@@ -143,7 +163,10 @@ async function manejarReporte(nuevo: any) {
         // les abre todos los barrios, así no pierden alcance sin enterarse.
         return (
           variasZonas ||
-          (Array.isArray(p.barrios) && (p.barrios.includes('*') || (nuevo.zona && p.barrios.includes(nuevo.zona))))
+          (Array.isArray(p.barrios) &&
+            (p.barrios.includes('*') ||
+              // Comparación tolerante (ver normBarrio): "Antonini " matchea "Antonini".
+              (!!nuevo.zona && p.barrios.some((b: string) => normBarrio(b) === normBarrio(nuevo.zona)))))
         )
       })
       .map((p: any) => p.user_id)
