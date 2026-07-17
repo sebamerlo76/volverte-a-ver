@@ -34,9 +34,9 @@ function AvisoRow({ r, onOpen, pie }) {
 // recordatorio es POSTERIOR a la creación, fue avisado y no renovó desde entonces.
 function pieEmpujon(r) {
   if (r.recordatorioEn && r.recordatorioEn >= r.creadoEn) {
-    return `🔔 Avisado al dueño ${tiempoRelativo(r.recordatorioEn)} · sin acción`
+    return `🔔 Avisado ${tiempoRelativo(r.recordatorioEn)} · sin acción`
   }
-  return '🔕 Todavía sin avisar al dueño'
+  return '🔕 Todavía sin avisar'
 }
 
 export default function Admin({ onVolver, onOpen, stats }) {
