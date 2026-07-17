@@ -3,7 +3,7 @@ import PetCard from './PetCard.jsx'
 import { getMisReportes, getMisMascotas, marcarResuelto, renovarReporte, reactivarReporte, desactivarCuenta, reactivarCuenta } from '../data/store.js'
 import { avatarDe, nombreUsuario } from '../lib/formato.js'
 import { soportado as pushSoportado, yaSuscripto, activarPush, desactivarPush } from '../lib/push.js'
-import { supabase } from '../lib/supabase.js'
+import { supabase, supabaseConfigurado } from '../lib/supabase.js'
 import NotifPrefs from './NotifPrefs.jsx'
 import MisUbicaciones from './MisUbicaciones.jsx'
 import PrimerosPasos from './PrimerosPasos.jsx'
@@ -156,6 +156,19 @@ export default function MiCuenta({
     }
   }
 
+  // Solo demo: borra todo lo local (avisos, mascotas, ubicaciones, marcas) y recarga.
+  // Vuelve al feed de ejemplo, listo para grabar de nuevo. No existe en la app real.
+  async function reiniciarDemo() {
+    if (supabaseConfigurado) return // jamás en la app real: localStorage.clear() borraría la sesión
+    if (!(await confirmar({ mensaje: '¿Reiniciar la demo? Se borra lo que cargaste y vuelve al feed de ejemplo.', aceptar: 'Reiniciar', peligro: true }))) return
+    try {
+      localStorage.clear()
+    } catch (e) {
+      /* ignore */
+    }
+    location.reload()
+  }
+
   const desactivada = !!user?.user_metadata?.desactivada
   async function desactivar() {
     if (!(await confirmar({ mensaje: '¿Desactivar tu cuenta? Tus avisos dejan de verse y no vas a recibir notificaciones. Podés reactivarla cuando quieras.', aceptar: 'Desactivar', peligro: true }))) return
@@ -258,14 +271,31 @@ export default function MiCuenta({
               </button>
             </div>
 
-            <div style={{ padding: '24px 20px 8px' }}>
-              <button className="btn-logout" onClick={onLogout}>
-                <span className="mi" style={{ fontSize: 21 }}>
-                  logout
-                </span>
-                Cerrar sesión
-              </button>
-            </div>
+            {/* Solo en el Chicho demo (sin Supabase): reiniciar borra lo local y vuelve
+                al feed de ejemplo. Para arrancar cada grabación desde cero. */}
+            {!supabaseConfigurado && (
+              <div style={{ padding: '24px 20px 8px' }}>
+                <button className="btn-logout" onClick={reiniciarDemo}>
+                  <span className="mi" style={{ fontSize: 21 }}>
+                    refresh
+                  </span>
+                  Reiniciar demo
+                </button>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', marginTop: 8, textAlign: 'center' }}>
+                  Borra lo que cargaste y vuelve al ejemplo.
+                </div>
+              </div>
+            )}
+            {supabaseConfigurado && (
+              <div style={{ padding: '24px 20px 8px' }}>
+                <button className="btn-logout" onClick={onLogout}>
+                  <span className="mi" style={{ fontSize: 21 }}>
+                    logout
+                  </span>
+                  Cerrar sesión
+                </button>
+              </div>
+            )}
             <div style={{ padding: '0 20px 34px' }}>
               {desactivada ? (
                 <div className="desact-box">

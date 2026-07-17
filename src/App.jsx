@@ -46,7 +46,9 @@ export default function App() {
   // En el Chicho demo (sin Supabase) no hay login, pero las pantallas de cuenta
   // (Mis mascotas, Mis ubicaciones) necesitan un usuario para tener un id. Le damos
   // uno falso, fijo. En producción esto es null y manda la sesión real de abajo.
-  const [user, setUser] = useState(supabaseConfigurado ? null : { id: 'demo', email: '', user_metadata: { nombre: 'Vos' } })
+  // id 'local': tiene que coincidir con el userId que addReporte le pone a los avisos
+  // en modo local, si no "Mis avisos" queda vacío (filtra por userId).
+  const [user, setUser] = useState(supabaseConfigurado ? null : { id: 'local', email: '', user_metadata: { nombre: 'Vos' } })
   const [editando, setEditando] = useState(null) // aviso en edición, o null
   const [mascotaEditando, setMascotaEditando] = useState(null) // mascota en edición, o null (nueva)
   const [plantilla, setPlantilla] = useState(null) // mascota para prellenar un aviso nuevo
