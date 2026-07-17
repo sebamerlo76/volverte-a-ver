@@ -43,7 +43,10 @@ export default function App() {
   const [reportes, setReportes] = useState([])
   const [cargandoReportes, setCargandoReportes] = useState(true) // 1ª carga: distinguir "cargando" de "vacío"
   const [toast, setToast] = useState('')
-  const [user, setUser] = useState(null)
+  // En el Chicho demo (sin Supabase) no hay login, pero las pantallas de cuenta
+  // (Mis mascotas, Mis ubicaciones) necesitan un usuario para tener un id. Le damos
+  // uno falso, fijo. En producción esto es null y manda la sesión real de abajo.
+  const [user, setUser] = useState(supabaseConfigurado ? null : { id: 'demo', email: '', user_metadata: { nombre: 'Vos' } })
   const [editando, setEditando] = useState(null) // aviso en edición, o null
   const [mascotaEditando, setMascotaEditando] = useState(null) // mascota en edición, o null (nueva)
   const [plantilla, setPlantilla] = useState(null) // mascota para prellenar un aviso nuevo

@@ -149,37 +149,70 @@ function ubicDesdeFila(u) {
   return { id: u.id, nombre: u.nombre, localidad: u.localidad, zona: u.zona || '', avisar: u.avisar }
 }
 
+// Rama local (Chicho demo, sin Supabase). Igual que las mascotas: nunca corre en
+// producción, solo cuando la app arranca sin base para grabar tutoriales.
+const CLAVE_UBIC = 'vav_ubicaciones_v1'
+function leerUbicacionesLocal() {
+  try {
+    const raw = localStorage.getItem(CLAVE_UBIC)
+    if (raw) return JSON.parse(raw)
+  } catch (e) {
+    /* ignore */
+  }
+  return []
+}
+function guardarUbicacionesLocal(u) {
+  localStorage.setItem(CLAVE_UBIC, JSON.stringify(u))
+}
+
 export async function getUbicaciones(userId) {
-  if (!userId || !supabaseConfigurado) return []
-  const { data, error } = await supabase.from('ubicaciones').select('*').eq('user_id', userId).order('creado_en', { ascending: true })
-  if (error) throw error
-  return (data || []).map(ubicDesdeFila)
+  if (supabaseConfigurado) {
+    if (!userId) return []
+    const { data, error } = await supabase.from('ubicaciones').select('*').eq('user_id', userId).order('creado_en', { ascending: true })
+    if (error) throw error
+    return (data || []).map(ubicDesdeFila)
+  }
+  return leerUbicacionesLocal()
 }
 
 export async function addUbicacion({ userId, nombre, localidad, zona, avisar }) {
-  if (!supabaseConfigurado) return null
-  const { data, error } = await supabase
-    .from('ubicaciones')
-    .insert({ user_id: userId, nombre, localidad, zona: zona || null, avisar })
-    .select()
-    .single()
-  if (error) throw error
-  return ubicDesdeFila(data)
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase
+      .from('ubicaciones')
+      .insert({ user_id: userId, nombre, localidad, zona: zona || null, avisar })
+      .select()
+      .single()
+    if (error) throw error
+    return ubicDesdeFila(data)
+  }
+  const us = leerUbicacionesLocal()
+  const nueva = { id: 'u-' + Date.now().toString(36), nombre, localidad, zona: zona || '', avisar }
+  us.push(nueva)
+  guardarUbicacionesLocal(us)
+  return nueva
 }
 
 export async function actualizarUbicacion(id, campos) {
-  if (!id || !supabaseConfigurado) return
-  const fila = {}
-  if (campos.avisar != null) fila.avisar = campos.avisar
-  if (campos.nombre != null) fila.nombre = campos.nombre
-  if (campos.localidad != null) fila.localidad = campos.localidad
-  if (campos.zona != null) fila.zona = campos.zona || null // '' = sin barrio, no "no lo toques"
-  await supabase.from('ubicaciones').update(fila).eq('id', id)
+  if (!id) return
+  if (supabaseConfigurado) {
+    const fila = {}
+    if (campos.avisar != null) fila.avisar = campos.avisar
+    if (campos.nombre != null) fila.nombre = campos.nombre
+    if (campos.localidad != null) fila.localidad = campos.localidad
+    if (campos.zona != null) fila.zona = campos.zona || null // '' = sin barrio, no "no lo toques"
+    await supabase.from('ubicaciones').update(fila).eq('id', id)
+    return
+  }
+  guardarUbicacionesLocal(leerUbicacionesLocal().map((u) => (u.id === id ? { ...u, ...campos } : u)))
 }
 
 export async function eliminarUbicacion(id) {
-  if (!id || !supabaseConfigurado) return
-  await supabase.from('ubicaciones').delete().eq('id', id)
+  if (!id) return
+  if (supabaseConfigurado) {
+    await supabase.from('ubicaciones').delete().eq('id', id)
+    return
+  }
+  guardarUbicacionesLocal(leerUbicacionesLocal().filter((u) => u.id !== id))
 }
 
 // ---------------------------------------------------------------------------

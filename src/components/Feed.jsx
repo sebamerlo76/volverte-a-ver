@@ -148,21 +148,21 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
         {/* Fila mini: menú (cara) · logo · campana */}
         <div className="hmini">
           <div className={'hmini-side' + (authActivo && !logueado ? ' hmini-side-auto' : '')}>
-            {authActivo ? (
-              logueado ? (
-                <button onClick={onMenu} aria-label="Menú">
-                  {avatar ? (
-                    <img className="hd-av" src={avatar} alt="Menú" referrerPolicy="no-referrer" />
-                  ) : (
-                    <span className="mi" style={{ fontSize: 27, color: 'var(--navy)' }}>menu</span>
-                  )}
-                </button>
-              ) : (
-                <button className="hd-entrar" onClick={onLogin} aria-label="Iniciar sesión">
-                  <span className="mi" style={{ fontSize: 19 }}>login</span>
-                  Entrar
-                </button>
-              )
+            {/* logueado incluye la demo (sin auth, logueado=true): mostramos el menú
+                para poder llegar a Mis mascotas / Mis ubicaciones. */}
+            {logueado ? (
+              <button onClick={onMenu} aria-label="Menú">
+                {avatar ? (
+                  <img className="hd-av" src={avatar} alt="Menú" referrerPolicy="no-referrer" />
+                ) : (
+                  <span className="mi" style={{ fontSize: 27, color: 'var(--navy)' }}>menu</span>
+                )}
+              </button>
+            ) : authActivo ? (
+              <button className="hd-entrar" onClick={onLogin} aria-label="Iniciar sesión">
+                <span className="mi" style={{ fontSize: 19 }}>login</span>
+                Entrar
+              </button>
             ) : null}
           </div>
 
@@ -189,6 +189,10 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
                 <span className="mi" style={{ fontSize: 19 }}>login</span>
                 Entrar
               </span>
+            ) : !authActivo ? (
+              // Demo: sin campana (no hay bandeja), pero un hueco del ancho del menú
+              // para que el logo quede centrado igual.
+              <span className="mi" aria-hidden="true" style={{ fontSize: 26, visibility: 'hidden' }}>menu</span>
             ) : null}
           </div>
         </div>
