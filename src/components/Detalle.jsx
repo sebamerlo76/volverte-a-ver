@@ -3,9 +3,10 @@ import MapaLeaflet from './MapaLazy.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { badgeEstado, subLinea, textoTipo } from '../lib/estados.js'
-import { getAvistamientos, sumarApoyo, sumarAplauso, denunciarReporte, reportarNumero, reportesDeNumero } from '../data/store.js'
+import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel } from '../lib/formato.js'
 import { compartirFlyer } from '../lib/flyer.js'
+import { useAplauso } from '../lib/useAplauso.js'
 
 // Escapa texto del usuario para meterlo seguro en el HTML del globito.
 function esc(s = '') {
@@ -43,25 +44,6 @@ function marcarApoyado(id) {
     if (!a.includes(id)) {
       a.push(id)
       localStorage.setItem('chicho_apoyos', JSON.stringify(a))
-    }
-  } catch (e) {
-    /* ignore */
-  }
-}
-// ¿Este dispositivo ya aplaudió este reencuentro? (mismo patrón que los apoyos)
-function yaAplaudido(id) {
-  try {
-    return JSON.parse(localStorage.getItem('chicho_aplausos') || '[]').includes(id)
-  } catch (e) {
-    return false
-  }
-}
-function marcarAplaudido(id) {
-  try {
-    const a = JSON.parse(localStorage.getItem('chicho_aplausos') || '[]')
-    if (!a.includes(id)) {
-      a.push(id)
-      localStorage.setItem('chicho_aplausos', JSON.stringify(a))
     }
   } catch (e) {
     /* ignore */
@@ -117,8 +99,7 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
   const [fotoActiva, setFotoActiva] = useState(0)
   const [apoyos, setApoyos] = useState(r?.apoyos || 0)
   const [apoyado, setApoyado] = useState(false)
-  const [aplausos, setAplausos] = useState(r?.aplausos || 0)
-  const [aplaudido, setAplaudido] = useState(false)
+  const { aplausos, aplaudido, aplaudir } = useAplauso(r) // 👏 reencuentro (mismo hook que la tarjeta del feed)
   const [reporteAbierto, setReporteAbierto] = useState(false)
   const [numeroSheet, setNumeroSheet] = useState(false)
   const [numReportes, setNumReportes] = useState(0)
@@ -153,26 +134,6 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
     setApoyos(r?.apoyos || 0)
     setApoyado(yaApoyado(r?.id))
   }, [r?.id, r?.apoyos])
-
-  // Idem el de aplausos (reencuentros).
-  useEffect(() => {
-    setAplausos(r?.aplausos || 0)
-    setAplaudido(yaAplaudido(r?.id))
-  }, [r?.id, r?.aplausos])
-
-  // Aplaudir un reencuentro: una vez por dispositivo, sin login.
-  async function aplaudir() {
-    if (aplaudido || !r?.id) return
-    setAplaudido(true)
-    setAplausos((n) => n + 1)
-    marcarAplaudido(r.id) // antes del await: evita que un doble toque dispare 2 RPC
-    try {
-      const total = await sumarAplauso(r.id)
-      if (typeof total === 'number') setAplausos(total)
-    } catch (e) {
-      console.error(e) // el +1 optimista queda igual
-    }
-  }
 
   // Compartir = apoyar: abre el compartir Y suma al contador (una vez por dispositivo).
   async function compartirYSumar() {

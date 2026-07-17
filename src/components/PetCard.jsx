@@ -1,6 +1,7 @@
 import { nombreMostrado, tiempoRelativo } from '../lib/formato.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { badgeEstado, subLinea } from '../lib/estados.js'
+import { useAplauso } from '../lib/useAplauso.js'
 
 // posicion: lugar en la lista del feed. Sirve para decidir qué fotos cargar ya.
 // Por defecto 99 = "no está arriba de todo" (así entra sin tocar quien no la pase).
@@ -8,6 +9,7 @@ export default function PetCard({ r, onClick, posicion = 99 }) {
   const perdido = r.tipo === 'perdido'
   const resuelto = r.estado === 'resuelto'
   const clr = perdido ? '#ff6b5e' : '#2f7fed'
+  const { aplausos, aplaudido, aplaudir } = useAplauso(r) // 👏 en los "Ya en casa", sin entrar al aviso
   return (
     <button className="card" onClick={onClick}>
       <div className={'ci' + (perdido ? '' : ' g')}>
@@ -58,6 +60,31 @@ export default function PetCard({ r, onClick, posicion = 99 }) {
           </span>
           {ubicacionTexto(r.localidad, r.zona)}
         </div>
+        {resuelto && (
+          // Aplaudir sin entrar al aviso. Es un span (no button) porque la tarjeta ya
+          // es un <button>; stopPropagation evita que aplaudir abra el aviso.
+          <span
+            className={'card-aplauso' + (aplaudido ? ' on' : '')}
+            role="button"
+            tabIndex={0}
+            aria-label={aplaudido ? 'Ya aplaudiste' : 'Aplaudir'}
+            onClick={(e) => {
+              e.stopPropagation()
+              aplaudir()
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                e.stopPropagation()
+                aplaudir()
+              }
+            }}
+          >
+            <span aria-hidden="true">👏</span>
+            {aplaudido ? '¡Aplaudiste!' : 'Aplaudir'}
+            {aplausos > 0 ? <b>{aplausos}</b> : null}
+          </span>
+        )}
         {(() => {
           const attrs = [r.tamano, r.color, r.raza, r.sexo && r.sexo !== 'No sé' ? r.sexo : null].filter(Boolean)
           if (!r.recompensa && !attrs.length) return null
