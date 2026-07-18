@@ -32,6 +32,9 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
   const [sexo, setSexo] = useState(base?.sexo || '')
   const [edad, setEdad] = useState(base?.edad || '')
   const [collar, setCollar] = useState(base?.collar || '')
+  // Acordeón de características (mismo modo que "Encontré una"): una sección por vez,
+  // al elegir salta sola a la siguiente. Arranca en Color.
+  const [accAbierta, setAccAbierta] = useState('color')
   const [recompensa, setRecompensa] = useState(base?.recompensa || '')
   const [localidad, setLocalidad] = useState(base?.localidad || localidadGuardada())
   const [zona, setZona] = useState(base?.zona || 'Centro')
@@ -145,6 +148,40 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
     }
   }
 
+  // Acordeón de características (Color → Collar). Raza no va si es "otro" animal.
+  const SECS = [
+    { k: 'color', t: 'Color', v: color },
+    { k: 'tamano', t: 'Tamaño', v: tamano },
+    ...(especie !== 'otro' ? [{ k: 'raza', t: 'Raza', v: raza }] : []),
+    { k: 'sexo', t: 'Sexo', v: sexo },
+    { k: 'edad', t: 'Edad (aprox.)', v: edad },
+    { k: 'collar', t: 'Collar / chapita', v: collar },
+  ]
+  function saltarA(k) {
+    const i = SECS.findIndex((s) => s.k === k)
+    setAccAbierta(SECS[i + 1]?.k || null) // la última cierra todo
+  }
+  function cuerpoSec(k) {
+    if (k === 'color')
+      return <SelectChips opciones={COLORES} valor={color} onChange={setColor} onElegir={() => saltarA('color')} otro placeholder="Otro color" />
+    if (k === 'tamano') return <SelectChips opciones={TAMANOS} valor={tamano} onChange={setTamano} onElegir={() => saltarA('tamano')} />
+    if (k === 'raza')
+      return (
+        <SelectChips
+          opciones={especie === 'gato' ? RAZAS_GATO : RAZAS_PERRO}
+          valor={raza}
+          onChange={setRaza}
+          onElegir={() => saltarA('raza')}
+          otro
+          placeholder="Otra raza"
+        />
+      )
+    if (k === 'sexo') return <SelectChips opciones={SEXOS} valor={sexo} onChange={setSexo} onElegir={() => saltarA('sexo')} />
+    if (k === 'edad')
+      return <SelectChips opciones={EDADES} valor={edad} onChange={setEdad} onElegir={() => saltarA('edad')} otro placeholder="Ej: 2 años" />
+    return <SelectChips opciones={COLLAR} valor={collar} onChange={setCollar} onElegir={() => saltarA('collar')} otro placeholder="Detalle, ej: rojo con chapita" />
+  }
+
   return (
     <div className="view">
       <div className="fhead">
@@ -194,33 +231,23 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
           <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej: Rocco" />
         </div>
 
-        <div className="flabel">Color</div>
-        <SelectChips opciones={COLORES} valor={color} onChange={setColor} otro placeholder="Otro color" />
-
-        <div className="flabel">Tamaño</div>
-        <SelectChips opciones={TAMANOS} valor={tamano} onChange={setTamano} />
-
-        {especie !== 'otro' && (
-          <>
-            <div className="flabel">Raza</div>
-            <SelectChips
-              opciones={especie === 'gato' ? RAZAS_GATO : RAZAS_PERRO}
-              valor={raza}
-              onChange={setRaza}
-              otro
-              placeholder="Otra raza"
-            />
-          </>
-        )}
-
-        <div className="flabel">Sexo</div>
-        <SelectChips opciones={SEXOS} valor={sexo} onChange={setSexo} />
-
-        <div className="flabel">Edad (aprox.)</div>
-        <SelectChips opciones={EDADES} valor={edad} onChange={setEdad} otro placeholder="Ej: 2 años" />
-
-        <div className="flabel">Collar / chapita</div>
-        <SelectChips opciones={COLLAR} valor={collar} onChange={setCollar} otro placeholder="Detalle, ej: rojo con chapita" />
+        <div className="flabel">Características</div>
+        <div className="acc-lista">
+          {SECS.map((s) => (
+            <div className="acc" key={s.k}>
+              <button
+                type="button"
+                className={'acc-h' + (accAbierta === s.k ? ' on' : '')}
+                onClick={() => setAccAbierta(accAbierta === s.k ? null : s.k)}
+              >
+                <span className="acc-t">{s.t}</span>
+                <span className={'acc-v' + (s.v ? '' : ' vacio')}>{s.v || 'Elegir'}</span>
+                <span className="mi acc-ch">{accAbierta === s.k ? 'expand_less' : 'expand_more'}</span>
+              </button>
+              {accAbierta === s.k && <div className="acc-b">{cuerpoSec(s.k)}</div>}
+            </div>
+          ))}
+        </div>
 
         {NOMBRES_LOCALIDADES.length > 1 && (
           <>

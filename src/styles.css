@@ -1579,14 +1579,16 @@ select {
   color: var(--muted);
   margin-top: 2px;
 }
-/* "zona vecina": el aviso es de una localidad del conurbano, no de la que mirás. */
+/* "zona vecina": el aviso es de una localidad del conurbano, no de la que mirás.
+   Amarillo suave para que se note sin gritar. */
 .tag-vecina {
   flex: none;
   margin-left: 4px;
-  padding: 1px 8px;
+  padding: 1.5px 9px;
   border-radius: 999px;
-  background: #eef3fb;
-  color: #5c6a7d;
+  background: #ffe9a8;
+  border: 1px solid #f4d67a;
+  color: #7a5a05;
   font-size: 10.5px;
   font-weight: 800;
   white-space: nowrap;
