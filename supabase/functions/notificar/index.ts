@@ -51,19 +51,65 @@ function normBarrio(s: string) {
     .trim()
 }
 
-// Conurbano: localidades que son una sola mancha urbana (un perro las cruza
-// caminando). Un aviso de una alcanza a las otras — feed y notificaciones.
-// ⚠️ DEBE coincidir con CONURBANOS de src/lib/localidades.js. No se puede importar
-// acá (Edge Function Deno), así que está duplicado a propósito: si sumás un grupo
-// allá, sumalo acá.
-const CONURBANOS = [['Paraná', 'Colonia Avellaneda', 'San Benito', 'Sauce Montrull']]
-function vecinasDe(loc: string): string[] {
-  const g = CONURBANOS.find((x) => x.includes(loc))
-  return g ? g.filter((l) => l !== loc) : []
+// ALCANCE POR DISTANCIA. Un aviso llega hasta donde esté a <= RADIO_ALCANCE_KM.
+// Antes era una tabla de conurbanos a mano (CONURBANOS); no escalaba a toda la
+// Argentina. Ahora es distancia.
+// ⚠️ DEBE coincidir con src/lib/localidades.js: el radio Y los centros de las
+// localidades. No se puede importar acá (Edge Function Deno), así que está
+// duplicado a propósito: si cambiás el radio o sumás/movés una localidad allá,
+// actualizalo acá también.
+const RADIO_ALCANCE_KM = 20
+const CENTROS: Record<string, [number, number]> = {
+  'Paraná': [-31.7405, -60.523],
+  'Crespo': [-32.0294, -60.3097],
+  'Colonia Avellaneda': [-31.76, -60.485],
+  'San Benito': [-31.7708, -60.4636],
+  'General Ramírez': [-32.171, -60.208],
+  'Córdoba': [-31.415532, -64.181483],
+  'Villa Urquiza': [-31.65, -60.367],
+  'Sauce Montrull': [-31.745, -60.355],
+  'La Picada': [-31.735, -60.309],
+  'Neuquén': [-38.9516, -68.0591],
+  'San Martín de los Andes': [-40.1579, -71.3534],
+  'Olavarría': [-36.8937, -60.3233],
+  'Cañuelas': [-35.0533, -58.76],
+  'Santa Fe': [-31.6107, -60.6989],
+  'San Juan': [-31.5375, -68.5364],
+  'Rafaela': [-31.2536, -61.4914],
+  'Ceres': [-29.8814, -61.945],
+  'Selva': [-29.7628, -62.0503],
 }
-// ¿Un aviso en `rLoc` cae en la zona de `loc` (su localidad o una vecina)?
-function enZona(rLoc: string, loc: string) {
-  return rLoc === loc || vecinasDe(loc).includes(rLoc)
+function centroDe(loc: string): [number, number] {
+  return CENTROS[loc] || CENTROS['Paraná']
+}
+// Distancia en km entre dos puntos (haversine). Igual que en src/lib/localidades.js.
+function distanciaKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371
+  const rad = (d: number) => (d * Math.PI) / 180
+  const dLat = rad(lat2 - lat1)
+  const dLng = rad(lng2 - lng1)
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLng / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(a))
+}
+// Las vecinas de una localidad (centro a centro <= radio). Pre-filtro del match.
+function vecinasDe(loc: string): string[] {
+  const c = centroDe(loc)
+  return Object.keys(CENTROS).filter((o) => {
+    if (o === loc) return false
+    const co = centroDe(o)
+    return distanciaKm(c[0], c[1], co[0], co[1]) <= RADIO_ALCANCE_KM
+  })
+}
+// ¿El aviso `nuevo` alcanza a un usuario cuya ubicación es la localidad `loc`? Su
+// misma localidad SIEMPRE. Si no, el punto real del aviso al centro de `loc` (y si
+// el aviso no trajera punto, centro a centro). Espeja avisoEnZona del front.
+function avisoAlcanza(nuevo: any, loc: string): boolean {
+  const avisoLoc = nuevo.localidad || 'Paraná'
+  if (avisoLoc === loc) return true
+  const c = centroDe(loc)
+  if (nuevo.lat != null && nuevo.lng != null) return distanciaKm(nuevo.lat, nuevo.lng, c[0], c[1]) <= RADIO_ALCANCE_KM
+  const ca = centroDe(avisoLoc)
+  return distanciaKm(ca[0], ca[1], c[0], c[1]) <= RADIO_ALCANCE_KM
 }
 
 async function prefsDe(userIds: string[]) {
@@ -171,8 +217,8 @@ async function manejarReporte(nuevo: any) {
         const locs =
           Array.isArray(p.localidades) && p.localidades.length ? p.localidades : [p.localidad || 'Paraná']
         const provs = Array.isArray(p.provincias) ? p.provincias : []
-        // El aviso cae en la zona del usuario si es su localidad o una vecina.
-        const enLocalidad = locs.some((l: string) => enZona(avisoLoc, l))
+        // El aviso cae en la zona del usuario si es su localidad o está a <= 20 km.
+        const enLocalidad = locs.some((l: string) => avisoAlcanza(nuevo, l))
         const enProvincia = !!nuevo.provincia && provs.includes(nuevo.provincia)
         if (!enLocalidad && !enProvincia) return false
         // Provincia entera, varias ciudades, o el aviso viene de una VECINA: avisamos
@@ -205,7 +251,7 @@ async function manejarReporte(nuevo: any) {
     if (errUbis) console.error('notificar: no se pudieron leer las ubicaciones →', errUbis.message)
     const destUbic = (ubis || [])
       .filter((u: any) => u.user_id !== nuevo.user_id)
-      .filter((u: any) => u.localidad && enZona(avisoLoc, u.localidad)) // su localidad o una vecina
+      .filter((u: any) => u.localidad && avisoAlcanza(nuevo, u.localidad)) // su localidad o a <= 20 km
       .map((u: any) => u.user_id)
 
     const destC = [...new Set([...destPrefs, ...destUbic])]

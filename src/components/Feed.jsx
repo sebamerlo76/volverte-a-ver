@@ -3,7 +3,7 @@ import PetCard from './PetCard.jsx'
 import MapaLeaflet from './MapaLazy.jsx'
 import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
-import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarScopeFeed, provinciaDe, ubicacionTexto, enZonaDelFeed, vecinasDe } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarScopeFeed, provinciaDe, ubicacionTexto, avisoEnZona, vecinasDe } from '../lib/localidades.js'
 import SelectorCiudad from './SelectorCiudad.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { TABS_ESTADO, textoTipo } from '../lib/estados.js'
@@ -103,9 +103,9 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
     const fuente = verFinales ? finales || [] : reportes
     let arr = fuente.filter((r) => {
       if (prov && provinciaDe(r.localidad || 'Paraná') !== prov) return false
-      // Localidad + sus vecinas del conurbano; "solo esta localidad" apaga las vecinas.
+      // Localidad + lo que esté a <= 20 km; "solo esta localidad" apaga las vecinas.
       if (loc) {
-        const entra = filtros.soloLocalidad ? (r.localidad || 'Paraná') === loc : enZonaDelFeed(r.localidad, loc)
+        const entra = filtros.soloLocalidad ? (r.localidad || 'Paraná') === loc : avisoEnZona(r, loc)
         if (!entra) return false
       }
       if (filtros.estado === 'perdido' || filtros.estado === 'encontrado') {

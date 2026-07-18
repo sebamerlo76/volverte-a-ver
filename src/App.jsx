@@ -26,7 +26,7 @@ import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, elimina
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { contarLogin, logins, pasosOk } from './lib/pasos.js'
 import { nombreMostrado } from './lib/formato.js'
-import { scopeFeedGuardado, provinciaDe, recordarLocalidad, enZonaDelFeed } from './lib/localidades.js'
+import { scopeFeedGuardado, provinciaDe, recordarLocalidad, avisoEnZona } from './lib/localidades.js'
 import { confirmar } from './lib/confirmar.js'
 import { compartirFlyer } from './lib/flyer.js'
 import FestejoReencuentro from './components/FestejoReencuentro.jsx'
@@ -353,7 +353,7 @@ export default function App() {
     if (!loc && !prov) return reportes
     return reportes.filter((r) => {
       if (prov && provinciaDe(r.localidad || 'Paraná') !== prov) return false
-      if (loc && !enZonaDelFeed(r.localidad, loc)) return false // + vecinas del conurbano
+      if (loc && !avisoEnZona(r, loc)) return false // misma localidad o a <= 20 km
       return true
     })
   }, [reportes, filtros.localidad, filtros.provincia])
