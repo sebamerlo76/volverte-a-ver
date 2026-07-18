@@ -50,6 +50,22 @@ function normBarrio(s: string) {
     .replace(/\s+/g, ' ')
     .trim()
 }
+
+// Conurbano: localidades que son una sola mancha urbana (un perro las cruza
+// caminando). Un aviso de una alcanza a las otras — feed y notificaciones.
+// ⚠️ DEBE coincidir con CONURBANOS de src/lib/localidades.js. No se puede importar
+// acá (Edge Function Deno), así que está duplicado a propósito: si sumás un grupo
+// allá, sumalo acá.
+const CONURBANOS = [['Paraná', 'Colonia Avellaneda', 'San Benito', 'Sauce Montrull']]
+function vecinasDe(loc: string): string[] {
+  const g = CONURBANOS.find((x) => x.includes(loc))
+  return g ? g.filter((l) => l !== loc) : []
+}
+// ¿Un aviso en `rLoc` cae en la zona de `loc` (su localidad o una vecina)?
+function enZona(rLoc: string, loc: string) {
+  return rLoc === loc || vecinasDe(loc).includes(rLoc)
+}
+
 async function prefsDe(userIds: string[]) {
   const ids = [...new Set(userIds.filter(Boolean))]
   const map = new Map<string, any>()
@@ -105,7 +121,10 @@ async function enviarAUsuarios(userIds: string[], payload: any, meta: any = {}) 
 async function manejarReporte(nuevo: any) {
   const opuesto = nuevo.tipo === 'perdido' ? 'encontrado' : 'perdido'
 
-  // 1) MATCH: dueños de avisos opuestos activos que coinciden.
+  // 1) MATCH: dueños de avisos opuestos activos que coinciden. En el conurbano cruza
+  // (un encontrado en San Benito puede ser el perdido en Colonia): buscamos también
+  // en las vecinas.
+  const avisoLoc = nuevo.localidad || 'Paraná'
   const { data: candidatos } = await sb
     .from('reportes')
     .select('*')
@@ -114,7 +133,7 @@ async function manejarReporte(nuevo: any) {
     .eq('bloqueado', false)
     .eq('tipo', opuesto)
     .eq('especie', nuevo.especie)
-    .eq('localidad', nuevo.localidad || 'Paraná')
+    .in('localidad', [avisoLoc, ...vecinasDe(avisoLoc)])
   let matches = (candidatos || []).filter(
     (c: any) => compat(nuevo, c, 'color') && compat(nuevo, c, 'tamano') && compat(nuevo, c, 'sexo', true),
   )
@@ -152,11 +171,15 @@ async function manejarReporte(nuevo: any) {
         const locs =
           Array.isArray(p.localidades) && p.localidades.length ? p.localidades : [p.localidad || 'Paraná']
         const provs = Array.isArray(p.provincias) ? p.provincias : []
-        const enLocalidad = locs.includes(nuevo.localidad || 'Paraná')
+        // El aviso cae en la zona del usuario si es su localidad o una vecina.
+        const enLocalidad = locs.some((l: string) => enZona(avisoLoc, l))
         const enProvincia = !!nuevo.provincia && provs.includes(nuevo.provincia)
         if (!enLocalidad && !enProvincia) return false
-        // Provincia entera o varias ciudades: avisamos de todos los barrios.
-        const variasZonas = enProvincia || locs.length > 1
+        // Provincia entera, varias ciudades, o el aviso viene de una VECINA: avisamos
+        // de todos los barrios. (El barrio no cruza localidades, así que no se puede
+        // filtrar por barrio un aviso de la localidad de al lado.)
+        const desdeVecina = !locs.includes(avisoLoc)
+        const variasZonas = enProvincia || locs.length > 1 || desdeVecina
         // Antes esto era `porBarrio || porRadio`, con un punto+radio propio. Se
         // fue: hacía lo mismo que "Mis ubicaciones" (ver abajo) y los dos caían
         // en el mismo destC. A los que tenían punto marcado el SQL de migración
@@ -182,7 +205,7 @@ async function manejarReporte(nuevo: any) {
     if (errUbis) console.error('notificar: no se pudieron leer las ubicaciones →', errUbis.message)
     const destUbic = (ubis || [])
       .filter((u: any) => u.user_id !== nuevo.user_id)
-      .filter((u: any) => u.localidad && u.localidad === (nuevo.localidad || 'Paraná'))
+      .filter((u: any) => u.localidad && enZona(avisoLoc, u.localidad)) // su localidad o una vecina
       .map((u: any) => u.user_id)
 
     const destC = [...new Set([...destPrefs, ...destUbic])]
