@@ -139,6 +139,18 @@ export const LOCALIDADES = {
       'Oeste': [-31.735, -60.318],
     },
   },
+  'Oro Verde': {
+    // Pegada a Paraná (~9 km al sur). Centro real del municipio (OSM); a <20 km,
+    // así que el alcance por distancia la trata como vecina de Paraná sola.
+    center: [-31.8237, -60.5159],
+    barrios: {
+      'Centro': [-31.8237, -60.5159],
+      'Norte': [-31.8157, -60.5159],
+      'Sur': [-31.8317, -60.5159],
+      'Este': [-31.8237, -60.5069],
+      'Oeste': [-31.8237, -60.5249],
+    },
+  },
   'Neuquén': {
     // 49 barrios oficiales de Neuquén capital (coords reales de OSM donde matchearon).
     center: NEUQUEN_CENTER,
@@ -221,6 +233,7 @@ const PROVINCIA_POR_CIUDAD = {
   'Villa Urquiza': 'Entre Ríos',
   'Sauce Montrull': 'Entre Ríos',
   'La Picada': 'Entre Ríos',
+  'Oro Verde': 'Entre Ríos',
   'Córdoba': 'Córdoba',
   'Neuquén': 'Neuquén',
   'San Martín de los Andes': 'Neuquén',

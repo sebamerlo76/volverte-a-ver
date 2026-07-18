@@ -69,6 +69,7 @@ const CENTROS: Record<string, [number, number]> = {
   'Villa Urquiza': [-31.65, -60.367],
   'Sauce Montrull': [-31.745, -60.355],
   'La Picada': [-31.735, -60.309],
+  'Oro Verde': [-31.8237, -60.5159],
   'Neuquén': [-38.9516, -68.0591],
   'San Martín de los Andes': [-40.1579, -71.3534],
   'Olavarría': [-36.8937, -60.3233],
