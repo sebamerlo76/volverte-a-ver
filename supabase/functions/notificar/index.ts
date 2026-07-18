@@ -112,6 +112,13 @@ function avisoAlcanza(nuevo: any, loc: string): boolean {
   return distanciaKm(ca[0], ca[1], c[0], c[1]) <= RADIO_ALCANCE_KM
 }
 
+// Lugar para el texto de una notificación: "Centro, Paraná" (barrio + ciudad, sin
+// provincia). Sin la ciudad, "en Centro" no dice de qué localidad es. Si falta el
+// barrio, solo la ciudad; si no viene nada, Paraná.
+function lugarDe(r: any): string {
+  return [r.zona, r.localidad].filter(Boolean).join(', ') || 'Paraná'
+}
+
 async function prefsDe(userIds: string[]) {
   const ids = [...new Set(userIds.filter(Boolean))]
   const map = new Map<string, any>()
@@ -200,7 +207,7 @@ async function manejarReporte(nuevo: any) {
       destM,
       {
         title: '🐾 ¿Será el tuyo?',
-        body: `Apareció un ${ESP[nuevo.especie] || 'animal'} parecido en ${nuevo.zona || 'Paraná'}.`,
+        body: `Apareció un ${ESP[nuevo.especie] || 'animal'} parecido en ${lugarDe(nuevo)}.`,
       },
       { reporteId: nuevo.id, tipo: 'match' },
     )
@@ -266,7 +273,7 @@ async function manejarReporte(nuevo: any) {
         destC,
         {
           title: '📍 Nuevo aviso cerca tuyo',
-          body: `Un ${ESP[nuevo.especie] || 'animal'} ${tipoTxt} en ${nuevo.zona || 'Paraná'}.`,
+          body: `Un ${ESP[nuevo.especie] || 'animal'} ${tipoTxt} en ${lugarDe(nuevo)}.`,
         },
         { reporteId: nuevo.id, tipo: 'cerca' },
       )
