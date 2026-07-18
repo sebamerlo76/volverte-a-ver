@@ -3,7 +3,7 @@ import PetCard from './PetCard.jsx'
 import MapaLeaflet from './MapaLazy.jsx'
 import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
-import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarScopeFeed, provinciaDe, ubicacionTexto, enZonaDelFeed } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarScopeFeed, provinciaDe, ubicacionTexto, enZonaDelFeed, vecinasDe } from '../lib/localidades.js'
 import SelectorCiudad from './SelectorCiudad.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { TABS_ESTADO, textoTipo } from '../lib/estados.js'
@@ -103,7 +103,11 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
     const fuente = verFinales ? finales || [] : reportes
     let arr = fuente.filter((r) => {
       if (prov && provinciaDe(r.localidad || 'Paraná') !== prov) return false
-      if (loc && !enZonaDelFeed(r.localidad, loc)) return false // la localidad + sus vecinas del conurbano
+      // Localidad + sus vecinas del conurbano; "solo esta localidad" apaga las vecinas.
+      if (loc) {
+        const entra = filtros.soloLocalidad ? (r.localidad || 'Paraná') === loc : enZonaDelFeed(r.localidad, loc)
+        if (!entra) return false
+      }
       if (filtros.estado === 'perdido' || filtros.estado === 'encontrado') {
         if (r.tipo !== filtros.estado) return false
       }
@@ -242,6 +246,19 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
       {/* El panel de filtros tapa los resultados mientras está abierto; al cerrar, muestra los filtrados */}
       {panelAbierto ? (
         <div className="filtros-panel">
+          {loc && vecinasDe(loc).length > 0 && (
+            <>
+              <div className="fp-label">Zona</div>
+              <div className="chipsel-wrap">
+                <button className={'chip' + (!filtros.soloLocalidad ? ' on' : '')} onClick={() => setFiltro('soloLocalidad', false)}>
+                  {loc} y alrededores
+                </button>
+                <button className={'chip' + (filtros.soloLocalidad ? ' on' : '')} onClick={() => setFiltro('soloLocalidad', true)}>
+                  Solo {loc}
+                </button>
+              </div>
+            </>
+          )}
           <div className="fp-label">Especie</div>
           <div className="chipsel-wrap">
             {['perro', 'gato', 'otro'].map((e) => (
@@ -393,7 +410,15 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
               )}
             </div>
           ) : (
-            filtrados.map((r, i) => <PetCard key={r.id} r={r} onClick={() => onOpen(r)} posicion={i} />)
+            filtrados.map((r, i) => (
+              <PetCard
+                key={r.id}
+                r={r}
+                onClick={() => onOpen(r)}
+                posicion={i}
+                zonaVecina={!!loc && !filtros.soloLocalidad && (r.localidad || 'Paraná') !== loc}
+              />
+            ))
           )}
           <div style={{ height: 18 }} />
         </div>

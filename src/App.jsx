@@ -35,7 +35,7 @@ export default function App() {
   const [vista, setVista] = useState('feed') // feed | detalle | post | auth | cuenta | avistamiento | recorrido
   const [homeModo, setHomeModo] = useState('lista') // lista | mapa (vista del inicio)
   const SCOPE_INI = scopeFeedGuardado()
-  const FILTROS_INI = { q: '', estado: 'todos', especie: null, zona: null, tiempo: 'todos', orden: 'recientes', localidad: SCOPE_INI.localidad, provincia: SCOPE_INI.provincia }
+  const FILTROS_INI = { q: '', estado: 'todos', especie: null, zona: null, tiempo: 'todos', orden: 'recientes', localidad: SCOPE_INI.localidad, provincia: SCOPE_INI.provincia, soloLocalidad: false }
   const [filtros, setFiltros] = useState(FILTROS_INI) // filtros del inicio (se conservan entre vistas)
   const [buscadorAbierto, setBuscadorAbierto] = useState(false)
   const [selReporte, setSelReporte] = useState(null) // aviso abierto en el detalle

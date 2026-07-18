@@ -5,7 +5,7 @@ import { useAplauso } from '../lib/useAplauso.js'
 
 // posicion: lugar en la lista del feed. Sirve para decidir qué fotos cargar ya.
 // Por defecto 99 = "no está arriba de todo" (así entra sin tocar quien no la pase).
-export default function PetCard({ r, onClick, posicion = 99 }) {
+export default function PetCard({ r, onClick, posicion = 99, zonaVecina = false }) {
   const perdido = r.tipo === 'perdido'
   const resuelto = r.estado === 'resuelto'
   const clr = perdido ? '#ff6b5e' : '#2f7fed'
@@ -59,6 +59,8 @@ export default function PetCard({ r, onClick, posicion = 99 }) {
             location_on
           </span>
           {ubicacionTexto(r.localidad, r.zona)}
+          {/* Este aviso es de una localidad vecina, no de la que estás mirando. */}
+          {zonaVecina && <span className="tag-vecina">zona vecina</span>}
         </div>
         {resuelto && (
           // Aplaudir sin entrar al aviso. Es un span (no button) porque la tarjeta ya
