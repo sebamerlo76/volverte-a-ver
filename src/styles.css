@@ -1579,6 +1579,29 @@ select {
   color: var(--muted);
   margin-top: 2px;
 }
+/* Aviso en la carga: "también llega a las zonas vecinas". Mismo amarillo que el pill. */
+.vecinas-nota {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 8px 0 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff6de;
+  border: 1px solid #f4d67a;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #7a5a05;
+  line-height: 1.45;
+}
+.vecinas-nota .mi {
+  flex: none;
+  margin-top: 1px;
+}
+.vecinas-nota b {
+  font-weight: 900;
+}
+
 /* "zona vecina": el aviso es de una localidad del conurbano, no de la que mirás.
    Amarillo suave para que se note sin gritar. */
 .tag-vecina {

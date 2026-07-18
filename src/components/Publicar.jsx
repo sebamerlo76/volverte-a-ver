@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import MapaLeaflet from './MapaLazy.jsx'
 import { coordsDeBarrio, puntoDeReporte } from '../lib/parana.js'
-import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad, vecinasDe } from '../lib/localidades.js'
 import SelectorCiudad from './SelectorCiudad.jsx'
 import BuscarDireccion from './BuscarDireccion.jsx'
 import { addReporte, actualizarReporte, addMascota, subirFotos, subirFotoFeed, guardarEmbedding } from '../data/store.js'
@@ -262,6 +262,18 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
               </span>
             </button>
           </>
+        )}
+
+        {vecinasDe(localidad).length > 0 && (
+          <div className="vecinas-nota">
+            <span className="mi fill" style={{ fontSize: 17, color: '#a0791a' }}>
+              info
+            </span>
+            <div>
+              Tu aviso también se va a ver en las zonas vecinas (<b>{vecinasDe(localidad).join(', ')}</b>), por si se fue
+              para ese lado. No hace falta publicarlo de nuevo. 🐾
+            </div>
+          </div>
         )}
 
         <div className="flabel">Zona / barrio</div>
