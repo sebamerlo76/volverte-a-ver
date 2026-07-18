@@ -3,7 +3,7 @@ import PetCard from './PetCard.jsx'
 import MapaLeaflet from './MapaLazy.jsx'
 import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
-import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarScopeFeed, provinciaDe, ubicacionTexto } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, LOCALIDAD_DEFECTO, centroDe, nombresBarriosDe, coordsDeBarrioEn, recordarLocalidad, recordarScopeFeed, provinciaDe, ubicacionTexto, enZonaDelFeed } from '../lib/localidades.js'
 import SelectorCiudad from './SelectorCiudad.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { TABS_ESTADO, textoTipo } from '../lib/estados.js'
@@ -103,7 +103,7 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
     const fuente = verFinales ? finales || [] : reportes
     let arr = fuente.filter((r) => {
       if (prov && provinciaDe(r.localidad || 'Paraná') !== prov) return false
-      if (loc && (r.localidad || 'Paraná') !== loc) return false
+      if (loc && !enZonaDelFeed(r.localidad, loc)) return false // la localidad + sus vecinas del conurbano
       if (filtros.estado === 'perdido' || filtros.estado === 'encontrado') {
         if (r.tipo !== filtros.estado) return false
       }

@@ -301,6 +301,27 @@ export function coordsDeBarrioEn(loc, barrio) {
   return barriosDe(loc)[barrio] || centroDe(loc)
 }
 
+// Grupos de localidades que son UNA sola mancha urbana: un perro las cruza
+// caminando, así que un aviso de una se muestra en el feed de las otras. Evita que
+// la gente republique el mismo aviso en cada localidad vecina para tener alcance.
+// Por ahora solo el conurbano de Paraná; sumar otros grupos a mano si hacen falta.
+// (No se calcula por distancia: los centros mienten en un conurbano — ver el aviso
+//  en ciudadMasCercana.)
+const CONURBANOS = [['Paraná', 'Colonia Avellaneda', 'San Benito', 'Sauce Montrull']]
+
+// Las vecinas de una localidad (las otras de su mismo grupo), o [] si no está en uno.
+export function vecinasDe(loc) {
+  const grupo = CONURBANOS.find((g) => g.includes(loc))
+  return grupo ? grupo.filter((l) => l !== loc) : []
+}
+
+// ¿Un aviso en `rLoc` entra en el feed de `loc`? Sí si es la misma localidad o una
+// vecina del conurbano. Con loc null (Todas / provincia) no aplica: filtra el caller.
+export function enZonaDelFeed(rLoc, loc) {
+  const r = rLoc || LOCALIDAD_DEFECTO
+  return r === loc || vecinasDe(loc).includes(r)
+}
+
 // ¿Este nombre suelto es un barrio nuestro? Devuelve el nombre TAL COMO lo tenemos
 // (no el que vino), o '' si no lo conocemos. Se usa para lo que dice OSM, que
 // escribe distinto: "Barrio General Espejo" es nuestro "General Espejo". Gana
