@@ -597,9 +597,12 @@ export default function App() {
     setMascotaEditando(m)
     setVista('mascota')
   }
-  function mascotaGuardada(sacada) {
+  async function mascotaGuardada(sacada) {
     setVista('cuenta')
     mostrarToast(sacada ? '🐾 Mascota sacada de tu perfil' : '🐾 Mascota guardada')
+    // Sacar una mascota publicada como perdida baja también su aviso: refrescamos
+    // el feed para que no quede el aviso fantasma en la lista en memoria.
+    if (sacada) await cargar()
   }
   function publicarMascota(m) {
     // Prellena un aviso "perdido" con los datos de la mascota (y la deja vinculada).
