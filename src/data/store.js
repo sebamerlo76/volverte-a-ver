@@ -600,6 +600,27 @@ export async function eliminarReporte(id) {
   guardarLocal(leerLocal().filter((r) => r.id !== id))
 }
 
+// El aviso ACTIVO vinculado a una mascota, o null. Se usa al sacar la mascota
+// ("Ya no lo tengo") para avisar que además hay que bajar el aviso perdido, en vez
+// de dejarlo huérfano (la FK es on delete set null: la mascota se va pero el aviso
+// quedaba vivo). Filtra por estado, no por tipo: el vínculo es siempre perdido,
+// pero así es robusto ante cualquier aviso activo colgado de la mascota.
+export async function getAvisoActivoDeMascota(mascotaId) {
+  if (!mascotaId) return null
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase
+      .from('reportes')
+      .select('*')
+      .eq('mascota_id', mascotaId)
+      .eq('estado', 'activo')
+      .limit(1)
+      .maybeSingle()
+    if (error) throw error
+    return data ? desdeFila(data) : null
+  }
+  return leerLocal().find((x) => x.mascotaId === mascotaId && x.estado === 'activo') || null
+}
+
 // ---------------------------------------------------------------------------
 // Mis mascotas (perfiles guardados para publicar rápido si se pierden)
 // ---------------------------------------------------------------------------

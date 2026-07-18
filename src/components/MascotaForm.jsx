@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { addMascota, actualizarMascota, eliminarMascota, subirFotos } from '../data/store.js'
+import { addMascota, actualizarMascota, eliminarMascota, eliminarReporte, getAvisoActivoDeMascota, subirFotos } from '../data/store.js'
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS } from '../lib/opciones.js'
@@ -54,9 +54,25 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, on
   }
 
   async function borrar() {
-    if (!(await confirmar({ mensaje: '¿Sacar esta mascota de tu perfil? Se puede volver a cargar cuando quieras.', aceptar: 'Sacar', peligro: true }))) return
     try {
-      await eliminarMascota(inicial.id)
+      // Si está publicada como perdida, sacarla del perfil sin bajar el aviso lo
+      // dejaría huérfano (vivo en el feed, notificando). Avisamos y lo bajamos.
+      const aviso = await getAvisoActivoDeMascota(inicial.id)
+      if (aviso) {
+        if (
+          !(await confirmar({
+            mensaje: `${nombre || 'Esta mascota'} está publicado como perdido. Si volvió a casa, cerralo con «¡Ya está en casa!» para festejarlo 🎉. Si igual lo querés sacar, también se baja el aviso.`,
+            aceptar: 'Bajar aviso y sacar',
+            peligro: true,
+          }))
+        )
+          return
+        await eliminarReporte(aviso.id) // primero el aviso: si el segundo paso falla, no queda huérfano
+        await eliminarMascota(inicial.id)
+      } else {
+        if (!(await confirmar({ mensaje: '¿Sacar esta mascota de tu perfil? Se puede volver a cargar cuando quieras.', aceptar: 'Sacar', peligro: true }))) return
+        await eliminarMascota(inicial.id)
+      }
       onGuardado(true) // sacada, no guardada
     } catch (e) {
       console.error(e)
