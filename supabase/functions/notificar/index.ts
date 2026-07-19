@@ -79,6 +79,7 @@ const CENTROS: Record<string, [number, number]> = {
   'Rafaela': [-31.2536, -61.4914],
   'Ceres': [-29.8814, -61.945],
   'Selva': [-29.7628, -62.0503],
+  'Mercedes': [-29.1836, -58.08],
 }
 function centroDe(loc: string): [number, number] {
   return CENTROS[loc] || CENTROS['Paraná']

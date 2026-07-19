@@ -217,6 +217,18 @@ export const LOCALIDADES = {
       'Oeste': [-29.7628, -62.0593],
     },
   },
+  'Mercedes': {
+    // Mercedes de CORRIENTES (hay otras Mercedes en el país). Centro real del
+    // municipio (OSM). Aislada: no hay otra localidad cargada a menos de 20 km.
+    center: [-29.1836, -58.08],
+    barrios: {
+      'Centro': [-29.1836, -58.08],
+      'Norte': [-29.1756, -58.08],
+      'Sur': [-29.1916, -58.08],
+      'Este': [-29.1836, -58.071],
+      'Oeste': [-29.1836, -58.089],
+    },
+  },
   // Para sumar otra: copiá un bloque, poné center [lat,lng] y sus barrios.
 }
 
@@ -244,6 +256,7 @@ const PROVINCIA_POR_CIUDAD = {
   'Ceres': 'Santa Fe',
   'Selva': 'Santiago del Estero',
   'San Juan': 'San Juan',
+  'Mercedes': 'Corrientes',
 }
 export const PROVINCIA_DEFECTO = 'Entre Ríos'
 export function provinciaDe(loc) {
