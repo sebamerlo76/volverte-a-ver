@@ -47,9 +47,10 @@ async function pushAUsuario(uid: string, payload: any, meta: any = {}) {
   }
 }
 
-// Recordatorio a los dueños de perdidos activos: que renueven o cierren. El primero
-// a los 3 días de publicado, y después se repite cada 7 días (así no hay un hueco
-// largo de silencio). Si renuevan, creado_en se actualiza y arranca de nuevo.
+// Recordatorio a los dueños de avisos activos (perdidos Y encontrados): que renueven
+// o cierren. El texto se adapta al tipo. El primero a los 3 días de publicado, y
+// después se repite cada 7 días (así no hay un hueco largo de silencio). Si renuevan,
+// creado_en se actualiza y arranca de nuevo.
 async function enviarRecordatorios(): Promise<number> {
   const corte3 = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
   const hace7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -59,7 +60,6 @@ async function enviarRecordatorios(): Promise<number> {
       .from('reportes')
       .select('id, nombre, especie, user_id, creado_en, recordatorio_en')
       .eq('estado', 'activo')
-      .eq('tipo', 'perdido')
       .eq('oculto', false)
       .eq('bloqueado', false)
       .lt('creado_en', corte3) // publicado hace +3 días
@@ -74,11 +74,14 @@ async function enviarRecordatorios(): Promise<number> {
     // sale a los 3 días y después uno cada 7, sin spamear.
     if (r.recordatorio_en && r.recordatorio_en >= hace7) continue
     const nombre = r.nombre || (ESP[r.especie] || 'tu mascota')
+    const perdido = r.tipo === 'perdido'
     await pushAUsuario(
       r.user_id,
       {
-        title: '🔔 ¿Cómo va la búsqueda?',
-        body: `¿Novedades de ${nombre}? Si ya volvió, marcalo 🏠. Si no, renovalo para que vuelva arriba. 🐾`,
+        title: perdido ? '🔔 ¿Cómo va la búsqueda?' : '🔔 ¿Apareció la familia?',
+        body: perdido
+          ? `¿Novedades de ${nombre}? Si ya volvió, marcalo 🏠. Si no, renovalo para que vuelva arriba. 🐾`
+          : `¿Novedades del ${ESP[r.especie] || 'animal'} que encontraste? Si ya apareció la familia, cerrá el aviso 🏠. Si no, renovalo para que vuelva arriba. 🐾`,
         url: `/r/${r.id}`, // al aviso, no al feed (igual que el recordatorio de "compartí")
       },
       { reporteId: r.id, tipo: 'recordatorio' },
@@ -172,10 +175,11 @@ async function avisarAdmin(titulo: string, cuerpo: string) {
   }
 }
 
-// Empujón temprano: al día siguiente de publicar un perdido, invitamos al dueño
-// a compartir el aviso (difundir es lo que más rápido lo encuentra). Una sola
-// vez por ciclo (compartir_en). Ventana 24-72 h para tolerar que el cron falte
-// algún día (y no molestar a avisos viejos, que no reciben este push).
+// Empujón temprano: al día siguiente de publicar un aviso (perdido o encontrado),
+// invitamos al dueño a compartirlo (difundir es lo que más rápido resuelve). Una
+// sola vez por ciclo (compartir_en) — y si ya tocó "Compartir ahora" al publicar,
+// compartir_en ya está seteado y no le llega. Ventana 24-72 h para tolerar que el
+// cron falte algún día (y no molestar a avisos viejos, que no reciben este push).
 async function enviarRecordatorioCompartir(): Promise<number> {
   const ahora = Date.now()
   const min24 = new Date(ahora - 24 * 60 * 60 * 1000).toISOString()
@@ -186,7 +190,6 @@ async function enviarRecordatorioCompartir(): Promise<number> {
       .from('reportes')
       .select('id, nombre, especie, user_id, creado_en, compartir_en')
       .eq('estado', 'activo')
-      .eq('tipo', 'perdido')
       .eq('oculto', false)
       .eq('bloqueado', false)
       .lt('creado_en', min24) // publicado hace +24 h
@@ -200,11 +203,14 @@ async function enviarRecordatorioCompartir(): Promise<number> {
   for (const r of recientes) {
     if (r.compartir_en && r.compartir_en >= r.creado_en) continue
     const nombre = r.nombre || (ESP[r.especie] || 'tu mascota')
+    const perdido = r.tipo === 'perdido'
     await pushAUsuario(
       r.user_id,
       {
-        title: '📣 Ayudá a que vuelva a casa',
-        body: `Compartí el aviso de ${nombre} con tus vecinos y en tus redes. Cuanta más gente lo vea, más rápido aparece. 🐾`,
+        title: perdido ? '📣 Ayudá a que vuelva a casa' : '📣 Ayudá a encontrar a su familia',
+        body: perdido
+          ? `Compartí el aviso de ${nombre} con tus vecinos y en tus redes. Cuanta más gente lo vea, más rápido aparece. 🐾`
+          : `Compartí el aviso del ${ESP[r.especie] || 'animal'} que encontraste con tus vecinos y en tus redes. Cuanta más gente lo vea, más rápido aparece la familia. 🐾`,
         url: `/r/${r.id}`,
       },
       { reporteId: r.id, tipo: 'compartir' },
@@ -215,9 +221,9 @@ async function enviarRecordatorioCompartir(): Promise<number> {
   return n
 }
 
-// Pre-aviso de pausa: a un perdido activo hace +27 días le avisamos que, si no hay
-// novedad, en unos días vamos a pausar el aviso. Una vez por ciclo (preaviso_en).
-// La regla de oro del auto-archivar: nunca pausar de sorpresa.
+// Pre-aviso de pausa: a un aviso activo (perdido o encontrado) hace +27 días le
+// avisamos que, si no hay novedad, en unos días vamos a pausarlo. Una vez por ciclo
+// (preaviso_en). La regla de oro del auto-archivar: nunca pausar de sorpresa.
 async function preavisarPausa(): Promise<number> {
   const corte27 = new Date(Date.now() - 27 * 24 * 60 * 60 * 1000).toISOString()
   let viejos: any[] = []
@@ -226,7 +232,6 @@ async function preavisarPausa(): Promise<number> {
       .from('reportes')
       .select('id, nombre, especie, user_id, creado_en, preaviso_en')
       .eq('estado', 'activo')
-      .eq('tipo', 'perdido')
       .eq('oculto', false)
       .eq('bloqueado', false)
       .lt('creado_en', corte27)
@@ -239,11 +244,14 @@ async function preavisarPausa(): Promise<number> {
   for (const r of viejos) {
     if (r.preaviso_en && r.preaviso_en >= r.creado_en) continue // ya avisado este ciclo
     const nombre = r.nombre || (ESP[r.especie] || 'tu mascota')
+    const perdido = r.tipo === 'perdido'
     await pushAUsuario(
       r.user_id,
       {
-        title: `⏸️ ¿Seguimos buscando a ${nombre}?`,
-        body: `Si no hay novedad, en unos días pausamos el aviso. Renovalo para que siga, o marcalo 🏠 si ya volvió. 🐾`,
+        title: perdido ? `⏸️ ¿Seguimos buscando a ${nombre}?` : '⏸️ ¿Seguimos con tu aviso?',
+        body: perdido
+          ? `Si no hay novedad, en unos días pausamos el aviso. Renovalo para que siga, o marcalo 🏠 si ya volvió. 🐾`
+          : `Si no hay novedad, en unos días lo pausamos. Renovalo para que siga, o cerralo si ya apareció la familia. 🐾`,
         url: `/r/${r.id}`,
       },
       { reporteId: r.id, tipo: 'preaviso' },
@@ -254,9 +262,9 @@ async function preavisarPausa(): Promise<number> {
   return n
 }
 
-// Pausar: perdido activo hace +30 días que YA recibió el pre-aviso (hace ≥2 días) y
-// no renovó ni cerró. Pasa a 'pausado': sale del feed, queda en Mi cuenta con
-// Reactivar. No se borra ni se marca "Ya en casa". Reversible siempre.
+// Pausar: aviso activo (perdido o encontrado) hace +30 días que YA recibió el
+// pre-aviso (hace ≥2 días) y no renovó ni cerró. Pasa a 'pausado': sale del feed,
+// queda en Mi cuenta con Reactivar. No se borra ni se marca "Ya en casa". Reversible.
 async function pausarInactivos(): Promise<number> {
   const corte30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const hace2d = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
@@ -266,7 +274,6 @@ async function pausarInactivos(): Promise<number> {
       .from('reportes')
       .select('id, nombre, especie, user_id, creado_en, preaviso_en')
       .eq('estado', 'activo')
-      .eq('tipo', 'perdido')
       .eq('oculto', false)
       .eq('bloqueado', false)
       .lt('creado_en', corte30)
@@ -283,11 +290,12 @@ async function pausarInactivos(): Promise<number> {
     if (!r.preaviso_en || r.preaviso_en < r.creado_en) continue
     if (r.preaviso_en >= hace2d) continue
     const nombre = r.nombre || (ESP[r.especie] || 'tu mascota')
+    const perdido = r.tipo === 'perdido'
     await sb.from('reportes').update({ estado: 'pausado', pausado_en: new Date().toISOString() }).eq('id', r.id)
     await pushAUsuario(
       r.user_id,
       {
-        title: `⏸️ Pausamos el aviso de ${nombre}`,
+        title: perdido ? `⏸️ Pausamos el aviso de ${nombre}` : '⏸️ Pausamos tu aviso',
         body: `Estaba sin novedad hace tiempo. Está guardado: reactivalo cuando quieras desde Mi cuenta. 🐾`,
         url: `/r/${r.id}`,
       },
