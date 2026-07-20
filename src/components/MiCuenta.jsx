@@ -10,10 +10,10 @@ import PrimerosPasos from './PrimerosPasos.jsx'
 import { confirmar } from '../lib/confirmar.js'
 
 const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
-// A partir de acá ofrecemos renovar. Tiene que coincidir con el recordatorio que
-// manda el cron a los 7 días ("renovalo"): si no, le pedíamos renovar por push y
+// A partir de acá ofrecemos renovar. Tiene que coincidir con el primer recordatorio
+// que manda el cron a los 3 días ("renovalo"): si no, le pedíamos renovar por push y
 // al entrar no estaba el botón.
-const DIAS_VIEJO = 7
+const DIAS_VIEJO = 3
 function diasDe(iso) {
   const ms = Date.now() - new Date(iso).getTime()
   return isNaN(ms) ? 0 : Math.floor(ms / 86400000)

@@ -547,6 +547,18 @@ export async function renovarReporte(id) {
   return reportes.find((r) => r.id === id) || null
 }
 
+// Marca que el dueño ya tocó "compartir" al publicar. Usa la misma columna que el
+// recordatorio de compartir del cron (compartir_en), así ese push de las 24 h no le
+// llega si ya difundió. No es crítico: si falla, a lo sumo recibe el recordatorio.
+export async function marcarCompartido(id) {
+  if (!id || !supabaseConfigurado) return
+  try {
+    await supabase.from('reportes').update({ compartir_en: new Date().toISOString() }).eq('id', id)
+  } catch (e) {
+    /* no crítico */
+  }
+}
+
 // Vuelve a activar un aviso que estaba resuelto.
 export async function reactivarReporte(id) {
   // Reactivar (un resuelto o un pausado) le da fecha fresca: vuelve arriba del feed

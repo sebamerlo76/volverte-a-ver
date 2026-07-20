@@ -22,7 +22,7 @@ import Moderacion from './components/Moderacion.jsx'
 import Soporte from './components/Soporte.jsx'
 import Lightbox from './components/Lightbox.jsx'
 import NuevaPassword from './components/NuevaPassword.jsx'
-import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, borrarReporteAdmin, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte, getUbicaciones } from './data/store.js'
+import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, borrarReporteAdmin, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte, getUbicaciones, marcarCompartido } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { contarLogin, logins, pasosOk } from './lib/pasos.js'
 import { nombreMostrado } from './lib/formato.js'
@@ -30,6 +30,7 @@ import { scopeFeedGuardado, provinciaDe, recordarLocalidad, avisoEnZona } from '
 import { confirmar } from './lib/confirmar.js'
 import { compartirFlyer } from './lib/flyer.js'
 import FestejoReencuentro from './components/FestejoReencuentro.jsx'
+import CompartiAhora from './components/CompartiAhora.jsx'
 
 export default function App() {
   const [vista, setVista] = useState('feed') // feed | detalle | post | auth | cuenta | avistamiento | recorrido
@@ -70,6 +71,7 @@ export default function App() {
   const contadoRef = useRef(false)
   const feedScrollRef = useRef(0) // recuerda el scroll del feed al entrar a un aviso
   const [festejo, setFestejo] = useState(null) // aviso recién resuelto, para ofrecer compartir el reencuentro
+  const [compartiNuevo, setCompartiNuevo] = useState(null) // aviso recién publicado, para ofrecer compartirlo ya
 
   const notifsNoLeidas = notifs.filter((n) => !n.leida).length
 
@@ -80,7 +82,7 @@ export default function App() {
   // --- Botón "atrás" del celu: cerrar la capa abierta en vez de cerrar la PWA ---
   // ¿Hay algo "abierto" sobre el feed? (una vista distinta, o un modal)
   const hayCapa =
-    vista !== 'feed' || !!fotosVer || menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo
+    vista !== 'feed' || !!fotosVer || menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo || !!compartiNuevo
   // Cuántos "atrás" hacen falta para llegar al feed desde la vista actual.
   const nivelVista = (v) => {
     switch (v) {
@@ -100,7 +102,7 @@ export default function App() {
   }
   // El festejo cuenta como capa: si no, el "atrás" del celu te saca de la pantalla
   // en vez de cerrarlo. Antes salía sólo desde el aviso; ahora también en Mi cuenta.
-  const modalAbierto = menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo
+  const modalAbierto = menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo || !!compartiNuevo
   // Profundidad = capas apiladas = cantidad de "atrás" hasta el feed.
   const profundidad = nivelVista(vista) + (fotosVer ? 1 : 0) + (modalAbierto ? 1 : 0)
   const backRef = useRef({ hayCapa: false })
@@ -110,13 +112,14 @@ export default function App() {
   const removiendo = useRef(false) // estamos sacando centinelas nosotros (ignorar esos popstate)
   // Snapshot del estado para que el listener (registrado una vez) lea lo actual.
   const estadoRef = useRef({})
-  estadoRef.current = { vista, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte, festejo }
+  estadoRef.current = { vista, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte, festejo, compartiNuevo }
 
   // Cierra la capa de más arriba (foto y modales primero, después vistas).
   function retroceder() {
     const s = estadoRef.current
     if (s.fotosVer) return setFotosVer(null)
     if (s.festejo) return setFestejo(null)
+    if (s.compartiNuevo) return setCompartiNuevo(null)
     if (s.menuAbierto) return setMenuAbierto(false)
     if (s.buscadorAbierto) return setBuscadorAbierto(false)
     if (s.notifsAbierto) return setNotifsAbierto(false)
@@ -461,14 +464,18 @@ export default function App() {
     }
   }
 
-  async function alPublicar() {
+  async function alPublicar(reporte) {
     const eraEdicion = !!editando
     await cargar()
     setEditando(null)
     setPlantilla(null)
     setOfrecerGuardar(false)
     setVista('feed')
-    mostrarToast(eraEdicion ? '✅ Aviso actualizado' : '✅ ¡Reporte publicado! Ya aparece en el inicio.')
+    if (!eraEdicion && reporte) {
+      setCompartiNuevo(reporte) // en alta: pantalla para compartir ya (reemplaza el toast)
+    } else {
+      mostrarToast(eraEdicion ? '✅ Aviso actualizado' : '✅ ¡Reporte publicado! Ya aparece en el inicio.')
+    }
   }
 
   // --- Sesión ---
@@ -830,6 +837,18 @@ export default function App() {
               setFestejo(null)
             }}
             onCerrar={() => setFestejo(null)}
+          />
+        )}
+
+        {compartiNuevo && (
+          <CompartiAhora
+            r={compartiNuevo}
+            onCompartir={() => {
+              compartirFlyer(compartiNuevo, mostrarToast)
+              marcarCompartido(compartiNuevo.id) // ya difundió → saltar el push de 24 h
+              setCompartiNuevo(null)
+            }}
+            onCerrar={() => setCompartiNuevo(null)}
           />
         )}
 

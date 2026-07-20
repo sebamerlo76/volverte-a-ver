@@ -47,11 +47,12 @@ async function pushAUsuario(uid: string, payload: any, meta: any = {}) {
   }
 }
 
-// Recordatorio a los dueños de perdidos activos hace +7 días: que renueven o
-// cierren. Una sola vez por ciclo (recordatorio_en); si renuevan, creado_en se
-// actualiza y vuelve a ser elegible 7 días después.
+// Recordatorio a los dueños de perdidos activos: que renueven o cierren. El primero
+// a los 3 días de publicado, y después se repite cada 7 días (así no hay un hueco
+// largo de silencio). Si renuevan, creado_en se actualiza y arranca de nuevo.
 async function enviarRecordatorios(): Promise<number> {
-  const corte7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  const corte3 = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+  const hace7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
   let viejos: any[] = []
   try {
     const { data } = await sb
@@ -61,7 +62,7 @@ async function enviarRecordatorios(): Promise<number> {
       .eq('tipo', 'perdido')
       .eq('oculto', false)
       .eq('bloqueado', false)
-      .lt('creado_en', corte7)
+      .lt('creado_en', corte3) // publicado hace +3 días
       .not('user_id', 'is', null)
     viejos = data || []
   } catch (_e) {
@@ -69,8 +70,9 @@ async function enviarRecordatorios(): Promise<number> {
   }
   let n = 0
   for (const r of viejos) {
-    // Comparación de ISO como string: ordena bien. Ya recordado este ciclo → saltar.
-    if (r.recordatorio_en && r.recordatorio_en >= r.creado_en) continue
+    // Recurrente: si ya le avisamos en los últimos 7 días, saltar. Así el primero
+    // sale a los 3 días y después uno cada 7, sin spamear.
+    if (r.recordatorio_en && r.recordatorio_en >= hace7) continue
     const nombre = r.nombre || (ESP[r.especie] || 'tu mascota')
     await pushAUsuario(
       r.user_id,
@@ -213,11 +215,11 @@ async function enviarRecordatorioCompartir(): Promise<number> {
   return n
 }
 
-// Pre-aviso de pausa: a un perdido activo hace +57 días le avisamos que, si no hay
+// Pre-aviso de pausa: a un perdido activo hace +27 días le avisamos que, si no hay
 // novedad, en unos días vamos a pausar el aviso. Una vez por ciclo (preaviso_en).
 // La regla de oro del auto-archivar: nunca pausar de sorpresa.
 async function preavisarPausa(): Promise<number> {
-  const corte57 = new Date(Date.now() - 57 * 24 * 60 * 60 * 1000).toISOString()
+  const corte27 = new Date(Date.now() - 27 * 24 * 60 * 60 * 1000).toISOString()
   let viejos: any[] = []
   try {
     const { data } = await sb
@@ -227,7 +229,7 @@ async function preavisarPausa(): Promise<number> {
       .eq('tipo', 'perdido')
       .eq('oculto', false)
       .eq('bloqueado', false)
-      .lt('creado_en', corte57)
+      .lt('creado_en', corte27)
       .not('user_id', 'is', null)
     viejos = data || []
   } catch (_e) {
@@ -252,11 +254,11 @@ async function preavisarPausa(): Promise<number> {
   return n
 }
 
-// Pausar: perdido activo hace +60 días que YA recibió el pre-aviso (hace ≥2 días) y
+// Pausar: perdido activo hace +30 días que YA recibió el pre-aviso (hace ≥2 días) y
 // no renovó ni cerró. Pasa a 'pausado': sale del feed, queda en Mi cuenta con
 // Reactivar. No se borra ni se marca "Ya en casa". Reversible siempre.
 async function pausarInactivos(): Promise<number> {
-  const corte60 = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString()
+  const corte30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const hace2d = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
   let viejos: any[] = []
   try {
@@ -267,7 +269,7 @@ async function pausarInactivos(): Promise<number> {
       .eq('tipo', 'perdido')
       .eq('oculto', false)
       .eq('bloqueado', false)
-      .lt('creado_en', corte60)
+      .lt('creado_en', corte30)
       .not('preaviso_en', 'is', null)
       .not('user_id', 'is', null)
     viejos = data || []

@@ -140,7 +140,8 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
           console.warn('No se pudo guardar la mascota en el perfil:', e)
         }
       }
-      onPublicado()
+      // En alta pasamos el aviso creado para ofrecer compartirlo; en edición, nada.
+      onPublicado(editando ? null : guardado)
     } catch (e) {
       console.error('No se pudo guardar:', e)
       onToast('No se guardó. Revisá la conexión y reintentá 🔄')
