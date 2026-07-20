@@ -19,7 +19,7 @@ export default function Privacidad() {
               Política de privacidad
             </div>
             <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--muted)', textAlign: 'center', marginTop: 4 }}>
-              Última actualización: 8 de julio de 2026
+              Última actualización: 19 de julio de 2026
             </div>
 
             <p style={{ ...p, marginTop: 18 }}>
@@ -40,6 +40,7 @@ export default function Privacidad() {
               <li style={li}>Mostrar los avisos de mascotas perdidas y encontradas.</li>
               <li style={li}>Avisarte cuando aparece una posible coincidencia o un aviso cerca tuyo.</li>
               <li style={li}>Permitir que las personas se contacten entre sí para reunir a la mascota con su familia.</li>
+              <li style={li}>Escribirte sobre tu propio aviso — por ejemplo, para pedirte permiso de compartir tu reencuentro en nuestras redes, o para conocer tu experiencia con la app.</li>
             </ul>
 
             <div style={h}>Qué NO hacemos</div>
