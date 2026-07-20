@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { getAdminStats, getAdminStatsRango, getActividadReciente, getPerdidosParaEmpujar, getActivosPorProvincia } from '../data/store.js'
-import { tiempoRelativo, nombreMostrado } from '../lib/formato.js'
+import { getAdminStats, getAdminStatsRango, getActividadReciente, getPerdidosParaEmpujar, getActivosPorProvincia, getReencuentros } from '../data/store.js'
+import { tiempoRelativo, nombreMostrado, fechaLegible, linkWhatsAppReencuentro, linkTel } from '../lib/formato.js'
 import { badgeEstado } from '../lib/estados.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 
@@ -49,11 +49,13 @@ export default function Admin({ onVolver, onOpen, stats }) {
   const [recientes, setRecientes] = useState(null)
   const [empujar, setEmpujar] = useState(null)
   const [porProv, setPorProv] = useState(null)
+  const [reencuentros, setReencuentros] = useState(null)
 
   useEffect(() => {
     getActividadReciente(15).then(setRecientes).catch(() => setRecientes([]))
     getPerdidosParaEmpujar(7, 20).then(setEmpujar).catch(() => setEmpujar([]))
     getActivosPorProvincia().then(setPorProv).catch(() => setPorProv([]))
+    getReencuentros().then(setReencuentros).catch(() => setReencuentros([]))
   }, [])
 
   async function verRango() {
@@ -134,6 +136,47 @@ export default function Admin({ onVolver, onOpen, stats }) {
                 </div>
               </>
             )}
+
+            <div className="adm-sub">
+              Reencuentros — permiso IG / encuesta
+              {reencuentros?.length ? <span className="adm-sub-n">{reencuentros.length}</span> : null}
+            </div>
+            <div className="adm-nota" style={{ marginTop: 0, marginBottom: 8 }}>
+              Los "ya en casa" con su contacto. Pedí permiso antes de publicar en IG 🙏
+            </div>
+            <div className="adm-lista">
+              {reencuentros === null ? (
+                <div className="adm-nota" style={{ marginTop: 0 }}>Cargando…</div>
+              ) : reencuentros.length === 0 ? (
+                <div className="adm-nota" style={{ marginTop: 0 }}>Todavía no hay reencuentros.</div>
+              ) : (
+                reencuentros.map((r) => (
+                  <div className="adm-reenc" key={r.id}>
+                    <div className="adm-row-txt">
+                      <div className="adm-row-t">{nombreMostrado(r)}</div>
+                      <div className="adm-row-s">
+                        {ubicacionTexto(r.localidad, r.zona)}
+                        {r.resueltoEn ? ` · volvió ${fechaLegible(r.resueltoEn)}` : ''}
+                      </div>
+                    </div>
+                    <div className="adm-reenc-acc">
+                      {r.whatsapp ? (
+                        <>
+                          <a className="adm-reenc-wa" href={linkWhatsAppReencuentro(r)} target="_blank" rel="noreferrer">
+                            WhatsApp
+                          </a>
+                          <a className="adm-reenc-tel" href={linkTel(r.whatsapp)}>Llamar</a>
+                        </>
+                      ) : r.email ? (
+                        <span className="adm-reenc-mail">{r.email}</span>
+                      ) : (
+                        <span className="adm-row-s">sin contacto</span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
 
             <div className="adm-sub">Actividad reciente</div>
             <div className="adm-lista">

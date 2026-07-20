@@ -357,6 +357,15 @@ export async function getModeracion() {
   if (error) throw error
   return data
 }
+// Reencuentros (avisos ya en casa) con su contacto, solo para el admin. Para pedir
+// permiso de IG o mandar una encuesta. El contacto lo sirve la RPC gateada (el
+// whatsapp está oculto en la app una vez resuelto), no se lee del lado del cliente.
+export async function getReencuentros() {
+  if (!supabaseConfigurado) return []
+  const { data, error } = await supabase.rpc('admin_reencuentros')
+  if (error) throw error
+  return data || []
+}
 export async function desbloquearReporte(id) {
   if (supabaseConfigurado) await supabase.rpc('desbloquear_reporte', { rid: id })
 }

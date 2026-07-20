@@ -79,6 +79,16 @@ export function linkWhatsApp(r) {
   return `${base}?text=${encodeURIComponent(texto)}`
 }
 
+// Link de WhatsApp para el admin: pedir permiso de publicar el reencuentro en el IG
+// (+ invitar a contar la experiencia). Mismo manejo del número que linkWhatsApp.
+export function linkWhatsAppReencuentro(r) {
+  const nombre = nombreMostrado(r)
+  const texto = `¡Hola! Te escribo de Chicho 🐾 Vi que ${nombre} volvió a casa, ¡qué alegría! ¿Nos das permiso para compartir el reencuentro en nuestro Instagram (@chicho.ar)? Y si tenés un minuto, nos encantaría saber cómo fue tu experiencia con la app 🙏`
+  const numero = (r.whatsapp || '').replace(/\D/g, '')
+  const base = numero ? `https://wa.me/54${numero}` : 'https://wa.me/'
+  return `${base}?text=${encodeURIComponent(texto)}`
+}
+
 // Link para llamar por teléfono (usa el mismo número que el WhatsApp).
 export function linkTel(whatsapp) {
   const numero = (whatsapp || '').replace(/\D/g, '')
