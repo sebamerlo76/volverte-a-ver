@@ -51,6 +51,7 @@ export default function Privacidad() {
               <li style={li}><b>Supabase:</b> guarda la base de datos y las cuentas de forma segura.</li>
               <li style={li}><b>Vercel:</b> aloja la app y provee estadísticas anónimas de visitas.</li>
               <li style={li}><b>OpenStreetMap:</b> muestra los mapas.</li>
+              <li style={li}><b>Meta (Facebook/Instagram):</b> <b>sólo si llegás desde uno de nuestros anuncios</b>, un píxel de medición para saber si nuestras campañas funcionan (por ejemplo, si instalaste la app). Si entrás de forma orgánica o directa, no se activa y no compartimos nada con Meta.</li>
             </ul>
 
             <div style={h}>Tus derechos</div>

@@ -8,6 +8,7 @@ import EliminarCuenta from './components/EliminarCuenta.jsx'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import ConfirmHost from './components/ConfirmHost.jsx'
+import { initPixel } from './lib/pixel.js'
 import './styles.css'
 
 // Ruteo simple: /m/<id> = perfil público (QR del collar); /g/<token> = gestionar
@@ -36,6 +37,11 @@ createRoot(document.getElementById('root')).render(
     <ConfirmHost />
   </StrictMode>
 )
+
+// Píxel de Meta para medir instalaciones PWA de campañas. Se auto-apaga si no hay
+// VITE_FB_PIXEL_ID (demo), si corre como app de Play, o si la visita no viene de un
+// anuncio. Ver src/lib/pixel.js.
+initPixel()
 
 // Service worker: habilita Web Push (notificaciones) e instalar como PWA.
 if ('serviceWorker' in navigator) {
