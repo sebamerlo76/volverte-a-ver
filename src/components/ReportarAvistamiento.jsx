@@ -2,6 +2,7 @@ import { useState } from 'react'
 import MapaLeaflet from './MapaLazy.jsx'
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
+import BuscarDireccion from './BuscarDireccion.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { addAvistamiento, subirFotos } from '../data/store.js'
@@ -76,10 +77,12 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
 
       <div className="body form-body">
         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--muted)', margin: '6px 0 10px', lineHeight: 1.5 }}>
-          Marcá dónde viste a <b>{nombreMostrado(reporte)}</b>. Tocá el mapa para mover el pin al lugar exacto.
+          Marcá dónde viste a <b>{nombreMostrado(reporte)}</b>. Buscá la calle o tocá el mapa para mover el pin al lugar exacto.
         </div>
 
-        <div style={{ height: 240, borderRadius: 16, overflow: 'hidden', border: '1.5px solid var(--line)' }}>
+        <BuscarDireccion localidad={reporte.localidad} onEncontrado={(p) => setPunto(p)} onToast={onToast} />
+
+        <div style={{ height: 240, borderRadius: 16, overflow: 'hidden', border: '1.5px solid var(--line)', marginTop: 8 }}>
           <MapaLeaflet
             center={[punto.lat, punto.lng]}
             zoom={15}
