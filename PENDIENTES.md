@@ -101,3 +101,16 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
 - [ ] Compartir el link en grupos de Facebook/WhatsApp de mascotas de Paraná.
 - [ ] Sumar veterinarias y refugios locales.
 - [ ] **Publicar en Play Store** (más adelante, cuando esté validado). NO hay que reprogramar: se "envuelve" la PWA en una TWA con **PWABuilder** (genera el `.aab`). Requiere: cuenta de desarrollador de Google (**US$25** único), **política de privacidad** (URL), **`assetlinks.json`** en el dominio, material de tienda, y —para cuentas personales nuevas— **prueba cerrada con 20 testers × 14 días**. Por ahora la PWA "instalable" alcanza; la tienda suma credibilidad/alcance cuando la app ya tenga uso.
+
+## 🤖 Play Store — mantenimiento
+
+- [ ] **⚠️ Target API 36 (Android 16) — antes del 30-ago-2026.** Google exige que la
+  TWA apunte a API 36; los `.aab` que no cumplan se rechazan (aviso recibido el
+  2026-07-19, plazo de 40 días). **Cómo:** regenerar el paquete en **PWABuilder** (su
+  target ya viene actualizado), subir el `versionCode` (el último subido es **2** →
+  poner **3+**), y **usar el MISMO keystore/firma de siempre**: la huella SHA-256 de
+  `public/.well-known/assetlinks.json` (`63:1D:D4:…`, paquete `ar.chicho.app`) debe
+  coincidir — con una firma nueva Play rechaza el `.aab` y se rompe la verificación del
+  dominio. Mejor hacerlo **después** de terminar el testeo cerrado (14 días) para no
+  arriesgar el contador de testers. NO es la web (React/Vite): es el envoltorio Android,
+  fuera de este repo.
