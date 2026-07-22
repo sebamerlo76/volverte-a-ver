@@ -5,6 +5,20 @@ import { useEffect, useRef, useState } from 'react'
 // la tarjeta). Devuelve { full, thumb }: la imagen entera + el recorte del feed.
 const RATIO = 2 // feed 2:1 (ancho:alto)
 const THUMB_W = 800 // recorte del feed: la tarjeta se ve a ~360px, con 800 alcanza y pesa menos (LCP)
+
+// Formato de salida: WebP si el navegador puede exportarlo desde canvas (~25-35%
+// menos bytes que JPEG a igual calidad → mejor LCP y menos egress). Red de
+// seguridad: si no lo soporta, toDataURL cae a PNG y el check falla → usamos JPEG
+// (nunca PNG, que para una foto pesa más). Solo aplica a subidas nuevas.
+const FORMATO = (() => {
+  try {
+    const c = document.createElement('canvas')
+    c.width = c.height = 1
+    return c.toDataURL('image/webp').startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg'
+  } catch (e) {
+    return 'image/jpeg'
+  }
+})()
 const FULL_MAX = 1440
 
 export default function ImageCropper({ file, onConfirm, onCancel }) {
@@ -97,8 +111,8 @@ export default function ImageCropper({ file, onConfirm, onCancel }) {
     c1.toBlob((thumb) => {
       c2.toBlob((full) => {
         if (thumb && full) onConfirm({ full, thumb })
-      }, 'image/jpeg', 0.85)
-    }, 'image/jpeg', 0.8) // el recorte del feed va un poco más comprimido (se ve chico)
+      }, FORMATO, 0.85)
+    }, FORMATO, 0.8) // el recorte del feed va un poco más comprimido (se ve chico)
   }
 
   return (

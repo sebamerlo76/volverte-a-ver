@@ -18,8 +18,11 @@ export default function PhotoPicker({ value = [], onChange, max = 3 }) {
   }
   function alConfirmar({ full, thumb }) {
     const ts = Date.now()
-    const fFull = new File([full], `foto-${ts}.jpg`, { type: 'image/jpeg' })
-    const fThumb = new File([thumb], `thumb-${ts}.jpg`, { type: 'image/jpeg' })
+    // La extensión y el tipo salen del blob (webp o jpg, según lo que armó el cropper),
+    // no hardcodeados: así el path del Storage y el content-type quedan bien.
+    const ext = (b) => (b.type === 'image/webp' ? 'webp' : 'jpg')
+    const fFull = new File([full], `foto-${ts}.${ext(full)}`, { type: full.type })
+    const fThumb = new File([thumb], `thumb-${ts}.${ext(thumb)}`, { type: thumb.type })
     // url = la completa (previsualización); file = completa (detalle); thumb = recorte del feed
     onChange([...value, { url: URL.createObjectURL(full), file: fFull, thumb: fThumb }])
     setPendiente(null)
