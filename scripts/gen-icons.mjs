@@ -4,7 +4,7 @@
 // Uso: node scripts/gen-icons.mjs
 import sharp from 'sharp'
 
-const CREMA = { r: 252, g: 238, b: 214, alpha: 1 } // #fceed6
+const CREMA = { r: 250, g: 247, b: 241, alpha: 1 } // #faf7f1 (la crema clara de la app; = al splash del manifest → sin recuadro)
 const ESCALA = 0.72 // el logo ocupa el 72% → 14% de margen a cada lado
 
 async function gen(size, salida) {
@@ -21,4 +21,5 @@ async function gen(size, salida) {
 await gen(512, 'public/icon-512.png')
 await gen(192, 'public/icon-192.png')
 await gen(180, 'public/apple-touch-icon.png')
+await gen(512, 'public/icon-maskable-512.png') // maskable: mismo diseño (el margen 0.72 ya es zona segura)
 console.log('Íconos PWA generados con margen (safe zone para maskable)')
