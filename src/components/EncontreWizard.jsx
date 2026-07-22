@@ -8,7 +8,7 @@ import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuard
 import SelectorCiudad from './SelectorCiudad.jsx'
 import BuscarDireccion from './BuscarDireccion.jsx'
 import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
-import { addReporte, addMascota, subirFotos, subirFotoFeed, publicarGestion, nuevoTokenGestion } from '../data/store.js'
+import { addReporte, addMascota, subirFotos, subirFotoFeed, publicarGestion, nuevoTokenGestion, getEmbeddingsDe } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, linkWhatsApp } from '../lib/formato.js'
 import { SITIO_URL } from '../lib/sitio.js'
 import { similitud } from '../lib/vector.js'
@@ -119,6 +119,33 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
     setPaso(Math.min(TOTAL, paso + 1))
   }
 
+  // Los embeddings (huella visual) NO vienen en el feed (pesan mucho y frenaban el
+  // LCP). Al llegar al paso de la foto los pedimos on-demand, sólo de los candidatos
+  // (perdidos activos de la especie, en la provincia).
+  const [embeddings, setEmbeddings] = useState({})
+  const idsFoto = useMemo(() => {
+    if (paso !== 3 || !especie) return []
+    return reportes
+      .filter(
+        (r) =>
+          r.tipo === 'perdido' &&
+          r.estado === 'activo' &&
+          r.especie === especie &&
+          provinciaDe(r.localidad || 'Paraná') === provinciaDe(localidad),
+      )
+      .map((r) => r.id)
+  }, [reportes, especie, localidad, paso])
+  useEffect(() => {
+    if (!idsFoto.length) return
+    let vivo = true
+    getEmbeddingsDe(idsFoto)
+      .then((m) => vivo && setEmbeddings(m))
+      .catch(() => {})
+    return () => {
+      vivo = false
+    }
+  }, [idsFoto])
+
   // Posibles dueños: perdidos activos que coinciden. Refina según el paso.
   // Solo en pasos 1 (especie), 2 (cómo es) y 4 (dónde). En foto/contacto no.
   const coincidencias = useMemo(() => {
@@ -142,9 +169,9 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
     // Paso 3 (foto): ordenamos por parecido visual a la foto cargada.
     if (paso === 3) {
       if (!huella) return []
-      const conH = arr.filter((r) => Array.isArray(r.embedding) && r.embedding.length === huella.length)
+      const conH = arr.filter((r) => Array.isArray(embeddings[r.id]) && embeddings[r.id].length === huella.length)
       return conH
-        .map((r) => ({ r, s: similitud(huella, r.embedding) }))
+        .map((r) => ({ r, s: similitud(huella, embeddings[r.id]) }))
         .sort((a, b) => b.s - a.s)
         .slice(0, 4)
         .map((o) => o.r)
@@ -166,7 +193,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
       return mismaCiudad ? 1 : 2
     }
     return [...arr].sort((a, b) => cerca(a) - cerca(b)).slice(0, 4)
-  }, [reportes, especie, color, tamano, sexo, zona, paso, huella, localidad])
+  }, [reportes, especie, color, tamano, sexo, zona, paso, huella, localidad, embeddings])
 
   // --- Acordeón del paso 2 ---
   // Se abre una sección por vez y al elegir salta sola a la siguiente, así el

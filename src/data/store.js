@@ -102,12 +102,20 @@ function guardarLocal(reportes) {
 
 // --- API pública ---
 
+// Columnas del feed: TODO menos `embedding`. La huella visual pesa mucho (cientos de
+// floats por aviso) y el feed no la usa — sólo la usa "Encontré una" para buscar por
+// foto, que la pide aparte con getEmbeddingsDe(). Bajarla en cada carga del feed
+// inflaba la respuesta (~1s de fetch en mobile) y empeoraba el LCP. Si sumás una
+// columna que desdeFila necesite, agregala también acá.
+const COLS_FEED =
+  'id, tipo, especie, nombre, zona, referencia, color, tamano, raza, descripcion, foto, fotos, whatsapp, autor, fecha_evento, creado_en, estado, user_id, mascota_id, sexo, edad, collar, recompensa, lat, lng, en_custodia, localidad, apoyos, aplausos, resuelto_en, recordatorio_en'
+
 // Reportes activos (los resueltos/reencontrados no se muestran), más nuevo primero.
 export async function getReportes() {
   if (supabaseConfigurado) {
     const { data, error } = await supabase
       .from('reportes')
-      .select('*')
+      .select(COLS_FEED)
       .eq('estado', 'activo')
       .eq('oculto', false)
       .eq('bloqueado', false)
@@ -118,6 +126,24 @@ export async function getReportes() {
   return leerLocal()
     .filter((r) => r.estado === 'activo') // ni resueltos ni pausados en el feed
     .sort((a, b) => (a.creadoEn < b.creadoEn ? 1 : -1))
+}
+
+// Embeddings (huella visual) de una lista de avisos, por id. El feed NO los baja
+// (ver COLS_FEED); "Encontré una" los pide acá, on-demand, sólo de los candidatos y
+// sólo al llegar al paso de la foto. Devuelve un mapa { id: embedding }.
+export async function getEmbeddingsDe(ids) {
+  const lista = [...new Set((ids || []).filter(Boolean))]
+  if (!lista.length) return {}
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase.from('reportes').select('id, embedding').in('id', lista)
+    if (error) throw error
+    const map = {}
+    for (const r of data || []) map[r.id] = r.embedding
+    return map
+  }
+  const map = {}
+  for (const r of leerLocal()) if (lista.includes(r.id)) map[r.id] = r.embedding
+  return map
 }
 
 // Suma 1 apoyo (prueba social) a un aviso. Devuelve el nuevo total, o null.

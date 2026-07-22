@@ -30,6 +30,10 @@
     <meta name="twitter:image" content="https://chicho.ar/icon-512.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Supabase (datos + fotos): dejar la conexión tibia para que el feed y las fotos
+         arranquen antes → mejor LCP, sobre todo en mobile. El dominio es público (ya va
+         en el bundle). El demo usa otra Supabase: este hint es inocuo ahí. -->
+    <link rel="preconnect" href="https://ltrutscputgtmrxpmjbm.supabase.co" crossorigin />
     <!-- Fuentes NO bloqueantes (se precargan y se aplican al terminar, sin frenar
          el primer pintado). Texto: display=swap (aparece ya con la fuente de
          respaldo). Íconos: display=block (quedan en blanco un instante mientras
