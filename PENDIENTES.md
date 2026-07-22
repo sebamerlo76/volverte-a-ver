@@ -114,3 +114,8 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
   dominio. Mejor hacerlo **después** de terminar el testeo cerrado (14 días) para no
   arriesgar el contador de testers. NO es la web (React/Vite): es el envoltorio Android,
   fuera de este repo.
+  - **De paso, en ese MISMO rebuild se arregla el splash** (el cuadrado durazno del
+    ícono). Ya se unificó la crema en `#faf7f1` (manifest + íconos, commit `2b13b43`),
+    pero en la app de Play el splash está horneado en el `.aab` viejo → recién queda
+    lindo al regenerarlo. O sea: un solo rebuild = API 36 + splash. (En la PWA instalada
+    se arregla reinstalando; ahí no hace falta esperar.)
