@@ -2761,6 +2761,18 @@ select {
 .adm-reenc-wa { padding: 7px 12px; border-radius: 10px; background: var(--green); color: #fff; font-weight: 800; font-size: 12.5px; text-decoration: none; }
 .adm-reenc-tel { padding: 7px 11px; border-radius: 10px; background: #f3ece1; color: var(--navy); font-weight: 800; font-size: 12.5px; text-decoration: none; }
 .adm-reenc-mail { font-size: 12px; font-weight: 700; color: var(--faint); word-break: break-all; }
+
+/* Banner "Sumate a la red de tu zona" (instalar la PWA) — arriba del feed */
+.inst-banner { position: relative; display: flex; gap: 12px; align-items: flex-start; margin: 10px 14px 6px; padding: 14px; background: linear-gradient(#ffffff, #fff6de); border: 1.5px solid #f4d67a; border-radius: 16px; }
+.inst-x { position: absolute; top: 6px; right: 6px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #b3a68f; border-radius: 50%; }
+.inst-x:active { background: rgba(0, 0, 0, 0.06); }
+.inst-ico { flex: none; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #f4d67a; border-radius: 12px; color: var(--amber); }
+.inst-body { flex: 1; min-width: 0; padding-right: 22px; }
+.inst-t { font-family: Fredoka, sans-serif; font-weight: 600; font-size: 16px; color: var(--navy); }
+.inst-d { font-size: 13px; font-weight: 700; color: var(--slate); line-height: 1.4; margin-top: 2px; }
+.inst-btn { display: inline-flex; align-items: center; gap: 7px; margin-top: 10px; padding: 9px 16px; border-radius: 12px; background: var(--teal); color: #fff; font-family: Nunito, sans-serif; font-weight: 800; font-size: 13.5px; }
+.inst-btn:active { filter: brightness(0.95); }
+.inst-ios { font-size: 12.5px; font-weight: 700; color: var(--slate); line-height: 1.45; margin-top: 8px; background: #fff; border: 1px solid #f4d67a; border-radius: 10px; padding: 8px 10px; }
 .adm-rango { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .adm-rango input[type='date'] { flex: 1; min-width: 120px; padding: 9px 10px; border-radius: 12px; border: 1px solid var(--line); background: #fff; font-family: Nunito, sans-serif; font-weight: 700; font-size: 13px; color: #2a2320; }
 .adm-rango span { color: var(--muted); font-weight: 800; }

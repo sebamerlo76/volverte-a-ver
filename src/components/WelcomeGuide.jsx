@@ -46,8 +46,8 @@ const PASOS = [
   {
     ic: 'install_mobile',
     color: 'var(--navy)',
-    t: 'Instalá la app 📲',
-    d: 'Tenela en tu inicio como cualquier app.\n\n📱 Android: menú ⋮ → "Instalar app".\n🍎 iPhone: en Safari, tocá Compartir (el cuadradito con la flecha ↑) → "Agregar a inicio".',
+    t: 'Sumate a la red de tu zona 📲',
+    d: 'Instalá Chicho en tu inicio y recibí un aviso cuando se pierde o aparece una mascota cerca tuyo. Cuantos más seamos, más rápido vuelven a casa. 🔔\n\n📱 Android: menú ⋮ → «Instalar app».\n🍎 iPhone: en Safari, Compartir ↑ → «Agregar a inicio».\n\nSin instalar no llegan las notificaciones.',
   },
 ]
 

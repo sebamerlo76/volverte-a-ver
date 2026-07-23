@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import PetCard from './PetCard.jsx'
+import BannerInstalar from './BannerInstalar.jsx'
 import MapaLeaflet from './MapaLazy.jsx'
 import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
@@ -383,6 +384,7 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
         </div>
       ) : (
         <div className="body" ref={bodyRef} onScroll={(e) => { if (scrollRef) scrollRef.current = e.currentTarget.scrollTop }}>
+          {!verFinales && <BannerInstalar />}
           {cargando && !verFinales ? (
             <div className="empty">Cargando avisos… 🐾</div>
           ) : verFinales && finales === null ? (

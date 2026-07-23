@@ -9,6 +9,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import ConfirmHost from './components/ConfirmHost.jsx'
 import { initPixel } from './lib/pixel.js'
+import './lib/instalar.js' // registra el listener de beforeinstallprompt lo antes posible
 import './styles.css'
 
 // Ruteo simple: /m/<id> = perfil público (QR del collar); /g/<token> = gestionar
