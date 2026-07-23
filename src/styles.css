@@ -378,8 +378,9 @@ select {
   padding: 12px 16px 4px;
 }
 .hmini-side {
-  flex: none;
-  width: 46px;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
   display: flex;
   align-items: center;
 }
@@ -410,7 +411,7 @@ select {
   transform: scale(0.97);
 }
 .hmini-logo {
-  flex: 1;
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1791,10 +1792,10 @@ select {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 8px 30px;
+  padding: 8px 6px;
   padding-bottom: calc(8px + env(safe-area-inset-bottom));
   position: relative;
-  z-index: 1000; /* la barra (y la patita que sobresale) siempre al frente */
+  z-index: 1000; /* la barra siempre al frente */
 }
 .ni {
   display: flex;
@@ -1809,22 +1810,12 @@ select {
 .ni.on {
   color: var(--navy);
 }
-.navc {
-  width: 62px;
-  height: 62px;
-  border-radius: 21px;
-  background: var(--navy);
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
-  margin-top: -30px;
-  box-shadow: 0 5px 12px rgba(31, 56, 82, 0.22);
-  font-size: 10px;
-  font-weight: 800;
-  flex: none;
+/* Los dos atajos de publicar van con el color de su estado (rojo perdido, azul encontrado). */
+.ni-perdi {
+  color: var(--coral);
+}
+.ni-encontre {
+  color: var(--blue);
 }
 .leaflet-container {
   background: #dfe8e4;

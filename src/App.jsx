@@ -91,13 +91,11 @@ export default function App() {
       case 'avistamiento':
       case 'recorrido':
       case 'mascota':
-      case 'perdido-pick':
-      case 'post-encontre':
-        return 2 // se abren desde otra vista (detalle / cuenta / post-intent)
+        return 2 // se abren desde otra vista (detalle / cuenta)
       case 'qr':
         return 3 // cuenta → mascota → qr
       default:
-        return 1 // detalle, cuenta, post, auth, post-intent, admin, moderacion
+        return 1 // detalle, cuenta, post, perdido-pick, post-encontre, auth, admin
     }
   }
   // El festejo cuenta como capa: si no, el "atrás" del celu te saca de la pantalla
@@ -134,7 +132,7 @@ export default function App() {
         return setVista('detalle')
       case 'perdido-pick':
       case 'post-encontre':
-        return setVista('post-intent')
+        return setVista('feed')
       case 'post':
         return cerrarPublicar()
       case 'mascota':
@@ -328,14 +326,17 @@ export default function App() {
   }
 
   function navegar(tab) {
-    if (tab === 'post') {
+    // Atajos de publicar de la barra: 'perdi' y 'encontre' van directo (sin el
+    // chooser); 'post' abre el chooser. Todos piden cuenta primero.
+    const dest = { post: 'post-intent', perdi: 'perdido-pick', encontre: 'post-encontre' }[tab]
+    if (dest) {
       if (logueado) {
         setEditando(null)
         setPlantilla(null)
         setOfrecerGuardar(false)
-        setVista('post-intent')
+        setVista(dest)
       } else {
-        setAuthProximo('post')
+        setAuthProximo(tab)
         setVista('auth')
       }
       return
@@ -370,12 +371,12 @@ export default function App() {
     if (b) b.scrollTop = 0
   }
 
-  // Barra inferior: Inicio · Buscar · Publicar · Mapa/Lista
+  // Barra inferior: Inicio · Perdí · Encontré · Mapa
   function navBarra(accion) {
-    if (accion === 'post') return navegar('post')
-    if (accion === 'buscar') return setBuscadorAbierto(true)
     if (accion === 'inicio') return resetInicio()
-    if (accion === 'toggle') return setHomeModo((m) => (m === 'mapa' ? 'lista' : 'mapa'))
+    if (accion === 'mapa') return setHomeModo('mapa')
+    if (accion === 'perdi') return navegar('perdi')
+    if (accion === 'encontre') return navegar('encontre')
   }
 
   function abrirDetalle(reporte, origen = 'feed') {
@@ -501,11 +502,12 @@ export default function App() {
       return
     }
     mostrarToast('¡Bienvenido! 🐾')
-    if (authProximo === 'post') {
+    const dest = { post: 'post-intent', perdi: 'perdido-pick', encontre: 'post-encontre' }[authProximo]
+    if (dest) {
       setEditando(null)
       setPlantilla(null)
       setOfrecerGuardar(false)
-      setVista('post-intent')
+      setVista(dest)
     } else {
       setVista('feed')
     }
@@ -644,6 +646,7 @@ export default function App() {
             onLogin={pedirLogin}
             onMenu={() => setMenuAbierto(true)}
             onNotifs={abrirNotifs}
+            onBuscar={() => setBuscadorAbierto(true)}
             notifsNoLeidas={notifsNoLeidas}
             hayNudge={nudge}
             modo={homeModo}
@@ -700,7 +703,7 @@ export default function App() {
             user={user}
             onElegir={elegirMascotaPerdida}
             onOtra={perdidoNueva}
-            onVolver={() => setVista('post-intent')}
+            onVolver={() => setVista('feed')}
           />
         )}
         {vista === 'post-encontre' && (
@@ -708,7 +711,7 @@ export default function App() {
             reportes={reportes}
             telefonoGuardado={user?.user_metadata?.telefono || ''}
             onVerAviso={abrirDetalle}
-            onCerrar={() => setVista('post-intent')}
+            onCerrar={() => setVista('feed')}
             onPublicado={alPublicar}
             onToast={mostrarToast}
           />

@@ -29,7 +29,7 @@ const PASOS = [
     ic: 'pets',
     color: 'var(--navy)',
     t: 'Publicá en un toque',
-    d: '¿Perdiste o encontraste una? Tocá la patita 🐾 de abajo para cargar tu aviso.',
+    d: '¿Perdiste o encontraste una? Tocá 🐾 Perdí o 👁️ Encontré abajo para cargar tu aviso.',
   },
   {
     ic: 'visibility',

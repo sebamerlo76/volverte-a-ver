@@ -29,7 +29,7 @@ function jitter(base, id = '') {
   return [base[0] + dy, base[1] + dx]
 }
 
-export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, logueado, user, onLogin, onMenu, onNotifs, notifsNoLeidas = 0, hayNudge, modo, filtros, setFiltro, resetInicio, scrollRef }) {
+export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, logueado, user, onLogin, onMenu, onNotifs, onBuscar, notifsNoLeidas = 0, hayNudge, modo, filtros, setFiltro, resetInicio, scrollRef }) {
   const avatar = avatarDe(user)
   const [finales, setFinales] = useState(null)
   const [sel, setSel] = useState(null)
@@ -176,7 +176,12 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
             Chicho
           </button>
 
-          <div className={'hmini-side hmini-side-r' + (authActivo && !logueado ? ' hmini-side-auto' : '')}>
+          <div className="hmini-side hmini-side-r">
+            <button className="hd-bell" onClick={onBuscar} aria-label="Buscar">
+              <span className="mi" style={{ fontSize: 25, color: 'var(--navy)' }}>
+                search
+              </span>
+            </button>
             {authActivo && logueado ? (
               <button className="hd-bell" onClick={onNotifs} aria-label="Notificaciones">
                 <span className="mi" style={{ fontSize: 26, color: 'var(--navy)' }}>
@@ -188,16 +193,6 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
                   <span className="hd-bell-dot" />
                 ) : null}
               </button>
-            ) : authActivo && !logueado ? (
-              // Espaciador invisible = mismo ancho que "Entrar", para centrar el logo.
-              <span className="hd-entrar" aria-hidden="true" style={{ visibility: 'hidden' }}>
-                <span className="mi" style={{ fontSize: 19 }}>login</span>
-                Entrar
-              </span>
-            ) : !authActivo ? (
-              // Demo: sin campana (no hay bandeja), pero un hueco del ancho del menú
-              // para que el logo quede centrado igual.
-              <span className="mi" aria-hidden="true" style={{ fontSize: 26, visibility: 'hidden' }}>menu</span>
             ) : null}
           </div>
         </div>
