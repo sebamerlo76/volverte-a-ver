@@ -77,6 +77,8 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
 - [x] **Múltiples fotos** por aviso (hasta 3 + carrusel). ✅
 - [x] **Teléfono** además de WhatsApp — botón Llamar con el mismo número. ✅
 - [x] **Compartir con imagen linda** (flyer del aviso) para WhatsApp/Facebook + **link directo al aviso**. ✅
+- [x] **Preview rico del link** (`/r/<id>`): serverless function `api/og.js` que inyecta los tags OG por aviso (foto + nombre + estado + zona), así al pegar el link en un grupo la tarjeta muestra la mascota y no el ícono genérico. ✅ Ojo: en Vercel `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` tienen que estar disponibles **en runtime** para las functions (si no, cae al genérico, no rompe). Test: `node test/og.test.mjs`.
+  - [ ] **v2**: en vez de la foto cruda, generar una imagen 1200×630 (el flyer) como `og:image` — tarjeta más linda y sin recortes raros.
 - [ ] **Fotitos de raza** (grilla visual curada) — más adelante, con imágenes con licencia.
 - [x] **Raza clickeable** — chips de razas comunes (perro/gato) o escribir otra, en Publicar y Encontré. ✅ (fotitos de raza quedan para más adelante)
 - [ ] **Acciones rápidas**: marcar reencontrado desde la lista sin abrir el aviso.
