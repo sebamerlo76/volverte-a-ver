@@ -121,3 +121,16 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
     pero en la app de Play el splash está horneado en el `.aab` viejo → recién queda
     lindo al regenerarlo. O sea: un solo rebuild = API 36 + splash. (En la PWA instalada
     se arregla reinstalando; ahí no hace falta esperar.)
+
+- [ ] **Cuándo migrar de TWA (a futuro, no urgente).** Hoy TWA es la decisión correcta:
+  un solo código (la web) sirve web + Android, se actualiza al instante con `git push`
+  (la app de Play sólo abre chicho.ar), y valida la idea sin costo de app nativa. Corre
+  Chrome real por debajo, no un WebView viejo. Convendría saltar a **Capacitor** (envuelve
+  la misma web con acceso nativo → se reaprovecha casi todo el código) o **React Native**
+  el día que pegue contra una de estas paredes:
+  - **iPhone en la App Store**: TWA es sólo Android; en iOS Chicho anda como PWA (agregar
+    a inicio), pero para estar en la store de Apple hace falta wrapper (Capacitor) o nativo.
+  - **Features nativas profundas**: ubicación en segundo plano, widgets, Bluetooth, cámara
+    avanzada.
+  - **Pulcritud "de app cara"**: animaciones/gestos que sólo se logran nativo.
+  Mientras Chicho sea contenido + notificaciones + mapa, TWA alcanza y sobra.
