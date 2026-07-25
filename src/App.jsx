@@ -374,7 +374,7 @@ export default function App() {
   // Barra inferior: Inicio · Perdí · Encontré · Mapa
   function navBarra(accion) {
     if (accion === 'inicio') return resetInicio()
-    if (accion === 'mapa') return setHomeModo('mapa')
+    if (accion === 'mapa') return setHomeModo((m) => (m === 'mapa' ? 'lista' : 'mapa')) // alterna: vuelve a lista
     if (accion === 'perdi') return navegar('perdi')
     if (accion === 'encontre') return navegar('encontre')
   }
