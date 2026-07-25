@@ -1810,6 +1810,21 @@ select {
 .ni.on {
   color: var(--navy);
 }
+/* Destello al tocar Inicio: un fondo navy suave que aparece y se apaga, para que
+   se note que el toque hizo algo (el reset del feed es instantáneo). */
+.ni.pulse {
+  animation: niPulse 0.6s ease;
+}
+@keyframes niPulse {
+  0% {
+    background: rgba(31, 56, 82, 0.16);
+    border-radius: 12px;
+  }
+  100% {
+    background: transparent;
+    border-radius: 12px;
+  }
+}
 /* Los dos atajos de publicar van con el color de su estado (rojo perdido, azul encontrado). */
 .ni-perdi {
   color: var(--coral);

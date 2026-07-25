@@ -1,9 +1,16 @@
-// Barra inferior: Inicio · Perdí · Encontré · Mapa (Perdí/Encontré publican directo).
-export default function BottomNav({ modo, onNav }) {
+// Barra inferior: Inicio · Perdí · Encontré · Mapa/Lista.
+// - Perdí / Encontré publican directo.
+// - El último botón es un toggle que muestra SIEMPRE lo contrario de lo que estás
+//   viendo: en lista dice "Mapa" (te lleva al mapa); en mapa dice "Lista".
+// - inicioPulse: destello breve al tocar Inicio, para que se note que hizo algo.
+export default function BottomNav({ modo, onNav, inicioPulse }) {
   const enMapa = modo === 'mapa'
   return (
     <div className="nav">
-      <button className={'ni' + (!enMapa ? ' on' : '')} onClick={() => onNav('inicio')}>
+      <button
+        className={'ni' + (!enMapa ? ' on' : '') + (inicioPulse ? ' pulse' : '')}
+        onClick={() => onNav('inicio')}
+      >
         <span className="mi" style={{ fontSize: 25 }}>
           home
         </span>
@@ -21,11 +28,11 @@ export default function BottomNav({ modo, onNav }) {
         </span>
         Encontré
       </button>
-      <button className={'ni' + (enMapa ? ' on' : '')} onClick={() => onNav('mapa')}>
-        <span className={'mi' + (enMapa ? ' fill' : '')} style={{ fontSize: 25 }}>
-          map
+      <button className="ni" onClick={() => onNav('mapa')} aria-label={enMapa ? 'Ver lista' : 'Ver mapa'}>
+        <span className="mi" style={{ fontSize: 25 }}>
+          {enMapa ? 'view_list' : 'map'}
         </span>
-        Mapa
+        {enMapa ? 'Lista' : 'Mapa'}
       </button>
     </div>
   )

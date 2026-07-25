@@ -362,6 +362,10 @@ export default function App() {
     })
   }, [reportes, filtros.localidad, filtros.provincia])
   const ambitoBusqueda = filtros.localidad || filtros.provincia || null
+  // Destello breve del botón Inicio al tocarlo, para que se note que hizo algo
+  // (el reset es instantáneo, si no no se percibe nada).
+  const [inicioPulse, setInicioPulse] = useState(false)
+  const pulseTimer = useRef(null)
   function resetInicio() {
     setFiltros(FILTROS_INI)
     setHomeModo('lista')
@@ -371,9 +375,15 @@ export default function App() {
     if (b) b.scrollTop = 0
   }
 
-  // Barra inferior: Inicio · Perdí · Encontré · Mapa
+  // Barra inferior: Inicio · Perdí · Encontré · Mapa/Lista
   function navBarra(accion) {
-    if (accion === 'inicio') return resetInicio()
+    if (accion === 'inicio') {
+      resetInicio()
+      if (pulseTimer.current) clearTimeout(pulseTimer.current)
+      setInicioPulse(true)
+      pulseTimer.current = setTimeout(() => setInicioPulse(false), 600)
+      return
+    }
     if (accion === 'mapa') return setHomeModo((m) => (m === 'mapa' ? 'lista' : 'mapa')) // alterna: vuelve a lista
     if (accion === 'perdi') return navegar('perdi')
     if (accion === 'encontre') return navegar('encontre')
@@ -793,7 +803,7 @@ export default function App() {
             </div>
           </div>
         )}
-        {vista === 'feed' && <BottomNav modo={homeModo} onNav={navBarra} />}
+        {vista === 'feed' && <BottomNav modo={homeModo} onNav={navBarra} inicioPulse={inicioPulse} />}
 
         {vista === 'admin' && esAdmin && <Admin onVolver={() => setVista('feed')} onOpen={(r) => abrirDetalle(r, 'admin')} />}
         {vista === 'moderacion' && esAdmin && <Moderacion onVolver={() => setVista('feed')} />}
