@@ -6,7 +6,7 @@ const ITEMS = [
   { k: 'animalitos', ic: 'pets', t: 'Mis mascotas' }, // la clave queda 'animalitos' (routing); el texto dice mascotas, como el resto
   { k: 'ubicaciones', ic: 'location_on', t: 'Mis ubicaciones' },
   { k: 'notificaciones', ic: 'notifications', t: 'Notificaciones' },
-  { k: 'avisos', ic: 'campaign', t: 'Mis avisos' },
+  { k: 'avisos', ic: 'campaign', t: 'Avisos' },
   { k: 'cuenta', ic: 'person', t: 'Mi cuenta' },
   { k: 'guia', ic: 'help', t: 'Guía' },
   { k: 'ayuda', ic: 'support_agent', t: 'Ayuda / Soporte' },

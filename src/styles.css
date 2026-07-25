@@ -3206,6 +3206,31 @@ select {
   text-decoration: underline;
 }
 
+/* Solapas Míos / Siguiendo en la sección Avisos */
+.av-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 14px 16px 12px;
+  padding: 4px;
+  border-radius: 12px;
+  background: #eef1f4;
+}
+.av-tab {
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 9px;
+  background: transparent;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  color: #4a4038;
+}
+.av-tab.on {
+  background: #fff;
+  color: var(--navy);
+  box-shadow: 0 1px 3px rgba(31, 56, 82, 0.12);
+}
+
 /* Barra "renovar aviso viejo" en Mis avisos */
 .renovar-bar {
   display: flex;

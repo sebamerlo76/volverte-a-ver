@@ -450,6 +450,28 @@ export async function getReportePorId(id) {
   return leerLocal().find((r) => r.id === id) || null
 }
 
+// Trae varios avisos por sus ids (para la solapa "Siguiendo": guardamos los ids,
+// no los datos). Incluye resueltos y pausados a propósito —querés ver en qué quedó
+// el que seguís—; saltea ocultos/bloqueados. Más nuevo primero.
+export async function getReportesPorIds(ids) {
+  const lista = [...new Set((ids || []).filter(Boolean))]
+  if (!lista.length) return []
+  if (supabaseConfigurado) {
+    const { data, error } = await supabase
+      .from('reportes')
+      .select(COLS_FEED)
+      .in('id', lista)
+      .eq('oculto', false)
+      .eq('bloqueado', false)
+      .order('creado_en', { ascending: false })
+    if (error) throw error
+    return data.map(desdeFila)
+  }
+  return leerLocal()
+    .filter((r) => lista.includes(r.id))
+    .sort((a, b) => (a.creadoEn < b.creadoEn ? 1 : -1))
+}
+
 // Trae SOLO los avisos de un usuario (activos y resueltos), más nuevo primero.
 export async function getMisReportes(userId) {
   if (!userId) return []

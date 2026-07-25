@@ -743,6 +743,8 @@ export default function App() {
             onCompletoPasos={() => setNudge(false)}
             onResuelto={resolverDesdeCuenta}
             onToast={mostrarToast}
+            seguidos={seguidos}
+            onDejarDeSeguir={(id) => toggleSeguir({ id })}
           />
         )}
         {vista === 'mascota' && (

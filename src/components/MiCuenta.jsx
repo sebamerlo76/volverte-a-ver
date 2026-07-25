@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import PetCard from './PetCard.jsx'
-import { getMisReportes, getMisMascotas, marcarResuelto, renovarReporte, reactivarReporte, desactivarCuenta, reactivarCuenta } from '../data/store.js'
+import { getMisReportes, getMisMascotas, getReportesPorIds, marcarResuelto, renovarReporte, reactivarReporte, desactivarCuenta, reactivarCuenta } from '../data/store.js'
 import { avatarDe, nombreUsuario } from '../lib/formato.js'
 import { soportado as pushSoportado, yaSuscripto, activarPush, desactivarPush } from '../lib/push.js'
 import { supabase, supabaseConfigurado } from '../lib/supabase.js'
@@ -22,7 +22,7 @@ const TITULOS = {
   animalitos: 'Mis mascotas',
   ubicaciones: 'Mis ubicaciones',
   notificaciones: 'Notificaciones',
-  avisos: 'Mis avisos',
+  avisos: 'Avisos',
   cuenta: 'Mi cuenta',
   'primeros-pasos': 'Primeros pasos',
 }
@@ -41,9 +41,13 @@ export default function MiCuenta({
   onCompletoPasos,
   onResuelto,
   onToast,
+  seguidos = [],
+  onDejarDeSeguir,
 }) {
   const [mios, setMios] = useState(null)
   const [mascotas, setMascotas] = useState(null)
+  const [tabAviso, setTabAviso] = useState('mios')
+  const [segReportes, setSegReportes] = useState(null)
   const [pushOk, setPushOk] = useState(false)
   const [pushOn, setPushOn] = useState(false)
   const [pushBusy, setPushBusy] = useState(false)
@@ -93,6 +97,25 @@ export default function MiCuenta({
   useEffect(() => {
     cargar()
   }, [cargar])
+
+  // Los avisos que sigo: guardamos sólo los ids (prop seguidos), así que traemos
+  // sus datos. Refresca cuando cambia el conjunto (p. ej. al dejar de seguir).
+  const idsSeguidos = (seguidos || []).join(',')
+  useEffect(() => {
+    let vivo = true
+    getReportesPorIds(seguidos || [])
+      .then((rs) => vivo && setSegReportes(rs))
+      .catch(() => vivo && setSegReportes([]))
+    return () => {
+      vivo = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idsSeguidos])
+
+  function dejarDeSeguir(id) {
+    setSegReportes((rs) => (rs || []).filter((r) => r.id !== id)) // saca ya (optimista)
+    onDejarDeSeguir?.(id)
+  }
 
   // Aviso activo vinculado a una mascota = está publicada como perdida.
   function avisoActivoDe(m) {
@@ -442,9 +465,19 @@ export default function MiCuenta({
           </>
         )}
 
-        {/* ---------------- Mis avisos ---------------- */}
-        {seccion === 'avisos' &&
-          (mios === null ? (
+        {/* ---------------- Avisos: Míos / Siguiendo ---------------- */}
+        {seccion === 'avisos' && (
+          <>
+            <div className="av-tabs">
+              <button className={'av-tab' + (tabAviso === 'mios' ? ' on' : '')} onClick={() => setTabAviso('mios')}>
+                Míos
+              </button>
+              <button className={'av-tab' + (tabAviso === 'siguiendo' ? ' on' : '')} onClick={() => setTabAviso('siguiendo')}>
+                Siguiendo
+              </button>
+            </div>
+            {tabAviso === 'mios' ? (
+              mios === null ? (
             <div className="empty" style={{ padding: '20px 30px' }}>
               Cargando tus avisos…
             </div>
@@ -510,7 +543,40 @@ export default function MiCuenta({
                 </div>
               )
             })
-          ))}
+            )
+            ) : segReportes === null ? (
+              <div className="empty" style={{ padding: '20px 30px' }}>
+                Cargando…
+              </div>
+            ) : segReportes.length === 0 ? (
+              <div className="empty" style={{ padding: '20px 30px' }}>
+                Todavía no seguís ningún aviso. Abrí una mascota que te interese y tocá «Seguir esta búsqueda» para
+                enterarte si aparece. 🔔
+              </div>
+            ) : (
+              segReportes.map((r) => (
+                <div key={r.id} style={{ position: 'relative' }}>
+                  {r.estado === 'resuelto' && <div className="resuelto-chip">🏠 Ya en casa</div>}
+                  {r.estado === 'pausado' && <div className="resuelto-chip">⏸️ En pausa</div>}
+                  <div style={{ opacity: r.estado !== 'activo' ? 0.6 : 1 }}>
+                    <PetCard r={r} onClick={() => onAbrir(r)} />
+                  </div>
+                  <div className="renovar-bar">
+                    <span>Seguís este aviso</span>
+                    <div className="rb-acc">
+                      <button className="rb-sec" onClick={() => dejarDeSeguir(r.id)}>
+                        <span className="mi" style={{ fontSize: 15 }}>
+                          notifications_off
+                        </span>
+                        Dejar de seguir
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </>
+        )}
 
         {/* ---------------- Mis ubicaciones ---------------- */}
         {seccion === 'ubicaciones' && <MisUbicaciones user={user} onToast={onToast} />}
