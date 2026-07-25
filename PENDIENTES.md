@@ -107,20 +107,19 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
 ## 🤖 Play Store — mantenimiento
 
 - [ ] **⚠️ Target API 36 (Android 16) — antes del 30-ago-2026.** Google exige que la
-  TWA apunte a API 36; los `.aab` que no cumplan se rechazan (aviso recibido el
-  2026-07-19, plazo de 40 días). **Cómo:** regenerar el paquete en **PWABuilder** (su
-  target ya viene actualizado), subir el `versionCode` (el último subido es **2** →
-  poner **3+**), y **usar el MISMO keystore/firma de siempre**: la huella SHA-256 de
-  `public/.well-known/assetlinks.json` (`63:1D:D4:…`, paquete `ar.chicho.app`) debe
-  coincidir — con una firma nueva Play rechaza el `.aab` y se rompe la verificación del
-  dominio. Mejor hacerlo **después** de terminar el testeo cerrado (14 días) para no
-  arriesgar el contador de testers. NO es la web (React/Vite): es el envoltorio Android,
-  fuera de este repo.
-  - **De paso, en ese MISMO rebuild se arregla el splash** (el cuadrado durazno del
-    ícono). Ya se unificó la crema en `#faf7f1` (manifest + íconos, commit `2b13b43`),
-    pero en la app de Play el splash está horneado en el `.aab` viejo → recién queda
-    lindo al regenerarlo. O sea: un solo rebuild = API 36 + splash. (En la PWA instalada
-    se arregla reinstalando; ahí no hace falta esperar.)
+  TWA apunte a API 36 desde esa fecha (aviso recibido el 2026-07-19). **Estado
+  (25-jul-2026):** se regeneró el paquete en PWABuilder (versionCode **3**, carpeta
+  `Desktop\Chicho\...package v3`, misma firma verificada por hash) y se subió a la
+  prueba cerrada — **pero salió con SDK objetivo 35**: PWABuilder todavía no apunta
+  a 36. Ese rebuild arregló el splash y llevó el nombre nuevo; **falta OTRO rebuild
+  antes del 30-ago** cuando PWABuilder actualice su target:
+  - Mismo proceso: PWABuilder → `ar.chicho.app` → versionCode **4** → Signing
+    **"Use mine"** con `signing.keystore` (cualquier carpeta v2/v3, son la misma llave).
+  - **Verificar en Play al subir** que "SDK objetivo" diga **36** (en la tabla del
+    bundle) — no dar por hecho que PWABuilder ya lo subió.
+  - La huella del assetlinks del sitio (`63:1D:D4:…`) es la de **Play App Signing**
+    (Google re-firma); la del zip de PWABuilder (`6B:A9:…`) es la llave de subida.
+    Son distintas a propósito: **no tocar el assetlinks de chicho.ar**.
 
 - [ ] **Cuándo migrar de TWA (a futuro, no urgente).** Hoy TWA es la decisión correcta:
   un solo código (la web) sirve web + Android, se actualiza al instante con `git push`
