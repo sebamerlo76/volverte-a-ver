@@ -201,7 +201,18 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
   const perdidos = filtrados.filter((r) => r.tipo === 'perdido').length
   const encontrados = filtrados.filter((r) => r.tipo === 'encontrado').length
 
-  // Chips de filtros activos (breadcrumb removible)
+  // Vuelve todos los filtros del panel a su estado neutro (no toca la ciudad ni la
+  // pestaña: eso es el "dónde" y el "qué", no el filtrado fino).
+  function limpiarFiltros() {
+    setFiltro('q', '')
+    setFiltro('especie', null)
+    setFiltro('zona', null)
+    setFiltro('tiempo', 'todos')
+    setFiltro('orden', 'recientes')
+    setFiltro('soloLocalidad', false)
+  }
+
+  // Filtros activos (para el contador del botón Filtrar y el chip Limpiar)
   const chips = []
   if (filtros.q) chips.push({ key: 'q', label: `“${filtros.q}”`, clear: () => setFiltro('q', '') })
   if (filtros.especie) chips.push({ key: 'especie', label: ESPECIE_LBL[filtros.especie], clear: () => setFiltro('especie', null) })
@@ -213,6 +224,7 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
       clear: () => setFiltro('tiempo', 'todos'),
     })
   if (filtros.orden === 'antiguos') chips.push({ key: 'orden', label: 'Más antiguos', clear: () => setFiltro('orden', 'recientes') })
+  if (filtros.soloLocalidad && loc) chips.push({ key: 'solo', label: `Solo ${loc}`, clear: () => setFiltro('soloLocalidad', false) })
 
   return (
     <div className={'view home-' + filtros.estado}>
@@ -290,17 +302,18 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
               tune
             </span>
             Filtrar
+            {chips.length > 0 && <span className="fbar-badge">{chips.length}</span>}
           </button>
-          {chips.map((c) => (
-            <button key={c.key} className="fchip" onClick={c.clear}>
-              {c.label}
-              <span className="mi" style={{ fontSize: 15 }}>
-                close
-              </span>
+          {/* Un solo chip para soltar todo: el detalle de qué está filtrando vive en el
+              panel (chips prendidos). Antes había un chip por filtro y la barra crecía
+              a dos líneas. */}
+          {chips.length > 0 && (
+            <button className="fchip" onClick={limpiarFiltros}>
+              Limpiar
             </button>
-          ))}
+          )}
           <span className="fbar-count">
-            {filtrados.length} {filtrados.length === 1 ? 'resultado' : 'resultados'}
+            {filtrados.length} {filtrados.length === 1 ? 'aviso' : 'avisos'}
           </span>
         </div>
 
@@ -383,9 +396,16 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
               </button>
             ))}
           </div>
-          <button className="fp-listo" onClick={() => setPanelAbierto(false)}>
-            Ver resultados
-          </button>
+          <div className="fp-acciones">
+            {chips.length > 0 && (
+              <button className="fp-limpiar" onClick={limpiarFiltros}>
+                Limpiar filtros
+              </button>
+            )}
+            <button className="fp-listo" onClick={() => setPanelAbierto(false)}>
+              Ver resultados
+            </button>
+          </div>
         </div>
       ) : enMapa ? (
         <div className="mapwrap">

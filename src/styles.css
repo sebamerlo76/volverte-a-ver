@@ -519,7 +519,7 @@ select {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px; /* justo para que Todas + Filtrar·3 + Limpiar + "4 avisos" entren en una línea a 375px */
   padding: 9px 16px;
   background: var(--acento-bg);
 }
@@ -528,7 +528,7 @@ select {
   align-items: center;
   gap: 5px;
   height: 32px;
-  padding: 0 13px;
+  padding: 0 11px;
   border-radius: 10px;
   background: #fff;
   border: 1.5px solid var(--line);
@@ -556,12 +556,26 @@ select {
   color: #fff;
   border-color: var(--ink);
 }
+/* Contador de filtros activos en el botón Filtrar */
+.fbar-badge {
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--acento);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .fchip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   height: 32px;
-  padding: 0 9px 0 12px;
+  padding: 0 11px;
   border-radius: 10px;
   background: var(--acento);
   color: #fff;
@@ -574,9 +588,23 @@ select {
   font-weight: 800;
   color: var(--faint);
 }
-.fp-listo {
+.fp-acciones {
+  display: flex;
+  gap: 10px;
   margin-top: 14px;
-  width: 100%;
+}
+.fp-limpiar {
+  flex: 1;
+  height: 44px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+}
+.fp-listo {
+  flex: 2;
   height: 44px;
   border-radius: 12px;
   background: var(--ink);
