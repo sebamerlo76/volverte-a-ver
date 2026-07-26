@@ -396,16 +396,11 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
               </button>
             ))}
           </div>
-          <div className="fp-acciones">
-            {chips.length > 0 && (
-              <button className="fp-limpiar" onClick={limpiarFiltros}>
-                Limpiar filtros
-              </button>
-            )}
-            <button className="fp-listo" onClick={() => setPanelAbierto(false)}>
-              Ver resultados
-            </button>
-          </div>
+          {/* Sin "Limpiar" acá: la barra de arriba queda visible con el panel abierto
+              y ya tiene el suyo. */}
+          <button className="fp-listo" onClick={() => setPanelAbierto(false)}>
+            Ver resultados
+          </button>
         </div>
       ) : enMapa ? (
         <div className="mapwrap">
