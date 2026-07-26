@@ -181,6 +181,9 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
       if (texto && !coincideBusqueda(r, texto)) return false
       return true
     })
+    // La fuente ya viene más nuevos primero; "antiguos" la da vuelta (los que más
+    // tiempo llevan buscando, arriba).
+    if (filtros.orden === 'antiguos') arr.sort((a, b) => (a.creadoEn > b.creadoEn ? 1 : -1))
     return arr
   }, [reportes, finales, verFinales, filtros])
 
@@ -209,6 +212,7 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
       label: filtros.tiempo === 'hoy' ? 'Hoy' : filtros.tiempo === 'semana' ? 'Esta semana' : 'Este mes',
       clear: () => setFiltro('tiempo', 'todos'),
     })
+  if (filtros.orden === 'antiguos') chips.push({ key: 'orden', label: 'Más antiguos', clear: () => setFiltro('orden', 'recientes') })
 
   return (
     <div className={'view home-' + filtros.estado}>
@@ -365,6 +369,17 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
             {TIEMPOS.map((t) => (
               <button key={t.k} className={'chip' + (filtros.tiempo === t.k ? ' on' : '')} onClick={() => setFiltro('tiempo', t.k)}>
                 {t.t}
+              </button>
+            ))}
+          </div>
+          <div className="fp-label">Orden</div>
+          <div className="chipsel-wrap">
+            {[
+              { k: 'recientes', t: 'Más recientes' },
+              { k: 'antiguos', t: 'Más antiguos' },
+            ].map((o) => (
+              <button key={o.k} className={'chip' + (filtros.orden === o.k ? ' on' : '')} onClick={() => setFiltro('orden', o.k)}>
+                {o.t}
               </button>
             ))}
           </div>
