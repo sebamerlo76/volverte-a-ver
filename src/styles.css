@@ -122,6 +122,37 @@ select {
 .body::-webkit-scrollbar {
   display: none;
 }
+/* Lista del feed: al cambiar de pestaña (el .body se re-monta por key) el contenido
+   entra desde el lado hacia el que deslizaste; con tap, un fundido corto. */
+.body-feed {
+  animation: fade 0.18s ease;
+}
+.body-feed[data-slide='der'] {
+  animation: slide-der 0.22s ease;
+}
+.body-feed[data-slide='izq'] {
+  animation: slide-izq 0.22s ease;
+}
+@keyframes slide-der {
+  from {
+    opacity: 0.4;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes slide-izq {
+  from {
+    opacity: 0.4;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 .view {
   display: flex;
   flex-direction: column;

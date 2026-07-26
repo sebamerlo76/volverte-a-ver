@@ -39,11 +39,74 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
   const [irPunto, setIrPunto] = useState(null) // punto para "cómo llegar"
   const [qBarrio, setQBarrio] = useState('') // búsqueda de barrio en el filtro (ciudades grandes)
   const bodyRef = useRef(null) // contenedor scrolleable de la lista, para recordar la posición
+  const [dirSlide, setDirSlide] = useState(0) // de dónde entra el contenido al cambiar de pestaña: 1 = swipe a la izq, -1 = a la der, 0 = tap
 
   // Al volver de un aviso (el Feed se re-monta), restaurar dónde estaba el scroll.
   useEffect(() => {
     if (bodyRef.current && scrollRef) bodyRef.current.scrollTop = scrollRef.current || 0
   }, [])
+
+  // Cambio de pestaña de estado (tap o swipe): mismo camino para los dos. Resetea el
+  // scroll guardado — heredar la posición de otra pestaña era un bug de UX.
+  function irAPestana(k, dir = 0) {
+    if (k === filtros.estado) return
+    setDirSlide(dir)
+    setFiltro('estado', k)
+    if (scrollRef) scrollRef.current = 0
+  }
+
+  // La pestaña activa siempre visible en la fila (en pantallas angostas .tabs scrollea).
+  useEffect(() => {
+    document.querySelector('.tabs .tab.on')?.scrollIntoView({ inline: 'nearest', block: 'nearest' })
+  }, [filtros.estado])
+
+  // --- Swipe horizontal sobre la lista = cambiar de pestaña (estilo Instagram) ---
+  // Detector puro (no bloquea el scroll nativo: los onTouch* de React son pasivos).
+  // Vive en el .body, así el mapa (Leaflet arrastra) y el panel de filtros quedan
+  // afuera solos: cuando están montados, el .body no existe.
+  const sw = useRef({ activo: false, x0: 0, y0: 0, t0: 0, modo: null }) // modo: null | 'h' | 'v'
+  const SW_BORDE = 28 // px: arranques pegados al borde son del sistema (atrás de Android / iOS)
+  const SW_DECIDIR = 12 // px: a esta distancia se fija horizontal o vertical, sin vuelta atrás
+  const SW_UMBRAL = 60 // px: desplazamiento mínimo para cambiar de pestaña
+  const SW_RATIO = 1.5 // lo horizontal tiene que dominar por este factor (evita diagonales)
+  const SW_MAX_MS = 600 // más lento que esto es un arrastre, no un swipe
+
+  function swStart(e) {
+    const t = e.touches[0]
+    if (e.touches.length !== 1 || t.clientX < SW_BORDE || t.clientX > window.innerWidth - SW_BORDE) {
+      sw.current.activo = false
+      return
+    }
+    sw.current = { activo: true, x0: t.clientX, y0: t.clientY, t0: Date.now(), modo: null }
+  }
+  function swMove(e) {
+    const s = sw.current
+    if (!s.activo || s.modo) return // ya decidido: no se reconsidera en todo el gesto
+    const t = e.touches[0]
+    const dx = t.clientX - s.x0
+    const dy = t.clientY - s.y0
+    if (Math.abs(dy) > SW_DECIDIR && Math.abs(dy) >= Math.abs(dx)) s.modo = 'v' // scroll: swipe muerto
+    else if (Math.abs(dx) > SW_DECIDIR && Math.abs(dx) > Math.abs(dy) * SW_RATIO) s.modo = 'h'
+  }
+  function swEnd(e) {
+    // Copiar ANTES de apagar: sw.current es el mismo objeto, si apagáramos primero
+    // el chequeo de abajo se leería a sí mismo y saldría siempre temprano.
+    const { activo, modo, x0, y0, t0 } = sw.current
+    sw.current.activo = false
+    if (!activo || modo !== 'h' || Date.now() - t0 > SW_MAX_MS) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - x0
+    const dy = t.clientY - y0
+    // Re-chequeo con los totales: un arranque horizontal que degeneró en diagonal no pasa.
+    if (Math.abs(dx) < SW_UMBRAL || Math.abs(dx) < Math.abs(dy) * SW_RATIO) return
+    const i = TABS.findIndex((tab) => tab.k === filtros.estado)
+    const j = dx < 0 ? i + 1 : i - 1 // a la izquierda = pestaña siguiente (como IG)
+    if (j < 0 || j >= TABS.length) return // sin dar la vuelta en los extremos
+    irAPestana(TABS[j].k, dx < 0 ? 1 : -1)
+  }
+  function swCancel() {
+    sw.current.activo = false
+  }
 
   const loc = filtros.localidad // null = todas las localidades
   const prov = filtros.provincia // toda una provincia (localidad === null)
@@ -200,7 +263,7 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
         {/* Pestañas de estado (con acento de color) */}
         <div className="tabs">
           {TABS.map((tab) => (
-            <button key={tab.k} className={'tab' + (filtros.estado === tab.k ? ' on' : '')} onClick={() => setFiltro('estado', tab.k)}>
+            <button key={tab.k} className={'tab' + (filtros.estado === tab.k ? ' on' : '')} onClick={() => irAPestana(tab.k)}>
               {tab.icono ? (
                 <span className={'mi' + (filtros.estado === tab.k ? ' fill' : '')} style={{ fontSize: 16, marginRight: 3, verticalAlign: '-3px' }}>
                   {tab.icono}
@@ -378,7 +441,17 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
           )}
         </div>
       ) : (
-        <div className="body" ref={bodyRef} onScroll={(e) => { if (scrollRef) scrollRef.current = e.currentTarget.scrollTop }}>
+        <div
+          className="body body-feed"
+          key={filtros.estado} /* re-monta al cambiar de pestaña: re-dispara la animación y el scroll nace en 0 */
+          data-slide={dirSlide === 0 ? undefined : dirSlide === 1 ? 'der' : 'izq'}
+          ref={bodyRef}
+          onScroll={(e) => { if (scrollRef) scrollRef.current = e.currentTarget.scrollTop }}
+          onTouchStart={swStart}
+          onTouchMove={swMove}
+          onTouchEnd={swEnd}
+          onTouchCancel={swCancel}
+        >
           {!verFinales && <BannerInstalar />}
           {cargando && !verFinales ? (
             <div className="empty">Cargando avisos… 🐾</div>
