@@ -23,6 +23,11 @@ function ultimoWhatsapp() {
 }
 
 const TOTAL = 5
+// Piso de parecido visual (coseno CLIP, huellas de recortes): la lista es un "top 4
+// de lo que haya", y con pocos perdidos en la zona los últimos puestos se llenaban
+// con cualquiera (un negro contra uno marrón). Por debajo del piso no entra aunque
+// sobre lugar. Ajustar con los valores que loguea [parecidos] en la consola.
+const SIM_PISO = 0.65
 // La foto va ANTES que "cómo es": con la foto el buscador visual ya ordena por
 // parecido, y los datos del paso siguiente afinan. Al revés obligaba a cargar todo
 // a mano antes de que la foto hiciera su magia.
@@ -199,9 +204,11 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
     if (paso === 2) {
       if (!huella) return []
       const conH = arr.filter((r) => Array.isArray(embeddings[r.id]) && embeddings[r.id].length === huella.length)
-      return conH
-        .map((r) => ({ r, s: similitud(huella, embeddings[r.id]) }))
-        .sort((a, b) => b.s - a.s)
+      const puntuados = conH.map((r) => ({ r, s: similitud(huella, embeddings[r.id]) })).sort((a, b) => b.s - a.s)
+      // Rastro para calibrar el piso con casos reales (visible en la consola del navegador).
+      if (puntuados.length) console.debug('[parecidos]', puntuados.map((o) => `${nombreMostrado(o.r)}: ${o.s.toFixed(3)}`).join(' · '))
+      return puntuados
+        .filter((o) => o.s >= SIM_PISO)
         .slice(0, 4)
         .map((o) => o.r)
     }
