@@ -85,7 +85,23 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
   avisos ya publicados tienen la huella de la foto completa. Mientras conviven, el matching
   anda igual (un lado ya viene limpio). Cuando moleste: una acción de admin que recorra los
   activos con foto y regenere `embedding` desde `foto` (el recorte) con `guardarEmbedding`.
-- [ ] **Varias huellas por aviso** (hasta 3 fotos → 3 huellas, comparar contra la mejor):
+- [ ] **Mejorar el matching por foto (DINOv2)** — decisión del 28-jul-2026: el buscador
+  queda como está (CLIP + huellas de recortes + piso 0.65) hasta juntar evidencia real.
+  - **Cuándo retomarlo**: cuando el log `[parecidos]` de la consola (paso de la foto en
+    Encontré) muestre casos reales donde el correcto no queda primero, o cuelen
+    no-parecidos por encima del piso.
+  - **El camino**: probar DINOv2 (`Xenova/dinov2-*` en transformers.js) primero A/B con
+    fotos reales contra CLIP; si gana, swap de `MODELO` en src/lib/similar.js + correr
+    el botón "Recalcular huellas visuales" del Admin (la migración ya está pavimentada).
+  - **El costo a pesar**: ~25-40MB más de descarga en el celu de quien usa Encontré
+    (el modelo baja al dispositivo; hoy CLIP ya pesa lo suyo).
+  - **Descartado a esta escala** (análisis de un PDF externo, 28-jul-2026): FAISS (índice
+    para millones de vectores con servidor; acá los candidatos post-filtro son 5-15 y la
+    fuerza bruta tarda microsegundos — si algún día explota, el paso es pgvector en
+    Supabase), inferencia en servidor (Chicho corre el modelo en el celu a propósito:
+    gratis y privado), y entrenar un modelo propio de re-identificación (necesita un
+    dataset de pares del mismo animal que hoy no existe). El porcentaje visible ya se
+    probó y se sacó. Los filtros por atributos y el "quitar fondo" (recorte) ya están.
   matchea desde cualquier ángulo. Necesita columna nueva (SQL) y más cómputo al publicar.
   Para cuando haya más volumen.
 - [ ] **Auto-detectar color/tamaño desde la foto** (idea de Sebastián, 26-jul-2026): que al
