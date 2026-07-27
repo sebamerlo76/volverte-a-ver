@@ -114,12 +114,14 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
       }
       const guardado = editando ? await actualizarReporte(inicial.id, datos) : await addReporte(datos)
 
-      // Huella visual EN SEGUNDO PLANO (no bloquea el guardado). Usa la 1ª foto ya subida
-      // (URL remota, sobrevive al cierre del formulario). Si falla, no pasa nada.
-      const primeraUrl = fotosUrls[0]
-      if (guardado?.id && primeraUrl && (fotos[0]?.file || !base?.embedding)) {
+      // Huella visual EN SEGUNDO PLANO (no bloquea el guardado). Sobre el RECORTE
+      // del feed (fotoUrl, encuadrado en el animal), no la foto entera: CLIP mete
+      // el fondo en la huella y ensuciaba los parecidos. URL remota, así sobrevive
+      // al cierre del formulario. Si falla, no pasa nada.
+      const srcHuella = fotoUrl || fotosUrls[0]
+      if (guardado?.id && srcHuella && (fotos[0]?.file || !base?.embedding)) {
         import('../lib/similar.js')
-          .then((m) => m.huellaDeImagen(primeraUrl))
+          .then((m) => m.huellaDeImagen(srcHuella))
           .then((emb) => emb && guardarEmbedding(guardado.id, emb))
           .catch(() => {})
       }

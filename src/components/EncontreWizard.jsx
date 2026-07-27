@@ -23,6 +23,14 @@ function ultimoWhatsapp() {
 }
 
 const TOTAL = 5
+// Calibración del parecido visual. El coseno de CLIP entre dos animales
+// cualesquiera ya arranca alto (~0.5-0.6): mostrado crudo, "nada que ver" daba
+// 62%. Reescalamos para que el número se lea como intuición humana, y por debajo
+// del piso ni lo ofrecemos como candidato. Ajustables si en la calle no cierran.
+const SIM_PISO = 0.6 // menos parecido que esto, no es candidato
+const SIM_CERO = 0.45 // acá abajo el porcentaje mostrado es ~0
+const SIM_TOPE = 0.95 // de acá arriba es "prácticamente el mismo" (~99%)
+const simAPorcentaje = (s) => Math.max(1, Math.min(99, Math.round(((s - SIM_CERO) / (SIM_TOPE - SIM_CERO)) * 100)))
 // La foto va ANTES que "cómo es": con la foto el buscador visual ya ordena por
 // parecido, y los datos del paso siguiente afinan. Al revés obligaba a cargar todo
 // a mano antes de que la foto hiciera su magia.
@@ -92,6 +100,9 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
   }, [])
 
   // Al cambiar la primera foto, calculamos su huella (para sugerir parecidos).
+  // Sobre el RECORTE del feed (thumb, encuadrado en el animal por el usuario), no
+  // la foto entera: CLIP mete el fondo en la huella, y dos fotos con fondos
+  // parecidos daban % altos aunque los animales no tuvieran nada que ver.
   useEffect(() => {
     const primera = fotos[0]
     if (!primera) {
@@ -101,10 +112,14 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
     let vivo = true
     setHuella(null)
     setAnalizando(true)
+    const urlThumb = primera.thumb ? URL.createObjectURL(primera.thumb) : null
     import('../lib/similar.js')
-      .then((m) => m.huellaDeImagen(primera.url))
+      .then((m) => m.huellaDeImagen(urlThumb || primera.url))
       .then((h) => vivo && setHuella(h))
-      .finally(() => vivo && setAnalizando(false))
+      .finally(() => {
+        if (urlThumb) URL.revokeObjectURL(urlThumb)
+        if (vivo) setAnalizando(false)
+      })
     return () => {
       vivo = false
     }
@@ -194,9 +209,10 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
       const conH = arr.filter((r) => Array.isArray(embeddings[r.id]) && embeddings[r.id].length === huella.length)
       return conH
         .map((r) => ({ r, s: similitud(huella, embeddings[r.id]) }))
+        .filter((o) => o.s >= SIM_PISO) // por debajo del piso no es candidato
         .sort((a, b) => b.s - a.s)
         .slice(0, 4)
-        .map((o) => ({ ...o.r, simPct: Math.max(0, Math.min(99, Math.round(o.s * 100))) }))
+        .map((o) => ({ ...o.r, simPct: simAPorcentaje(o.s) }))
     }
     if (paso >= 3) {
       arr = arr.filter((r) => compat(r, 'color', color) && compat(r, 'tamano', tamano) && compat(r, 'sexo', sexo, true))
