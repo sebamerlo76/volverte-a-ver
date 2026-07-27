@@ -85,7 +85,7 @@ export default function App() {
   // --- Botón "atrás" del celu: cerrar la capa abierta en vez de cerrar la PWA ---
   // ¿Hay algo "abierto" sobre el feed? (una vista distinta, o un modal)
   const hayCapa =
-    vista !== 'feed' || !!fotosVer || menuAbierto || buscadorAbierto || filtrosAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo || !!compartiNuevo
+    vista !== 'feed' || homeModo === 'mapa' || !!fotosVer || menuAbierto || buscadorAbierto || filtrosAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo || !!compartiNuevo
   // Cuántos "atrás" hacen falta para llegar al feed desde la vista actual.
   const nivelVista = (v) => {
     switch (v) {
@@ -105,7 +105,8 @@ export default function App() {
   // en vez de cerrarlo. Antes salía sólo desde el aviso; ahora también en Mi cuenta.
   const modalAbierto = menuAbierto || buscadorAbierto || filtrosAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo || !!compartiNuevo
   // Profundidad = capas apiladas = cantidad de "atrás" hasta el feed.
-  const profundidad = nivelVista(vista) + (fotosVer ? 1 : 0) + (modalAbierto ? 1 : 0)
+  // El mapa cuenta como capa: el atrás vuelve a la lista, no saca de la app.
+  const profundidad = nivelVista(vista) + (vista === 'feed' && homeModo === 'mapa' ? 1 : 0) + (fotosVer ? 1 : 0) + (modalAbierto ? 1 : 0)
   const backRef = useRef({ hayCapa: false })
   backRef.current.hayCapa = hayCapa
   const pushedRef = useRef(0) // cuántas entradas centinela metimos en el historial
@@ -113,7 +114,7 @@ export default function App() {
   const removiendo = useRef(false) // estamos sacando centinelas nosotros (ignorar esos popstate)
   // Snapshot del estado para que el listener (registrado una vez) lea lo actual.
   const estadoRef = useRef({})
-  estadoRef.current = { vista, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, filtrosAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte, festejo, compartiNuevo }
+  estadoRef.current = { vista, homeModo, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, filtrosAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte, festejo, compartiNuevo }
 
   // Cierra la capa de más arriba (foto y modales primero, después vistas).
   function retroceder() {
@@ -128,6 +129,7 @@ export default function App() {
     if (s.guiaAbierta) return cerrarGuia()
     if (s.soporteAbierto) return setSoporteAbierto(false)
     if (s.cartelReporte) return setCartelReporte(null)
+    if (s.vista === 'feed' && s.homeModo === 'mapa') return setHomeModo('lista') // del mapa, atrás = lista
     switch (s.vista) {
       case 'detalle':
         return setVista(s.detalleOrigen)
