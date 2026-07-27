@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getAdminStats, getAdminStatsRango, getActividadReciente, getPerdidosParaEmpujar, getActivosPorProvincia, getReencuentros } from '../data/store.js'
+import { getAdminStats, getAdminStatsRango, getActividadReciente, getPerdidosParaEmpujar, getActivosPorProvincia, getReencuentros, getReportes, guardarEmbeddingAdmin } from '../data/store.js'
 import { tiempoRelativo, nombreMostrado, fechaLegible, linkWhatsAppReencuentro, linkTel } from '../lib/formato.js'
 import { badgeEstado } from '../lib/estados.js'
 import { ubicacionTexto } from '../lib/localidades.js'
@@ -57,6 +57,42 @@ export default function Admin({ onVolver, onOpen, stats }) {
     getActivosPorProvincia().then(setPorProv).catch(() => setPorProv([]))
     getReencuentros().then(setReencuentros).catch(() => setReencuentros([]))
   }, [])
+
+  // Recalcula la huella visual de todos los activos con foto, desde el RECORTE del
+  // feed (r.foto). Las huellas viejas eran de la foto entera (el fondo ensuciaba los
+  // parecidos). Corre acá, en el navegador del admin: baja el modelo una vez y va
+  // aviso por aviso. Si el SQL de huellas no está corrido, el primer guardado grita.
+  const [huellasBusy, setHuellasBusy] = useState(false)
+  const [huellasProg, setHuellasProg] = useState('')
+  async function recalcularHuellas() {
+    if (huellasBusy) return
+    setHuellasBusy(true)
+    setHuellasProg('Preparando el modelo…')
+    try {
+      const m = await import('../lib/similar.js')
+      const todos = (await getReportes()).filter((r) => r.foto)
+      let ok = 0
+      let fallo = 0
+      for (let i = 0; i < todos.length; i++) {
+        setHuellasProg(`Procesando ${i + 1} de ${todos.length}…`)
+        try {
+          const emb = await m.huellaDeImagen(todos[i].foto)
+          if (!emb) throw new Error('la imagen no dio huella')
+          await guardarEmbeddingAdmin(todos[i].id, emb)
+          ok++
+        } catch (e) {
+          console.error('huella', todos[i].id, e)
+          fallo++
+        }
+      }
+      setHuellasProg(`Listo: ${ok} recalculadas${fallo ? ` · ${fallo} fallaron (detalle en la consola)` : ''} ✅`)
+    } catch (e) {
+      console.error(e)
+      setHuellasProg(`No se pudo: ${e?.message || 'error'} — ¿está corrido schema-huellas-admin.sql?`)
+    } finally {
+      setHuellasBusy(false)
+    }
+  }
 
   async function verRango() {
     if (!desde || !hasta) return
@@ -177,6 +213,20 @@ export default function Admin({ onVolver, onOpen, stats }) {
                 ))
               )}
             </div>
+
+            <div className="adm-sub">Herramientas</div>
+            <div className="adm-nota" style={{ marginTop: 0, marginBottom: 8 }}>
+              Regenera la huella visual de los avisos activos desde el recorte del feed — mejora los "parecidos por
+              foto" (las huellas viejas incluían el fondo). Correrlo una vez; tarda un ratito.
+            </div>
+            <button className="adm-btn" onClick={recalcularHuellas} disabled={huellasBusy}>
+              {huellasBusy ? 'Recalculando…' : '🔍 Recalcular huellas visuales'}
+            </button>
+            {huellasProg && (
+              <div className="adm-nota" style={{ marginTop: 6 }}>
+                {huellasProg}
+              </div>
+            )}
 
             <div className="adm-sub">Actividad reciente</div>
             <div className="adm-lista">

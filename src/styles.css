@@ -1262,16 +1262,6 @@ select {
   margin-top: 8px;
   line-height: 1.45;
 }
-/* Porcentaje de parecido a la foto (paso de la foto en "Encontré") */
-.bres-sim {
-  flex: none;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: #e7f2ef;
-  color: #1f9d8f;
-  font-size: 12px;
-  font-weight: 800;
-}
 
 /* "Tu dirección no se guarda". Va abajo del mapa de Mis ubicaciones, donde recién
    escribiste tu calle: es justo donde surge la duda. */
@@ -2882,6 +2872,9 @@ select {
 .adm-rango span { color: var(--muted); font-weight: 800; }
 .adm-rango button { padding: 9px 18px; border-radius: 12px; background: var(--navy); color: #fff; font-family: Nunito, sans-serif; font-weight: 800; font-size: 13.5px; }
 .adm-rango button:disabled { opacity: 0.5; }
+/* Botón de herramienta del panel admin (ej: recalcular huellas) */
+.adm-btn { width: 100%; height: 42px; border-radius: 12px; background: var(--navy); color: #fff; font-family: Nunito, sans-serif; font-weight: 800; font-size: 13.5px; }
+.adm-btn:disabled { opacity: 0.5; }
 
 /* Panel de moderación */
 .mod-card { background: #fff; border: 1px solid #f0e7dc; border-radius: 16px; padding: 14px; margin-top: 10px; }

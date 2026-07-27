@@ -23,14 +23,6 @@ function ultimoWhatsapp() {
 }
 
 const TOTAL = 5
-// Calibración del parecido visual. El coseno de CLIP entre dos animales
-// cualesquiera ya arranca alto (~0.5-0.6): mostrado crudo, "nada que ver" daba
-// 62%. Reescalamos para que el número se lea como intuición humana, y por debajo
-// del piso ni lo ofrecemos como candidato. Ajustables si en la calle no cierran.
-const SIM_PISO = 0.6 // menos parecido que esto, no es candidato
-const SIM_CERO = 0.45 // acá abajo el porcentaje mostrado es ~0
-const SIM_TOPE = 0.95 // de acá arriba es "prácticamente el mismo" (~99%)
-const simAPorcentaje = (s) => Math.max(1, Math.min(99, Math.round(((s - SIM_CERO) / (SIM_TOPE - SIM_CERO)) * 100)))
 // La foto va ANTES que "cómo es": con la foto el buscador visual ya ordena por
 // parecido, y los datos del paso siguiente afinan. Al revés obligaba a cargar todo
 // a mano antes de que la foto hiciera su magia.
@@ -202,17 +194,16 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
     // puro ruido: un perdido en Neuquén no es coincidencia de uno de Paraná.
     const enAmbito = (r) => provinciaDe(r.localidad || 'Paraná') === provinciaDe(localidad)
     let arr = reportes.filter((r) => r.tipo === 'perdido' && r.estado === 'activo' && r.especie === especie && enAmbito(r))
-    // Paso 2 (foto): ordenamos por parecido visual a la foto cargada, con el
-    // porcentaje a la vista (simPct) para que se entienda por qué salen esos.
+    // Paso 2 (foto): ordenamos por parecido visual a la foto cargada. Sin
+    // porcentaje a la vista (se probó y no quedaba bien): el orden ya lo dice.
     if (paso === 2) {
       if (!huella) return []
       const conH = arr.filter((r) => Array.isArray(embeddings[r.id]) && embeddings[r.id].length === huella.length)
       return conH
         .map((r) => ({ r, s: similitud(huella, embeddings[r.id]) }))
-        .filter((o) => o.s >= SIM_PISO) // por debajo del piso no es candidato
         .sort((a, b) => b.s - a.s)
         .slice(0, 4)
-        .map((o) => ({ ...o.r, simPct: simAPorcentaje(o.s) }))
+        .map((o) => o.r)
     }
     if (paso >= 3) {
       arr = arr.filter((r) => compat(r, 'color', color) && compat(r, 'tamano', tamano) && compat(r, 'sexo', sexo, true))
@@ -646,7 +637,6 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
                     {ubicacionTexto(r.localidad, r.zona)} · Perdido · {tiempoRelativo(r.creadoEn)}
                   </div>
                 </div>
-                {r.simPct != null && <span className="bres-sim">{r.simPct}%</span>}
                 <span className="mi" style={{ fontSize: 22, color: '#c3b8b0' }}>
                   chevron_right
                 </span>
