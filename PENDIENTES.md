@@ -85,22 +85,20 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
   avisos ya publicados tienen la huella de la foto completa. Mientras conviven, el matching
   anda igual (un lado ya viene limpio). Cuando moleste: una acción de admin que recorra los
   activos con foto y regenere `embedding` desde `foto` (el recorte) con `guardarEmbedding`.
-- [ ] **Mejorar el matching por foto (DINOv2)** — decisión del 28-jul-2026: el buscador
-  queda como está (CLIP + huellas de recortes + piso 0.65) hasta juntar evidencia real.
-  - **Cuándo retomarlo**: cuando el log `[parecidos]` de la consola (paso de la foto en
-    Encontré) muestre casos reales donde el correcto no queda primero, o cuelen
-    no-parecidos por encima del piso.
-  - **El camino**: probar DINOv2 (`Xenova/dinov2-*` en transformers.js) primero A/B con
-    fotos reales contra CLIP; si gana, swap de `MODELO` en src/lib/similar.js + correr
-    el botón "Recalcular huellas visuales" del Admin (la migración ya está pavimentada).
-  - **El costo a pesar**: ~25-40MB más de descarga en el celu de quien usa Encontré
-    (el modelo baja al dispositivo; hoy CLIP ya pesa lo suyo).
-  - **Descartado a esta escala** (análisis de un PDF externo, 28-jul-2026): FAISS (índice
-    para millones de vectores con servidor; acá los candidatos post-filtro son 5-15 y la
+- [x] **Matching por foto: swap a DINOv2** ✅ (28-jul-2026). El criterio que habíamos
+  escrito se cumplió en la primera prueba real (banda apretada 0.72-0.76 entre un blanco,
+  un negro y un tricolor contra una consulta canela), y el A/B con los avisos reales
+  (`node scripts/ab-similitud.mjs`, usa la 2ª foto de cada aviso como consulta) fue
+  categórico: DINOv2 11/13 top-1 con margen +0.155 vs CLIP 8/13 con margen −0.005 —
+  y encima pesa 24MB contra 85MB (el usuario baja MENOS). Piso recalibrado a 0.4.
+  Migración: deploy + "Recalcular huellas visuales" en Admin (las huellas de distinto
+  largo dan similitud 0: transición sin fallas mudas, verificado en las dos `similitud`).
+  - **Descartado a esta escala** (análisis de un PDF externo): FAISS (índice para
+    millones de vectores con servidor; acá los candidatos post-filtro son 5-15 y la
     fuerza bruta tarda microsegundos — si algún día explota, el paso es pgvector en
     Supabase), inferencia en servidor (Chicho corre el modelo en el celu a propósito:
     gratis y privado), y entrenar un modelo propio de re-identificación (necesita un
-    dataset de pares del mismo animal que hoy no existe). El porcentaje visible ya se
+    dataset de pares del mismo animal que hoy no existe). El porcentaje visible se
     probó y se sacó. Los filtros por atributos y el "quitar fondo" (recorte) ya están.
   matchea desde cualquier ángulo. Necesita columna nueva (SQL) y más cómputo al publicar.
   Para cuando haya más volumen.

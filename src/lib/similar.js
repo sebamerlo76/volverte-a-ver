@@ -7,8 +7,13 @@ import { pipeline, env } from '@xenova/transformers'
 // No buscamos modelos locales: se bajan del CDN de Hugging Face y quedan cacheados.
 env.allowLocalModels = false
 
-// Modelo de embeddings de imágenes. Swappable por uno más liviano si hace falta.
-const MODELO = 'Xenova/clip-vit-base-patch32'
+// Modelo de embeddings de imágenes. DINOv2 desde el 28-jul-2026: en el A/B con los
+// avisos reales (scripts/ab-similitud.mjs) le ganó a CLIP 11/13 vs 8/13 en encontrar
+// al mismo animal, con MUCHA más separación del resto (margen +0.155 vs -0.005), y
+// encima pesa 24MB contra 85MB. Ojo: cambiar de modelo cambia el largo de la huella
+// → hay que correr "Recalcular huellas visuales" (Admin) después de deployar (las
+// huellas de distinto largo dan similitud 0, no rompen ni mienten).
+const MODELO = 'Xenova/dinov2-small'
 
 let _extractor = null
 let _cargando = null
@@ -47,7 +52,10 @@ export async function huellaDeImagen(src) {
   try {
     const ext = await extractor()
     const out = await ext(src)
-    const v = Array.from(out.data)
+    // CLIP devuelve el vector ya agrupado ([1, d]); DINOv2 devuelve un vector por
+    // token ([1, tokens, d]) → nos quedamos con el CLS (el primero), que es el
+    // resumen global de la imagen. Mismo criterio que scripts/ab-similitud.mjs.
+    const v = out.dims?.length === 3 ? Array.from(out.data.slice(0, out.dims[2])) : Array.from(out.data)
     // L2-normalizamos para que el coseno sea un simple producto punto.
     let norm = 0
     for (const x of v) norm += x * x
