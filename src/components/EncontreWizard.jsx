@@ -34,7 +34,7 @@ const TITULOS = [
   '¿Cómo te contactan?',
 ]
 
-export default function EncontreWizard({ reportes = [], telefonoGuardado = '', onVerAviso, onCerrar, onPublicado, onToast }) {
+export default function EncontreWizard({ reportes = [], telefonoGuardado = '', onVerAviso, onCerrar, onPublicado, onToast, onPasos, atrasRef }) {
   const [paso, setPaso] = useState(1)
   const [ciudadSheet, setCiudadSheet] = useState(false) // hoja para elegir ciudad (el "Cambiar" y el paso 4)
   const [especie, setEspecie] = useState('') // sin asumir: se elige en el paso 1
@@ -114,6 +114,20 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
     if (paso === 1) onCerrar()
     else setPaso(paso - 1)
   }
+
+  // El atrás del celu retrocede de a un paso: le contamos a App cuántos pasos
+  // apilamos (empuja un centinela de historial por cada uno) y le dejamos la
+  // función para volver uno. En la pantalla del link de gestión ya no hay pasos
+  // que deshacer (el aviso está publicado): ahí el atrás cierra directo.
+  useEffect(() => {
+    onPasos?.(gestionLink ? 0 : paso - 1)
+    if (atrasRef) atrasRef.current = () => setPaso((p) => Math.max(1, p - 1))
+    return () => {
+      onPasos?.(0)
+      if (atrasRef) atrasRef.current = null
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paso, gestionLink])
   function siguiente() {
     if (paso === 1 && !especie) {
       onToast?.('Elegí qué animal es 🐾')

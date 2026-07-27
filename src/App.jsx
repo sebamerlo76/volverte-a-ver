@@ -42,6 +42,10 @@ export default function App() {
   // El panel de filtros del feed vive acá (no en Feed) para que el botón atrás del
   // celu lo cierre en vez de sacarte de la app.
   const [filtrosAbierto, setFiltrosAbierto] = useState(false)
+  // Pasos apilados del wizard de Encontré (paso - 1): cada paso cuenta como capa,
+  // así el atrás del celu retrocede de a un paso en vez de volver al feed de una.
+  const [wizPasos, setWizPasos] = useState(0)
+  const wizAtrasRef = useRef(null) // función del wizard para retroceder un paso
   const [selReporte, setSelReporte] = useState(null) // aviso abierto en el detalle
   const [detalleOrigen, setDetalleOrigen] = useState('feed') // a dónde volver al cerrar el detalle
   const [reportes, setReportes] = useState([])
@@ -106,7 +110,12 @@ export default function App() {
   const modalAbierto = menuAbierto || buscadorAbierto || filtrosAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo || !!compartiNuevo
   // Profundidad = capas apiladas = cantidad de "atrás" hasta el feed.
   // El mapa cuenta como capa: el atrás vuelve a la lista, no saca de la app.
-  const profundidad = nivelVista(vista) + (vista === 'feed' && homeModo === 'mapa' ? 1 : 0) + (fotosVer ? 1 : 0) + (modalAbierto ? 1 : 0)
+  const profundidad =
+    nivelVista(vista) +
+    (vista === 'feed' && homeModo === 'mapa' ? 1 : 0) +
+    (vista === 'post-encontre' ? wizPasos : 0) +
+    (fotosVer ? 1 : 0) +
+    (modalAbierto ? 1 : 0)
   const backRef = useRef({ hayCapa: false })
   backRef.current.hayCapa = hayCapa
   const pushedRef = useRef(0) // cuántas entradas centinela metimos en el historial
@@ -114,7 +123,7 @@ export default function App() {
   const removiendo = useRef(false) // estamos sacando centinelas nosotros (ignorar esos popstate)
   // Snapshot del estado para que el listener (registrado una vez) lea lo actual.
   const estadoRef = useRef({})
-  estadoRef.current = { vista, homeModo, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, filtrosAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte, festejo, compartiNuevo }
+  estadoRef.current = { vista, homeModo, wizPasos, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, filtrosAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte, festejo, compartiNuevo }
 
   // Cierra la capa de más arriba (foto y modales primero, después vistas).
   function retroceder() {
@@ -136,8 +145,11 @@ export default function App() {
       case 'avistamiento':
       case 'recorrido':
         return setVista('detalle')
-      case 'perdido-pick':
       case 'post-encontre':
+        // Dentro del wizard, atrás retrocede de a un paso; recién desde el paso 1 sale.
+        if (s.wizPasos > 0 && wizAtrasRef.current) return wizAtrasRef.current()
+        return setVista('feed')
+      case 'perdido-pick':
         return setVista('feed')
       case 'post':
         return cerrarPublicar()
@@ -735,6 +747,8 @@ export default function App() {
             onVerAviso={abrirDetalle}
             onCerrar={() => setVista('feed')}
             onPublicado={alPublicar}
+            onPasos={setWizPasos}
+            atrasRef={wizAtrasRef}
             onToast={mostrarToast}
           />
         )}
