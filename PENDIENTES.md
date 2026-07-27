@@ -135,15 +135,20 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
 
 - [ ] **⚠️ Target API 36 (Android 16) — antes del 30-ago-2026.** Google exige que la
   TWA apunte a API 36 desde esa fecha (aviso recibido el 2026-07-19). **Estado
-  (25-jul-2026):** se regeneró el paquete en PWABuilder (versionCode **3**, carpeta
-  `Desktop\Chicho\...package v3`, misma firma verificada por hash) y se subió a la
-  prueba cerrada — **pero salió con SDK objetivo 35**: PWABuilder todavía no apunta
-  a 36. Ese rebuild arregló el splash y llevó el nombre nuevo; **falta OTRO rebuild
-  antes del 30-ago** cuando PWABuilder actualice su target:
-  - Mismo proceso: PWABuilder → `ar.chicho.app` → versionCode **4** → Signing
-    **"Use mine"** con `signing.keystore` (cualquier carpeta v2/v3, son la misma llave).
-  - **Verificar en Play al subir** que "SDK objetivo" diga **36** (en la tabla del
-    bundle) — no dar por hecho que PWABuilder ya lo subió.
+  (28-jul-2026):** se intentó DOS veces con PWABuilder (versionCode 3 el 25-jul y
+  versionCode 4 el 28-jul) y **ambas salieron con SDK objetivo 35** — PWABuilder aún
+  no actualizó su target. El borrador de la v4 se descartó sin publicar. **Plan A
+  elegido por Sebastián**: re-chequear PWABuilder una vez por semana (regenerar el
+  paquete tarda 5 min y el "SDK objetivo" se ve en la tabla del bundle al subirlo a
+  Play — verificar SIEMPRE ese número antes de publicar). Fechas: chequear ~4-ago y
+  ~11-ago (junto con la re-solicitud de producción); si al **~15-ago** sigue en 35,
+  pasar al **Plan B: Bubblewrap local** (la CLI de Google debajo de PWABuilder):
+  generar el proyecto, editar `targetSdkVersion`/`compileSdkVersion` a 36 en el
+  build.gradle generado, y compilar en la máquina de Sebastián (él tipea las
+  contraseñas del keystore en SU terminal, nunca por el chat). Requiere JDK + SDK
+  de Android (~2GB, Bubblewrap ofrece instalarlos).
+  - Mismo proceso PWABuilder: `ar.chicho.app` → versionCode **4** (o el que siga) →
+    Signing **"Use mine"** con `signing.keystore` (carpetas v2/v3/v4: misma llave).
   - La huella del assetlinks del sitio (`63:1D:D4:…`) es la de **Play App Signing**
     (Google re-firma); la del zip de PWABuilder (`6B:A9:…`) es la llave de subida.
     Son distintas a propósito: **no tocar el assetlinks de chicho.ar**.
