@@ -39,6 +39,9 @@ export default function App() {
   const FILTROS_INI = { q: '', estado: 'todos', especie: null, zona: null, tiempo: 'todos', orden: 'recientes', localidad: SCOPE_INI.localidad, provincia: SCOPE_INI.provincia, soloLocalidad: false }
   const [filtros, setFiltros] = useState(FILTROS_INI) // filtros del inicio (se conservan entre vistas)
   const [buscadorAbierto, setBuscadorAbierto] = useState(false)
+  // El panel de filtros del feed vive acá (no en Feed) para que el botón atrás del
+  // celu lo cierre en vez de sacarte de la app.
+  const [filtrosAbierto, setFiltrosAbierto] = useState(false)
   const [selReporte, setSelReporte] = useState(null) // aviso abierto en el detalle
   const [detalleOrigen, setDetalleOrigen] = useState('feed') // a dónde volver al cerrar el detalle
   const [reportes, setReportes] = useState([])
@@ -82,7 +85,7 @@ export default function App() {
   // --- Botón "atrás" del celu: cerrar la capa abierta en vez de cerrar la PWA ---
   // ¿Hay algo "abierto" sobre el feed? (una vista distinta, o un modal)
   const hayCapa =
-    vista !== 'feed' || !!fotosVer || menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo || !!compartiNuevo
+    vista !== 'feed' || !!fotosVer || menuAbierto || buscadorAbierto || filtrosAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo || !!compartiNuevo
   // Cuántos "atrás" hacen falta para llegar al feed desde la vista actual.
   const nivelVista = (v) => {
     switch (v) {
@@ -100,7 +103,7 @@ export default function App() {
   }
   // El festejo cuenta como capa: si no, el "atrás" del celu te saca de la pantalla
   // en vez de cerrarlo. Antes salía sólo desde el aviso; ahora también en Mi cuenta.
-  const modalAbierto = menuAbierto || buscadorAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo || !!compartiNuevo
+  const modalAbierto = menuAbierto || buscadorAbierto || filtrosAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo || !!compartiNuevo
   // Profundidad = capas apiladas = cantidad de "atrás" hasta el feed.
   const profundidad = nivelVista(vista) + (fotosVer ? 1 : 0) + (modalAbierto ? 1 : 0)
   const backRef = useRef({ hayCapa: false })
@@ -110,7 +113,7 @@ export default function App() {
   const removiendo = useRef(false) // estamos sacando centinelas nosotros (ignorar esos popstate)
   // Snapshot del estado para que el listener (registrado una vez) lea lo actual.
   const estadoRef = useRef({})
-  estadoRef.current = { vista, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte, festejo, compartiNuevo }
+  estadoRef.current = { vista, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, filtrosAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte, festejo, compartiNuevo }
 
   // Cierra la capa de más arriba (foto y modales primero, después vistas).
   function retroceder() {
@@ -120,6 +123,7 @@ export default function App() {
     if (s.compartiNuevo) return setCompartiNuevo(null)
     if (s.menuAbierto) return setMenuAbierto(false)
     if (s.buscadorAbierto) return setBuscadorAbierto(false)
+    if (s.filtrosAbierto) return setFiltrosAbierto(false)
     if (s.notifsAbierto) return setNotifsAbierto(false)
     if (s.guiaAbierta) return cerrarGuia()
     if (s.soporteAbierto) return setSoporteAbierto(false)
@@ -368,6 +372,7 @@ export default function App() {
   const pulseTimer = useRef(null)
   function resetInicio() {
     setFiltros(FILTROS_INI)
+    setFiltrosAbierto(false)
     setHomeModo('lista')
     setVista('feed')
     feedScrollRef.current = 0
@@ -384,7 +389,10 @@ export default function App() {
       pulseTimer.current = setTimeout(() => setInicioPulse(false), 600)
       return
     }
-    if (accion === 'mapa') return setHomeModo((m) => (m === 'mapa' ? 'lista' : 'mapa')) // alterna: vuelve a lista
+    if (accion === 'mapa') {
+      setFiltrosAbierto(false) // si el panel de filtros tapaba la lista, que el toque se vea
+      return setHomeModo((m) => (m === 'mapa' ? 'lista' : 'mapa')) // alterna: vuelve a lista
+    }
     if (accion === 'perdi') return navegar('perdi')
     if (accion === 'encontre') return navegar('encontre')
   }
@@ -664,6 +672,8 @@ export default function App() {
             setFiltro={setFiltro}
             resetInicio={resetInicio}
             scrollRef={feedScrollRef}
+            panelAbierto={filtrosAbierto}
+            setPanelAbierto={setFiltrosAbierto}
           />
         )}
         {vista === 'detalle' && (

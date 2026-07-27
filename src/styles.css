@@ -1254,6 +1254,24 @@ select {
   margin: 3px 0 8px;
   line-height: 1.45;
 }
+/* Pie de las coincidencias: qué hacer si ninguno es el que encontraste */
+.coinc-pie {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-top: 8px;
+  line-height: 1.45;
+}
+/* Porcentaje de parecido a la foto (paso de la foto en "Encontré") */
+.bres-sim {
+  flex: none;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #e7f2ef;
+  color: #1f9d8f;
+  font-size: 12px;
+  font-weight: 800;
+}
 
 /* "Tu dirección no se guarda". Va abajo del mapa de Mis ubicaciones, donde recién
    escribiste tu calle: es justo donde surge la duda. */
@@ -1465,6 +1483,21 @@ select {
 }
 .acc-b {
   padding: 0 0 14px;
+}
+/* Sección abierta del acordeón: recuadro blanco con borde navy, para que se note
+   QUÉ estás cargando (feedback de Sebastián: los toggles se confundían entre sí). */
+.acc.abierta {
+  background: #fff;
+  border: 1.5px solid var(--navy);
+  border-radius: 14px;
+  padding: 0 12px;
+  margin: 10px -2px;
+}
+.acc.abierta .acc-t {
+  color: var(--navy);
+}
+.acc.abierta .acc-ch {
+  color: var(--navy);
 }
 
 .bres-nombre {

@@ -235,7 +235,7 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
         <div className="flabel">Características</div>
         <div className="acc-lista">
           {SECS.map((s) => (
-            <div className="acc" key={s.k}>
+            <div className={'acc' + (accAbierta === s.k ? ' abierta' : '')} key={s.k}>
               <button
                 type="button"
                 className={'acc-h' + (accAbierta === s.k ? ' on' : '')}

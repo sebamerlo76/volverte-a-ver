@@ -23,10 +23,13 @@ function ultimoWhatsapp() {
 }
 
 const TOTAL = 5
+// La foto va ANTES que "cómo es": con la foto el buscador visual ya ordena por
+// parecido, y los datos del paso siguiente afinan. Al revés obligaba a cargar todo
+// a mano antes de que la foto hiciera su magia.
 const TITULOS = [
   '¿Qué animal es?',
-  '¿Cómo es?',
   'Una foto (si podés)',
+  '¿Cómo es?',
   '¿Dónde y cuándo?',
   '¿Cómo te contactan?',
 ]
@@ -54,7 +57,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
   const [enCustodia, setEnCustodia] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [gestionLink, setGestionLink] = useState('') // link para gestionar el aviso sin cuenta
-  const [accAbierta, setAccAbierta] = useState('color') // acordeón del paso 2
+  const [accAbierta, setAccAbierta] = useState('color') // acordeón del paso "¿Cómo es?"
 
   const cIni = coordsDeBarrioEn(localidad, 'Centro')
   const [punto, setPunto] = useState({ lat: cIni[0], lng: cIni[1] })
@@ -124,7 +127,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
   // (perdidos activos de la especie, en la provincia).
   const [embeddings, setEmbeddings] = useState({})
   const idsFoto = useMemo(() => {
-    if (paso !== 3 || !especie) return []
+    if (paso < 2 || !especie) return [] // desde el paso de la foto en adelante
     return reportes
       .filter(
         (r) =>
@@ -146,8 +149,8 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
     }
   }, [idsFoto])
 
-  // Posibles dueños: perdidos activos que coinciden. Refina según el paso.
-  // Solo en pasos 1 (especie), 2 (cómo es) y 4 (dónde). En foto/contacto no.
+  // Posibles dueños: perdidos activos que coinciden. Refina según el paso:
+  // 1 especie · 2 foto (parecido visual) · 3 cómo es · 4 dónde. En contacto no.
   const coincidencias = useMemo(() => {
     if (paso !== 1 && paso !== 2 && paso !== 3 && paso !== 4) return []
     const compat = (r, campo, valor, ignorarNoSe) => {
@@ -163,18 +166,19 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
     // puro ruido: un perdido en Neuquén no es coincidencia de uno de Paraná.
     const enAmbito = (r) => provinciaDe(r.localidad || 'Paraná') === provinciaDe(localidad)
     let arr = reportes.filter((r) => r.tipo === 'perdido' && r.estado === 'activo' && r.especie === especie && enAmbito(r))
-    if (paso >= 2) {
-      arr = arr.filter((r) => compat(r, 'color', color) && compat(r, 'tamano', tamano) && compat(r, 'sexo', sexo, true))
-    }
-    // Paso 3 (foto): ordenamos por parecido visual a la foto cargada.
-    if (paso === 3) {
+    // Paso 2 (foto): ordenamos por parecido visual a la foto cargada, con el
+    // porcentaje a la vista (simPct) para que se entienda por qué salen esos.
+    if (paso === 2) {
       if (!huella) return []
       const conH = arr.filter((r) => Array.isArray(embeddings[r.id]) && embeddings[r.id].length === huella.length)
       return conH
         .map((r) => ({ r, s: similitud(huella, embeddings[r.id]) }))
         .sort((a, b) => b.s - a.s)
         .slice(0, 4)
-        .map((o) => o.r)
+        .map((o) => ({ ...o.r, simPct: Math.max(0, Math.min(99, Math.round(o.s * 100))) }))
+    }
+    if (paso >= 3) {
+      arr = arr.filter((r) => compat(r, 'color', color) && compat(r, 'tamano', tamano) && compat(r, 'sexo', sexo, true))
     }
     if (paso >= 4) {
       // El barrio solo discrimina dentro de tu ciudad: los nombres se repiten
@@ -217,7 +221,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
     if (k === 'raza')
       return (
         <SelectChips
-          opciones={especie === 'gato' ? RAZAS_GATO : RAZAS_PERRO}
+          opciones={['No sé', ...(especie === 'gato' ? RAZAS_GATO : RAZAS_PERRO)]}
           valor={raza}
           onChange={setRaza}
           onElegir={() => saltarA('raza')}
@@ -252,6 +256,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
     setGuardando(true)
     try {
       const wa = soloAviso ? '' : whatsapp.trim()
+      const razaFinal = raza === 'No sé' ? '' : raza.trim() // "No sé" ayuda en el form, no en el aviso
       if (wa) {
         try {
           localStorage.setItem('vav_wa', wa)
@@ -270,7 +275,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
         referencia: zona,
         color: color.trim(),
         tamano,
-        raza: raza.trim(),
+        raza: razaFinal,
         sexo,
         edad: edad.trim(),
         collar: collar.trim(),
@@ -291,7 +296,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
             especie,
             color: color.trim(),
             tamano,
-            raza: raza.trim(),
+            raza: razaFinal,
             sexo,
             edad: edad.trim(),
             collar: collar.trim(),
@@ -417,29 +422,11 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
         )}
 
         {paso === 2 && (
-          <div className="acc-lista">
-            {SECS.map((s) => (
-              <div className="acc" key={s.k}>
-                <button
-                  type="button"
-                  className={'acc-h' + (accAbierta === s.k ? ' on' : '')}
-                  onClick={() => setAccAbierta(accAbierta === s.k ? null : s.k)}
-                >
-                  <span className="acc-t">{s.t}</span>
-                  <span className={'acc-v' + (s.v ? '' : ' vacio')}>{s.v || 'Elegir'}</span>
-                  <span className="mi acc-ch">{accAbierta === s.k ? 'expand_less' : 'expand_more'}</span>
-                </button>
-                {accAbierta === s.k && <div className="acc-b">{cuerpoSec(s.k)}</div>}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {paso === 3 && (
           <>
             <PhotoPicker value={fotos} onChange={setFotos} max={3} />
             <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700, marginTop: 12, lineHeight: 1.5 }}>
-              La foto ayuda muchísimo a que la familia la reconozca. Si no tenés, podés seguir igual.
+              📸 <b>Consejo:</b> sacala de día, de cerca y que se vea el cuerpo entero. Con una buena foto el buscador
+              encuentra mejor a los parecidos. Si no tenés, podés seguir igual.
             </div>
             {analizando && (
               <div className="analizando">
@@ -449,6 +436,30 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
                 Buscando parecidos por la foto…
               </div>
             )}
+          </>
+        )}
+
+        {paso === 3 && (
+          <>
+            <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700, marginBottom: 4, lineHeight: 1.5 }}>
+              Marcá <b>lo que sepas</b>: cuanto más completes, mejor funciona la búsqueda. Lo que no sabés, saltealo.
+            </div>
+            <div className="acc-lista">
+              {SECS.map((s) => (
+                <div className={'acc' + (accAbierta === s.k ? ' abierta' : '')} key={s.k}>
+                  <button
+                    type="button"
+                    className={'acc-h' + (accAbierta === s.k ? ' on' : '')}
+                    onClick={() => setAccAbierta(accAbierta === s.k ? null : s.k)}
+                  >
+                    <span className="acc-t">{s.t}</span>
+                    <span className={'acc-v' + (s.v ? '' : ' vacio')}>{s.v || 'Elegir'}</span>
+                    <span className="mi acc-ch">{accAbierta === s.k ? 'expand_less' : 'expand_more'}</span>
+                  </button>
+                  {accAbierta === s.k && <div className="acc-b">{cuerpoSec(s.k)}</div>}
+                </div>
+              ))}
+            </div>
           </>
         )}
 
@@ -577,7 +588,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
               ¿Alguno es este?
             </div>
             <div className="coinc-sub">
-              {paso === 3
+              {paso === 2
                 ? 'Ordenados por parecido a tu foto 🔍'
                 : 'Fijate si su familia ya lo está buscando — así lo devolvés al toque.'}
             </div>
@@ -598,25 +609,29 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
                     {ubicacionTexto(r.localidad, r.zona)} · Perdido · {tiempoRelativo(r.creadoEn)}
                   </div>
                 </div>
+                {r.simPct != null && <span className="bres-sim">{r.simPct}%</span>}
                 <span className="mi" style={{ fontSize: 22, color: '#c3b8b0' }}>
                   chevron_right
                 </span>
               </button>
             ))}
+            <div className="coinc-pie">
+              ¿No es ninguno? Tocá <b>Siguiente</b> abajo y terminá de cargar tu aviso 👇
+            </div>
           </div>
         )}
 
         {/* Sin coincidencias: avisamos igual, así no queda la duda de qué pasó. Desde
             el paso 1: apenas elegís la especie ya buscamos, y si no hay nada la
-            pantalla quedaba en blanco sin decir ni por qué. En el paso de la foto (3),
+            pantalla quedaba en blanco sin decir ni por qué. En el paso de la foto (2),
             recién cuando terminó de analizar y hay foto. */}
-        {especie && paso <= 4 && coincidencias.length === 0 && (paso !== 3 || (fotos.length > 0 && !analizando)) && (
+        {especie && paso <= 4 && coincidencias.length === 0 && (paso !== 2 || (fotos.length > 0 && !analizando)) && (
           <div className="coinc-vacio">
             <span className="mi" style={{ fontSize: 21, color: 'var(--muted)' }}>
               search_off
             </span>
             <div>
-              <b>{paso === 3 ? 'No encontramos ninguno parecido a tu foto.' : 'Todavía no hay perdidos que coincidan.'}</b>
+              <b>{paso === 2 ? 'No encontramos ninguno parecido a tu foto.' : 'Todavía no hay perdidos que coincidan.'}</b>
               <div style={{ marginTop: 2 }}>
                 Igual publicá tu hallazgo 👇 — su familia lo va a encontrar acá cuando lo busque.
               </div>

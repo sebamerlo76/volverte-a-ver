@@ -80,6 +80,11 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
 - [x] **Preview rico del link** (`/r/<id>`): serverless function `api/og.js` que inyecta los tags OG por aviso (foto + nombre + estado + zona), así al pegar el link en un grupo la tarjeta muestra la mascota y no el ícono genérico. ✅ Ojo: en Vercel `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` tienen que estar disponibles **en runtime** para las functions (si no, cae al genérico, no rompe). Test: `node test/og.test.mjs`.
   - [ ] **v2**: en vez de la foto cruda, generar una imagen 1200×630 (el flyer) como `og:image` — tarjeta más linda y sin recortes raros.
 - [ ] **Fotitos de raza** (grilla visual curada) — más adelante, con imágenes con licencia.
+- [ ] **Auto-detectar color/tamaño desde la foto** (idea de Sebastián, 26-jul-2026): que al
+  subir la foto en "Encontré" se precarguen color/tamaño del paso siguiente. Diferido: el
+  modelo actual (huella para parecidos) no clasifica atributos, y estimar color por píxeles
+  falla feo (fondo, luz, sombras) — precargar mal es peor que no precargar. Si algún día se
+  hace: modelo clasificador aparte (o API de visión), corriendo en el cliente como el actual.
 - [x] **Raza clickeable** — chips de razas comunes (perro/gato) o escribir otra, en Publicar y Encontré. ✅ (fotitos de raza quedan para más adelante)
 - [ ] **Acciones rápidas**: marcar reencontrado desde la lista sin abrir el aviso.
 - [ ] **Buscar dentro de "Mis avisos"** (si alguien tiene muchos).

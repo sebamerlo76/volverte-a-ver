@@ -29,11 +29,12 @@ function jitter(base, id = '') {
   return [base[0] + dy, base[1] + dx]
 }
 
-export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, logueado, user, onLogin, onMenu, onNotifs, onBuscar, notifsNoLeidas = 0, hayNudge, modo, filtros, setFiltro, resetInicio, scrollRef }) {
+export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, logueado, user, onLogin, onMenu, onNotifs, onBuscar, notifsNoLeidas = 0, hayNudge, modo, filtros, setFiltro, resetInicio, scrollRef, panelAbierto = false, setPanelAbierto = () => {} }) {
+  // panelAbierto (panel de filtros) vive en App: el botón atrás del celu tiene que
+  // cerrarlo (antes te sacaba de la app), y ese manejo del historial está allá.
   const avatar = avatarDe(user)
   const [finales, setFinales] = useState(null)
   const [sel, setSel] = useState(null)
-  const [panelAbierto, setPanelAbierto] = useState(false)
   const [miUbi, setMiUbi] = useState(null)
   const [ciudadSheet, setCiudadSheet] = useState(false)
   const [irPunto, setIrPunto] = useState(null) // punto para "cómo llegar"
@@ -411,6 +412,7 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
             ajustar
             miUbi={miUbi}
             onMarcadorClick={setSel}
+            onMapaClick={() => setSel(null)} /* tocar el mapa (no un pin) cierra la mini ficha */
             style={{ position: 'absolute', inset: 0 }}
           />
           <div className="mlegend">
