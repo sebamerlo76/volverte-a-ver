@@ -115,19 +115,26 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
     else setPaso(paso - 1)
   }
 
-  // El atrás del celu retrocede de a un paso: le contamos a App cuántos pasos
-  // apilamos (empuja un centinela de historial por cada uno) y le dejamos la
-  // función para volver uno. En la pantalla del link de gestión ya no hay pasos
-  // que deshacer (el aviso está publicado): ahí el atrás cierra directo.
+  // El atrás del celu deshace de a una capa dentro del wizard: primero la tarjeta
+  // de "¿es este?" (matchPreview), después la hoja de ciudad, después un paso.
+  // Le contamos a App cuántas capas apilamos (empuja un centinela de historial por
+  // cada una) y le dejamos la función para deshacer la de más arriba. En la
+  // pantalla del link de gestión ya no hay nada que deshacer (el aviso está
+  // publicado): ahí el atrás cierra directo.
   useEffect(() => {
-    onPasos?.(gestionLink ? 0 : paso - 1)
-    if (atrasRef) atrasRef.current = () => setPaso((p) => Math.max(1, p - 1))
+    onPasos?.(gestionLink ? 0 : paso - 1 + (matchPreview ? 1 : 0) + (ciudadSheet ? 1 : 0))
+    if (atrasRef)
+      atrasRef.current = () => {
+        if (matchPreview) return setMatchPreview(null)
+        if (ciudadSheet) return setCiudadSheet(false)
+        setPaso((p) => Math.max(1, p - 1))
+      }
     return () => {
       onPasos?.(0)
       if (atrasRef) atrasRef.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paso, gestionLink])
+  }, [paso, gestionLink, matchPreview, ciudadSheet])
   function siguiente() {
     if (paso === 1 && !especie) {
       onToast?.('Elegí qué animal es 🐾')
