@@ -513,7 +513,7 @@ export default function MiCuenta({
               const conNovedad = (notifs || []).some((n) => !n.leida && n.reporteId === r.id)
               return (
                 <div key={r.id} style={{ position: 'relative' }}>
-                  {r.estado === 'resuelto' && <div className="resuelto-chip">🏠 Ya en casa</div>}
+                  {/* Sin chip de estado acá: la tarjeta ya trae su badge (badgeEstado) y quedaban dos "Ya en casa" pisándose. */}
                   {conNovedad && (
                     <div className="novedad-chip">
                       <span className="mi fill" style={{ fontSize: 14 }}>
@@ -598,8 +598,7 @@ export default function MiCuenta({
             ) : (
               segReportes.map((r) => (
                 <div key={r.id} style={{ position: 'relative' }}>
-                  {r.estado === 'resuelto' && <div className="resuelto-chip">🏠 Ya en casa</div>}
-                  {r.estado === 'pausado' && <div className="resuelto-chip">⏸️ En pausa</div>}
+                  {/* La tarjeta ya trae su badge de estado (incluye "Ya en casa" y "En pausa"). */}
                   <div style={{ opacity: r.estado !== 'activo' ? 0.6 : 1 }}>
                     <PetCard r={r} onClick={() => onAbrir(r)} />
                   </div>
