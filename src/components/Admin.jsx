@@ -139,6 +139,11 @@ export default function Admin({ onVolver, onOpen, stats }) {
   const maxZona = s ? Math.max(1, ...s.topZonas.map((z) => z.total)) : 1
   const exito = s && s.avisos ? Math.round((s.enCasa / s.avisos) * 100) : 0
   const conFoto = reencuentros ? reencuentros.filter((r) => r.fotoReencuentro).length : 0
+  // Personas con push. Si el SQL nuevo (pushUsuarios) no está corrido todavía, caemos
+  // a los dispositivos: sobrestima un poco (celu + tablet = 2) pero no miente el orden
+  // de magnitud ni deja la tarjeta vacía.
+  const pushUsuarios = s ? (s.pushUsuarios ?? s.pushSubs) : null
+  const pushPct = s && s.usuarios ? Math.round((pushUsuarios / s.usuarios) * 100) : 0
 
   return (
     <div className="view">
@@ -370,16 +375,26 @@ export default function Admin({ onVolver, onOpen, stats }) {
             </Sec>
 
             <Sec id="comunidad" titulo="👥 Comunidad" abierta={!!abiertas.comunidad} onToggle={toggle}>
-              <div className="adm-grid">
+              {/* El push es el corazón de Chicho (avisar en la primera hora): lo que
+                  importa es qué TAJADA de los usuarios lo tiene, no el número suelto. */}
+              <div className="adm-exito" style={{ marginTop: 0 }}>
+                <div className="adm-exito-n">{pushPct}%</div>
+                <div>
+                  de los usuarios tiene los <b>avisos activados</b> 🔔
+                  <div style={{ fontSize: 12.5, fontWeight: 700, opacity: 0.8, marginTop: 2 }}>
+                    {pushUsuarios ?? '—'} de {s.usuarios ?? '—'} personas · {s.pushSubs ?? '—'} dispositivos
+                  </div>
+                </div>
+              </div>
+              <div className="adm-grid" style={{ marginTop: 10 }}>
                 <Card n={s.avistamientos} label="Avistamientos 👀" />
                 <Card n={s.seguidores} label="Siguiendo 🔔" />
                 <Card n={s.apoyos} label="Apoyos (difusión) 🙌" />
-                <Card n={s.pushSubs} label="Con notif. 📲" />
+                <Card n={s.notificaciones} label="Notif. enviadas" />
               </div>
-              <div className="adm-grid tres">
+              <div className="adm-grid">
                 <Card n={s.mascotas} label="Mascotas" />
                 <Card n={s.ubicaciones} label="Ubicaciones" />
-                <Card n={s.notificaciones} label="Notif. enviadas" />
               </div>
               <div className="adm-nota">
                 "Apoyos" = veces que tocaron "Me sumo a difundir". Los compartidos directos por WhatsApp no se registran.

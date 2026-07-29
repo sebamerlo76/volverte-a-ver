@@ -38,7 +38,11 @@ begin
     'seguidores',     (select count(*) from seguidores),
     'apoyos',         (select coalesce(sum(apoyos), 0) from reportes),
     'notificaciones', (select count(*) from notificaciones),
+    -- Push: dispositivos (una fila por navegador/celu) vs PERSONAS únicas. El panel
+    -- muestra el ratio de personas sobre usuarios: el número de dispositivos solo no
+    -- dice nada (8 de 10 es excelente, 8 de 200 es un problema).
     'pushSubs',       (select count(*) from push_subs),
+    'pushUsuarios',   (select count(distinct user_id) from push_subs),
     'avisosPorMes', (
       select coalesce(jsonb_agg(jsonb_build_object('mes', to_char(mes, 'YYYY-MM'), 'total', coalesce(c, 0)) order by mes), '[]'::jsonb)
       from generate_series(date_trunc('month', now()) - interval '11 months', date_trunc('month', now()), interval '1 month') mes
