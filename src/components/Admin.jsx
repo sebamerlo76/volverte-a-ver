@@ -13,6 +13,26 @@ function Card({ n, label, color }) {
   )
 }
 
+// Sección plegable del panel. Arriba lo que se ACCIONA (abierto), abajo los números
+// (cerrado): el panel se hizo largo y había que scrollear todo para llegar a lo útil.
+function Sec({ id, titulo, n, sub, abierta, onToggle, children }) {
+  return (
+    <div className={'adm-sec' + (abierta ? ' abierta' : '')}>
+      <button type="button" className="adm-sec-h" onClick={() => onToggle(id)}>
+        <span className="adm-sec-t">{titulo}</span>
+        {n != null && <span className="adm-sub-n">{n}</span>}
+        <span className="mi adm-sec-ch">{abierta ? 'expand_less' : 'expand_more'}</span>
+      </button>
+      {abierta && (
+        <div className="adm-sec-b">
+          {sub && <div className="adm-nota" style={{ marginTop: 0, marginBottom: 8 }}>{sub}</div>}
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // Fila de un aviso en las listas del panel (actividad / empujón).
 // pie (opcional): línea extra abajo — en el empujón dice si ya le avisamos al dueño.
 function AvisoRow({ r, onOpen, pie }) {
@@ -50,6 +70,9 @@ export default function Admin({ onVolver, onOpen, stats }) {
   const [empujar, setEmpujar] = useState(null)
   const [porProv, setPorProv] = useState(null)
   const [reencuentros, setReencuentros] = useState(null)
+  // Qué secciones arrancan abiertas: las accionables. Los números, cerrados.
+  const [abiertas, setAbiertas] = useState({ empujon: true, reencuentros: true })
+  const toggle = (id) => setAbiertas((a) => ({ ...a, [id]: !a[id] }))
 
   useEffect(() => {
     getActividadReciente(15).then(setRecientes).catch(() => setRecientes([]))
@@ -59,8 +82,7 @@ export default function Admin({ onVolver, onOpen, stats }) {
   }, [])
 
   // Recalcula la huella visual de todos los activos con foto, desde el RECORTE del
-  // feed (r.foto). Las huellas viejas eran de la foto entera (el fondo ensuciaba los
-  // parecidos). Corre acá, en el navegador del admin: baja el modelo una vez y va
+  // feed (r.foto). Corre acá, en el navegador del admin: baja el modelo una vez y va
   // aviso por aviso. Si el SQL de huellas no está corrido, el primer guardado grita.
   const [huellasBusy, setHuellasBusy] = useState(false)
   const [huellasProg, setHuellasProg] = useState('')
@@ -116,6 +138,7 @@ export default function Admin({ onVolver, onOpen, stats }) {
   const maxMes = s ? Math.max(1, ...s.avisosPorMes.map((m) => m.total)) : 1
   const maxZona = s ? Math.max(1, ...s.topZonas.map((z) => z.total)) : 1
   const exito = s && s.avisos ? Math.round((s.enCasa / s.avisos) * 100) : 0
+  const conFoto = reencuentros ? reencuentros.filter((r) => r.fotoReencuentro).length : 0
 
   return (
     <div className="view">
@@ -137,6 +160,7 @@ export default function Admin({ onVolver, onOpen, stats }) {
           <div className="empty" style={{ padding: '30px' }}>Cargando…</div>
         ) : (
           <>
+            {/* ---- Resumen: lo único siempre a la vista ---- */}
             <div className="adm-grid">
               <Card n={s.usuarios} label="Usuarios" color="var(--navy)" />
               <Card n={s.avisos} label="Avisos totales" color="var(--navy)" />
@@ -157,196 +181,225 @@ export default function Admin({ onVolver, onOpen, stats }) {
               </div>
             )}
 
-            {empujar && empujar.length > 0 && (
-              <>
-                <div className="adm-sub">
-                  Perdidos que necesitan empujón <span className="adm-sub-n">{empujar.length}</span>
-                </div>
-                <div className="adm-nota" style={{ marginTop: 0, marginBottom: 8 }}>
-                  Perdidos activos hace +7 días. Tocá para abrir y difundir, o pedile al dueño que lo cierre.
-                </div>
+            {/* ---- Para hacer (abiertas) ---- */}
+            <Sec
+              id="empujon"
+              titulo="🔔 Perdidos que necesitan empujón"
+              n={empujar ? empujar.length : null}
+              sub="Perdidos activos hace +7 días. Tocá para abrir y difundir, o pedile al dueño que lo cierre."
+              abierta={!!abiertas.empujon}
+              onToggle={toggle}
+            >
+              {empujar === null ? (
+                <div className="adm-nota" style={{ marginTop: 0 }}>Cargando…</div>
+              ) : empujar.length === 0 ? (
+                <div className="adm-nota" style={{ marginTop: 0 }}>✅ Ninguno pendiente — todo al día.</div>
+              ) : (
                 <div className="adm-lista">
                   {empujar.map((r) => (
                     <AvisoRow key={r.id} r={r} onOpen={onOpen} pie={pieEmpujon(r)} />
                   ))}
                 </div>
-              </>
-            )}
+              )}
+            </Sec>
 
-            <div className="adm-sub">
-              Reencuentros — permiso IG / encuesta
-              {reencuentros?.length ? <span className="adm-sub-n">{reencuentros.length}</span> : null}
-            </div>
-            <div className="adm-nota" style={{ marginTop: 0, marginBottom: 8 }}>
-              Los "ya en casa" con su contacto. Pedí permiso antes de publicar en IG 🙏
-            </div>
-            <div className="adm-lista">
+            <Sec
+              id="reencuentros"
+              titulo="🏠 Reencuentros — permiso IG"
+              n={reencuentros ? reencuentros.length : null}
+              sub={`Los "ya en casa" con su contacto. Pedí permiso antes de publicar en IG 🙏${
+                reencuentros && reencuentros.length ? ` · ${conFoto} con foto del reencuentro 📸` : ''
+              }`}
+              abierta={!!abiertas.reencuentros}
+              onToggle={toggle}
+            >
               {reencuentros === null ? (
                 <div className="adm-nota" style={{ marginTop: 0 }}>Cargando…</div>
               ) : reencuentros.length === 0 ? (
                 <div className="adm-nota" style={{ marginTop: 0 }}>Todavía no hay reencuentros.</div>
               ) : (
-                reencuentros.map((r) => (
-                  <div className="adm-reenc" key={r.id}>
-                    <div className="adm-row-txt">
-                      <div className="adm-row-t">{nombreMostrado(r)}</div>
-                      <div className="adm-row-s">
-                        {ubicacionTexto(r.localidad, r.zona)}
-                        {r.resueltoEn ? ` · volvió ${fechaLegible(r.resueltoEn)}` : ''}
+                <div className="adm-lista">
+                  {reencuentros.map((r) => (
+                    <div className="adm-reenc" key={r.id}>
+                      {r.fotoReencuentro ? (
+                        <img className="adm-reenc-foto" src={r.fotoReencuentro} alt="" loading="lazy" onError={(e) => (e.target.style.display = 'none')} />
+                      ) : null}
+                      <div className="adm-row-txt">
+                        <div className="adm-row-t">
+                          {nombreMostrado(r)} {r.fotoReencuentro ? '📸' : ''}
+                        </div>
+                        <div className="adm-row-s">
+                          {ubicacionTexto(r.localidad, r.zona)}
+                          {r.resueltoEn ? ` · volvió ${fechaLegible(r.resueltoEn)}` : ''}
+                        </div>
+                      </div>
+                      <div className="adm-reenc-acc">
+                        {r.whatsapp ? (
+                          <>
+                            <a className="adm-reenc-wa" href={linkWhatsAppReencuentro(r)} target="_blank" rel="noreferrer">
+                              WhatsApp
+                            </a>
+                            <a className="adm-reenc-tel" href={linkTel(r.whatsapp)}>Llamar</a>
+                          </>
+                        ) : r.email ? (
+                          <span className="adm-reenc-mail">{r.email}</span>
+                        ) : (
+                          <span className="adm-row-s">sin contacto</span>
+                        )}
                       </div>
                     </div>
-                    <div className="adm-reenc-acc">
-                      {r.whatsapp ? (
-                        <>
-                          <a className="adm-reenc-wa" href={linkWhatsAppReencuentro(r)} target="_blank" rel="noreferrer">
-                            WhatsApp
-                          </a>
-                          <a className="adm-reenc-tel" href={linkTel(r.whatsapp)}>Llamar</a>
-                        </>
-                      ) : r.email ? (
-                        <span className="adm-reenc-mail">{r.email}</span>
-                      ) : (
-                        <span className="adm-row-s">sin contacto</span>
-                      )}
-                    </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
-            </div>
+            </Sec>
 
-            <div className="adm-sub">Herramientas</div>
-            <div className="adm-nota" style={{ marginTop: 0, marginBottom: 8 }}>
-              Regenera la huella visual de los avisos activos desde el recorte del feed — mejora los "parecidos por
-              foto" (las huellas viejas incluían el fondo). Correrlo una vez; tarda un ratito.
-            </div>
-            <button className="adm-btn" onClick={recalcularHuellas} disabled={huellasBusy}>
-              {huellasBusy ? 'Recalculando…' : '🔍 Recalcular huellas visuales'}
-            </button>
-            {huellasProg && (
-              <div className="adm-nota" style={{ marginTop: 6 }}>
-                {huellasProg}
-              </div>
-            )}
-
-            <div className="adm-sub">Actividad reciente</div>
-            <div className="adm-lista">
+            <Sec
+              id="actividad"
+              titulo="🕒 Actividad reciente"
+              n={recientes ? recientes.length : null}
+              abierta={!!abiertas.actividad}
+              onToggle={toggle}
+            >
               {recientes === null ? (
                 <div className="adm-nota" style={{ marginTop: 0 }}>Cargando…</div>
               ) : recientes.length === 0 ? (
                 <div className="adm-nota" style={{ marginTop: 0 }}>Todavía no hay avisos.</div>
               ) : (
-                recientes.map((r) => <AvisoRow key={r.id} r={r} onOpen={onOpen} />)
+                <div className="adm-lista">
+                  {recientes.map((r) => (
+                    <AvisoRow key={r.id} r={r} onOpen={onOpen} />
+                  ))}
+                </div>
               )}
-            </div>
+            </Sec>
 
-            <div className="adm-sub">Avisos nuevos</div>
-            <div className="adm-grid tres">
-              <Card n={s.avisosHoy} label="Hoy" />
-              <Card n={s.avisosMes} label="Este mes" />
-              <Card n={s.avisosAnio} label="Este año" />
-            </div>
-
-            <div className="adm-sub">Ver un rango de fechas</div>
-            <div className="adm-rango">
-              <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} aria-label="Desde" />
-              <span>→</span>
-              <input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} aria-label="Hasta" />
-              <button onClick={verRango} disabled={rangoBusy || !desde || !hasta}>
-                {rangoBusy ? '…' : 'Ver'}
-              </button>
-            </div>
-            {rango && (
-              <div className="adm-grid tres" style={{ marginTop: 10 }}>
-                <Card n={rango.avisos} label="Avisos" color="var(--navy)" />
-                <Card n={rango.perdidos} label="Perdidos" color="var(--coral)" />
-                <Card n={rango.enLaCalle} label="Encontrados" color="var(--blue)" />
-                <Card n={rango.enCasa} label="Ya en casa" color="var(--amber)" />
-                <Card n={rango.usuarios} label="Usuarios" />
-                <Card n={rango.avistamientos} label="Avistamientos" />
+            {/* ---- Números (cerradas) ---- */}
+            <Sec id="numeros" titulo="📈 Números" abierta={!!abiertas.numeros} onToggle={toggle}>
+              <div className="adm-sub2">Avisos nuevos</div>
+              <div className="adm-grid tres">
+                <Card n={s.avisosHoy} label="Hoy" />
+                <Card n={s.avisosMes} label="Este mes" />
+                <Card n={s.avisosAnio} label="Este año" />
               </div>
-            )}
 
-            <div className="adm-sub">Por tipo</div>
-            <div className="adm-grid tres">
-              <Card n={s.perdidos} label="Perdidos" color="var(--coral)" />
-              <Card n={s.enLaCalle} label="Encontrados" color="var(--blue)" />
-              <Card n={s.enCasa} label="Ya en casa" color="var(--amber)" />
-            </div>
+              {/* "Ya en casa" no se repite acá: ya está en el resumen de arriba. */}
+              <div className="adm-sub2">Por tipo (activos y cerrados)</div>
+              <div className="adm-grid">
+                <Card n={s.perdidos} label="Perdidos" color="var(--coral)" />
+                <Card n={s.enLaCalle} label="Encontrados" color="var(--blue)" />
+              </div>
 
-            <div className="adm-sub">Por especie</div>
-            <div className="adm-grid tres">
-              <Card n={s.perro} label="🐕 Perros" />
-              <Card n={s.gato} label="🐈 Gatos" />
-              <Card n={s.otro} label="🐾 Otros" />
-            </div>
+              <div className="adm-sub2">Por especie</div>
+              <div className="adm-grid tres">
+                <Card n={s.perro} label="🐕 Perros" />
+                <Card n={s.gato} label="🐈 Gatos" />
+                <Card n={s.otro} label="🐾 Otros" />
+              </div>
 
-            {porProv && porProv.length > 0 && (
-              <>
-                <div className="adm-sub">Actividad por provincia (activos)</div>
-                <div className="adm-zonas">
-                  {porProv.map((p) => {
-                    const maxProv = Math.max(1, ...porProv.map((x) => x.total))
-                    return (
-                      <div className="adm-zona" key={p.provincia}>
-                        <div className="adm-zona-t">
-                          <span>{p.provincia}</span>
-                          <b>{p.total}</b>
-                        </div>
-                        <div className="adm-zona-bar">
-                          <div style={{ width: `${(p.total / maxProv) * 100}%` }} />
-                        </div>
-                        <div className="adm-zona-s">
-                          🔴 {p.perdidos} perdidos · 🔵 {p.encontrados} encontrados
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </>
-            )}
-
-            <div className="adm-sub">Avisos por mes (últimos 12)</div>
-            <div className="adm-chart">
-              {s.avisosPorMes.map((m) => (
-                <div className="adm-bar-col" key={m.mes}>
-                  <div className="adm-bar-v">{m.total || ''}</div>
-                  <div className="adm-bar" style={{ height: `${(m.total / maxMes) * 100}%` }} />
-                  <div className="adm-bar-x">{m.mes.slice(5)}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="adm-sub">Comunidad</div>
-            <div className="adm-grid">
-              <Card n={s.avistamientos} label="Avistamientos 👀" />
-              <Card n={s.seguidores} label="Siguiendo 🔔" />
-              <Card n={s.apoyos} label="Apoyos (difusión) 🙌" />
-              <Card n={s.pushSubs} label="Con notif. 📲" />
-            </div>
-            <div className="adm-grid tres">
-              <Card n={s.mascotas} label="Mascotas" />
-              <Card n={s.ubicaciones} label="Ubicaciones" />
-              <Card n={s.notificaciones} label="Notif. enviadas" />
-            </div>
-
-            <div className="adm-sub">Barrios más activos</div>
-            <div className="adm-zonas">
-              {s.topZonas.map((z) => (
-                <div className="adm-zona" key={z.zona}>
-                  <div className="adm-zona-t">
-                    <span>{z.zona}</span>
-                    <b>{z.total}</b>
+              <div className="adm-sub2">Avisos por mes (últimos 12)</div>
+              <div className="adm-chart">
+                {s.avisosPorMes.map((m) => (
+                  <div className="adm-bar-col" key={m.mes}>
+                    <div className="adm-bar-v">{m.total || ''}</div>
+                    <div className="adm-bar" style={{ height: `${(m.total / maxMes) * 100}%` }} />
+                    <div className="adm-bar-x">{m.mes.slice(5)}</div>
                   </div>
-                  <div className="adm-zona-bar">
-                    <div style={{ width: `${(z.total / maxZona) * 100}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            <div className="adm-nota">
-              "Apoyos" = veces que tocaron "Me sumo a difundir". Los compartidos directos por WhatsApp no se registran.
-            </div>
+              <div className="adm-sub2">Ver un rango de fechas</div>
+              <div className="adm-rango">
+                <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} aria-label="Desde" />
+                <span>→</span>
+                <input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} aria-label="Hasta" />
+                <button onClick={verRango} disabled={rangoBusy || !desde || !hasta}>
+                  {rangoBusy ? '…' : 'Ver'}
+                </button>
+              </div>
+              {rango && (
+                <div className="adm-grid tres" style={{ marginTop: 10 }}>
+                  <Card n={rango.avisos} label="Avisos" color="var(--navy)" />
+                  <Card n={rango.perdidos} label="Perdidos" color="var(--coral)" />
+                  <Card n={rango.enLaCalle} label="Encontrados" color="var(--blue)" />
+                  <Card n={rango.enCasa} label="Ya en casa" color="var(--amber)" />
+                  <Card n={rango.usuarios} label="Usuarios" />
+                  <Card n={rango.avistamientos} label="Avistamientos" />
+                </div>
+              )}
+            </Sec>
+
+            <Sec id="zonas" titulo="🗺️ Dónde está pasando" abierta={!!abiertas.zonas} onToggle={toggle}>
+              {porProv && porProv.length > 0 && (
+                <>
+                  <div className="adm-sub2">Por provincia (activos)</div>
+                  <div className="adm-zonas">
+                    {porProv.map((p) => {
+                      const maxProv = Math.max(1, ...porProv.map((x) => x.total))
+                      return (
+                        <div className="adm-zona" key={p.provincia}>
+                          <div className="adm-zona-t">
+                            <span>{p.provincia}</span>
+                            <b>{p.total}</b>
+                          </div>
+                          <div className="adm-zona-bar">
+                            <div style={{ width: `${(p.total / maxProv) * 100}%` }} />
+                          </div>
+                          <div className="adm-zona-s">
+                            🔴 {p.perdidos} perdidos · 🔵 {p.encontrados} encontrados
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
+              <div className="adm-sub2">Barrios más activos</div>
+              <div className="adm-zonas">
+                {s.topZonas.map((z) => (
+                  <div className="adm-zona" key={z.zona}>
+                    <div className="adm-zona-t">
+                      <span>{z.zona}</span>
+                      <b>{z.total}</b>
+                    </div>
+                    <div className="adm-zona-bar">
+                      <div style={{ width: `${(z.total / maxZona) * 100}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Sec>
+
+            <Sec id="comunidad" titulo="👥 Comunidad" abierta={!!abiertas.comunidad} onToggle={toggle}>
+              <div className="adm-grid">
+                <Card n={s.avistamientos} label="Avistamientos 👀" />
+                <Card n={s.seguidores} label="Siguiendo 🔔" />
+                <Card n={s.apoyos} label="Apoyos (difusión) 🙌" />
+                <Card n={s.pushSubs} label="Con notif. 📲" />
+              </div>
+              <div className="adm-grid tres">
+                <Card n={s.mascotas} label="Mascotas" />
+                <Card n={s.ubicaciones} label="Ubicaciones" />
+                <Card n={s.notificaciones} label="Notif. enviadas" />
+              </div>
+              <div className="adm-nota">
+                "Apoyos" = veces que tocaron "Me sumo a difundir". Los compartidos directos por WhatsApp no se registran.
+              </div>
+            </Sec>
+
+            <Sec id="herramientas" titulo="🛠️ Herramientas" abierta={!!abiertas.herramientas} onToggle={toggle}>
+              <div className="adm-nota" style={{ marginTop: 0, marginBottom: 8 }}>
+                Regenera la huella visual de los avisos activos desde el recorte del feed — mejora los "parecidos por
+                foto". Correr solo si se cambió el modelo o quedaron huellas viejas; tarda un ratito.
+              </div>
+              <button className="adm-btn" onClick={recalcularHuellas} disabled={huellasBusy}>
+                {huellasBusy ? 'Recalculando…' : '🔍 Recalcular huellas visuales'}
+              </button>
+              {huellasProg && (
+                <div className="adm-nota" style={{ marginTop: 6 }}>
+                  {huellasProg}
+                </div>
+              )}
+            </Sec>
           </>
         )}
       </div>
