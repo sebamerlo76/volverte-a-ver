@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import PetCard from './PetCard.jsx'
-import { getMisReportes, getMisMascotas, getReportesPorIds, marcarResuelto, renovarReporte, reactivarReporte, desactivarCuenta, reactivarCuenta } from '../data/store.js'
+import { getMisReportes, getMisMascotas, getReportesPorIds, marcarResuelto, renovarReporte, reactivarReporte, desactivarCuenta, reactivarCuenta, subirFoto, guardarFotoReencuentro } from '../data/store.js'
+import PhotoPicker from './PhotoPicker.jsx'
 import { avatarDe, nombreUsuario } from '../lib/formato.js'
 import { soportado as pushSoportado, yaSuscripto, activarPush, desactivarPush } from '../lib/push.js'
 import { supabase, supabaseConfigurado } from '../lib/supabase.js'
@@ -70,6 +71,28 @@ export default function MiCuenta({
       setRenovando(null)
     }
   }
+  // Foto del reencuentro a posteriori: muchos la suben días después del festejo.
+  // Apenas la eligen (ya recortada), se sube sin más pasos.
+  const [fotoReencId, setFotoReencId] = useState(null) // aviso con el selector abierto
+  const [fotoReencBusy, setFotoReencBusy] = useState(false)
+  async function subirFotoReenc(r, arr) {
+    const it = arr[0]
+    if (!it || fotoReencBusy) return
+    setFotoReencBusy(true)
+    try {
+      const url = await subirFoto(it.thumb)
+      await guardarFotoReencuentro(r.id, url)
+      onToast?.('📸 ¡Foto del reencuentro subida! Ya está en Ya en casa 💛')
+      setFotoReencId(null)
+      await cargar()
+    } catch (e) {
+      console.error(e)
+      onToast?.('No se pudo subir la foto. Probá de nuevo 🔄')
+    } finally {
+      setFotoReencBusy(false)
+    }
+  }
+
   // Sacar un aviso de pausa: vuelve al feed, arriba y con el ciclo reiniciado.
   async function reactivarAviso(id) {
     setRenovando(id)
@@ -538,6 +561,25 @@ export default function MiCuenta({
                           Ya volvió
                         </button>
                       </div>
+                    </div>
+                  )}
+                  {r.estado === 'resuelto' && !r.fotoReencuentro && (
+                    <div className="renovar-bar">
+                      <span>¿Tenés una foto del reencuentro? 📸</span>
+                      <div className="rb-acc">
+                        <button className="rb-ok" onClick={() => setFotoReencId(fotoReencId === r.id ? null : r.id)}>
+                          <span className="mi" style={{ fontSize: 15 }}>add_a_photo</span>
+                          {fotoReencId === r.id ? 'Cancelar' : 'Subirla'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {fotoReencId === r.id && (
+                    <div style={{ margin: '0 16px 14px' }}>
+                      <PhotoPicker value={[]} max={1} onChange={(arr) => subirFotoReenc(r, arr)} />
+                      {fotoReencBusy && (
+                        <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)', marginTop: 6 }}>Subiendo la foto…</div>
+                      )}
                     </div>
                   )}
                 </div>

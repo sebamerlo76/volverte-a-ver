@@ -184,7 +184,9 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
   const perdido = r.tipo === 'perdido'
   const resuelto = r.estado === 'resuelto'
   const clr = perdido ? '#ff6b5e' : '#2f7fed'
-  const fotos = r.fotos && r.fotos.length ? r.fotos : r.foto ? [r.foto] : []
+  const fotosBase = r.fotos && r.fotos.length ? r.fotos : r.foto ? [r.foto] : []
+  // Resuelto con foto del reencuentro: va primera en el carrusel — "así volvió".
+  const fotos = r.estado === 'resuelto' && r.fotoReencuentro ? [r.fotoReencuentro, ...fotosBase] : fotosBase
   const centro = puntoDeReporte(r)
 
   // Marcadores del mapa: la zona del aviso + cada avistamiento numerado.

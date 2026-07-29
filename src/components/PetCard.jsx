@@ -10,12 +10,15 @@ export default function PetCard({ r, onClick, posicion = 99, zonaVecina = false 
   const resuelto = r.estado === 'resuelto'
   const clr = perdido ? '#ff6b5e' : '#2f7fed'
   const { aplausos, aplaudido, aplaudir } = useAplauso(r) // 👏 en los "Ya en casa", sin entrar al aviso
+  // En "Ya en casa" mostramos la foto DEL REENCUENTRO si la familia la subió: el
+  // muro pasa de avisos viejos a resultados — la mejor prueba social que tenemos.
+  const fotoCard = resuelto && r.fotoReencuentro ? r.fotoReencuentro : r.foto
   return (
     <button className="card" onClick={onClick}>
       <div className={'ci' + (perdido ? '' : ' g')}>
-        {r.foto ? (
+        {fotoCard ? (
           <img
-            src={r.foto}
+            src={fotoCard}
             alt={nombreMostrado(r)}
             // Las 2 primeras entran en pantalla al abrir el feed: si esperan al
             // lazy-load aparecen tarde y se ve el flash. Van eager. De la 3ª en

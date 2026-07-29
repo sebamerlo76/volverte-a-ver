@@ -47,6 +47,7 @@ function desdeFila(row) {
     localidad: row.localidad || 'Paraná',
     apoyos: row.apoyos || 0, // prueba social: cuánta gente se sumó a difundir
     aplausos: row.aplausos || 0, // 👏 en los reencuentros
+    fotoReencuentro: row.foto_reencuentro || null, // la foto de "ya en casa" (la sube el dueño al resolver)
     resueltoEn: row.resuelto_en || null, // cuándo volvió a casa (lo estampa un trigger)
     recordatorioEn: row.recordatorio_en || null, // último recordatorio al dueño (panel admin)
     // OJO: apoyos/aplausos NO van en haciaFila — solo los toca su RPC. Si entraran
@@ -573,6 +574,18 @@ export async function guardarEmbedding(id, embedding) {
   if (!supabaseConfigurado || !id || !embedding) return
   const { error } = await supabase.from('reportes').update({ embedding }).eq('id', id)
   if (error) console.warn('No se pudo guardar la huella:', error)
+}
+
+// Guarda la foto del reencuentro de un aviso resuelto (la sube el dueño; RLS solo
+// deja tocar lo propio). No va en haciaFila: se setea aparte, como el embedding.
+export async function guardarFotoReencuentro(id, url) {
+  if (!id || !url) return
+  if (supabaseConfigurado) {
+    const { error } = await supabase.from('reportes').update({ foto_reencuentro: url }).eq('id', id)
+    if (error) throw error
+    return
+  }
+  guardarLocal(leerLocal().map((r) => (r.id === id ? { ...r, fotoReencuentro: url } : r)))
 }
 
 export async function marcarResuelto(id) {

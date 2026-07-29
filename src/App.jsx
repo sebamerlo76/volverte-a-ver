@@ -878,6 +878,8 @@ export default function App() {
               setFestejo(null)
             }}
             onCerrar={() => setFestejo(null)}
+            onToast={mostrarToast}
+            onFotoSubida={() => cargar()}
           />
         )}
 

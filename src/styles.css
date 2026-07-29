@@ -4484,6 +4484,24 @@ textarea:focus-visible {
   line-height: 1.5;
   margin-top: 8px;
 }
+/* Bloque "subí la foto del reencuentro" dentro del festejo */
+.festejo-foto {
+  margin: 12px 0 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.festejo-foto-sub {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.festejo-foto-ok {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #1f9d8f;
+}
 .festejo-btn {
   display: flex;
   align-items: center;
