@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import PetCard from './PetCard.jsx'
 import BannerInstalar from './BannerInstalar.jsx'
+import BannerNotifs from './BannerNotifs.jsx'
 import MapaLeaflet from './MapaLazy.jsx'
 import { getReencontrados } from '../data/store.js'
 import { avatarDe, nombreMostrado, tiempoRelativo, dentroDeRango } from '../lib/formato.js'
@@ -484,7 +485,10 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
           onTouchEnd={swEnd}
           onTouchCancel={swCancel}
         >
+          {/* Excluyentes por diseño: el de instalar sale si NO está instalada, el de
+              avisos si SÍ. Nunca se ven los dos juntos. */}
           {!verFinales && <BannerInstalar />}
+          {!verFinales && <BannerNotifs logueado={logueado} onToast={onToast} />}
           {cargando && !verFinales ? (
             <div className="empty">Cargando avisos… 🐾</div>
           ) : verFinales && finales === null ? (
