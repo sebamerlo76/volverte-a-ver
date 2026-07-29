@@ -569,7 +569,9 @@ export default function MiCuenta({
                       <div className="rb-acc">
                         <button className="rb-ok" onClick={() => setFotoReencId(fotoReencId === r.id ? null : r.id)}>
                           <span className="mi" style={{ fontSize: 15 }}>add_a_photo</span>
-                          {fotoReencId === r.id ? 'Cancelar' : 'Subirla'}
+                          {/* "Subir foto" y no "Compartir": en Chicho compartir ya significa
+                              difundir el aviso afuera (WhatsApp/flyer) — se pisaría. */}
+                          {fotoReencId === r.id ? 'Cancelar' : 'Subir foto'}
                         </button>
                       </div>
                     </div>
