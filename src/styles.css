@@ -2856,6 +2856,14 @@ select {
 .adm-reenc-tel { padding: 7px 11px; border-radius: 10px; background: #f3ece1; color: var(--navy); font-weight: 800; font-size: 12.5px; text-decoration: none; }
 .adm-reenc-mail { font-size: 12px; font-weight: 700; color: var(--faint); word-break: break-all; }
 
+/* Elegir qué se aporta a un aviso (lo vi / sé de quién es / se escapa / peligro) */
+.aporte-tipos { display: flex; flex-direction: column; gap: 9px; }
+.aporte-op { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 16px; background: #fff; cursor: pointer; }
+.aporte-op:active { background: #faf4ec; }
+.aporte-op-ic { flex: none; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; }
+.aporte-op-t { display: block; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 15.5px; color: var(--navy); }
+.aporte-op-d { display: block; font-size: 12.5px; font-weight: 700; color: var(--muted); line-height: 1.35; margin-top: 1px; }
+
 /* Banner "Sumate a la red de tu zona" (instalar la PWA) — arriba del feed */
 .inst-banner { position: relative; display: flex; gap: 12px; align-items: flex-start; margin: 10px 14px 6px; padding: 14px; background: linear-gradient(#ffffff, #fff6de); border: 1.5px solid #f4d67a; border-radius: 16px; }
 .inst-x { position: absolute; top: 6px; right: 6px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #b3a68f; border-radius: 50%; }

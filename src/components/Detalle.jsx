@@ -5,6 +5,7 @@ import { ubicacionTexto } from '../lib/localidades.js'
 import { badgeEstado, subLinea, textoTipo } from '../lib/estados.js'
 import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel } from '../lib/formato.js'
+import { tipoAporte, aporteEnMapa } from '../lib/aportes.js'
 import { compartirFlyer } from '../lib/flyer.js'
 import { useAplauso } from '../lib/useAplauso.js'
 
@@ -189,10 +190,12 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
   const fotos = r.estado === 'resuelto' && r.fotoReencuentro ? [r.fotoReencuentro, ...fotosBase] : fotosBase
   const centro = puntoDeReporte(r)
 
-  // Marcadores del mapa: la zona del aviso + cada avistamiento numerado.
+  // Los aportes que marcan lugar ("lo vi", "está en peligro") van al mapa y arman el
+  // recorrido; los que son datos ("sé de quién es") solo van a la lista de abajo.
+  const ubicables = avist.filter(aporteEnMapa)
   const marcadores = [
     { id: 'zona', lat: centro[0], lng: centro[1], tipo: r.tipo, especie: r.especie },
-    ...avist.map((a, i) => ({
+    ...ubicables.map((a, i) => ({
       id: a.id,
       lat: a.lat,
       lng: a.lng,
@@ -201,7 +204,7 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
       popup: popupAvist(a, i + 1),
     })),
   ]
-  const linea = [centro, ...avist.map((a) => [a.lat, a.lng])]
+  const linea = [centro, ...ubicables.map((a) => [a.lat, a.lng])]
 
   return (
     <div className="view">
@@ -401,7 +404,9 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
           {!resuelto && (
             <>
           <div className="sec-t" style={{ marginTop: 18, color: 'var(--teal)' }}>
-            {avist.length > 0 ? `Recorrido · ${avist.length} avistamiento${avist.length === 1 ? '' : 's'}` : 'Última zona conocida'}
+            {ubicables.length > 0
+              ? `Recorrido · ${ubicables.length} avistamiento${ubicables.length === 1 ? '' : 's'}`
+              : 'Última zona conocida'}
           </div>
           <div className="minimap" style={{ height: 200 }}>
             <MapaLeaflet center={centro} zoom={14} interactivo={false} marcadores={marcadores} linea={linea} />
@@ -410,7 +415,7 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
                 location_on
               </span>
               {r.zona}
-              {avist.length > 0 ? ` → ${avist.length} visto${avist.length === 1 ? '' : 's'}` : ''}
+              {ubicables.length > 0 ? ` → ${ubicables.length} visto${ubicables.length === 1 ? '' : 's'}` : ''}
             </div>
             <button className="map-expand" onClick={() => onMaximizar(r)} aria-label="Ver el mapa completo">
               <span className="mi" style={{ fontSize: 20, color: '#2a2320' }}>
@@ -431,23 +436,35 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
             <span className="mi" style={{ fontSize: 22 }}>
               visibility
             </span>
-            ¡Lo vi acá!
+            ¡Lo vi acá! / Aportar un dato
           </button>
 
           {avist.length > 0 && (
             <div className="avist-lista">
-              {avist.map((a, i) => (
+              {avist.map((a) => {
+                const cfg = tipoAporte(a.tipo)
+                // Los que van al mapa llevan su número (el del pin); los datos, su ícono.
+                const num = cfg.mapa ? ubicables.findIndex((u) => u.id === a.id) + 1 : null
+                return (
                 <div className="avist-row" key={a.id}>
-                  <div className="avist-num">{i + 1}</div>
+                  {num ? (
+                    <div className="avist-num">{num}</div>
+                  ) : (
+                    <div className="avist-num" style={{ background: cfg.color }}>
+                      <span className="mi fill" style={{ fontSize: 15 }}>
+                        {cfg.ic}
+                      </span>
+                    </div>
+                  )}
                   {a.foto ? (
-                    <a href={a.foto} target="_blank" rel="noreferrer" className="avist-thumb" aria-label="Ver la foto del avistamiento">
-                      <img src={a.foto} alt="Foto del avistamiento" loading="lazy" />
+                    <a href={a.foto} target="_blank" rel="noreferrer" className="avist-thumb" aria-label="Ver la foto del aporte">
+                      <img src={a.foto} alt="Foto del aporte" loading="lazy" />
                     </a>
                   ) : null}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="avist-nota">{a.nota || 'Avistamiento'}</div>
+                    <div className="avist-nota">{a.nota || cfg.t}</div>
                     <div className="avist-meta">
-                      {a.autor || 'Anónimo'} · {tiempoRelativo(a.creadoEn)}
+                      <b style={{ color: cfg.color }}>{cfg.t}</b> · {a.autor || 'Anónimo'} · {tiempoRelativo(a.creadoEn)}
                     </div>
                   </div>
                   {a.whatsapp ? (
@@ -465,7 +482,8 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
                     </a>
                   ) : null}
                 </div>
-              ))}
+                )
+              })}
             </div>
           )}
             </>

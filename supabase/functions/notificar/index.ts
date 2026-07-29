@@ -311,10 +311,44 @@ async function pushAAdmin(payload: any) {
   }
 }
 
+// Textos según el TIPO de aporte (ver src/lib/aportes.js — se duplica acá porque las
+// Edge Functions no pueden importar de src/). Un "sé de quién es" avisado como
+// "alguien lo vio" hacía salir a buscar al vicio: el título tiene que decir la verdad.
+// Los avistamientos de antes de la columna `tipo` llegan sin ella → caen en 'visto'.
+function textosAporte(tipo: string, nombre: string, especie: string) {
+  const esp = ESP[especie] || 'mascota'
+  switch (tipo) {
+    case 'duenio':
+      return {
+        dueno: { title: '🏠 Alguien sabe de quién es', body: 'Un vecino dice conocer a la familia o dónde vive. Tocá para ver el dato.' },
+        segs: { title: `🏠 Novedad de ${nombre}`, body: 'Alguien sabe de quién es.' },
+      }
+    case 'escapa':
+      return {
+        dueno: { title: '🔁 Dicen que tiene familia', body: `Un vecino avisa que este ${esp} se escapa seguido y vuelve solo.` },
+        segs: { title: `🔁 Novedad de ${nombre}`, body: 'Un vecino dice que tiene familia y se escapa seguido.' },
+      }
+    case 'peligro':
+      return {
+        dueno: { title: '⚠️ ¡Necesita ayuda ahora!', body: `Avisan que tu ${esp} está en peligro. Tocá para ver dónde.` },
+        segs: { title: `⚠️ ${nombre} está en peligro`, body: 'Alguien avisa que necesita ayuda ya. Tocá para ver dónde.' },
+      }
+    default:
+      return {
+        dueno: { title: '👀 ¡Vieron a tu mascota!', body: `Alguien reportó ver a tu ${esp}.` },
+        segs: { title: `👀 Novedad de ${nombre}`, body: 'Alguien lo vio.' },
+      }
+  }
+}
+
 async function manejarAvistamiento(rec: any) {
   const { data: rep } = await sb.from('reportes').select('*').eq('id', rec.reporte_id).maybeSingle()
   if (!rep) return
   const nombre = rep.nombre || (ESP[rep.especie] || 'tu mascota')
+  const t = textosAporte(rec.tipo || 'visto', nombre, rep.especie)
+  // La nota que escribió el vecino manda (es lo concreto); si no dejó nota, el texto
+  // según el tipo.
+  const cuerpo = (base: string) => (rec.nota ? rec.nota : base)
 
   // Dueño del aviso.
   if (rep.user_id) {
@@ -322,10 +356,7 @@ async function manejarAvistamiento(rec: any) {
     if ((prefs.get(rep.user_id)?.avisar_avistamiento ?? true) !== false) {
       await enviarAUsuarios(
         [rep.user_id],
-        {
-          title: '👀 ¡Vieron a tu mascota!',
-          body: rec.nota ? `Nuevo avistamiento: ${rec.nota}` : `Alguien reportó ver a tu ${ESP[rep.especie] || 'mascota'}.`,
-        },
+        { title: t.dueno.title, body: cuerpo(t.dueno.body) },
         { reporteId: rec.reporte_id, tipo: 'avistamiento' },
       )
     }
@@ -336,10 +367,7 @@ async function manejarAvistamiento(rec: any) {
   if (segs.length) {
     await enviarAUsuarios(
       segs,
-      {
-        title: `👀 Novedad de ${nombre}`,
-        body: rec.nota ? `Nuevo avistamiento: ${rec.nota}` : 'Alguien lo vio.',
-      },
+      { title: t.segs.title, body: cuerpo(t.segs.body) },
       { reporteId: rec.reporte_id, tipo: 'avistamiento' },
     )
   }

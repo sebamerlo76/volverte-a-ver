@@ -834,7 +834,19 @@ export async function eliminarMascota(id) {
 const CLAVE_AVIST = 'vav_avistamientos_v1'
 
 function avistDesdeFila(a) {
-  return { id: a.id, reporteId: a.reporte_id, lat: a.lat, lng: a.lng, nota: a.nota, autor: a.autor, whatsapp: a.whatsapp, foto: a.foto, creadoEn: a.creado_en }
+  return {
+    id: a.id,
+    reporteId: a.reporte_id,
+    lat: a.lat,
+    lng: a.lng,
+    nota: a.nota,
+    autor: a.autor,
+    whatsapp: a.whatsapp,
+    foto: a.foto,
+    // tipo de aporte (ver lib/aportes.js). Los de antes de la columna quedan 'visto'.
+    tipo: a.tipo || 'visto',
+    creadoEn: a.creado_en,
+  }
 }
 
 // Avistamientos de un aviso, del más viejo al más nuevo (para ver el recorrido).
@@ -853,16 +865,20 @@ export async function getAvistamientos(reporteId) {
   return all.filter((a) => a.reporteId === reporteId).sort((a, b) => (a.creadoEn < b.creadoEn ? -1 : 1))
 }
 
-export async function addAvistamiento({ reporteId, lat, lng, nota, autor, whatsapp, foto }) {
+export async function addAvistamiento({ reporteId, lat, lng, nota, autor, whatsapp, foto, tipo }) {
   if (supabaseConfigurado) {
     const base = { reporte_id: reporteId, lat, lng, nota, autor }
     const fila = { ...base }
     if (whatsapp) fila.whatsapp = whatsapp
     if (foto) fila.foto = foto
+    // `tipo` va entre los opcionales a propósito: si el SQL de la columna todavía no
+    // se corrió, el reintento de abajo guarda el aporte igual (como avistamiento
+    // común) en vez de perderlo. Nunca rompemos "¡Lo vi acá!" por una columna nueva.
+    if (tipo && tipo !== 'visto') fila.tipo = tipo
     let { data, error } = await supabase.from('avistamientos').insert(fila).select().single()
-    // A prueba de balas: si falla por una columna opcional (whatsapp/foto),
+    // A prueba de balas: si falla por una columna opcional (whatsapp/foto/tipo),
     // reintentamos con lo esencial — jamás perdemos un avistamiento.
-    if (error && (whatsapp || foto)) {
+    if (error && (whatsapp || foto || fila.tipo)) {
       console.warn('Avistamiento: reintento sin extras por error:', error.message)
       ;({ data, error } = await supabase.from('avistamientos').insert(base).select().single())
     }
@@ -870,7 +886,18 @@ export async function addAvistamiento({ reporteId, lat, lng, nota, autor, whatsa
     return avistDesdeFila(data)
   }
   const all = JSON.parse(localStorage.getItem(CLAVE_AVIST) || '[]')
-  const nuevo = { id: 'a-' + Date.now().toString(36), reporteId, lat, lng, nota, autor, whatsapp: whatsapp || '', foto: foto || '', creadoEn: new Date().toISOString() }
+  const nuevo = {
+    id: 'a-' + Date.now().toString(36),
+    reporteId,
+    lat,
+    lng,
+    nota,
+    autor,
+    whatsapp: whatsapp || '',
+    foto: foto || '',
+    tipo: tipo || 'visto',
+    creadoEn: new Date().toISOString(),
+  }
   all.push(nuevo)
   localStorage.setItem(CLAVE_AVIST, JSON.stringify(all))
   return nuevo
