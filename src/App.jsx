@@ -30,6 +30,8 @@ import { scopeFeedGuardado, provinciaDe, recordarLocalidad, avisoEnZona } from '
 import { confirmar } from './lib/confirmar.js'
 import { compartirFlyer } from './lib/flyer.js'
 import FestejoReencuentro from './components/FestejoReencuentro.jsx'
+import PedirAvisos from './components/PedirAvisos.jsx'
+import { decidirModo as decidirModoAvisos } from './lib/avisos-push.js'
 import CompartiAhora from './components/CompartiAhora.jsx'
 
 export default function App() {
@@ -78,6 +80,11 @@ export default function App() {
   const contadoRef = useRef(false)
   const feedScrollRef = useRef(0) // recuerda el scroll del feed al entrar a un aviso
   const [festejo, setFestejo] = useState(null) // aviso recién resuelto, para ofrecer compartir el reencuentro
+  // Recién siguió un aviso: momento de máxima intención para ofrecerle los avisos
+  // push. Guarda el MODO ('activar' | 'instalar') y solo se levanta si hay algo que
+  // ofrecer — decidirlo antes evita abrir y cerrar la capa al vuelo (el sistema del
+  // botón atrás se comería un toque empujando y sacando un centinela).
+  const [pedirAvisos, setPedirAvisos] = useState(null)
   const [compartiNuevo, setCompartiNuevo] = useState(null) // aviso recién publicado, para ofrecer compartirlo ya
 
   const notifsNoLeidas = notifs.filter((n) => !n.leida).length
@@ -89,7 +96,7 @@ export default function App() {
   // --- Botón "atrás" del celu: cerrar la capa abierta en vez de cerrar la PWA ---
   // ¿Hay algo "abierto" sobre el feed? (una vista distinta, o un modal)
   const hayCapa =
-    vista !== 'feed' || homeModo === 'mapa' || !!fotosVer || menuAbierto || buscadorAbierto || filtrosAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo || !!compartiNuevo
+    vista !== 'feed' || homeModo === 'mapa' || !!fotosVer || menuAbierto || buscadorAbierto || filtrosAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo || !!compartiNuevo || !!pedirAvisos
   // Cuántos "atrás" hacen falta para llegar al feed desde la vista actual.
   const nivelVista = (v) => {
     switch (v) {
@@ -107,7 +114,7 @@ export default function App() {
   }
   // El festejo cuenta como capa: si no, el "atrás" del celu te saca de la pantalla
   // en vez de cerrarlo. Antes salía sólo desde el aviso; ahora también en Mi cuenta.
-  const modalAbierto = menuAbierto || buscadorAbierto || filtrosAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo || !!compartiNuevo
+  const modalAbierto = menuAbierto || buscadorAbierto || filtrosAbierto || notifsAbierto || guiaAbierta || soporteAbierto || !!cartelReporte || !!festejo || !!compartiNuevo || !!pedirAvisos
   // Profundidad = capas apiladas = cantidad de "atrás" hasta el feed.
   // El mapa cuenta como capa: el atrás vuelve a la lista, no saca de la app.
   const profundidad =
@@ -123,12 +130,13 @@ export default function App() {
   const removiendo = useRef(false) // estamos sacando centinelas nosotros (ignorar esos popstate)
   // Snapshot del estado para que el listener (registrado una vez) lea lo actual.
   const estadoRef = useRef({})
-  estadoRef.current = { vista, homeModo, wizPasos, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, filtrosAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte, festejo, compartiNuevo }
+  estadoRef.current = { vista, homeModo, wizPasos, detalleOrigen, fotosVer, menuAbierto, buscadorAbierto, filtrosAbierto, notifsAbierto, guiaAbierta, soporteAbierto, cartelReporte, festejo, compartiNuevo, pedirAvisos }
 
   // Cierra la capa de más arriba (foto y modales primero, después vistas).
   function retroceder() {
     const s = estadoRef.current
     if (s.fotosVer) return setFotosVer(null)
+    if (s.pedirAvisos) return setPedirAvisos(null)
     if (s.festejo) return setFestejo(null)
     if (s.compartiNuevo) return setCompartiNuevo(null)
     if (s.menuAbierto) return setMenuAbierto(false)
@@ -479,6 +487,12 @@ export default function App() {
     if (user?.id) marcarTodasLeidas(user.id).catch(() => {})
   }
 
+  // Ofrece los avisos push, pero solo si hay algo que ofrecer (ver lib/avisos-push.js:
+  // no si ya los tiene, no si bloqueó el permiso, no si ya se lo ofrecimos hoy).
+  function ofrecerAvisos() {
+    decidirModoAvisos().then((m) => m && setPedirAvisos(m))
+  }
+
   function toggleSeguir(reporte) {
     if (!reporte) return
     if (!logueado) {
@@ -494,6 +508,7 @@ export default function App() {
       seguirReporte(id).catch(() => {})
       setSeguidos((s) => (s.includes(id) ? s : [...s, id]))
       mostrarToast('🔔 Siguiendo — te aviso si hay novedades')
+      ofrecerAvisos() // ...y si no tiene el push activo, se lo ofrecemos acá mismo
     }
   }
 
@@ -530,7 +545,8 @@ export default function App() {
         .then(() => setSeguidos((s) => (s.includes(id) ? s : [...s, id])))
         .catch(() => {})
       setVista('detalle')
-      mostrarToast('🔔 ¡Listo! Seguís esta búsqueda. Activá la campana en Mi cuenta para recibir los avisos.')
+      mostrarToast('🔔 ¡Listo! Seguís esta búsqueda')
+      ofrecerAvisos() // el cartel ofrece activar los avisos (antes acá iba una tarea)
       return
     }
     mostrarToast('¡Bienvenido! 🐾')
@@ -882,6 +898,8 @@ export default function App() {
             onFotoSubida={() => cargar()}
           />
         )}
+
+        {pedirAvisos && <PedirAvisos modo={pedirAvisos} onCerrar={() => setPedirAvisos(null)} onToast={mostrarToast} />}
 
         {compartiNuevo && (
           <CompartiAhora
