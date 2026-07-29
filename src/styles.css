@@ -3337,13 +3337,16 @@ select {
   box-shadow: 0 1px 3px rgba(31, 56, 82, 0.12);
 }
 
-/* Barra "renovar aviso viejo" en Mis avisos */
+/* Barra de acción bajo una tarjeta en Mis avisos (renovar / reactivar / dejar de
+   seguir / subir la foto del reencuentro). Alineada a los MISMOS 20px laterales de
+   .card: con 16px sobresalía 4px por lado y el amarillo asomaba por las esquinas
+   redondeadas (22px) de la tarjeta. Y separada 6px en vez de montada -4px. */
 .renovar-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin: -4px 16px 14px;
+  margin: 6px 20px 16px;
   padding: 9px 12px;
   border-radius: 12px;
   background: #fff6e3;
