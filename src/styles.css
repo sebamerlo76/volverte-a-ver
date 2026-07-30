@@ -3897,6 +3897,30 @@ select {
   color: var(--muted);
   line-height: 1.5;
 }
+/* "¿Se te ocurre algo?" → WhatsApp. Va arriba del historial: quien lee las mejoras es
+   justo quien puede sugerir la próxima. */
+.nov-idea {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 20px 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1.5px solid var(--line);
+  color: var(--slate);
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-decoration: none;
+}
+.nov-idea span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.nov-idea:active {
+  background: #faf4ec;
+}
 .nov-lista {
   padding: 10px 20px 0;
 }
@@ -3991,6 +4015,47 @@ select {
 }
 .auth-nota:active {
   background: #e3edf8;
+}
+/* Después de pedir el enlace: qué esperar y por qué puede no llegar */
+.auth-enviado {
+  margin: 16px 20px 0;
+  padding: 16px;
+  border-radius: 16px;
+  background: #f2f9f5;
+  border: 1.5px solid #cfe8db;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--slate);
+  line-height: 1.55;
+}
+.auth-enviado-t {
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+.auth-enviado-btn {
+  width: 100%;
+  margin-top: 14px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--navy);
+  color: #fff;
+  font-family: Nunito, sans-serif;
+  font-size: 13.5px;
+  font-weight: 800;
+}
+.auth-enviado-link {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-family: Nunito, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: underline;
 }
 
 /* Fila de mascota: la usa ElegirMascota ("¿cuál se perdió?"), donde una lista compacta

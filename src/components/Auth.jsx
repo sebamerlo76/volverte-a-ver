@@ -22,6 +22,7 @@ export default function Auth({ onCerrar, onAuth, onToast }) {
   const [pass, setPass] = useState('')
   const [verPass, setVerPass] = useState(false)
   const [cargando, setCargando] = useState(false)
+  const [enviado, setEnviado] = useState(false) // ya pidió el enlace: mostramos qué esperar
 
   const esRegistro = modo === 'registrar'
   const esRecuperar = modo === 'recuperar'
@@ -38,8 +39,13 @@ export default function Auth({ onCerrar, onAuth, onToast }) {
         redirectTo: window.location.origin,
       })
       if (error) throw error
-      onToast('Te enviamos un enlace a tu correo para cambiar la contraseña')
-      setModo('ingresar')
+      // OJO con este texto: Supabase contesta "ok" SIEMPRE, exista o no la cuenta (no
+      // revela quién está registrado — y en Chicho, donde se publica la zona de la
+      // mascota, eso importa). Así que no podemos prometer "te lo enviamos": si el
+      // correo tiene un error de tipeo, o entró con Google, no le va a llegar nada y
+      // se queda esperando. El cartel de abajo explica los tres casos.
+      setEnviado(true)
+      onToast('Listo — si hay una cuenta con ese correo, ya salió el enlace 📬')
     } catch (e) {
       console.error('resetPasswordForEmail', e)
       onToast(traducirError(e?.message))
@@ -115,13 +121,38 @@ export default function Auth({ onCerrar, onAuth, onToast }) {
             llega nada". Casi siempre es una cuenta creada con Google, que no tiene
             contraseña — y Supabase no manda el mail (ni avisa por qué, para no revelar
             si el email existe). Decirlo acá lo resuelve sin que nos escriban. */}
-        {esRecuperar && (
+        {esRecuperar && !enviado && (
           <button type="button" className="auth-nota" onClick={conGoogle}>
             <span className="mi" style={{ fontSize: 19, color: 'var(--navy)' }}>info</span>
             <span>
               ¿Entraste con <b>Google</b>? Entonces no tenés contraseña: tocá acá para entrar con Google.
             </span>
           </button>
+        )}
+
+        {/* Después de pedirlo: qué esperar y, sobre todo, por qué puede no llegar. Sin
+            esto la persona se queda mirando la casilla sin saber que el problema puede
+            ser el tipeo del correo o que su cuenta es de Google. */}
+        {esRecuperar && enviado && (
+          <div className="auth-enviado">
+            <div className="auth-enviado-t">📬 Revisá tu correo</div>
+            <div>
+              Si hay una cuenta con <b>{email.trim()}</b>, el enlace llega en un minuto. Mirá también el <b>correo no
+              deseado</b>.
+              <br />
+              <br />
+              ¿No llega? Puede ser por tres motivos:
+              <br />• el correo está escrito distinto al de tu cuenta,
+              <br />• entraste con <b>Google</b> (no tenés contraseña), o
+              <br />• todavía no tenés cuenta.
+            </div>
+            <button type="button" className="auth-enviado-btn" onClick={conGoogle}>
+              Entrar con Google
+            </button>
+            <button type="button" className="auth-enviado-link" onClick={() => setEnviado(false)}>
+              Probar con otro correo
+            </button>
+          </div>
         )}
 
         {!esRecuperar && (
