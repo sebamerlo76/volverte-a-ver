@@ -2858,6 +2858,10 @@ select {
 .adm-reenc-wa { padding: 7px 12px; border-radius: 10px; background: var(--green); color: #fff; font-weight: 800; font-size: 12.5px; text-decoration: none; }
 .adm-reenc-tel { padding: 7px 11px; border-radius: 10px; background: #f3ece1; color: var(--navy); font-weight: 800; font-size: 12.5px; text-decoration: none; }
 .adm-reenc-mail { font-size: 12px; font-weight: 700; color: var(--faint); word-break: break-all; }
+/* Cómo se registró un usuario: lo primero que hay que mirar cuando no puede entrar */
+.adm-prov { font-weight: 800; }
+.adm-prov.google { color: var(--blue); }
+.adm-prov.mail { color: var(--muted); }
 
 /* Elegir qué se aporta a un aviso (lo vi / sé de quién es / se escapa / peligro) */
 .aporte-tipos { display: flex; flex-direction: column; gap: 9px; }

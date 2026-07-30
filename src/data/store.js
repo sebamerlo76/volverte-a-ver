@@ -581,6 +581,23 @@ export async function actualizarReporte(id, datos) {
 
 // Marca un aviso como reencontrado/resuelto (sale del listado).
 // Guarda SOLO la huella visual de un aviso (se calcula en segundo plano tras publicar).
+// Usuarios para soporte (solo admin, ver schema-usuarios-admin.sql). Sirve sobre todo
+// para saber si alguien entró con Google (no tiene contraseña) o con email.
+export async function getUsuariosAdmin() {
+  if (!supabaseConfigurado) return []
+  const { data, error } = await supabase.rpc('admin_usuarios')
+  if (error) throw error
+  return data || []
+}
+
+// Le manda a esa persona el mail para crear una contraseña nueva. Lo envía Supabase;
+// nosotros no vemos ni cambiamos contraseñas (eso necesita la clave maestra).
+export async function reenviarRecuperacion(email) {
+  if (!supabaseConfigurado || !email) return
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin })
+  if (error) throw error
+}
+
 // ---------------------------------------------------------------------------
 // Novedades (anuncios de mejoras). Lectura pública; publicar, solo el admin (RLS).
 // ---------------------------------------------------------------------------

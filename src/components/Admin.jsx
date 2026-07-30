@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getAdminStats, getAdminStatsRango, getActividadReciente, getPerdidosParaEmpujar, getActivosPorProvincia, getReencuentros, getReportes, guardarEmbeddingAdmin, getNovedades, crearNovedad, borrarNovedad } from '../data/store.js'
+import { getAdminStats, getAdminStatsRango, getActividadReciente, getPerdidosParaEmpujar, getActivosPorProvincia, getReencuentros, getReportes, guardarEmbeddingAdmin, getNovedades, crearNovedad, borrarNovedad, getUsuariosAdmin, reenviarRecuperacion } from '../data/store.js'
 import { confirmar } from '../lib/confirmar.js'
 import { tiempoRelativo, nombreMostrado, fechaLegible, linkWhatsAppReencuentro, linkTel } from '../lib/formato.js'
 import { badgeEstado } from '../lib/estados.js'
@@ -116,6 +116,37 @@ export default function Admin({ onVolver, onOpen, stats }) {
       setHuellasBusy(false)
     }
   }
+
+  // --- Usuarios (soporte): sobre todo para ver CÓMO se registró cada uno ---
+  const [usuarios, setUsuarios] = useState(null)
+  const [qUsuario, setQUsuario] = useState('')
+  const [enviandoMail, setEnviandoMail] = useState('')
+  async function cargarUsuarios() {
+    if (usuarios !== null) return // una sola vez, al abrir la sección
+    try {
+      setUsuarios(await getUsuariosAdmin())
+    } catch (e) {
+      console.error(e)
+      setUsuarios([])
+    }
+  }
+  async function mandarRecuperacion(u) {
+    if (!(await confirmar({ mensaje: `¿Enviarle a ${u.email} el mail para crear una contraseña nueva?`, aceptar: 'Enviar' }))) return
+    setEnviandoMail(u.id)
+    try {
+      await reenviarRecuperacion(u.email)
+      alert('Listo, se le envió el mail. Decile que mire también el correo no deseado.')
+    } catch (e) {
+      alert('No se pudo enviar: ' + (e?.message || 'error'))
+    } finally {
+      setEnviandoMail('')
+    }
+  }
+  const usuariosFiltrados = (usuarios || []).filter((u) => {
+    const q = qUsuario.trim().toLowerCase()
+    if (!q) return true
+    return (u.email || '').toLowerCase().includes(q) || (u.nombre || '').toLowerCase().includes(q)
+  })
 
   // --- Novedades: contar una mejora y que llegue como push ---
   const [novTitulo, setNovTitulo] = useState('')
@@ -298,6 +329,61 @@ export default function Admin({ onVolver, onOpen, stats }) {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </Sec>
+
+            <Sec
+              id="usuarios"
+              titulo="🧑 Usuarios (soporte)"
+              n={usuarios ? usuarios.length : null}
+              sub="Para cuando alguien escribe con un problema para entrar. Lo primero a mirar: si dice Google, esa cuenta NO tiene contraseña y el mail de recuperación nunca le va a llegar."
+              abierta={!!abiertas.usuarios}
+              onToggle={(id) => {
+                cargarUsuarios()
+                toggle(id)
+              }}
+            >
+              <input
+                className="fp-buscar"
+                value={qUsuario}
+                onChange={(e) => setQUsuario(e.target.value)}
+                placeholder="Buscar por correo o nombre…"
+              />
+              {usuarios === null ? (
+                <div className="adm-nota" style={{ marginTop: 8 }}>Cargando…</div>
+              ) : usuariosFiltrados.length === 0 ? (
+                <div className="adm-nota" style={{ marginTop: 8 }}>
+                  {usuarios.length === 0 ? 'No se pudieron leer los usuarios. ¿Está corrido schema-usuarios-admin.sql?' : 'Ningún usuario coincide.'}
+                </div>
+              ) : (
+                <div className="adm-lista">
+                  {usuariosFiltrados.slice(0, 60).map((u) => (
+                    <div className="adm-reenc" key={u.id}>
+                      <div className="adm-row-txt">
+                        <div className="adm-row-t">{u.email}</div>
+                        <div className="adm-row-s">
+                          <span className={'adm-prov ' + (u.proveedor === 'google' ? 'google' : 'mail')}>
+                            {u.proveedor === 'google' ? '🔵 Google' : '✉️ Contraseña'}
+                          </span>
+                          {u.nombre ? ` · ${u.nombre}` : ''} · alta {fechaLegible(u.creadoEn)}
+                          {u.ultimoAcceso ? ` · entró ${tiempoRelativo(u.ultimoAcceso)}` : ' · nunca entró'}
+                        </div>
+                      </div>
+                      {u.proveedor === 'google' ? (
+                        <span className="adm-row-s" style={{ flex: 'none', maxWidth: 96, textAlign: 'right' }}>
+                          Entra con Google
+                        </span>
+                      ) : (
+                        <button className="adm-reenc-tel" onClick={() => mandarRecuperacion(u)} disabled={enviandoMail === u.id}>
+                          {enviandoMail === u.id ? '…' : 'Enviar mail'}
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {usuariosFiltrados.length > 60 && (
+                    <div className="adm-nota">Mostrando los 60 más nuevos de {usuariosFiltrados.length}. Usá el buscador.</div>
+                  )}
                 </div>
               )}
             </Sec>
