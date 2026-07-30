@@ -3889,6 +3889,29 @@ select {
   color: #8a6f5f;
   line-height: 1.5;
 }
+/* Aviso clickeable en "Recuperar contraseña": las cuentas de Google no tienen
+   contraseña, y sin esto la gente espera un mail que nunca llega. */
+.auth-nota {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  width: calc(100% - 40px);
+  margin: 16px 20px 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #eef4fb;
+  border: 1.5px solid #cfe0f3;
+  color: var(--slate);
+  font-family: Nunito, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+  text-align: left;
+}
+.auth-nota:active {
+  background: #e3edf8;
+}
+
 /* Fila de mascota: la usa ElegirMascota ("¿cuál se perdió?"), donde una lista compacta
    es lo correcto (elegís y seguís). En Mis mascotas se usan las tarjetas de abajo. */
 .masc-row {

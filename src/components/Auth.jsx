@@ -111,6 +111,19 @@ export default function Auth({ onCerrar, onAuth, onToast }) {
           </div>
         </div>
 
+        {/* La consulta de soporte más común: "pedí recuperar la contraseña y no me
+            llega nada". Casi siempre es una cuenta creada con Google, que no tiene
+            contraseña — y Supabase no manda el mail (ni avisa por qué, para no revelar
+            si el email existe). Decirlo acá lo resuelve sin que nos escriban. */}
+        {esRecuperar && (
+          <button type="button" className="auth-nota" onClick={conGoogle}>
+            <span className="mi" style={{ fontSize: 19, color: 'var(--navy)' }}>info</span>
+            <span>
+              ¿Entraste con <b>Google</b>? Entonces no tenés contraseña: tocá acá para entrar con Google.
+            </span>
+          </button>
+        )}
+
         {!esRecuperar && (
         <>
         <button className="btn-social" onClick={conGoogle} style={{ marginTop: 22 }}>
