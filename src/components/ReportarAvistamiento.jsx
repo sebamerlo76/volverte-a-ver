@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import MapaLeaflet from './MapaLazy.jsx'
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
@@ -11,7 +11,7 @@ import { puedeEnviarAvist, registrarEnvioAvist } from '../lib/antispam.js'
 import { tieneGroseria } from '../lib/moderacion.js'
 import { TIPOS_APORTE, tipoAporte } from '../lib/aportes.js'
 
-export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onToast }) {
+export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onToast, onPasos, atrasRef }) {
   const c = puntoDeReporte(reporte)
   const [tipo, setTipo] = useState(null) // null = elegiendo qué aporta
   const [punto, setPunto] = useState({ lat: c[0], lng: c[1] })
@@ -28,6 +28,19 @@ export default function ReportarAvistamiento({ reporte, onCerrar, onEnviado, onT
     setTipo(k)
     setNota('') // los chips cambian según el tipo
   }
+
+  // El paso 2 (el detalle del aporte) cuenta como capa: así el atrás del celu vuelve
+  // a las opciones en vez de cerrar todo y volver al aviso — te hacía perder lo que
+  // estabas cargando si te equivocabas de tipo.
+  useEffect(() => {
+    onPasos?.(tipo ? 1 : 0)
+    if (atrasRef) atrasRef.current = () => setTipo(null)
+    return () => {
+      onPasos?.(0)
+      if (atrasRef) atrasRef.current = null
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tipo])
 
   async function enviar() {
     // Honeypot: un humano no ve este campo; si vino lleno, es un bot → fingimos éxito.

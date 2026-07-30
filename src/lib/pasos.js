@@ -4,7 +4,11 @@
 // de logins y el flag de "ya completó todo".
 
 const LS_LOGINS = 'chicho_logins'
-const LS_PASOS = 'chicho_pasos' // { compartir, redes }
+// { compartir, redes, sinMascotas }. sinMascotas = "no tengo mascotas por ahora":
+// el vecino que solo quiere ayudar no podía tildar el paso de mascotas y le quedaba
+// el aviso de "primeros pasos" para siempre. Y es el usuario más valioso de la red:
+// es el que recibe los avisos y ve a los animales en la calle.
+const LS_PASOS = 'chicho_pasos'
 const LS_OK = 'chicho_pasos_ok'
 
 export const INSTAGRAM_URL = 'https://instagram.com/chicho.ar'

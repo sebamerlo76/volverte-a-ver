@@ -13,6 +13,9 @@ export default function PrimerosPasos({ user, onIrSeccion, onNuevaMascota, onCom
   const [compartir, setCompartir] = useState(pasoHecho('compartir'))
   const [redes, setRedes] = useState(pasoHecho('redes'))
   const [redesAbierto, setRedesAbierto] = useState(false)
+  // "No tengo mascotas por ahora": sin esto, el vecino que solo quiere ayudar nunca
+  // completaba los pasos y le quedaba el aviso de la campana para siempre.
+  const [sinMascotas, setSinMascotas] = useState(pasoHecho('sinMascotas'))
 
   useEffect(() => {
     let vivo = true
@@ -32,7 +35,8 @@ export default function PrimerosPasos({ user, onIrSeccion, onNuevaMascota, onCom
     }
   }, [user?.id])
 
-  const hechos = [ubic, masc, push, compartir, redes].filter(Boolean).length
+  const mascOk = masc || sinMascotas // cargó alguna, o dijo que no tiene
+  const hechos = [ubic, mascOk, push, compartir, redes].filter(Boolean).length
   const total = 5
   const completo = !cargando && hechos === total
 
@@ -73,9 +77,26 @@ export default function PrimerosPasos({ user, onIrSeccion, onNuevaMascota, onCom
     setRedesAbierto(false)
   }
 
+  function noTengoMascotas() {
+    marcarPaso('sinMascotas')
+    setSinMascotas(true)
+    onToast?.('👍 Listo. Si algún día tenés una, la cargás desde Mis mascotas')
+  }
+
   const PASOS = [
     { done: ubic, ic: 'location_on', t: 'Cargá tu ubicación', s: 'Para enterarte de avisos cerca tuyo', btn: 'Cargar', accion: () => onIrSeccion('ubicaciones') },
-    { done: masc, ic: 'pets', t: 'Cargá tus mascotas', s: 'Si una se pierde, la publicás en 1 toque', btn: 'Cargar', accion: onNuevaMascota },
+    {
+      done: mascOk,
+      ic: 'pets',
+      // Si dijo que no tiene, el título lo refleja (no queda un "cargá tus mascotas" tildado, que confunde).
+      t: !masc && sinMascotas ? 'Sin mascotas por ahora' : 'Cargá tus mascotas',
+      s: 'Si una se pierde, la publicás en 1 toque',
+      btn: 'Cargar',
+      accion: onNuevaMascota,
+      // Segundo botón: para el que solo quiere ayudar.
+      btn2: 'No tengo',
+      accion2: noTengoMascotas,
+    },
     { done: push, ic: 'notifications', t: 'Activá las notificaciones', s: 'Recibí avisos de perdidos y encontrados', btn: 'Activar', accion: () => onIrSeccion('notificaciones') },
     { done: compartir, ic: 'share', t: 'Compartí Chicho', s: 'Cuanta más gente, más rápido vuelven a casa', btn: 'Compartir', accion: compartirApp },
   ]
@@ -111,9 +132,16 @@ export default function PrimerosPasos({ user, onIrSeccion, onNuevaMascota, onCom
               {!p.done && <div className="pp-row-s">{p.s}</div>}
             </div>
             {!p.done && (
-              <button className="pp-btn" onClick={p.accion}>
-                {p.btn}
-              </button>
+              <div className="pp-btns">
+                <button className="pp-btn" onClick={p.accion}>
+                  {p.btn}
+                </button>
+                {p.btn2 && (
+                  <button className="pp-btn-sec" onClick={p.accion2}>
+                    {p.btn2}
+                  </button>
+                )}
+              </div>
             )}
           </div>
         ))}

@@ -9,6 +9,7 @@ import NotifPrefs from './NotifPrefs.jsx'
 import MisUbicaciones from './MisUbicaciones.jsx'
 import PrimerosPasos from './PrimerosPasos.jsx'
 import { confirmar } from '../lib/confirmar.js'
+import { pasoHecho, marcarPaso } from '../lib/pasos.js'
 
 const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
 // A partir de acá ofrecemos renovar. Tiene que coincidir con el primer recordatorio
@@ -71,6 +72,15 @@ export default function MiCuenta({
       setRenovando(null)
     }
   }
+  // "No tengo mascotas por ahora": tilda el paso de mascotas para el vecino que solo
+  // quiere ayudar (si no, el aviso de primeros pasos no se apaga nunca).
+  const [, setRefrescar] = useState(0)
+  function marcarSinMascotas() {
+    marcarPaso('sinMascotas')
+    setRefrescar((n) => n + 1) // el flag vive en localStorage: forzamos el repintado
+    onToast?.('👍 Listo. Si algún día tenés una, la cargás desde acá')
+  }
+
   // Foto del reencuentro a posteriori: muchos la suben días después del festejo.
   // Apenas la eligen (ya recortada), se sube sin más pasos.
   const [fotoReencId, setFotoReencId] = useState(null) // aviso con el selector abierto
@@ -426,9 +436,18 @@ export default function MiCuenta({
                 Cargando…
               </div>
             ) : mascotas.length === 0 ? (
-              <div className="masc-vacio">
-                Cargá tu perro o gato acá 🐾 Si algún día se pierde, lo publicás al toque, sin llenar todo de nuevo.
-              </div>
+              <>
+                <div className="masc-vacio">
+                  Cargá tu perro o gato acá 🐾 Si algún día se pierde, lo publicás al toque, sin llenar todo de nuevo.
+                </div>
+                {/* El que solo quiere ayudar puede cerrar el tema acá: si no, le queda
+                    el aviso de "primeros pasos" para siempre. */}
+                {!pasoHecho('sinMascotas') && (
+                  <button className="masc-notengo" onClick={marcarSinMascotas}>
+                    No tengo mascotas por ahora
+                  </button>
+                )}
+              </>
             ) : (
               (() => {
                 const propias = mascotas.filter((m) => m.relacion !== 'transito')

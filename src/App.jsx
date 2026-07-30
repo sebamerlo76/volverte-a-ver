@@ -120,7 +120,7 @@ export default function App() {
   const profundidad =
     nivelVista(vista) +
     (vista === 'feed' && homeModo === 'mapa' ? 1 : 0) +
-    (vista === 'post-encontre' ? wizPasos : 0) +
+    (vista === 'post-encontre' || vista === 'avistamiento' ? wizPasos : 0) +
     (fotosVer ? 1 : 0) +
     (modalAbierto ? 1 : 0)
   const backRef = useRef({ hayCapa: false })
@@ -151,6 +151,9 @@ export default function App() {
       case 'detalle':
         return setVista(s.detalleOrigen)
       case 'avistamiento':
+        // Dentro del aporte, atrás vuelve a elegir el tipo (no cierra todo).
+        if (s.wizPasos > 0 && wizAtrasRef.current) return wizAtrasRef.current()
+        return setVista('detalle')
       case 'recorrido':
         return setVista('detalle')
       case 'post-encontre':
@@ -732,10 +735,12 @@ export default function App() {
             onCerrar={() => setVista('detalle')}
             onEnviado={() => {
               setVista('detalle')
-              mostrarToast('👀 ¡Gracias! Tu avistamiento se sumó al recorrido')
+              mostrarToast('🙌 ¡Gracias! Tu dato ya le llegó a la familia')
               if (!logueado) setCartelReporte(seleccionado)
             }}
             onToast={mostrarToast}
+            onPasos={setWizPasos}
+            atrasRef={wizAtrasRef}
           />
         )}
         {vista === 'recorrido' && seleccionado && (
