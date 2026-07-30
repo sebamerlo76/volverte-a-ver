@@ -109,6 +109,34 @@
         <div class="s">Mascotas perdidas y encontradas 🐾</div>
       </div>
     </div>
+    <!-- Pedimos el feed ACÁ, apenas se lee el HTML, en paralelo con la descarga del
+         JS. Si esperamos a que React monte, en un celu lento se pierden 2-3 s antes
+         de siquiera saber qué fotos hay que bajar — y la primera foto es el LCP.
+         store.js consume esta promesa (window.__feedPre) en getReportes().
+         Las columnas están duplicadas de COLS_FEED: si tocás una, tocá las dos
+         (test/cols-feed.test.mjs falla si se desincronizan). -->
+    <script>
+      ;(function () {
+        var u = '%VITE_SUPABASE_URL%'
+        var k = '%VITE_SUPABASE_ANON_KEY%'
+        // Sin variables de entorno (el demo) Vite deja el literal con %: no precargamos.
+        if (u.indexOf('%') !== -1 || k.indexOf('%') !== -1) return
+        var cols =
+          'id,tipo,especie,nombre,zona,referencia,color,tamano,raza,descripcion,foto,fotos,whatsapp,autor,fecha_evento,creado_en,estado,user_id,mascota_id,sexo,edad,collar,recompensa,lat,lng,en_custodia,localidad,apoyos,aplausos,resuelto_en,recordatorio_en'
+        var url =
+          u +
+          '/rest/v1/reportes?select=' +
+          cols +
+          '&estado=eq.activo&oculto=eq.false&bloqueado=eq.false&order=creado_en.desc'
+        window.__feedPre = fetch(url, { headers: { apikey: k, Authorization: 'Bearer ' + k } })
+          .then(function (r) {
+            return r.ok ? r.json() : null
+          })
+          .catch(function () {
+            return null // sin conexión o error: el store lo pide de nuevo por el camino normal
+          })
+      })()
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

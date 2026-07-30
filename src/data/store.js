@@ -108,12 +108,31 @@ function guardarLocal(reportes) {
 // foto, que la pide aparte con getEmbeddingsDe(). Bajarla en cada carga del feed
 // inflaba la respuesta (~1s de fetch en mobile) y empeoraba el LCP. Si sumás una
 // columna que desdeFila necesite, agregala también acá.
-const COLS_FEED =
+// OJO: esta lista está DUPLICADA en index.html (el precargado del feed). Si cambiás
+// una columna acá, cambiala allá — test/cols-feed.test.mjs falla si se desincronizan.
+export const COLS_FEED =
   'id, tipo, especie, nombre, zona, referencia, color, tamano, raza, descripcion, foto, fotos, whatsapp, autor, fecha_evento, creado_en, estado, user_id, mascota_id, sexo, edad, collar, recompensa, lat, lng, en_custodia, localidad, apoyos, aplausos, resuelto_en, recordatorio_en'
+
+// Toma el feed que index.html pidió apenas se leyó la página (en paralelo con la
+// descarga del JS). Se consume UNA sola vez: las recargas posteriores van por
+// Supabase normal. Si falló o no existe, devuelve null y seguimos como siempre.
+function feedPrecargado() {
+  const p = typeof window !== 'undefined' ? window.__feedPre : null
+  if (!p) return null
+  window.__feedPre = null
+  return p
+}
 
 // Reportes activos (los resueltos/reencontrados no se muestran), más nuevo primero.
 export async function getReportes() {
   if (supabaseConfigurado) {
+    const pre = feedPrecargado()
+    if (pre) {
+      const filas = await pre
+      // Sólo lo usamos si trajo algo con forma de aviso; ante cualquier duda, pedimos
+      // de nuevo por el camino normal (nunca mostrar el feed vacío por una precarga rara).
+      if (Array.isArray(filas) && (filas.length === 0 || filas[0]?.id)) return filas.map(desdeFila)
+    }
     const { data, error } = await supabase
       .from('reportes')
       .select(COLS_FEED)
