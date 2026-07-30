@@ -581,6 +581,21 @@ export async function actualizarReporte(id, datos) {
 
 // Marca un aviso como reencontrado/resuelto (sale del listado).
 // Guarda SOLO la huella visual de un aviso (se calcula en segundo plano tras publicar).
+// Quién publicó un aviso (solo admin, para soporte). Ver schema-admin-aviso.sql.
+export async function getContactoReporte(id) {
+  if (!supabaseConfigurado || !id) return null
+  const { data, error } = await supabase.rpc('admin_contacto_reporte', { rid: id })
+  if (error) throw error
+  return data || null
+}
+
+// Cerrar un aviso como admin, cuando la familia no puede entrar a hacerlo.
+export async function resolverReporteAdmin(id) {
+  if (!supabaseConfigurado || !id) return
+  const { error } = await supabase.rpc('admin_resolver_reporte', { rid: id })
+  if (error) throw error
+}
+
 // Usuarios para soporte (solo admin, ver schema-usuarios-admin.sql). Sirve sobre todo
 // para saber si alguien entró con Google (no tiene contraseña) o con email.
 export async function getUsuariosAdmin() {

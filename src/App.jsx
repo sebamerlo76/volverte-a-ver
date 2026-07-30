@@ -36,7 +36,7 @@ const MenuUsuario = lazy(() => import('./components/MenuUsuario.jsx'))
 const WelcomeGuide = lazy(() => import('./components/WelcomeGuide.jsx'))
 const Soporte = lazy(() => import('./components/Soporte.jsx'))
 const Lightbox = lazy(() => import('./components/Lightbox.jsx'))
-import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, borrarReporteAdmin, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte, getUbicaciones, marcarCompartido } from './data/store.js'
+import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, borrarReporteAdmin, resolverReporteAdmin, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte, getUbicaciones, marcarCompartido } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { contarLogin, logins, pasosOk } from './lib/pasos.js'
 import { nombreMostrado } from './lib/formato.js'
@@ -617,6 +617,22 @@ export default function App() {
     }
   }
 
+  // Cerrar un aviso ajeno como admin: cuando la mascota ya apareció pero la familia no
+  // puede entrar a marcarlo. Termina igual que si lo cerrara ella (festejo incluido).
+  async function resolverAdmin(rep) {
+    if (!rep) return
+    if (!(await confirmar({ mensaje: `¿Marcar el aviso de ${nombreMostrado(rep)} como "Ya en casa"?`, aceptar: 'Marcar' }))) return
+    try {
+      await resolverReporteAdmin(rep.id)
+      await cargar()
+      setFestejo({ ...rep, estado: 'resuelto' })
+      mostrarToast('🏠 Aviso cerrado')
+    } catch (e) {
+      console.error(e)
+      mostrarToast('No se pudo cerrar 😕')
+    }
+  }
+
   // --- Flujo de publicar (dos caminos) ---
   function elegirMascotaPerdida(m) {
     setPlantilla({ ...m, tipo: 'perdido', mascotaId: m.id })
@@ -757,6 +773,7 @@ export default function App() {
             esMio={esMio}
             esAdmin={esAdmin}
             onBorrarAdmin={borrarAdmin}
+            onResolverAdmin={resolverAdmin}
             puedeSeguir={!esMio}
             siguiendo={seleccionado ? seguidos.includes(seleccionado.id) : false}
             onSeguir={() => toggleSeguir(seleccionado)}

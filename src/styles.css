@@ -2859,6 +2859,13 @@ select {
 .adm-reenc-tel { padding: 7px 11px; border-radius: 10px; background: #f3ece1; color: var(--navy); font-weight: 800; font-size: 12.5px; text-decoration: none; }
 .adm-reenc-mail { font-size: 12px; font-weight: 700; color: var(--faint); word-break: break-all; }
 /* Cómo se registró un usuario: lo primero que hay que mirar cuando no puede entrar */
+/* Caja de admin dentro de un aviso ajeno (contacto + cerrar/borrar) */
+.adm-aviso { margin: 6px 20px 2px; padding: 12px 14px; border: 1.5px dashed #d9cfc4; border-radius: 14px; background: #fbf7f2; }
+.adm-aviso-t { font-size: 12px; font-weight: 900; color: #7a6f66; text-transform: uppercase; letter-spacing: 0.3px; }
+.adm-aviso-link { margin-top: 6px; padding: 0; background: none; color: var(--navy); font-family: Nunito, sans-serif; font-size: 13px; font-weight: 800; text-decoration: underline; }
+.adm-aviso-datos { margin-top: 6px; font-size: 12.5px; font-weight: 700; color: var(--slate); line-height: 1.5; word-break: break-word; }
+.adm-aviso-acc { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.adm-aviso-ok { display: inline-flex; align-items: center; gap: 5px; padding: 8px 13px; border-radius: 10px; background: var(--green); color: #fff; font-family: Nunito, sans-serif; font-size: 12.5px; font-weight: 800; }
 .adm-prov { font-weight: 800; }
 .adm-prov.google { color: var(--blue); }
 .adm-prov.mail { color: var(--muted); }

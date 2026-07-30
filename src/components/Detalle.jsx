@@ -3,7 +3,7 @@ import MapaLeaflet from './MapaLazy.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { badgeEstado, subLinea, textoTipo } from '../lib/estados.js'
-import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero } from '../data/store.js'
+import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero, getContactoReporte } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel } from '../lib/formato.js'
 import { tipoAporte, aporteEnMapa } from '../lib/aportes.js'
 import { compartirFlyer } from '../lib/flyer.js'
@@ -95,7 +95,21 @@ function marcarReporteNum(w) {
   }
 }
 
-export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir, siguiendo, onSeguir, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar, onVerFotos }) {
+export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, onResolverAdmin, puedeSeguir, siguiendo, onSeguir, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar, onVerFotos }) {
+  // Contacto de quien publicó (solo admin, a pedido: no lo cargamos siempre)
+  const [contacto, setContacto] = useState(null)
+  const [cargandoContacto, setCargandoContacto] = useState(false)
+  async function verContacto() {
+    setCargandoContacto(true)
+    try {
+      setContacto((await getContactoReporte(r.id)) || { email: '' })
+    } catch (e) {
+      console.error(e)
+      onToast?.('No se pudo leer. ¿Está corrido schema-admin-aviso.sql?')
+    } finally {
+      setCargandoContacto(false)
+    }
+  }
   const [avist, setAvist] = useState([])
   const [fotoActiva, setFotoActiva] = useState(0)
   const [apoyos, setApoyos] = useState(r?.apoyos || 0)
@@ -518,12 +532,44 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, puedeSeguir,
             Reportar este aviso
           </button>
         </div>
+        {/* Herramientas de admin sobre un aviso ajeno. Nacieron de un caso real: una
+            mascota ya había aparecido pero el aviso seguía activo porque la familia no
+            podía entrar a su cuenta. Borrarlo perdía el reencuentro; ahora se puede
+            cerrar bien, y ver con qué correo publicó para poder ayudarla a entrar. */}
         {esAdmin && !esMio && (
-          <div style={{ textAlign: 'center', padding: '4px 20px 2px' }}>
-            <button className="btn-admin-borrar" onClick={() => onBorrarAdmin(r.id)}>
-              <span className="mi" style={{ fontSize: 16 }}>shield</span>
-              Borrar (admin)
-            </button>
+          <div className="adm-aviso">
+            <div className="adm-aviso-t">🛡️ Admin</div>
+            {contacto === null ? (
+              <button className="adm-aviso-link" onClick={verContacto} disabled={cargandoContacto}>
+                {cargandoContacto ? 'Buscando…' : '¿Quién publicó esto?'}
+              </button>
+            ) : (
+              <div className="adm-aviso-datos">
+                <div>
+                  <b>{contacto.email || 'sin cuenta'}</b>
+                  {contacto.proveedor && (
+                    <span className={'adm-prov ' + (contacto.proveedor === 'google' ? 'google' : 'mail')}>
+                      {' · '}
+                      {contacto.proveedor === 'google' ? '🔵 Google' : '✉️ Contraseña'}
+                    </span>
+                  )}
+                </div>
+                {contacto.nombre ? <div>{contacto.nombre}</div> : null}
+                {contacto.ultimoAcceso ? <div>Entró {tiempoRelativo(contacto.ultimoAcceso)}</div> : <div>Nunca entró</div>}
+              </div>
+            )}
+            <div className="adm-aviso-acc">
+              {!resuelto && (
+                <button className="adm-aviso-ok" onClick={() => onResolverAdmin(r)}>
+                  <span className="mi fill" style={{ fontSize: 16 }}>home</span>
+                  Marcar "Ya en casa"
+                </button>
+              )}
+              <button className="btn-admin-borrar" onClick={() => onBorrarAdmin(r.id)}>
+                <span className="mi" style={{ fontSize: 16 }}>shield</span>
+                Borrar
+              </button>
+            </div>
           </div>
         )}
         <div style={{ height: 18 }} />
