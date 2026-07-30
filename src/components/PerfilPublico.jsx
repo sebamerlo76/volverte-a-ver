@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getPerfilPublico, addAvistamiento } from '../data/store.js'
+import { numeroWa } from '../lib/formato.js'
 
 const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
 
@@ -84,9 +85,11 @@ export default function PerfilPublico({ id }) {
   }
 
   const nombre = m.nombre || (m.especie === 'gato' ? 'Gato' : 'Perro')
-  const wa = (m.whatsapp || '').replace(/\D/g, '')
+  // El número va normalizado (numeroWa): acá un contacto roto es lo más caro de todo
+  // — es la pantalla que ve quien encontró a la mascota y escaneó la chapita.
+  const wa = numeroWa(m.whatsapp)
   const texto = encodeURIComponent(`¡Hola! Encontré a ${nombre} 🐾 (por el QR de Chicho). ¿Dónde te lo llevo?`)
-  const waLink = wa ? `https://wa.me/54${wa}?text=${texto}` : null
+  const waLink = wa ? `https://wa.me/${wa}?text=${texto}` : null
 
   return (
     <div className="app-shell">

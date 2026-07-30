@@ -69,13 +69,42 @@ export function nombreUsuario(user) {
   return user?.user_metadata?.full_name || user?.user_metadata?.name || ''
 }
 
+// Número argentino listo para wa.me / tel:, a partir de lo que sea que escribió la
+// persona. Antes pegábamos '54' + los dígitos tal cual, y el link se rompía en los
+// casos MÁS comunes: si copiaba su número de WhatsApp con el +54 quedaba 5454…, y el
+// 0 del área (0343) y el 15 (343 15 405…) también lo rompían. Un aviso con el
+// contacto roto es un aviso inútil: nadie puede avisarle a la familia.
+//
+// Formato que quiere WhatsApp para móviles argentinos: 54 + 9 + área (sin 0) +
+// abonado (sin 15). Devuelve '' si no hay nada usable.
+export function numeroWa(whatsapp) {
+  let n = (whatsapp || '').replace(/\D/g, '')
+  if (!n) return ''
+  n = n.replace(/^00/, '') // prefijo internacional escrito a mano
+  // País: ningún código de área argentino empieza con 54, así que si está adelante es el país.
+  if (n.startsWith('54')) n = n.slice(2)
+  if (n.startsWith('9')) n = n.slice(1) // el 9 de móvil: lo ponemos nosotros al final
+  if (n.startsWith('0')) n = n.slice(1) // 0343 → 343
+  // El 15 va entre el área (2 a 4 dígitos) y el abonado. Un nacional válido tiene 10
+  // dígitos; si hay 12, sobra un 15 en medio.
+  if (n.length === 12) {
+    for (const largoArea of [2, 3, 4]) {
+      if (n.slice(largoArea, largoArea + 2) === '15') {
+        n = n.slice(0, largoArea) + n.slice(largoArea + 2)
+        break
+      }
+    }
+  }
+  return n ? '549' + n : ''
+}
+
 // Arma el link de WhatsApp con un mensaje ya escrito.
 export function linkWhatsApp(r) {
   const nombre = nombreMostrado(r)
   const lugar = [r.zona, r.localidad].filter(Boolean).join(', ')
   const texto = `Hola! Vi el reporte de ${nombre} en Chicho${lugar ? ` (${lugar})` : ''}. ¿Tenés novedades?`
-  const numero = (r.whatsapp || '').replace(/\D/g, '')
-  const base = numero ? `https://wa.me/54${numero}` : 'https://wa.me/'
+  const numero = numeroWa(r.whatsapp)
+  const base = numero ? `https://wa.me/${numero}` : 'https://wa.me/'
   return `${base}?text=${encodeURIComponent(texto)}`
 }
 
@@ -84,24 +113,24 @@ export function linkWhatsApp(r) {
 export function linkWhatsAppReencuentro(r) {
   const nombre = nombreMostrado(r)
   const texto = `¡Hola! Te escribo de Chicho 🐾 Vi que ${nombre} volvió a casa, ¡qué alegría! ¿Nos das permiso para compartir el reencuentro en nuestro Instagram (@chicho.ar)? Y si tenés un minuto, nos encantaría saber cómo fue tu experiencia con la app 🙏`
-  const numero = (r.whatsapp || '').replace(/\D/g, '')
-  const base = numero ? `https://wa.me/54${numero}` : 'https://wa.me/'
+  const numero = numeroWa(r.whatsapp)
+  const base = numero ? `https://wa.me/${numero}` : 'https://wa.me/'
   return `${base}?text=${encodeURIComponent(texto)}`
 }
 
 // Link para llamar por teléfono (usa el mismo número que el WhatsApp).
 export function linkTel(whatsapp) {
-  const numero = (whatsapp || '').replace(/\D/g, '')
-  return numero ? `tel:+54${numero}` : null
+  const numero = numeroWa(whatsapp)
+  return numero ? `tel:+${numero}` : null
 }
 
 // Link para que la familia le escriba a quien dejó un avistamiento.
 export function linkWhatsAppAvist(whatsapp, reporte) {
-  const numero = (whatsapp || '').replace(/\D/g, '')
+  const numero = numeroWa(whatsapp)
   if (!numero) return null
   const nombre = reporte ? nombreMostrado(reporte) : 'mi mascota'
   const texto = `Hola! Soy la familia de ${nombre} (Chicho). Vi que dejaste un avistamiento, ¿me podés contar más? 🙏`
-  return `https://wa.me/54${numero}?text=${encodeURIComponent(texto)}`
+  return `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`
 }
 
 // Cómo llegar: abren la navegación hasta un punto. Links universales (abren la
