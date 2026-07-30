@@ -22,4 +22,12 @@ await gen(512, 'public/icon-512.png')
 await gen(192, 'public/icon-192.png')
 await gen(180, 'public/apple-touch-icon.png')
 await gen(512, 'public/icon-maskable-512.png') // maskable: mismo diseño (el margen 0.72 ya es zona segura)
+
+// Logo de la pantalla de arranque (index.html): el logo.png completo pesa 57 KB y es
+// lo PRIMERO que se baja; a 176 px (88 CSS en pantallas retina) pesa 6 KB. Sin fondo:
+// se recorta sobre la crema del splash.
+await sharp('public/logo.png')
+  .resize(176, 176, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+  .png({ quality: 82, compressionLevel: 9 })
+  .toFile('public/logo-boot.png')
 console.log('Íconos PWA generados con margen (safe zone para maskable)')
