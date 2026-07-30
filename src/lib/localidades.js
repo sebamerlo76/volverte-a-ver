@@ -139,6 +139,19 @@ export const LOCALIDADES = {
       'Oeste': [-31.735, -60.318],
     },
   },
+  'Diamante': {
+    // Cabecera del departamento homónimo, sobre el Paraná (~45 km al sur de Paraná).
+    // Lejos del radio de 20 km, así que funciona como localidad propia.
+    center: [-32.0669, -60.6431],
+    barrios: {
+      'Centro': [-32.0669, -60.6431],
+      'Norte': [-32.0579, -60.6431],
+      'Sur': [-32.0759, -60.6431],
+      'Este': [-32.0669, -60.6325],
+      'Oeste': [-32.0669, -60.6537],
+      'Puerto': [-32.0705, -60.6520],
+    },
+  },
   'Oro Verde': {
     // Pegada a Paraná (~9 km al sur). Centro real del municipio (OSM); a <20 km,
     // así que el alcance por distancia la trata como vecina de Paraná sola.
@@ -246,6 +259,7 @@ const PROVINCIA_POR_CIUDAD = {
   'Sauce Montrull': 'Entre Ríos',
   'La Picada': 'Entre Ríos',
   'Oro Verde': 'Entre Ríos',
+  'Diamante': 'Entre Ríos',
   'Córdoba': 'Córdoba',
   'Neuquén': 'Neuquén',
   'San Martín de los Andes': 'Neuquén',

@@ -70,6 +70,7 @@ const CENTROS: Record<string, [number, number]> = {
   'Sauce Montrull': [-31.745, -60.355],
   'La Picada': [-31.735, -60.309],
   'Oro Verde': [-31.8237, -60.5159],
+  'Diamante': [-32.0669, -60.6431],
   'Neuquén': [-38.9516, -68.0591],
   'San Martín de los Andes': [-40.1579, -71.3534],
   'Olavarría': [-36.8937, -60.3233],
