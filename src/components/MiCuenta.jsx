@@ -465,7 +465,7 @@ export default function MiCuenta({
                     <div className={'masc-card' + (perdido ? ' buscando' : '')} key={m.id}>
                       <button className="masc-card-foto" onClick={() => onEditarMascota(m)} aria-label={`Editar ${m.nombre || 'mascota'}`}>
                         {m.foto ? (
-                          <img src={fotoOptimizada(m.foto, 400)} alt={m.nombre || ''} loading="lazy" onError={(e) => (e.target.style.display = 'none')} />
+                          <img src={fotoOptimizada(m.foto)} alt={m.nombre || ''} loading="lazy" onError={(e) => (e.target.style.display = 'none')} />
                         ) : (
                           <span className="mi fill" style={{ fontSize: 40, color: '#c9a58f' }}>pets</span>
                         )}

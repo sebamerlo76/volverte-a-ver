@@ -2585,13 +2585,13 @@ select {
 }
 .masc-aparecio {
   width: 100%;
-  margin-top: 8px;
-  min-height: 36px;
-  padding: 6px 8px;
+  margin-top: 10px;
+  min-height: 40px;
+  padding: 7px 10px;
   border-radius: 12px;
   background: var(--green);
   color: #fff;
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -3941,11 +3941,13 @@ select {
    que priorizamos la foto sobre la densidad. El ESTADO va como chip sobre la foto y
    la ACCIÓN como botón abajo: antes un botón rojo "Se me perdió" pegado al nombre se
    leía como si la mascota estuviera perdida. */
+/* Una tarjeta por fila, igual que el feed: son pocas mascotas y así la foto se ve
+   grande (mismo lenguaje visual que el inicio, no una pantalla aparte). */
 .masc-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  padding: 10px 20px 0;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  padding: 14px 20px 0;
 }
 .masc-card {
   background: #fff;
@@ -3963,7 +3965,7 @@ select {
 .masc-card-foto {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 2 / 1; /* apaisada, igual que la tarjeta del feed */
   background: #f6efe9;
   display: flex;
   align-items: center;
@@ -3978,14 +3980,14 @@ select {
 }
 .masc-chip {
   position: absolute;
-  left: 7px;
-  bottom: 7px;
-  max-width: calc(100% - 14px); /* que nunca se salga de la tarjeta en celus angostos */
-  padding: 4px 9px;
+  left: 10px;
+  bottom: 10px;
+  max-width: calc(100% - 20px); /* que nunca se salga de la tarjeta en celus angostos */
+  padding: 5px 11px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.94);
   color: #4a4038;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
   overflow: hidden;
@@ -3997,7 +3999,7 @@ select {
   color: #fff;
 }
 .masc-card-body {
-  padding: 9px 11px 11px;
+  padding: 11px 14px 13px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -4005,7 +4007,7 @@ select {
 .masc-card-nombre {
   font-family: Fredoka, sans-serif;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 18px;
   color: var(--navy);
   text-align: left;
   overflow: hidden;
@@ -4026,13 +4028,13 @@ select {
   justify-content: center;
   gap: 5px;
   width: 100%;
-  margin-top: 8px;
-  min-height: 36px;
-  padding: 6px 8px;
+  margin-top: 10px;
+  min-height: 40px;
+  padding: 7px 10px;
   border-radius: 12px;
   background: #fff1ee;
   color: var(--coral-strong);
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 800;
   line-height: 1.2;
   text-align: center;
