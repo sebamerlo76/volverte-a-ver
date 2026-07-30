@@ -1,27 +1,40 @@
 /* global __BUILD_ID__ */
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+// De arranque va SOLO lo que se ve al abrir la app: el feed, su tarjeta y la barra.
+// Todo lo demás se baja cuando se usa (code splitting).
+//
+// Por qué: el bundle inicial pesaba 655 KB y PageSpeed móvil (que simula 4G lenta +
+// CPU 4x más lenta) daba 58 de rendimiento con el LCP en 11,5 s de laboratorio: las
+// fotos son el último eslabón de la cadena, el cuello era bajar y ejecutar todo ese
+// JS. Y el público de Chicho entra desde un celu modesto con datos móviles, muchas
+// veces en la calle buscando a su mascota.
 import Feed from './components/Feed.jsx'
-import Detalle from './components/Detalle.jsx'
-import Publicar from './components/Publicar.jsx'
-import Auth from './components/Auth.jsx'
-import MiCuenta from './components/MiCuenta.jsx'
-import MascotaForm from './components/MascotaForm.jsx'
-import ChapitaQR from './components/ChapitaQR.jsx'
-import IntentPublicar from './components/IntentPublicar.jsx'
-import ElegirMascota from './components/ElegirMascota.jsx'
-import EncontreWizard from './components/EncontreWizard.jsx'
-import ReportarAvistamiento from './components/ReportarAvistamiento.jsx'
-import MapaRecorrido from './components/MapaRecorrido.jsx'
-import BuscadorOverlay from './components/BuscadorOverlay.jsx'
 import BottomNav from './components/BottomNav.jsx'
-import NotifPanel from './components/NotifPanel.jsx'
-import MenuUsuario from './components/MenuUsuario.jsx'
-import WelcomeGuide from './components/WelcomeGuide.jsx'
-import Admin from './components/Admin.jsx'
-import Moderacion from './components/Moderacion.jsx'
-import Soporte from './components/Soporte.jsx'
-import Lightbox from './components/Lightbox.jsx'
-import NuevaPassword from './components/NuevaPassword.jsx'
+import Detalle from './components/Detalle.jsx' // se abre en cada toque del feed: va de arranque
+
+// Vistas (reemplazan la pantalla): segundas pantallas, nadie las ve en la 1ª carga.
+const Publicar = lazy(() => import('./components/Publicar.jsx'))
+const Auth = lazy(() => import('./components/Auth.jsx'))
+const MiCuenta = lazy(() => import('./components/MiCuenta.jsx'))
+const MascotaForm = lazy(() => import('./components/MascotaForm.jsx'))
+const ChapitaQR = lazy(() => import('./components/ChapitaQR.jsx'))
+const IntentPublicar = lazy(() => import('./components/IntentPublicar.jsx'))
+const ElegirMascota = lazy(() => import('./components/ElegirMascota.jsx'))
+const EncontreWizard = lazy(() => import('./components/EncontreWizard.jsx'))
+const ReportarAvistamiento = lazy(() => import('./components/ReportarAvistamiento.jsx'))
+const MapaRecorrido = lazy(() => import('./components/MapaRecorrido.jsx'))
+const Admin = lazy(() => import('./components/Admin.jsx'))
+const Moderacion = lazy(() => import('./components/Moderacion.jsx'))
+const NuevaPassword = lazy(() => import('./components/NuevaPassword.jsx'))
+
+// Modales y hojas (se abren encima): van con fallback null, aparecen al instante
+// siguiente sin tapar lo que se está viendo.
+const BuscadorOverlay = lazy(() => import('./components/BuscadorOverlay.jsx'))
+const NotifPanel = lazy(() => import('./components/NotifPanel.jsx'))
+const MenuUsuario = lazy(() => import('./components/MenuUsuario.jsx'))
+const WelcomeGuide = lazy(() => import('./components/WelcomeGuide.jsx'))
+const Soporte = lazy(() => import('./components/Soporte.jsx'))
+const Lightbox = lazy(() => import('./components/Lightbox.jsx'))
 import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, borrarReporteAdmin, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte, getUbicaciones, marcarCompartido } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { contarLogin, logins, pasosOk } from './lib/pasos.js'
@@ -29,10 +42,22 @@ import { nombreMostrado } from './lib/formato.js'
 import { scopeFeedGuardado, provinciaDe, recordarLocalidad, avisoEnZona } from './lib/localidades.js'
 import { confirmar } from './lib/confirmar.js'
 import { compartirFlyer } from './lib/flyer.js'
-import FestejoReencuentro from './components/FestejoReencuentro.jsx'
-import PedirAvisos from './components/PedirAvisos.jsx'
 import { decidirModo as decidirModoAvisos } from './lib/avisos-push.js'
-import CompartiAhora from './components/CompartiAhora.jsx'
+const FestejoReencuentro = lazy(() => import('./components/FestejoReencuentro.jsx'))
+const PedirAvisos = lazy(() => import('./components/PedirAvisos.jsx'))
+const CompartiAhora = lazy(() => import('./components/CompartiAhora.jsx'))
+
+// Pantalla de espera mientras baja el código de una vista (una sola vez por vista;
+// después queda en la caché del navegador).
+function CargandoVista() {
+  return (
+    <div className="view">
+      <div className="body">
+        <div className="empty" style={{ padding: '40px 30px' }}>Cargando…</div>
+      </div>
+    </div>
+  )
+}
 
 export default function App() {
   const [vista, setVista] = useState('feed') // feed | detalle | post | auth | cuenta | avistamiento | recorrido
@@ -685,6 +710,9 @@ export default function App() {
             Hay una versión nueva — <b>&nbsp;Actualizar</b>
           </button>
         )}
+        {/* Las VISTAS: las que se bajan on-demand muestran "Cargando…" un instante la
+            primera vez. El feed y el detalle no son lazy, así que no suspenden. */}
+        <Suspense fallback={<CargandoVista />}>
         {vista === 'feed' && (
           <Feed
             reportes={reportes}
@@ -819,6 +847,10 @@ export default function App() {
         {vista === 'qr' && mascotaEditando && (
           <ChapitaQR mascota={mascotaEditando} onCerrar={() => setVista('mascota')} onToast={mostrarToast} />
         )}
+        {vista === 'admin' && esAdmin && <Admin onVolver={() => setVista('feed')} onOpen={(r) => abrirDetalle(r, 'admin')} />}
+        {vista === 'moderacion' && esAdmin && <Moderacion onVolver={() => setVista('feed')} />}
+        </Suspense>
+
         {cartelReporte && (
           <div className="match-modal" onClick={() => setCartelReporte(null)}>
             <div className="match-card" onClick={(e) => e.stopPropagation()}>
@@ -852,9 +884,9 @@ export default function App() {
         )}
         {vista === 'feed' && <BottomNav modo={homeModo} onNav={navBarra} inicioPulse={inicioPulse} />}
 
-        {vista === 'admin' && esAdmin && <Admin onVolver={() => setVista('feed')} onOpen={(r) => abrirDetalle(r, 'admin')} />}
-        {vista === 'moderacion' && esAdmin && <Moderacion onVolver={() => setVista('feed')} />}
-
+        {/* Modales y hojas: fallback null — aparecen al instante siguiente sin tapar
+            lo que se está viendo (son overlays, no reemplazan la pantalla). */}
+        <Suspense fallback={null}>
         {guiaAbierta && <WelcomeGuide onClose={cerrarGuia} />}
 
         {soporteAbierto && <Soporte onCerrar={() => setSoporteAbierto(false)} />}
@@ -927,9 +959,12 @@ export default function App() {
             onToast={mostrarToast}
           />
         )}
+        </Suspense>
       </div>
 
-      {fotosVer && <Lightbox fotos={fotosVer.fotos} inicio={fotosVer.i} onCerrar={() => setFotosVer(null)} />}
+      <Suspense fallback={null}>
+        {fotosVer && <Lightbox fotos={fotosVer.fotos} inicio={fotosVer.i} onCerrar={() => setFotosVer(null)} />}
+      </Suspense>
 
       <div className={'toast' + (toast ? ' show' : '')}>{toast}</div>
     </div>
