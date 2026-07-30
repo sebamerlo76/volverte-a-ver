@@ -50,6 +50,26 @@ ve o le falla. Por eso:
 hay changelog a mano, a propósito — se desactualiza. Ver también `PENDIENTES.md`
 (ideas/pendientes) y `ESCALA.md` (límites al crecer).
 
+## Cuando salga una mejora que el usuario nota
+
+Si un commit cambia algo que la persona **ve o siente**, el chat de código suma un
+bloque al final de `NOVEDADES-PENDIENTES.md`, en el mismo commit que la mejora:
+
+    ## <título corto, como se lo contás a un vecino>
+    - commit: <hash corto> · <fecha>
+    - Qué cambió: <una o dos líneas, sin palabras de programador>
+    - Por qué le importa: <qué gana quien está buscando a su mascota>
+    - Dónde se ve: <pantalla y botón exactos, para poder filmarlo>
+    - [ ] push desde el panel    [ ] redes
+
+No es un changelog, es una **cola**: el hilo de novedades manda el push desde el panel
+y borra el bloque; el de guiones tilda "redes" cuando salió el video. Archivo vacío =
+está todo contado. Lo de "dónde se ve" no es opcional: sin eso el guion se escribe a
+ciegas.
+
+Los cambios internos (refactors, dependencias, tooling) **no** van: sólo lo que
+alguien puede ver o sentir en la app.
+
 ## Palabras
 
 - **Nunca** decir "final feliz": en Argentina tiene connotación sexual. Usar
