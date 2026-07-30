@@ -581,6 +581,38 @@ export async function actualizarReporte(id, datos) {
 
 // Marca un aviso como reencontrado/resuelto (sale del listado).
 // Guarda SOLO la huella visual de un aviso (se calcula en segundo plano tras publicar).
+// ---------------------------------------------------------------------------
+// Novedades (anuncios de mejoras). Lectura pública; publicar, solo el admin (RLS).
+// ---------------------------------------------------------------------------
+export async function getNovedades(limite = 30) {
+  if (!supabaseConfigurado) return []
+  const { data, error } = await supabase
+    .from('novedades')
+    .select('*')
+    .order('creado_en', { ascending: false })
+    .limit(limite)
+  if (error) throw error
+  return (data || []).map((n) => ({ id: n.id, titulo: n.titulo, texto: n.texto, enviados: n.enviados || 0, creadoEn: n.creado_en }))
+}
+
+// Publicar una novedad. El trigger de la base dispara el push (ver schema-novedades.sql).
+export async function crearNovedad(titulo, texto) {
+  if (!supabaseConfigurado) return null
+  const { data, error } = await supabase
+    .from('novedades')
+    .insert({ titulo: titulo.trim(), texto: texto.trim() })
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function borrarNovedad(id) {
+  if (!supabaseConfigurado) return
+  const { error } = await supabase.from('novedades').delete().eq('id', id)
+  if (error) throw error
+}
+
 // Recalcular la huella de un aviso AJENO (solo admin): RLS no deja tocar avisos de
 // otros, así que va por RPC security definer gateada por es_admin (schema-huellas-admin.sql).
 export async function guardarEmbeddingAdmin(id, embedding) {

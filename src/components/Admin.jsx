@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { getAdminStats, getAdminStatsRango, getActividadReciente, getPerdidosParaEmpujar, getActivosPorProvincia, getReencuentros, getReportes, guardarEmbeddingAdmin } from '../data/store.js'
+import { getAdminStats, getAdminStatsRango, getActividadReciente, getPerdidosParaEmpujar, getActivosPorProvincia, getReencuentros, getReportes, guardarEmbeddingAdmin, getNovedades, crearNovedad, borrarNovedad } from '../data/store.js'
+import { confirmar } from '../lib/confirmar.js'
 import { tiempoRelativo, nombreMostrado, fechaLegible, linkWhatsAppReencuentro, linkTel } from '../lib/formato.js'
 import { badgeEstado } from '../lib/estados.js'
 import { ubicacionTexto } from '../lib/localidades.js'
@@ -113,6 +114,49 @@ export default function Admin({ onVolver, onOpen, stats }) {
       setHuellasProg(`No se pudo: ${e?.message || 'error'} — ¿está corrido schema-huellas-admin.sql?`)
     } finally {
       setHuellasBusy(false)
+    }
+  }
+
+  // --- Novedades: contar una mejora y que llegue como push ---
+  const [novTitulo, setNovTitulo] = useState('')
+  const [novTexto, setNovTexto] = useState('')
+  const [novBusy, setNovBusy] = useState(false)
+  const [novedades, setNovedades] = useState(null)
+
+  useEffect(() => {
+    getNovedades().then(setNovedades).catch(() => setNovedades([]))
+  }, [])
+
+  async function publicarNovedad() {
+    if (novBusy) return
+    const t = novTitulo.trim()
+    const x = novTexto.trim()
+    if (!t || !x) return
+    // Va a TODOS los que tienen los avisos activados: conviene pensarlo dos veces.
+    if (!(await confirmar({ mensaje: `¿Enviar "${t}" a todos los que tienen avisos activados?`, aceptar: 'Enviar' }))) return
+    setNovBusy(true)
+    try {
+      await crearNovedad(t, x)
+      setNovTitulo('')
+      setNovTexto('')
+      // El conteo de enviados lo escribe la Edge Function un instante después.
+      setTimeout(() => getNovedades().then(setNovedades).catch(() => {}), 2500)
+      setNovedades(await getNovedades())
+    } catch (e) {
+      console.error(e)
+      alert('No se pudo publicar: ' + (e?.message || 'error') + '\n¿Está corrido schema-novedades.sql?')
+    } finally {
+      setNovBusy(false)
+    }
+  }
+
+  async function quitarNovedad(id) {
+    if (!(await confirmar({ mensaje: '¿Borrar esta novedad del historial?', aceptar: 'Borrar', peligro: true }))) return
+    try {
+      await borrarNovedad(id)
+      setNovedades(await getNovedades())
+    } catch (e) {
+      console.error(e)
     }
   }
 
@@ -255,6 +299,55 @@ export default function Admin({ onVolver, onOpen, stats }) {
                     </div>
                   ))}
                 </div>
+              )}
+            </Sec>
+
+            <Sec
+              id="novedades"
+              titulo="✨ Contar una novedad"
+              n={novedades ? novedades.length : null}
+              sub="Se manda como push a los que tienen los avisos activados, y queda en la pantalla Novedades para todos."
+              abierta={!!abiertas.novedades}
+              onToggle={toggle}
+            >
+              <input
+                className="fp-buscar"
+                value={novTitulo}
+                onChange={(e) => setNovTitulo(e.target.value)}
+                placeholder="Título — ej: Ahora podés subir la foto del reencuentro"
+                maxLength={70}
+              />
+              <textarea
+                className="ta"
+                style={{ marginTop: 8 }}
+                value={novTexto}
+                onChange={(e) => setNovTexto(e.target.value)}
+                placeholder="Contalo en dos líneas, como se lo contarías a un vecino."
+                maxLength={280}
+              />
+              <button className="adm-btn" style={{ marginTop: 8 }} onClick={publicarNovedad} disabled={novBusy || !novTitulo.trim() || !novTexto.trim()}>
+                {novBusy ? 'Enviando…' : '📣 Publicar y avisar'}
+              </button>
+
+              {novedades && novedades.length > 0 && (
+                <>
+                  <div className="adm-sub2">Historial</div>
+                  <div className="adm-lista">
+                    {novedades.map((n) => (
+                      <div className="adm-reenc" key={n.id}>
+                        <div className="adm-row-txt">
+                          <div className="adm-row-t">{n.titulo}</div>
+                          <div className="adm-row-s">
+                            {fechaLegible(n.creadoEn)} · {n.enviados} push
+                          </div>
+                        </div>
+                        <button className="adm-reenc-tel" onClick={() => quitarNovedad(n.id)}>
+                          Borrar
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </Sec>
 

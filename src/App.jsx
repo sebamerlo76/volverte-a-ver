@@ -26,6 +26,7 @@ const MapaRecorrido = lazy(() => import('./components/MapaRecorrido.jsx'))
 const Admin = lazy(() => import('./components/Admin.jsx'))
 const Moderacion = lazy(() => import('./components/Moderacion.jsx'))
 const NuevaPassword = lazy(() => import('./components/NuevaPassword.jsx'))
+const Novedades = lazy(() => import('./components/Novedades.jsx'))
 
 // Modales y hojas (se abren encima): van con fallback null, aparecen al instante
 // siguiente sin tapar lo que se está viendo.
@@ -277,6 +278,15 @@ export default function App() {
     if (!yaVista && !esLinkDirecto) setGuiaAbierta(true)
   }, [])
 
+  // El push de una novedad lleva a /novedades: abrimos esa pantalla al entrar.
+  useEffect(() => {
+    if (!/^\/novedades\/?$/.test(window.location.pathname)) return
+    window.history.replaceState({}, '', '/')
+    window.history.pushState({ chicho: 1 }, '', '/')
+    pushedRef.current = 1
+    setVista('novedades')
+  }, [])
+
   // Link directo a un aviso: chicho.ar/r/<id> abre el detalle de ese aviso.
   useEffect(() => {
     const m = window.location.pathname.match(/^\/r\/([\w-]+)/)
@@ -467,6 +477,10 @@ export default function App() {
     }
     if (sec === 'ayuda') {
       setSoporteAbierto(true)
+      return
+    }
+    if (sec === 'novedades') {
+      setVista('novedades')
       return
     }
     if (sec === 'admin') {
@@ -850,6 +864,7 @@ export default function App() {
         )}
         {vista === 'admin' && esAdmin && <Admin onVolver={() => setVista('feed')} onOpen={(r) => abrirDetalle(r, 'admin')} />}
         {vista === 'moderacion' && esAdmin && <Moderacion onVolver={() => setVista('feed')} />}
+        {vista === 'novedades' && <Novedades onVolver={() => setVista('feed')} />}
         </Suspense>
 
         {cartelReporte && (

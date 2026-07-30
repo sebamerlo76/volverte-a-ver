@@ -428,6 +428,26 @@ async function manejarReporteUpdate(rec: any, old: any) {
   }
 }
 
+// Novedad publicada por el admin (una mejora de la app): push a quienes tienen los
+// avisos activados. En la campanita les queda a ellos; el historial completo lo ve
+// cualquiera en la pantalla Novedades, que lee la tabla directo.
+async function manejarNovedad(rec: any) {
+  const { data: subs } = await sb.from('push_subs').select('user_id')
+  const ids = [...new Set((subs || []).map((s: any) => s.user_id).filter(Boolean))]
+  if (!ids.length) return
+  const enviados = await enviarAUsuarios(
+    ids,
+    { title: `✨ ${rec.titulo}`, body: rec.texto, url: '/novedades' },
+    { tipo: 'novedad' },
+  )
+  // Dejamos el rastro de a cuántos llegó (el panel lo muestra en el historial).
+  try {
+    await sb.from('novedades').update({ enviados }).eq('id', rec.id)
+  } catch (e) {
+    console.error('novedad: no se pudo guardar el conteo', e)
+  }
+}
+
 Deno.serve(async (req) => {
   try {
     const body = await req.json()
@@ -436,6 +456,7 @@ Deno.serve(async (req) => {
       if (body.table === 'reportes' && body.type === 'INSERT') await manejarReporte(rec)
       else if (body.table === 'reportes' && body.type === 'UPDATE') await manejarReporteUpdate(rec, body.old_record)
       else if (body.table === 'avistamientos' && body.type === 'INSERT') await manejarAvistamiento(rec)
+      else if (body.table === 'novedades' && body.type === 'INSERT') await manejarNovedad(rec)
     }
     return new Response('ok', { status: 200 })
   } catch (e) {

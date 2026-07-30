@@ -9,6 +9,7 @@ const ITEMS = [
   { k: 'avisos', ic: 'campaign', t: 'Avisos' },
   { k: 'cuenta', ic: 'person', t: 'Mi cuenta' },
   { k: 'guia', ic: 'help', t: 'Guía' },
+  { k: 'novedades', ic: 'auto_awesome', t: 'Novedades' },
   { k: 'ayuda', ic: 'support_agent', t: 'Ayuda / Soporte' },
 ]
 

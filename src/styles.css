@@ -3889,6 +3889,87 @@ select {
   color: #8a6f5f;
   line-height: 1.5;
 }
+/* Novedades: el changelog en criollo, con línea de tiempo */
+.nov-intro {
+  margin: 14px 20px 4px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.nov-lista {
+  padding: 10px 20px 0;
+}
+.nov-item {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding-bottom: 18px;
+}
+/* Línea que une los puntos (la última no la dibuja) */
+.nov-item::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 16px;
+  bottom: 0;
+  width: 2px;
+  background: #eadfd2;
+}
+.nov-item:last-child::before {
+  display: none;
+}
+.nov-punto {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: #d8c9b8;
+  z-index: 1;
+}
+.nov-item.ultima .nov-punto {
+  background: var(--teal);
+  box-shadow: 0 0 0 4px rgba(31, 157, 143, 0.16);
+}
+.nov-cuerpo {
+  flex: 1;
+  min-width: 0;
+}
+.nov-fecha {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--faint);
+  text-transform: capitalize;
+}
+.nov-nuevo {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--teal);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: none;
+}
+.nov-titulo {
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 16.5px;
+  color: var(--navy);
+  margin-top: 2px;
+}
+.nov-texto {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--slate);
+  line-height: 1.5;
+  margin-top: 2px;
+  white-space: pre-wrap;
+}
+
 /* Aviso clickeable en "Recuperar contraseña": las cuentas de Google no tienen
    contraseña, y sin esto la gente espera un mail que nunca llega. */
 .auth-nota {
