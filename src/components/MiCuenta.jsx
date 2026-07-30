@@ -464,8 +464,10 @@ export default function MiCuenta({
                   return (
                     <div className={'masc-card' + (perdido ? ' buscando' : '')} key={m.id}>
                       <button className="masc-card-foto" onClick={() => onEditarMascota(m)} aria-label={`Editar ${m.nombre || 'mascota'}`}>
-                        {m.foto ? (
-                          <img src={fotoOptimizada(m.foto)} alt={m.nombre || ''} loading="lazy" onError={(e) => (e.target.style.display = 'none')} />
+                        {/* El recorte que encuadró el dueño; las mascotas viejas (sin
+                            recorte guardado) caen a la foto completa. */}
+                        {m.fotoFeed || m.foto ? (
+                          <img src={fotoOptimizada(m.fotoFeed || m.foto)} alt={m.nombre || ''} loading="lazy" onError={(e) => (e.target.style.display = 'none')} />
                         ) : (
                           <span className="mi fill" style={{ fontSize: 40, color: '#c9a58f' }}>pets</span>
                         )}

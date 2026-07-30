@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { addMascota, actualizarMascota, eliminarMascota, eliminarReporte, getAvisoActivoDeMascota, subirFotos } from '../data/store.js'
+import { addMascota, actualizarMascota, eliminarMascota, eliminarReporte, getAvisoActivoDeMascota, subirFotos, subirFotoFeed } from '../data/store.js'
 import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS } from '../lib/opciones.js'
@@ -40,8 +40,14 @@ export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, on
     }
     setGuardando(true)
     try {
+      // Dos fotos, igual que los avisos: la completa (para el QR del collar, donde se
+      // ve grande) y el RECORTE apaisado que el dueño encuadró en el cropper (para la
+      // tarjeta de Mis mascotas). Antes se guardaba solo la completa y la tarjeta la
+      // recortaba por CSS agarrando el centro — no lo que la persona había elegido.
       const fotoUrl = (await subirFotos(fotos))[0] || ''
+      const fotoFeed = await subirFotoFeed(fotos, '')
       const datos = {
+        fotoFeed: fotoFeed || inicial?.fotoFeed || null,
         nombre: nombre.trim(),
         especie,
         sexo,

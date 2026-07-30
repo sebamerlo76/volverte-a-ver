@@ -745,6 +745,9 @@ function mascotaDesdeFila(row) {
     raza: row.raza,
     descripcion: row.descripcion,
     foto: row.foto,
+    // Recorte apaisado que eligió el dueño en el cropper (el mismo que ve el feed).
+    // Si no está (mascotas de antes), las vistas caen a `foto`.
+    fotoFeed: row.foto_feed || null,
     sexo: row.sexo,
     edad: row.edad,
     collar: row.collar,
@@ -767,6 +770,13 @@ function mascotaHaciaFila(m) {
     collar: m.collar ?? null,
     relacion: m.relacion ?? 'propia',
   }
+}
+
+// El recorte va aparte de mascotaHaciaFila: si la columna foto_feed todavía no existe
+// en la base, el alta/edición no se cae — simplemente se guarda sin recorte (mismo
+// criterio que el `tipo` de los aportes).
+function conFotoFeed(fila, m) {
+  return m.fotoFeed ? { ...fila, foto_feed: m.fotoFeed } : fila
 }
 function leerMascotasLocal() {
   try {
@@ -797,7 +807,13 @@ export async function getMisMascotas(userId) {
 
 export async function addMascota(datos) {
   if (supabaseConfigurado) {
-    const { data, error } = await supabase.from('mascotas').insert(mascotaHaciaFila(datos)).select().single()
+    const base = mascotaHaciaFila(datos)
+    let { data, error } = await supabase.from('mascotas').insert(conFotoFeed(base, datos)).select().single()
+    if (error && datos.fotoFeed) {
+      // Sin la columna foto_feed todavía: guardamos igual, sin el recorte.
+      console.warn('Mascota: reintento sin foto_feed por error:', error.message)
+      ;({ data, error } = await supabase.from('mascotas').insert(base).select().single())
+    }
     if (error) throw error
     return mascotaDesdeFila(data)
   }
@@ -810,7 +826,12 @@ export async function addMascota(datos) {
 
 export async function actualizarMascota(id, datos) {
   if (supabaseConfigurado) {
-    const { data, error } = await supabase.from('mascotas').update(mascotaHaciaFila(datos)).eq('id', id).select().single()
+    const base = mascotaHaciaFila(datos)
+    let { data, error } = await supabase.from('mascotas').update(conFotoFeed(base, datos)).eq('id', id).select().single()
+    if (error && datos.fotoFeed) {
+      console.warn('Mascota: reintento sin foto_feed por error:', error.message)
+      ;({ data, error } = await supabase.from('mascotas').update(base).eq('id', id).select().single())
+    }
     if (error) throw error
     return mascotaDesdeFila(data)
   }

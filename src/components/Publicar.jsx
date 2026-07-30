@@ -83,7 +83,9 @@ export default function Publicar({ inicial, plantilla, ofrecerGuardar, telefonoG
     try {
       // Subimos las fotos nuevas y conservamos las que ya estaban.
       const fotosUrls = await subirFotos(fotos) // completas (para el detalle)
-      const fotoUrl = await subirFotoFeed(fotos, fotosUrls[0] || '') // recorte para el feed
+      // Recorte para el feed. Si la foto viene de una mascota del perfil (no se tocó
+      // en este formulario), heredamos SU recorte en vez de caer a la foto entera.
+      const fotoUrl = await subirFotoFeed(fotos, base?.fotoFeed || fotosUrls[0] || '')
       // La huella visual NO se calcula acá (para que el guardado sea instantáneo):
       // se hace en segundo plano después de publicar (ver más abajo).
       const embedding = base?.embedding ?? null
