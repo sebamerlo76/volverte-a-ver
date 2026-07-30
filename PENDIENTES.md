@@ -94,6 +94,40 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
   Impacto menor (1-3 fotos por pantalla) pero es una línea en cada una. Ver src/lib/foto.js.
   El hero del Detalle y el Lightbox se dejaron SIN transformar a propósito: ahí hace falta
   ver bien al animal (y el Lightbox tiene zoom).
+- [ ] **Bajar el LCP de campo: 4 cambios chicos** (30-jul-2026, medido en PageSpeed móvil
+  de chicho.ar). Contexto para no volver a diagnosticar de cero: el **58 del laboratorio
+  es un espejismo** (Lighthouse simula un Moto G Power con la CPU frenada 4×). Lo que
+  importa es el **campo**, que ya trae 28 días de usuarios reales: FCP **1,8 s** (era 7,4
+  antes del boot splash ✅) pero LCP **4,1 s** e INP **243 ms** → "no se aprueba" (CLS 0 ✅).
+  El servidor NO es el problema: medido `curl` a chicho.ar da **366 ms de TTFB, 0
+  redirecciones, `X-Vercel-Cache: HIT`** desde São Paulo. El 1,4 s de TTFB del informe es
+  la red 4G de la gente.
+  **El elemento LCP es el cartel de bienvenida** (`<div class="guia-d">`, WelcomeGuide.jsx),
+  y su desglose es **TTFB 0 ms + 2530 ms de "retraso de renderizado"**: no espera un
+  recurso, espera a que baje y monte el JS. Los 4 cambios atacan ese número:
+  - **A. Segundo `preconnect` a Supabase sin `crossorigin`** en index.html (dejando el que
+    ya está). El informe lo marca "conexión previa sin usar" y a la vez lo lista como
+    candidato con **330 ms de ahorro de LCP**: el `crossorigin` sirve para el `fetch` del
+    feed, pero las fotos `<img>` se piden sin CORS y abren otra conexión desde cero.
+    Riesgo nulo, una línea.
+  - **B. Mover el prefetch del mapa a después de que la app pintó** (App.jsx, el
+    `requestIdleCallback` con `timeout: 3000`). En un celu lento el navegador nunca queda
+    libre, así que **el timeout se cumple y baja el mapa a los 3 s justos**, en plena
+    pelea por pintar: `MapaLeaflet.js` (2775 ms) y su CSS (2825 ms) son **la rama más
+    larga de la ruta crítica**, y reaparecen como "JS sin usar: 38,9 KiB". Son 54 KB que
+    en esa visita nadie mira. Ojo al tocarlo: la idea original (que el mapa esté listo
+    cuando toquen "Mapa") es buena y hay que conservarla — mover el momento, no sacarlo.
+  - **C. `logo-boot.png` (176×176, 5,6 KB) en vez de `logo.png` (500×500, **57,8 KB**)** en
+    las 8 pantallas que lo muestran a 42-86 px: Auth, EliminarCuenta, Feed, GestionAviso,
+    NuevaPassword, PerfilPublico, Privacidad, WelcomeGuide. **NO tocar `src/lib/flyer.js`**,
+    que ahí el logo se imprime y necesita los 500 px.
+  - **D. Sacarle el `lazy` al WelcomeGuide**: su chunk pesa **1,9 KB** y estamos pagando un
+    viaje de red entero (1214 ms en el árbol) por eso. Cadena actual: HTML (388 ms) →
+    index.js 165 KB (830 ms) → WelcomeGuide.js. Suma 1,9 KB al bundle inicial y elimina
+    un salto serializado del camino al LCP.
+  **Cómo verificar (importante):** el 58 del lab casi no se va a mover — el número a mirar
+  es el **LCP de campo**, y la ventana de PageSpeed son 28 días, así que recién se ve a los
+  20-30 días. No sacar conclusiones a las 48 h.
 - [ ] **Fotitos de raza** (grilla visual curada) — más adelante, con imágenes con licencia.
 - [ ] **Recalcular huellas visuales viejas** (26-jul-2026): desde hoy la huella (embedding
   CLIP) se calcula sobre el RECORTE del feed (menos fondo → mejores parecidos), pero los
