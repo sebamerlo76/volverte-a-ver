@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import PetCard from './PetCard.jsx'
 import BannerInstalar from './BannerInstalar.jsx'
 import BannerNotifs from './BannerNotifs.jsx'
@@ -43,19 +43,38 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
   const bodyRef = useRef(null) // contenedor scrolleable de la lista, para recordar la posición
   const [dirSlide, setDirSlide] = useState(0) // de dónde entra el contenido al cambiar de pestaña: 1 = swipe a la izq, -1 = a la der, 0 = tap
 
+  // Dónde quedó el scroll de CADA pestaña. Volver a una y encontrarla donde la
+  // dejaste es lo mismo que ya pasa al volver de un aviso; empezar siempre de arriba
+  // se sentía como un refresh.
+  const scrollTabs = useRef({})
+
   // Al volver de un aviso (el Feed se re-monta), restaurar dónde estaba el scroll.
   useEffect(() => {
     if (bodyRef.current && scrollRef) bodyRef.current.scrollTop = scrollRef.current || 0
   }, [])
 
-  // Cambio de pestaña de estado (tap o swipe): mismo camino para los dos. Resetea el
-  // scroll guardado — heredar la posición de otra pestaña era un bug de UX.
+  const scrollPendiente = useRef(null) // a dónde saltar cuando se pinte la pestaña nueva
+
+  // Cambio de pestaña de estado (tap o swipe): mismo camino para los dos.
   function irAPestana(k, dir = 0) {
     if (k === filtros.estado) return
+    // Guardo dónde estaba en la pestaña que dejo, y me llevo la posición de la que voy.
+    scrollTabs.current[filtros.estado] = bodyRef.current?.scrollTop || 0
+    scrollPendiente.current = scrollTabs.current[k] || 0
     setDirSlide(dir)
     setFiltro('estado', k)
-    if (scrollRef) scrollRef.current = 0
+    if (scrollRef) scrollRef.current = scrollPendiente.current
   }
+
+  // El .body ya no se re-monta al cambiar de pestaña, así que el scroll hay que
+  // moverlo a mano — y en useLayoutEffect, que corre con la lista nueva ya en el DOM
+  // pero antes de pintar (con requestAnimationFrame llegaba antes de tiempo y no
+  // pasaba nada).
+  useLayoutEffect(() => {
+    if (scrollPendiente.current == null || !bodyRef.current) return
+    bodyRef.current.scrollTop = scrollPendiente.current
+    scrollPendiente.current = null
+  }, [filtros.estado])
 
   // La pestaña activa siempre visible en la fila (en pantallas angostas .tabs scrollea).
   useEffect(() => {
@@ -474,10 +493,11 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
           )}
         </div>
       ) : (
+        // El contenedor scrolleable NO se re-monta al cambiar de pestaña: si no, se
+        // veía como un refresh y se perdía dónde estabas. La animación vive en el
+        // wrapper de adentro (ahí sí va el key).
         <div
-          className="body body-feed"
-          key={filtros.estado} /* re-monta al cambiar de pestaña: re-dispara la animación y el scroll nace en 0 */
-          data-slide={dirSlide === 0 ? undefined : dirSlide === 1 ? 'der' : 'izq'}
+          className="body"
           ref={bodyRef}
           onScroll={(e) => { if (scrollRef) scrollRef.current = e.currentTarget.scrollTop }}
           onTouchStart={swStart}
@@ -485,6 +505,11 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
           onTouchEnd={swEnd}
           onTouchCancel={swCancel}
         >
+          <div
+            className="body-feed"
+            key={filtros.estado}
+            data-slide={dirSlide === 0 ? undefined : dirSlide === 1 ? 'der' : 'izq'}
+          >
           {/* Excluyentes por diseño: el de instalar sale si NO está instalada, el de
               avisos si SÍ. Nunca se ven los dos juntos. */}
           {!verFinales && <BannerInstalar />}
@@ -527,6 +552,7 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
             ))
           )}
           <div style={{ height: 18 }} />
+          </div>
         </div>
       )}
 
