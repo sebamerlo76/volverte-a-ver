@@ -10,9 +10,19 @@ Todo en **español rioplatense**: código, comentarios, commits y lo que ve el u
 Hay varios chats abiertos sobre este proyecto, con trabajos distintos:
 
 - **Chat de código** — el **único** que edita archivos, commitea y pushea.
-- **Chat de guiones/videos (Instagram) y cualquier otro** — **NO edita ni un archivo,
-  no commitea, no pushea.** Lee el código para escribir con precisión, y nada más.
-  Si encuentra un bug o una inconsistencia: **lo reporta, no lo arregla.**
+- **Chat de guiones/videos (Instagram), el de novedades y cualquier otro** — **NO
+  edita ni un archivo, no commitea, no pushea.** Lee el código para escribir con
+  precisión, y nada más. Si encuentra un bug o una inconsistencia: **lo reporta, no
+  lo arregla.**
+
+"Archivo" es **cualquier** archivo del repo, no sólo código: los `.md` también
+cuentan, incluido este. "Es sólo documentación" no es una excepción — un commit es
+un commit, y `git push` dispara un deploy en Vercel.
+
+Si otro chat necesita un cambio en el repo (una regla nueva acá, un bloque en
+`NOVEDADES-PENDIENTES.md`), **se lo pide al chat de código y él lo commitea**. El
+único que borra bloques de la cola es el hilo de novedades, y lo hace pidiéndolo
+también.
 
 Si no sabés cuál sos, preguntá antes de escribir un archivo. Dos chats tocando el
 mismo repo en vivo es la forma más rápida de romper algo.
@@ -63,8 +73,9 @@ bloque al final de `NOVEDADES-PENDIENTES.md`, en el mismo commit que la mejora:
     - [ ] push desde el panel    [ ] redes
 
 No es un changelog, es una **cola**: el hilo de novedades manda el push desde el panel
-y borra el bloque; el de guiones tilda "redes" cuando salió el video. Archivo vacío =
-está todo contado. Lo de "dónde se ve" no es opcional: sin eso el guion se escribe a
+y avisa que ya está contado; el de guiones avisa cuando salió el video. **El que tacha
+o borra el bloque es siempre el chat de código** (ver "Quién toca qué"). Archivo vacío
+= está todo contado. Lo de "dónde se ve" no es opcional: sin eso el guion se escribe a
 ciegas.
 
 Los cambios internos (refactors, dependencias, tooling) **no** van: sólo lo que
