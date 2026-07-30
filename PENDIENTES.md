@@ -79,6 +79,14 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
 - [x] **Compartir con imagen linda** (flyer del aviso) para WhatsApp/Facebook + **link directo al aviso**. ✅
 - [x] **Preview rico del link** (`/r/<id>`): serverless function `api/og.js` que inyecta los tags OG por aviso (foto + nombre + estado + zona), así al pegar el link en un grupo la tarjeta muestra la mascota y no el ícono genérico. ✅ Ojo: en Vercel `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` tienen que estar disponibles **en runtime** para las functions (si no, cae al genérico, no rompe). Test: `node test/og.test.mjs`.
   - [ ] **v2**: en vez de la foto cruda, generar una imagen 1200×630 (el flyer) como `og:image` — tarjeta más linda y sin recortes raros.
+- [ ] **Editar un aviso como admin** (30-jul-2026, diferido a propósito): hoy el admin puede
+  **borrar** y **desbloquear** avisos ajenos, pero no **corregir** (una zona mal escrita, un
+  nombre con un error, datos de contacto en la descripción). Surgió porque Sebastián vio un
+  WhatsApp con el país duplicado — pero eso se arregló de raíz normalizando el número
+  (`numeroWa` en src/lib/formato.js), así que ya no urge. Si aparece otro caso raro:
+  botón "Editar como admin" en Detalle que abra el formulario normal + un RPC security
+  definer gateado por `es_admin()` para poder guardar avisos de otros (RLS solo deja lo
+  propio) — mismo patrón que `admin_embedding` en supabase/schema-huellas-admin.sql.
 - [ ] **Extender `fotoOptimizada()` al resto de las miniaturas** (30-jul-2026): ya está en
   el feed (PetCard), el buscador y las coincidencias del wizard. Faltan las de Mis
   mascotas, ElegirMascota, el thumb de los aportes en Detalle, Moderación, PerfilPublico
