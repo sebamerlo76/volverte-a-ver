@@ -12,6 +12,7 @@ import { addReporte, addMascota, subirFotos, subirFotoFeed, publicarGestion, nue
 import { nombreMostrado, tiempoRelativo, linkWhatsApp } from '../lib/formato.js'
 import { SITIO_URL } from '../lib/sitio.js'
 import { similitud } from '../lib/vector.js'
+import { fotoOptimizada } from '../lib/foto.js'
 import { tieneGroseria } from '../lib/moderacion.js'
 
 function ultimoWhatsapp() {
@@ -632,7 +633,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
               <button className="bres-row" key={r.id} onClick={() => setMatchPreview(r)}>
                 <div className="bres-foto">
                   {r.foto ? (
-                    <img src={r.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
+                    <img src={fotoOptimizada(r.foto, 300)} alt="" loading="lazy" onError={(e) => (e.target.style.display = 'none')} />
                   ) : (
                     <span className="mi fill" style={{ fontSize: 22, color: '#c9a58f' }}>
                       pets

@@ -79,6 +79,13 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
 - [x] **Compartir con imagen linda** (flyer del aviso) para WhatsApp/Facebook + **link directo al aviso**. ✅
 - [x] **Preview rico del link** (`/r/<id>`): serverless function `api/og.js` que inyecta los tags OG por aviso (foto + nombre + estado + zona), así al pegar el link en un grupo la tarjeta muestra la mascota y no el ícono genérico. ✅ Ojo: en Vercel `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` tienen que estar disponibles **en runtime** para las functions (si no, cae al genérico, no rompe). Test: `node test/og.test.mjs`.
   - [ ] **v2**: en vez de la foto cruda, generar una imagen 1200×630 (el flyer) como `og:image` — tarjeta más linda y sin recortes raros.
+- [ ] **Extender `fotoOptimizada()` al resto de las miniaturas** (30-jul-2026): ya está en
+  el feed (PetCard), el buscador y las coincidencias del wizard. Faltan las de Mis
+  mascotas, ElegirMascota, el thumb de los aportes en Detalle, Moderación, PerfilPublico
+  y la miniatura de reencuentros del Admin — todas de 40-140 px sirviendo la foto entera.
+  Impacto menor (1-3 fotos por pantalla) pero es una línea en cada una. Ver src/lib/foto.js.
+  El hero del Detalle y el Lightbox se dejaron SIN transformar a propósito: ahí hace falta
+  ver bien al animal (y el Lightbox tiene zoom).
 - [ ] **Fotitos de raza** (grilla visual curada) — más adelante, con imágenes con licencia.
 - [ ] **Recalcular huellas visuales viejas** (26-jul-2026): desde hoy la huella (embedding
   CLIP) se calcula sobre el RECORTE del feed (menos fondo → mejores parecidos), pero los

@@ -1,4 +1,5 @@
 import { nombreMostrado, tiempoRelativo } from '../lib/formato.js'
+import { fotoOptimizada } from '../lib/foto.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { badgeEstado, subLinea } from '../lib/estados.js'
 import { useAplauso } from '../lib/useAplauso.js'
@@ -18,7 +19,9 @@ export default function PetCard({ r, onClick, posicion = 99, zonaVecina = false 
       <div className={'ci' + (perdido ? '' : ' g')}>
         {fotoCard ? (
           <img
-            src={fotoCard}
+            // Servida por el CDN de transformación: recomprime y manda WebP donde se
+            // pueda (-75% de bytes en las fotos viejas). Ver lib/foto.js.
+            src={fotoOptimizada(fotoCard)}
             alt={nombreMostrado(r)}
             // Las 2 primeras entran en pantalla al abrir el feed: si esperan al
             // lazy-load aparecen tarde y se ve el flash. Van eager. De la 3ª en

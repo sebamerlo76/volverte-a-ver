@@ -3,6 +3,7 @@ import { nombreMostrado } from '../lib/formato.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { textoEstado } from '../lib/estados.js'
 import { coincideBusqueda } from '../lib/buscar.js'
+import { fotoOptimizada } from '../lib/foto.js'
 
 // Buscador flotante (se abre desde la barra inferior). Resultados en vivo.
 export default function BuscadorOverlay({ reportes, ambito, q, onQ, onOpen, onCerrar }) {
@@ -63,7 +64,7 @@ export default function BuscadorOverlay({ reportes, ambito, q, onQ, onOpen, onCe
               <button className="bres-row" key={r.id} onClick={() => onOpen(r)}>
                 <div className="bres-foto">
                   {r.foto ? (
-                    <img src={r.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
+                    <img src={fotoOptimizada(r.foto, 300)} alt="" loading="lazy" onError={(e) => (e.target.style.display = 'none')} />
                   ) : (
                     <span className="mi fill" style={{ fontSize: 22, color: '#c9a58f' }}>
                       pets

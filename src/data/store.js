@@ -991,7 +991,10 @@ export async function subirFoto(file) {
   if (supabaseConfigurado) {
     const ext = file.name.split('.').pop()
     const path = `${Date.now()}-${Math.floor(Math.random() * 1e6)}.${ext}`
-    const { error } = await supabase.storage.from('fotos').upload(path, file, { upsert: false })
+    // cacheControl 1 año: el nombre del archivo lleva timestamp + random, así que una
+    // URL nunca cambia de contenido. Por defecto Supabase manda 1 h y PageSpeed
+    // (30-jul-2026) marcaba ~969 KB de re-descarga en visitas repetidas.
+    const { error } = await supabase.storage.from('fotos').upload(path, file, { upsert: false, cacheControl: '31536000' })
     if (error) throw error
     const { data } = supabase.storage.from('fotos').getPublicUrl(path)
     return data.publicUrl
