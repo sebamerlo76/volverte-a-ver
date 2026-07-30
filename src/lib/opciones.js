@@ -14,7 +14,9 @@ export const COLORES = [
 
 export const SEXOS = ['Macho', 'Hembra', 'No sé']
 
-export const EDADES = ['Cachorro', 'Adulto', 'Senior', 'No sé']
+// "Senior" era un anglicismo suelto en una app que habla en criollo. Los avisos
+// viejos que ya lo tienen guardado se muestran tal cual (es solo un texto).
+export const EDADES = ['Cachorro', 'Adulto', 'Viejito', 'No sé']
 
 export const COLLAR = ['Con collar', 'Sin collar', 'No sé']
 

@@ -835,6 +835,7 @@ export default function App() {
         {vista === 'mascota' && (
           <MascotaForm
             inicial={mascotaEditando}
+            telefonoGuardado={user?.user_metadata?.telefono || ''}
             onCerrar={() => setVista('cuenta')}
             onGuardado={mascotaGuardada}
             onToast={mostrarToast}

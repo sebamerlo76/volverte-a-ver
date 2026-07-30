@@ -5,11 +5,23 @@ import PhotoPicker from './PhotoPicker.jsx'
 import { COLORES, SEXOS, EDADES, COLLAR, TAMANOS } from '../lib/opciones.js'
 import { confirmar } from '../lib/confirmar.js'
 
-export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, onVerQR }) {
+// Último WhatsApp usado en la app (lo guarda el asistente de "Encontré una"), como
+// red por si el perfil todavía no tiene teléfono cargado.
+function ultimoWhatsapp() {
+  try {
+    return localStorage.getItem('vav_wa') || ''
+  } catch (e) {
+    return ''
+  }
+}
+
+export default function MascotaForm({ inicial, onCerrar, onGuardado, onToast, onVerQR, telefonoGuardado = '' }) {
   const editando = !!inicial
   const [especie, setEspecie] = useState(inicial?.especie || 'perro')
   const [relacion, setRelacion] = useState(inicial?.relacion || 'propia')
-  const [whatsapp, setWhatsapp] = useState(inicial?.whatsapp || '')
+  // Mascota nueva: viene con el teléfono del perfil (o el último usado). Es el mismo
+  // contacto que va a aparecer en el QR del collar — que lo tipee de nuevo era al pedo.
+  const [whatsapp, setWhatsapp] = useState(inicial?.whatsapp || telefonoGuardado || ultimoWhatsapp())
   const [fotos, setFotos] = useState(inicial?.foto ? [{ url: inicial.foto, file: null }] : [])
   const [nombre, setNombre] = useState(inicial?.nombre || '')
   const [sexo, setSexo] = useState(inicial?.sexo || '')

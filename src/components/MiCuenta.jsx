@@ -10,6 +10,7 @@ import MisUbicaciones from './MisUbicaciones.jsx'
 import PrimerosPasos from './PrimerosPasos.jsx'
 import { confirmar } from '../lib/confirmar.js'
 import { pasoHecho, marcarPaso } from '../lib/pasos.js'
+import { fotoOptimizada } from '../lib/foto.js'
 
 const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
 // A partir de acá ofrecemos renovar. Tiene que coincidir con el primer recordatorio
@@ -453,53 +454,54 @@ export default function MiCuenta({
                 const propias = mascotas.filter((m) => m.relacion !== 'transito')
                 const transito = mascotas.filter((m) => m.relacion === 'transito')
                 const hayMix = propias.length > 0 && transito.length > 0
-                const fila = (m) => {
+                // Card cuadrada: la foto grande (se ve la carita) y, sobre todo, el
+                // ESTADO separado de la ACCIÓN. Antes la fila mostraba un botón rojo
+                // "Se me perdió" pegado al nombre y parecía que la mascota estaba
+                // perdida — susto al pedo justo después de cargarla.
+                const tarjeta = (m) => {
                   const aviso = avisoActivoDe(m)
                   const perdido = !!aviso
                   return (
-                    <div className="masc-row" key={m.id}>
-                      <button className="masc-info" onClick={() => onEditarMascota(m)}>
-                        <div className="masc-foto">
-                          {m.foto ? (
-                            <img src={m.foto} alt={m.nombre} onError={(e) => (e.target.style.display = 'none')} />
-                          ) : (
-                            <span className="mi fill" style={{ fontSize: 26, color: '#c9a58f' }}>
-                              pets
-                            </span>
-                          )}
-                        </div>
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <div className="masc-nombre">
-                            {m.nombre || 'Sin nombre'}
-                            {perdido && <span className="masc-estado">Perdido</span>}
-                          </div>
-                          <div className="masc-sub">
-                            {ESPECIE_LBL[m.especie] || 'Mascota'}
-                            {m.color ? ` · ${m.color}` : ''}
-                          </div>
-                        </div>
+                    <div className={'masc-card' + (perdido ? ' buscando' : '')} key={m.id}>
+                      <button className="masc-card-foto" onClick={() => onEditarMascota(m)} aria-label={`Editar ${m.nombre || 'mascota'}`}>
+                        {m.foto ? (
+                          <img src={fotoOptimizada(m.foto, 400)} alt={m.nombre || ''} loading="lazy" onError={(e) => (e.target.style.display = 'none')} />
+                        ) : (
+                          <span className="mi fill" style={{ fontSize: 40, color: '#c9a58f' }}>pets</span>
+                        )}
+                        <span className={'masc-chip' + (perdido ? ' rojo' : '')}>
+                          {perdido ? '🔴 Buscándolo' : '🏠 En casa'}
+                        </span>
                       </button>
-                      {perdido ? (
-                        <button className="masc-aparecio" onClick={() => aparecio(aviso)}>
-                          <span className="mi" style={{ fontSize: 17 }}>
-                            celebration
-                          </span>
-                          ¡Ya está en casa!
+                      <div className="masc-card-body">
+                        <button className="masc-card-nombre" onClick={() => onEditarMascota(m)}>
+                          {m.nombre || 'Sin nombre'}
                         </button>
-                      ) : (
-                        <button className="masc-perdi" onClick={() => onPublicarMascota(m)}>
-                          Se me perdió
-                        </button>
-                      )}
+                        <div className="masc-sub">
+                          {ESPECIE_LBL[m.especie] || 'Mascota'}
+                          {m.color ? ` · ${m.color}` : ''}
+                        </div>
+                        {perdido ? (
+                          <button className="masc-aparecio" onClick={() => aparecio(aviso)}>
+                            <span className="mi" style={{ fontSize: 17 }}>celebration</span>
+                            ¡Ya está en casa!
+                          </button>
+                        ) : (
+                          <button className="masc-perdi" onClick={() => onPublicarMascota(m)}>
+                            <span className="mi" style={{ fontSize: 17 }}>campaign</span>
+                            Publicar que se perdió
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )
                 }
                 return (
                   <>
                     {hayMix && <div className="masc-grupo">Míos</div>}
-                    {propias.map(fila)}
+                    <div className="masc-grid">{propias.map(tarjeta)}</div>
                     {transito.length > 0 && <div className="masc-grupo">En tránsito 🤝</div>}
-                    {transito.map(fila)}
+                    {transito.length > 0 && <div className="masc-grid">{transito.map(tarjeta)}</div>}
                   </>
                 )
               })()

@@ -2584,9 +2584,10 @@ select {
   border-radius: 7px;
 }
 .masc-aparecio {
-  flex: none;
-  height: 38px;
-  padding: 0 13px;
+  width: 100%;
+  margin-top: 8px;
+  min-height: 36px;
+  padding: 6px 8px;
   border-radius: 12px;
   background: var(--green);
   color: #fff;
@@ -2594,7 +2595,9 @@ select {
   font-weight: 800;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
+  line-height: 1.15;
   box-shadow: 0 4px 10px rgba(23, 160, 107, 0.35);
 }
 .perfil-mail {
@@ -3886,6 +3889,8 @@ select {
   color: #8a6f5f;
   line-height: 1.5;
 }
+/* Fila de mascota: la usa ElegirMascota ("¿cuál se perdió?"), donde una lista compacta
+   es lo correcto (elegís y seguís). En Mis mascotas se usan las tarjetas de abajo. */
 .masc-row {
   display: flex;
   align-items: center;
@@ -3896,6 +3901,8 @@ select {
   border-radius: 16px;
   box-shadow: 0 6px 16px rgba(90, 55, 35, 0.06);
   padding: 8px 10px 8px 8px;
+  width: calc(100% - 40px);
+  text-align: left;
 }
 .masc-info {
   flex: 1;
@@ -3929,21 +3936,106 @@ select {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Mis mascotas: tarjetas cuadradas (se ve la carita) en dos columnas. Son pocas, así
+   que priorizamos la foto sobre la densidad. El ESTADO va como chip sobre la foto y
+   la ACCIÓN como botón abajo: antes un botón rojo "Se me perdió" pegado al nombre se
+   leía como si la mascota estuviera perdida. */
+.masc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 10px 20px 0;
+}
+.masc-card {
+  background: #fff;
+  border: 1px solid #f4ede6;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(90, 55, 35, 0.06);
+  display: flex;
+  flex-direction: column;
+}
+.masc-card.buscando {
+  border-color: #ffc9bf;
+  box-shadow: 0 6px 16px rgba(255, 87, 71, 0.18);
+}
+.masc-card-foto {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #f6efe9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.masc-card-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.masc-chip {
+  position: absolute;
+  left: 7px;
+  bottom: 7px;
+  max-width: calc(100% - 14px); /* que nunca se salga de la tarjeta en celus angostos */
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #4a4038;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 2px 8px rgba(60, 40, 25, 0.18);
+}
+.masc-chip.rojo {
+  background: var(--coral-strong);
+  color: #fff;
+}
+.masc-card-body {
+  padding: 9px 11px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.masc-card-nombre {
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--navy);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .masc-sub {
   font-size: 12.5px;
   font-weight: 800;
   color: var(--muted);
   margin-top: 1px;
 }
+/* Alto mínimo y no fijo: en celulares angostos el texto pasa a dos líneas en vez de
+   cortarse. Vale para los dos botones (publicar pérdida / ya está en casa). */
 .masc-perdi {
-  flex: none;
-  height: 38px;
-  padding: 0 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  margin-top: 8px;
+  min-height: 36px;
+  padding: 6px 8px;
   border-radius: 12px;
   background: #fff1ee;
   color: var(--coral-strong);
   font-size: 12.5px;
   font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
 }
 .masc-perdi:active {
   background: #ffe3dd;
