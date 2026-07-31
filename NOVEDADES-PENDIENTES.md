@@ -34,3 +34,21 @@ calendario del hilo de novedades. Acá van las mejoras nuevas, de ahí en adelan
   el navy **"Ver las mascotas"** y debajo **"Ver cómo funciona"**. Tocando el primero
   aparece el feed al instante.
 - [ ] push desde el panel    [ ] redes
+
+## Si en tu ciudad todavía no hay avisos, Chicho te invita a empezar
+
+- commit: "Feed vacío: invitar a publicar en vez de avisar de un fracaso" · 31-jul-2026
+- Qué cambió: si abrías Chicho en una ciudad donde todavía no hay avisos publicados, la
+  pantalla decía "No hay resultados con esos filtros" — y encima era mentira, porque no
+  habías puesto ningún filtro. Ahora te cuenta que Chicho recién llega a tu zona y te
+  ofrece publicar el primer aviso, o mirar otra ciudad.
+- Por qué le importa: llega gente de todo el país desde links compartidos, y muchos caen
+  en ciudades donde Chicho todavía no tiene avisos. Encontrarse con un cartel de "sin
+  resultados" parece que la app está rota o vacía, y se van. Ahora entienden que son los
+  primeros y tienen el botón para publicar ahí mismo.
+- Dónde se ve: en el inicio, tocá el nombre de tu ciudad arriba (el chip con el pin 📍) y
+  elegí una donde todavía no haya avisos — Cañuelas o Diamante sirven. Aparece "Todavía
+  no hay avisos en …" con los botones **"Se me perdió"** y **"Encontré una"**. Si además
+  tocás la pestaña **Perdidos**, el texto cambia y dice que estar vacío es una buena
+  noticia. 🎉
+- [ ] push desde el panel    [ ] redes

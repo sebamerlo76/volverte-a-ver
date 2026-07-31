@@ -30,7 +30,7 @@ function jitter(base, id = '') {
   return [base[0] + dy, base[1] + dx]
 }
 
-export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, logueado, user, onLogin, onMenu, onNotifs, onBuscar, notifsNoLeidas = 0, hayNudge, modo, filtros, setFiltro, resetInicio, scrollRef, panelAbierto = false, setPanelAbierto = () => {} }) {
+export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, logueado, user, onLogin, onMenu, onNotifs, onBuscar, onNav = () => {}, notifsNoLeidas = 0, hayNudge, modo, filtros, setFiltro, resetInicio, scrollRef, panelAbierto = false, setPanelAbierto = () => {} }) {
   // panelAbierto (panel de filtros) vive en App: el botón atrás del celu tiene que
   // cerrarlo (antes te sacaba de la app), y ese manejo del historial está allá.
   const avatar = avatarDe(user)
@@ -131,6 +131,27 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
 
   const loc = filtros.localidad // null = todas las localidades
   const prov = filtros.provincia // toda una provincia (localidad === null)
+
+  // ¿La lista está vacía porque filtró, o porque no hay nada publicado ahí? Son dos
+  // situaciones distintas y hasta ahora las dos decían lo mismo. La pestaña (estado) NO
+  // cuenta como filtro: es navegación, no algo que la persona haya "puesto".
+  const hayFiltros = !!(filtros.q || filtros.especie || filtros.zona || (filtros.tiempo && filtros.tiempo !== 'todos') || filtros.soloLocalidad)
+  const dondeEstoy = loc || prov || 'tu zona'
+  const TEXTOS_VACIO = {
+    perdido: {
+      t: `No hay mascotas perdidas en ${dondeEstoy}`,
+      d: 'Que esté vacío es una buena noticia. 🎉 Si se te perdió una, publicá el aviso y les avisamos a los vecinos de la zona.',
+    },
+    encontrado: {
+      t: `Todavía nadie publicó una encontrada en ${dondeEstoy}`,
+      d: '¿Viste una mascota dando vueltas por la calle? Cargá el aviso: su familia puede estar buscándola justo ahora.',
+    },
+  }
+  const textoVacio = TEXTOS_VACIO[filtros.estado] || {
+    t: `Todavía no hay avisos en ${dondeEstoy}`,
+    d: 'Chicho recién llega por acá. Si perdiste o encontraste una mascota, publicá el primer aviso: lo van a ver todos los vecinos que se sumen.',
+  }
+
   function abrirCiudadSheet() {
     setCiudadSheet(true) // el drill-down (y en qué provincia abre) vive en SelectorCiudad
   }
@@ -519,27 +540,55 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
           ) : verFinales && finales === null ? (
             <div className="empty">Cargando reencuentros…</div>
           ) : filtrados.length === 0 ? (
-            <div className="empty">
-              {verFinales ? (
-                <>
-                  🐾 Todavía no hay reencuentros publicados.
-                  <br />
-                  ¡Ojalá pronto haya muchos reencuentros!
-                </>
-              ) : (
-                <>
-                  🔍 No hay resultados con esos filtros.
-                  <div>
-                    <button className="btn-limpiar" onClick={resetInicio}>
-                      <span className="mi" style={{ fontSize: 18 }}>
-                        filter_alt_off
-                      </span>
-                      Limpiar todo
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
+            verFinales ? (
+              <div className="empty">
+                🐾 Todavía no hay reencuentros publicados.
+                <br />
+                ¡Ojalá pronto haya muchos reencuentros!
+              </div>
+            ) : hayFiltros ? (
+              <div className="empty">
+                🔍 No hay resultados con esos filtros.
+                <div>
+                  <button className="btn-limpiar" onClick={resetInicio}>
+                    <span className="mi" style={{ fontSize: 18 }}>
+                      filter_alt_off
+                    </span>
+                    Limpiar todo
+                  </button>
+                </div>
+              </div>
+            ) : (
+              // Ciudad sin avisos y sin filtros puestos: no es un error de búsqueda, es
+              // que Chicho recién llega ahí. Decirle "no hay resultados con esos filtros"
+              // (que además es falso, no puso ninguno) espantaba a la gente que llega de
+              // un link. Acá la invitamos a publicar, que es lo único que la destraba.
+              <div className="vac-inv">
+                <span className="mi vac-ico">pets</span>
+                <div className="vac-t">{textoVacio.t}</div>
+                <div className="vac-d">{textoVacio.d}</div>
+                <div className="vac-acc">
+                  <button className="vac-b perdi" onClick={() => onNav('perdi')}>
+                    <span className="mi" style={{ fontSize: 19 }}>
+                      pets
+                    </span>
+                    Se me perdió
+                  </button>
+                  <button className="vac-b encontre" onClick={() => onNav('encontre')}>
+                    <span className="mi" style={{ fontSize: 19 }}>
+                      visibility
+                    </span>
+                    Encontré una
+                  </button>
+                </div>
+                <button className="vac-otra" onClick={abrirCiudadSheet}>
+                  <span className="mi" style={{ fontSize: 17 }}>
+                    place
+                  </span>
+                  Buscar en otra ciudad
+                </button>
+              </div>
+            )
           ) : (
             filtrados.map((r, i) => (
               <PetCard

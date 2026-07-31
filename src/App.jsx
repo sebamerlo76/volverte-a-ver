@@ -762,6 +762,7 @@ export default function App() {
             onMenu={() => setMenuAbierto(true)}
             onNotifs={abrirNotifs}
             onBuscar={() => setBuscadorAbierto(true)}
+            onNav={navBarra}
             notifsNoLeidas={notifsNoLeidas}
             hayNudge={nudge}
             modo={homeModo}
