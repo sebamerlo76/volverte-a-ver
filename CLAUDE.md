@@ -66,11 +66,15 @@ Si un commit cambia algo que la persona **ve o siente**, el chat de código suma
 bloque al final de `NOVEDADES-PENDIENTES.md`, en el mismo commit que la mejora:
 
     ## <título corto, como se lo contás a un vecino>
-    - commit: <hash corto> · <fecha>
+    - commit: "<asunto del commit>" · <fecha>
     - Qué cambió: <una o dos líneas, sin palabras de programador>
     - Por qué le importa: <qué gana quien está buscando a su mascota>
     - Dónde se ve: <pantalla y botón exactos, para poder filmarlo>
     - [ ] push desde el panel    [ ] redes
+
+Va el **asunto** del commit y no el hash: el hash sale del contenido del commit, así que
+escribirlo adentro lo cambia y queda apuntando a un commit que no existe. Con el asunto
+se llega igual: `git log --grep "<asunto>"`.
 
 No es un changelog, es una **cola**: el hilo de novedades manda el push desde el panel
 y avisa que ya está contado; el de guiones avisa cuando salió el video. **El que tacha
