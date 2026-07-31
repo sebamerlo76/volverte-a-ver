@@ -34,7 +34,7 @@ export default function NuevaPassword({ onListo, onToast }) {
       <div className="body form-body">
         <div style={{ textAlign: 'center', margin: '10px 0 4px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-            <img src="/logo.png" alt="" width="52" height="52" style={{ display: 'block' }} />
+            <img src="/logo-boot.png" alt="" width="52" height="52" style={{ display: 'block' }} />
             <span style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 36, color: 'var(--navy)' }}>Chicho</span>
           </div>
           <div style={{ fontSize: 13.5, color: 'var(--muted)', fontWeight: 700, marginTop: 12, lineHeight: 1.5 }}>

@@ -293,7 +293,7 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
           </div>
 
           <button className="hmini-logo" onClick={resetInicio} aria-label="Ir al inicio">
-            <img src="/logo.png" alt="" width="42" height="42" style={{ display: 'block' }} />
+            <img src="/logo-boot.png" alt="" width="42" height="42" style={{ display: 'block' }} />
             Chicho
           </button>
 

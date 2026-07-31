@@ -51,7 +51,7 @@ export default function GestionAviso({ token }) {
         <div className="pub-scroll">
           <div className="pub-top">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9 }}>
-              <img src="/logo.png" alt="" width="48" height="48" style={{ display: 'block' }} />
+              <img src="/logo-boot.png" alt="" width="48" height="48" style={{ display: 'block' }} />
               <span style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 30, color: 'var(--navy)' }}>Chicho</span>
             </div>
           </div>

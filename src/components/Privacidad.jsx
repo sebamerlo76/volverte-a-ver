@@ -9,7 +9,7 @@ export default function Privacidad() {
         <div className="pub-scroll">
           <div className="pub-top">
             <a href="/" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, textDecoration: 'none' }}>
-              <img src="/logo.png" alt="" width="44" height="44" style={{ display: 'block' }} />
+              <img src="/logo-boot.png" alt="" width="44" height="44" style={{ display: 'block' }} />
               <span style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 600, fontSize: 28, color: 'var(--navy)' }}>Chicho</span>
             </a>
           </div>

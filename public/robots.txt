@@ -1,0 +1,13 @@
+# Chicho — https://chicho.ar
+#
+# Este archivo faltaba. Al no existir, Vercel devolvía el index.html del SPA para
+# /robots.txt (200, text/html), así que los rastreadores pedían las reglas y recibían
+# HTML: PageSpeed contaba 137 errores de sintaxis, uno por línea de la página.
+#
+# Todo el sitio es público y queremos que se indexe: cuanta más gente encuentre un aviso
+# desde Google, más rápido vuelve una mascota a casa. Las pantallas de cuenta no hace
+# falta excluirlas — viven detrás del login y se arman en el navegador, no hay nada que
+# un rastreador pueda leer ahí.
+
+User-agent: *
+Allow: /
