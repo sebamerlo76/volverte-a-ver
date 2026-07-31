@@ -327,17 +327,33 @@ export default function App() {
     setNudge(!!user && logins() >= 2 && !pasosOk())
   }, [user])
 
-  // Prefetch del mapa en segundo plano: no viaja en el bundle inicial (para que
-  // la app abra rápido), pero apenas el navegador queda libre lo bajamos, así
-  // cuando el usuario toca "Mapa" o abre un aviso ya está listo, sin espera.
+  // Prefetch del mapa en segundo plano: no viaja en el bundle inicial (para que la app
+  // abra rápido), pero después lo bajamos, así cuando el usuario toca "Mapa" o abre un
+  // aviso ya está listo, sin espera.
+  //
+  // La idea estaba bien; el momento no. Era requestIdleCallback con timeout de 3 s, y en
+  // un celu lento el navegador NUNCA queda libre durante la carga: se cumplía el timeout
+  // y los 54 KB del mapa (JS + CSS) se bajaban a los 3 segundos exactos, en plena pelea
+  // por pintar. En PageSpeed eran la rama más larga de la ruta crítica (2825 ms) y encima
+  // figuraban como "JS que no se usa". Ahora se espera al 'load' —con la página ya
+  // cargada, nada de esto compite con el LCP— y recién ahí se pide el rato libre.
   useEffect(() => {
     const bajarMapa = () => import('./components/MapaLeaflet.jsx').catch(() => {})
-    if ('requestIdleCallback' in window) {
-      const id = requestIdleCallback(bajarMapa, { timeout: 3000 })
-      return () => cancelIdleCallback(id)
+    let id = null
+    let t = null
+    function programar() {
+      if ('requestIdleCallback' in window) id = requestIdleCallback(bajarMapa, { timeout: 10000 })
+      else t = setTimeout(bajarMapa, 2000)
     }
-    const t = setTimeout(bajarMapa, 1500)
-    return () => clearTimeout(t)
+    // Si la app monta después del load (vuelta atrás, recarga con caché), no hay evento
+    // que esperar: se programa de una.
+    if (document.readyState === 'complete') programar()
+    else window.addEventListener('load', programar, { once: true })
+    return () => {
+      window.removeEventListener('load', programar)
+      if (id != null && 'cancelIdleCallback' in window) cancelIdleCallback(id)
+      if (t != null) clearTimeout(t)
+    }
   }, [])
 
   // Avisos que sigue el usuario (para el botón Seguir / Siguiendo).

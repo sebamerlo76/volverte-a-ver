@@ -94,11 +94,22 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
   Impacto menor (1-3 fotos por pantalla) pero es una línea en cada una. Ver src/lib/foto.js.
   El hero del Detalle y el Lightbox se dejaron SIN transformar a propósito: ahí hace falta
   ver bien al animal (y el Lightbox tiene zoom).
-- [ ] **Bajar el LCP de campo: 4 cambios chicos** (30-jul-2026, medido en PageSpeed móvil
-  de chicho.ar). Contexto para no volver a diagnosticar de cero: el **58 del laboratorio
+- [x] **Bajar el LCP de campo: 4 cambios chicos** ✅ (los 4 hechos el 31-jul-2026; falta
+  que la ventana de 28 días de PageSpeed los refleje — **no sacar conclusiones antes de
+  fines de agosto**). Efecto ya visible en laboratorio: LCP **10,7 s → 9,1 s**, bloqueo de
+  renderizado 300 → 150 ms, caché ineficiente 1055 → 322 KiB. La nota sigue en 58 y va a
+  seguir: la dominan FCP y Speed Index, que dependen del celu simulado.
+  **Lo próximo, si se retoma el tema, es el INP** (243 ms, 65% de la gente en "bueno"):
+  está a 10 puntos de aprobar, más cerca que el LCP (47%). Antes de tocar nada hay que
+  MEDIR qué interacción lo causa — candidatos: cambiar de pestaña en el feed (re-render de
+  la lista entera) y abrir un aviso.
+  Contexto para no volver a diagnosticar de cero: el **58 del laboratorio
   es un espejismo** (Lighthouse simula un Moto G Power con la CPU frenada 4×). Lo que
   importa es el **campo**, que ya trae 28 días de usuarios reales: FCP **1,8 s** (era 7,4
   antes del boot splash ✅) pero LCP **4,1 s** e INP **243 ms** → "no se aprueba" (CLS 0 ✅).
+  Ojo con un efecto perverso al leer el LCP de campo: el elemento LCP es el cartel de
+  bienvenida, que **sólo lo ve quien entra por primera vez**, así que una campaña de
+  tráfico nuevo empeora el número aunque el sitio esté mejor.
   El servidor NO es el problema: medido `curl` a chicho.ar da **366 ms de TTFB, 0
   redirecciones, `X-Vercel-Cache: HIT`** desde São Paulo. El 1,4 s de TTFB del informe es
   la red 4G de la gente.
