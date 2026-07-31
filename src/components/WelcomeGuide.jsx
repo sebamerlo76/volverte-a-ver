@@ -51,24 +51,32 @@ const PASOS = [
   },
 ]
 
-export default function WelcomeGuide({ onClose }) {
+// `bienvenida` = es la primera visita (no la abrió a mano desde el menú "Guía").
+// En ese caso el primer paso es una PORTADA: la acción grande entra a la app y el
+// recorrido queda como opción. El que llega de un link viene a ver mascotas, no a
+// leer siete pantallas — antes el botón grande decía "Siguiente" y la única salida
+// era un "Saltar" gris y chiquito, así que muchos no llegaban nunca al feed.
+export default function WelcomeGuide({ onClose, bienvenida = false }) {
   const ref = useRef(null)
   const [paso, setPaso] = useState(0)
   const ultimo = paso >= PASOS.length - 1
+  const portada = bienvenida && paso === 0
 
   function irA(i) {
     const el = ref.current
     if (el) el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' })
   }
   function siguiente() {
-    if (ultimo) onClose()
+    if (portada || ultimo) onClose()
     else irA(paso + 1)
   }
 
   return (
     <div className="guia-overlay">
       <div className="guia-card">
-        <button className="guia-saltar" onClick={onClose}>
+        {/* En la portada el "Saltar" sobra (abajo ya hay un botón que entra), pero se
+            deja ocupando su lugar con visibility para que nada salte al pasar de paso. */}
+        <button className={'guia-saltar' + (portada ? ' oculto' : '')} onClick={onClose}>
           Saltar
         </button>
 
@@ -85,7 +93,9 @@ export default function WelcomeGuide({ onClose }) {
             <div className="guia-slide" key={i}>
               <div className="guia-ico" style={{ color: p.color }}>
                 {p.logo ? (
-                  <img src="/logo.png" alt="Chicho" width="86" height="86" />
+                  // logo-boot (176px) y no logo.png (500px, 58 KB): acá se ve a 86 px
+                  // y es lo primero que pinta la app, así que el peso se nota.
+                  <img src="/logo-boot.png" alt="Chicho" width="86" height="86" />
                 ) : (
                   <span className="mi fill" style={{ fontSize: 66 }}>
                     {p.ic}
@@ -105,7 +115,12 @@ export default function WelcomeGuide({ onClose }) {
         </div>
 
         <button className="guia-btn" onClick={siguiente}>
-          {ultimo ? '¡Empezar!' : 'Siguiente'}
+          {portada ? 'Ver las mascotas' : ultimo ? '¡Empezar!' : 'Siguiente'}
+        </button>
+        {/* Mismo criterio que el "Saltar": fuera de la portada queda invisible pero
+            ocupando su lugar, así el pie no se mueve al avanzar. */}
+        <button className={'guia-sec' + (portada ? '' : ' oculto')} onClick={() => irA(1)}>
+          Ver cómo funciona
         </button>
       </div>
     </div>

@@ -19,4 +19,18 @@ calendario del hilo de novedades. Acá van las mejoras nuevas, de ahí en adelan
 
 ---
 
-(sin pendientes)
+## Ahora entrás a ver las mascotas en un toque
+
+- commit: "Bienvenida: que se pueda entrar a ver los avisos desde la primera pantalla" · 31-jul-2026
+- Qué cambió: al entrar por primera vez había un recorrido de 7 pantallas, y para llegar
+  a los avisos había que pasarlas todas de a una o encontrar un "Saltar" chiquito y gris
+  arriba. Ahora la primera pantalla tiene un botón grande que dice **"Ver las mascotas"**
+  y te lleva derecho al listado; el recorrido queda abajo como opción, para el que lo quiera.
+- Por qué le importa: el que llega desde un link compartido en un grupo de Facebook o por
+  WhatsApp entra buscando si está su mascota, no a leer siete pantallas. Antes muchos se
+  quedaban trabados ahí y no llegaban nunca a ver un aviso.
+- Dónde se ve: abrí chicho.ar en una ventana de incógnito (o borrá los datos del sitio) y
+  es la primera pantalla, la de "¡Bienvenido a Chicho!". Abajo se ven los dos botones:
+  el navy **"Ver las mascotas"** y debajo **"Ver cómo funciona"**. Tocando el primero
+  aparece el feed al instante.
+- [ ] push desde el panel    [ ] redes

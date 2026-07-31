@@ -11,6 +11,10 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import Feed from './components/Feed.jsx'
 import BottomNav from './components/BottomNav.jsx'
 import Detalle from './components/Detalle.jsx' // se abre en cada toque del feed: va de arranque
+// La guía es lo PRIMERO que ve quien entra por primera vez (y PageSpeed la marca como
+// el elemento LCP). En lazy costaba un viaje de red entero encadenado —HTML, bundle,
+// recién ahí el chunk— para 1,9 KB de componente: sale más barato que viaje adentro.
+import WelcomeGuide from './components/WelcomeGuide.jsx'
 
 // Vistas (reemplazan la pantalla): segundas pantallas, nadie las ve en la 1ª carga.
 const Publicar = lazy(() => import('./components/Publicar.jsx'))
@@ -33,7 +37,6 @@ const Novedades = lazy(() => import('./components/Novedades.jsx'))
 const BuscadorOverlay = lazy(() => import('./components/BuscadorOverlay.jsx'))
 const NotifPanel = lazy(() => import('./components/NotifPanel.jsx'))
 const MenuUsuario = lazy(() => import('./components/MenuUsuario.jsx'))
-const WelcomeGuide = lazy(() => import('./components/WelcomeGuide.jsx'))
 const Soporte = lazy(() => import('./components/Soporte.jsx'))
 const Lightbox = lazy(() => import('./components/Lightbox.jsx'))
 import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, borrarReporteAdmin, resolverReporteAdmin, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte, getUbicaciones, marcarCompartido } from './data/store.js'
@@ -275,7 +278,10 @@ export default function App() {
   useEffect(() => {
     const yaVista = localStorage.getItem('chicho_guia_vista')
     const esLinkDirecto = /^\/r\//.test(window.location.pathname)
-    if (!yaVista && !esLinkDirecto) setGuiaAbierta(true)
+    // 'bienvenida' (y no true) para que la guía sepa que es la primera visita y muestre
+    // la portada con el botón que entra directo. Abierta desde el menú va true y arranca
+    // el recorrido de una: ahí la persona la pidió.
+    if (!yaVista && !esLinkDirecto) setGuiaAbierta('bienvenida')
   }, [])
 
   // El push de una novedad lleva a /novedades: abrimos esa pantalla al entrar.
@@ -920,7 +926,7 @@ export default function App() {
         {/* Modales y hojas: fallback null — aparecen al instante siguiente sin tapar
             lo que se está viendo (son overlays, no reemplazan la pantalla). */}
         <Suspense fallback={null}>
-        {guiaAbierta && <WelcomeGuide onClose={cerrarGuia} />}
+        {guiaAbierta && <WelcomeGuide onClose={cerrarGuia} bienvenida={guiaAbierta === 'bienvenida'} />}
 
         {soporteAbierto && <Soporte onCerrar={() => setSoporteAbierto(false)} />}
 

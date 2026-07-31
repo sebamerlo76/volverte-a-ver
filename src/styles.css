@@ -2934,14 +2934,23 @@ select {
   flex-direction: column;
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
 }
+/* Salida del recorrido. Era gris --muted a 13.5px y pasaba desapercibida: la gente
+   quedaba atrapada en el carrusel sin ver cómo llegar a la app. Ahora es una pastilla
+   navy, del tamaño de un botón de verdad. */
 .guia-saltar {
   align-self: flex-end;
   margin: 14px 16px 0;
-  padding: 8px 6px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: rgba(31, 56, 82, 0.08);
   font-family: Nunito, sans-serif;
   font-weight: 800;
-  font-size: 13.5px;
-  color: var(--muted);
+  font-size: 15px;
+  color: var(--navy);
+}
+.guia-saltar.oculto,
+.guia-sec.oculto {
+  visibility: hidden;
 }
 .guia-slides {
   flex: 1;
@@ -3015,6 +3024,17 @@ select {
   font-family: Nunito, sans-serif;
   font-weight: 800;
   font-size: 16px;
+}
+/* Acción secundaria de la portada ("Ver cómo funciona"): tiene que leerse como
+   opción, no competirle al botón que entra a la app. */
+.guia-sec {
+  margin: 8px 24px 0;
+  height: 46px;
+  border-radius: 14px;
+  font-family: Nunito, sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--navy);
 }
 
 /* Encuadre de foto (cropper) */
