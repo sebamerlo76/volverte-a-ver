@@ -115,7 +115,7 @@ export default function WelcomeGuide({ onClose, bienvenida = false }) {
         </div>
 
         <button className="guia-btn" onClick={siguiente}>
-          {portada ? 'Ver las mascotas' : ultimo ? '¡Empezar!' : 'Siguiente'}
+          {portada ? 'Ver las mascotas de mi zona' : ultimo ? '¡Empezar!' : 'Siguiente'}
         </button>
         {/* Mismo criterio que el "Saltar": fuera de la portada queda invisible pero
             ocupando su lugar, así el pie no se mueve al avanzar. */}
