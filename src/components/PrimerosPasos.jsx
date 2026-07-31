@@ -111,7 +111,24 @@ export default function PrimerosPasos({ user, onIrSeccion, onNuevaMascota, onCom
     onToast?.('👍 Listo. Si algún día tenés una, la cargás desde Mis mascotas')
   }
 
+  // El orden sigue las dependencias reales, no lo que es más fácil de tildar. Instalar
+  // va primero porque HABILITA a los demás: en iPhone no hay notificaciones posibles sin
+  // la app instalada, y el banner de avisos del feed tampoco aparece hasta que lo está.
+  // Pedir "activá las notificaciones" antes es pedir algo que todavía no se puede hacer.
+  // Después la ubicación (define QUÉ te llega) y las mascotas (te dejan listo para el día
+  // que pase). Compartir y redes van al final: ayudan a Chicho, no a la persona.
   const PASOS = [
+    {
+      done: instalOk,
+      ic: 'install_mobile',
+      t: !instalada && sinInstalar ? 'La instalás cuando quieras' : 'Instalá la app',
+      s: 'Sin instalar no llegan las notificaciones',
+      btn: 'Instalar',
+      accion: instalarApp,
+      btn2: 'Ahora no',
+      accion2: ahoraNoInstalo,
+    },
+    { done: push, ic: 'notifications', t: 'Activá las notificaciones', s: 'Recibí avisos de perdidos y encontrados', btn: 'Activar', accion: () => onIrSeccion('notificaciones') },
     { done: ubic, ic: 'location_on', t: 'Cargá tu ubicación', s: 'Para enterarte de avisos cerca tuyo', btn: 'Cargar', accion: () => onIrSeccion('ubicaciones') },
     {
       done: mascOk,
@@ -125,33 +142,24 @@ export default function PrimerosPasos({ user, onIrSeccion, onNuevaMascota, onCom
       btn2: 'No tengo',
       accion2: noTengoMascotas,
     },
-    // Antes de las notificaciones a propósito: sin la app instalada no llegan.
-    {
-      done: instalOk,
-      ic: 'install_mobile',
-      t: !instalada && sinInstalar ? 'La instalás cuando quieras' : 'Instalá la app',
-      s: 'Sin instalar no llegan las notificaciones',
-      btn: 'Instalar',
-      accion: instalarApp,
-      btn2: 'Ahora no',
-      accion2: ahoraNoInstalo,
-    },
-    { done: push, ic: 'notifications', t: 'Activá las notificaciones', s: 'Recibí avisos de perdidos y encontrados', btn: 'Activar', accion: () => onIrSeccion('notificaciones') },
     { done: compartir, ic: 'share', t: 'Compartí Chicho', s: 'Cuanta más gente, más rápido vuelven a casa', btn: 'Compartir', accion: compartirApp },
   ]
 
   const pct = Math.round((hechos / total) * 100)
 
   return (
-    <div className="pp-card">
+    // Mientras la consulta no vuelve NO sabemos qué está hecho: ubicación, mascotas y
+    // notificaciones se leen de la base. Antes se pintaba todo como pendiente y un
+    // segundo después se tildaba solo — parecía que habías perdido lo que ya tenías
+    // hecho. Ahora, mientras carga, la pantalla no afirma nada: filas en gris, sin
+    // botones y el contador en puntos suspensivos.
+    <div className={'pp-card' + (cargando ? ' pp-cargando' : '')}>
       <div className="pp-top">
         <div className="pp-title">Primeros pasos</div>
-        <div className="pp-count">
-          {hechos} de {total}
-        </div>
+        <div className="pp-count">{cargando ? '…' : `${hechos} de ${total}`}</div>
       </div>
       <div className="pp-bar">
-        <div className="pp-bar-fill" style={{ width: pct + '%' }} />
+        <div className="pp-bar-fill" style={{ width: cargando ? 0 : pct + '%' }} />
       </div>
 
       {completo && (
@@ -162,15 +170,15 @@ export default function PrimerosPasos({ user, onIrSeccion, onNuevaMascota, onCom
 
       <div className="pp-rows">
         {PASOS.map((p) => (
-          <div key={p.t} className={'pp-row' + (p.done ? ' done' : '')}>
-            <span className={'mi' + (p.done ? ' fill' : '')} style={{ fontSize: 22, color: p.done ? '#1f9d8f' : 'var(--navy)' }}>
-              {p.done ? 'check_circle' : p.ic}
+          <div key={p.t} className={'pp-row' + (p.done && !cargando ? ' done' : '')}>
+            <span className={'mi' + (p.done && !cargando ? ' fill' : '')} style={{ fontSize: 22, color: p.done && !cargando ? '#1f9d8f' : 'var(--navy)' }}>
+              {p.done && !cargando ? 'check_circle' : p.ic}
             </span>
             <div className="pp-row-txt">
               <div className="pp-row-t">{p.t}</div>
-              {!p.done && <div className="pp-row-s">{p.s}</div>}
+              {!p.done && !cargando && <div className="pp-row-s">{p.s}</div>}
             </div>
-            {!p.done && (
+            {!p.done && !cargando && (
               <div className="pp-btns">
                 <button className="pp-btn" onClick={p.accion}>
                   {p.btn}
@@ -185,16 +193,19 @@ export default function PrimerosPasos({ user, onIrSeccion, onNuevaMascota, onCom
           </div>
         ))}
 
-        {/* Paso "Seguir en Instagram": botón + confirmar (no verificable) */}
-        <div className={'pp-row' + (redes ? ' done' : '')}>
-          <span className={'mi' + (redes ? ' fill' : '')} style={{ fontSize: 22, color: redes ? '#1f9d8f' : 'var(--navy)' }}>
-            {redes ? 'check_circle' : 'favorite'}
+        {/* Paso "Seguir en Instagram": botón + confirmar (no verificable). Su dato es
+            local (no depende de la consulta), pero se atiene a `cargando` igual: si no,
+            queda la única fila con botón entre cinco en gris. */}
+        <div className={'pp-row' + (redes && !cargando ? ' done' : '')}>
+          <span className={'mi' + (redes && !cargando ? ' fill' : '')} style={{ fontSize: 22, color: redes && !cargando ? '#1f9d8f' : 'var(--navy)' }}>
+            {redes && !cargando ? 'check_circle' : 'favorite'}
           </span>
           <div className="pp-row-txt">
             <div className="pp-row-t">Seguinos en Instagram</div>
-            {!redes && <div className="pp-row-s">@chicho.ar — novedades y reencuentros</div>}
+            {!redes && !cargando && <div className="pp-row-s">@chicho.ar — novedades y reencuentros</div>}
           </div>
           {!redes &&
+            !cargando &&
             (!redesAbierto ? (
               <button className="pp-btn" onClick={abrirInstagram}>
                 Seguir

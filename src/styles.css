@@ -4844,6 +4844,15 @@ textarea:focus-visible {
   background: #f6faf8;
   border-color: #dcefe9;
 }
+/* Mientras se leen los pasos de la base todavía no se sabe qué está hecho: se atenúa
+   en vez de afirmar que falta todo (y después tildarse solo, que se veía como un
+   parpadeo raro). Dura lo que tarda una consulta. */
+.pp-cargando .pp-row {
+  opacity: 0.45;
+}
+.pp-cargando .pp-count {
+  opacity: 0.5;
+}
 .pp-row-txt {
   flex: 1;
   min-width: 0;

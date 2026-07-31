@@ -57,15 +57,18 @@ calendario del hilo de novedades. Acá van las mejoras nuevas, de ahí en adelan
 ## Primeros pasos ahora te ayuda a instalar la app
 
 - commit: "Bienvenida de 4 pasos, sin Guía en la app, e instalar entra a Primeros pasos" · 31-jul-2026
-- Qué cambió: la lista de "Primeros pasos" sumó **Instalá la app**, con su botón. Es el
-  paso del que dependen todos los avisos: si Chicho no está instalado en el teléfono, las
-  notificaciones no llegan aunque estén activadas. Antes eso solo lo explicaba un cartel
-  del inicio que, si lo cerrabas una vez, no volvía nunca.
+- Qué cambió: la lista de "Primeros pasos" sumó **Instalá la app**, con su botón, y quedó
+  **primera**. Es el paso del que dependen todos los avisos: si Chicho no está instalado
+  en el teléfono, las notificaciones no llegan aunque las actives. Antes eso solo lo
+  explicaba un cartel del inicio que, si lo cerrabas una vez, no volvía nunca. De paso se
+  reordenó todo: primero lo que te hace llegar los avisos (instalar, notificaciones,
+  ubicación), después lo tuyo (mascotas) y al final compartir.
 - Por qué le importa: las notificaciones son lo que hace que una mascota aparezca en la
   primera hora, que es cuando se encuentran. Quien no tenía la app instalada se quedaba
-  afuera de eso sin enterarse.
-- Dónde se ve: menú (la carita arriba a la izquierda) → **Primeros pasos**. Es el tercer
-  ítem de la lista, entre "Cargá tus mascotas" y "Activá las notificaciones", con el botón
-  **Instalar**. Si ya la tenés instalada aparece tildado solo. El contador de arriba ahora
-  dice 6 en vez de 5.
+  afuera de eso sin enterarse, y encima la lista le pedía activar avisos que todavía no
+  podía recibir.
+- Dónde se ve: menú (la carita arriba a la izquierda) → **Primeros pasos**. **Instalá la
+  app** es el primer ítem, con el botón **Instalar**; si ya la tenés, aparece tildado
+  solo. El contador de arriba dice 6 en vez de 5. Además la pantalla ya no parpadea al
+  abrirse: antes mostraba un segundo todo sin completar y después se tildaba solo.
 - [ ] push desde el panel    [ ] redes
