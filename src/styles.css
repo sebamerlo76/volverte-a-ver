@@ -3047,6 +3047,17 @@ select {
   text-align: center;
   padding: 10px 34px;
   gap: 20px;
+  /* Red de seguridad: si aun así no entra (texto largo + pantalla muy baja), que se
+     pueda scrollear en vez de comerse el final. Con justify-content:center el scroll
+     recorta arriba, por eso los hijos llevan margin-block:auto. */
+  overflow-y: auto;
+}
+.guia-slide > * {
+  margin-block: auto;
+  flex-shrink: 0;
+}
+.guia-ico-mi {
+  font-size: 66px;
 }
 .guia-ico {
   width: 128px;
@@ -3089,6 +3100,34 @@ select {
   width: 22px;
   border-radius: 5px;
   background: var(--navy);
+}
+/* Pantallas bajas (iPhone SE y parecidos): el paso de instalar necesita ~410px de alto
+   y ahí hay 354. Se achica el ícono antes que dejar que se coma "Sin instalar no llegan
+   las notificaciones", que es la línea que importa. */
+@media (max-height: 640px) {
+  .guia-slide {
+    gap: 10px;
+    padding: 5px 26px;
+  }
+  .guia-ico {
+    width: 80px;
+    height: 80px;
+    border-radius: 25px;
+  }
+  .guia-ico-mi {
+    font-size: 46px;
+  }
+  .guia-ico img {
+    width: 58px;
+    height: 58px;
+  }
+  .guia-t {
+    font-size: 21px;
+  }
+  .guia-d {
+    font-size: 14.5px;
+    line-height: 1.5;
+  }
 }
 .guia-btn {
   margin: 0 24px;

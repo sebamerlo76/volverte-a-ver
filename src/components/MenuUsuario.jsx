@@ -8,7 +8,8 @@ const ITEMS = [
   { k: 'notificaciones', ic: 'notifications', t: 'Notificaciones' },
   { k: 'avisos', ic: 'campaign', t: 'Avisos' },
   { k: 'cuenta', ic: 'person', t: 'Mi cuenta' },
-  { k: 'guia', ic: 'help', t: 'Guía' },
+  // Sin "Guía": el recorrido de slides quedó como bienvenida del sitio, para el que
+  // llega navegando. Adentro se guía haciendo — los banners del feed y Primeros pasos.
   { k: 'novedades', ic: 'auto_awesome', t: 'Novedades' },
   { k: 'ayuda', ic: 'support_agent', t: 'Ayuda / Soporte' },
 ]

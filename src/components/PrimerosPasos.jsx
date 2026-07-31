@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getUbicaciones, getMisMascotas } from '../data/store.js'
 import { yaSuscripto } from '../lib/push.js'
+import { esStandalone, hayPrompt, instalar, esIOS, suscribir } from '../lib/instalar.js'
 import { pasoHecho, marcarPaso, marcarPasosOk, INSTAGRAM_URL } from '../lib/pasos.js'
 
 // Checklist de "Primeros pasos". Se tilda solo leyendo datos reales (ubicación,
@@ -16,6 +17,13 @@ export default function PrimerosPasos({ user, onIrSeccion, onNuevaMascota, onCom
   // "No tengo mascotas por ahora": sin esto, el vecino que solo quiere ayudar nunca
   // completaba los pasos y le quedaba el aviso de la campana para siempre.
   const [sinMascotas, setSinMascotas] = useState(pasoHecho('sinMascotas'))
+  // Instalar la app. Entró acá cuando se sacó la "Guía" del menú: era el único lugar que
+  // explicaba cómo instalar, y el banner del feed, una vez descartado, no vuelve nunca.
+  const [instalada, setInstalada] = useState(esStandalone())
+  const [puedeInstalar, setPuedeInstalar] = useState(hayPrompt())
+  // Mismo motivo que "No tengo mascotas": desde la compu no se puede instalar, y sin una
+  // salida el checklist quedaría incompleto para siempre.
+  const [sinInstalar, setSinInstalar] = useState(pasoHecho('sinInstalar'))
 
   useEffect(() => {
     let vivo = true
@@ -35,9 +43,13 @@ export default function PrimerosPasos({ user, onIrSeccion, onNuevaMascota, onCom
     }
   }, [user?.id])
 
+  // El cartel nativo de instalar puede aparecer después de montado: nos avisa `suscribir`.
+  useEffect(() => suscribir(() => setPuedeInstalar(hayPrompt())), [])
+
   const mascOk = masc || sinMascotas // cargó alguna, o dijo que no tiene
-  const hechos = [ubic, mascOk, push, compartir, redes].filter(Boolean).length
-  const total = 5
+  const instalOk = instalada || sinInstalar
+  const hechos = [ubic, mascOk, instalOk, push, compartir, redes].filter(Boolean).length
+  const total = 6
   const completo = !cargando && hechos === total
 
   useEffect(() => {
@@ -77,6 +89,22 @@ export default function PrimerosPasos({ user, onIrSeccion, onNuevaMascota, onCom
     setRedesAbierto(false)
   }
 
+  async function instalarApp() {
+    // Android con cartel nativo: un toque. iPhone (y Android sin cartel todavía): no hay
+    // API, así que le decimos el camino exacto en vez de dejar un botón que no hace nada.
+    if (!puedeInstalar || esIOS()) {
+      onToast && onToast(esIOS() ? '🍎 En Safari: Compartir ↑ → «Agregar a inicio»' : '📱 Menú ⋮ del navegador → «Instalar app»')
+      return
+    }
+    const r = await instalar()
+    if (r === 'accepted') setInstalada(true)
+  }
+  function ahoraNoInstalo() {
+    marcarPaso('sinInstalar')
+    setSinInstalar(true)
+    onToast?.('👍 Listo. Ojo que sin la app instalada no te llegan los avisos')
+  }
+
   function noTengoMascotas() {
     marcarPaso('sinMascotas')
     setSinMascotas(true)
@@ -96,6 +124,17 @@ export default function PrimerosPasos({ user, onIrSeccion, onNuevaMascota, onCom
       // Segundo botón: para el que solo quiere ayudar.
       btn2: 'No tengo',
       accion2: noTengoMascotas,
+    },
+    // Antes de las notificaciones a propósito: sin la app instalada no llegan.
+    {
+      done: instalOk,
+      ic: 'install_mobile',
+      t: !instalada && sinInstalar ? 'La instalás cuando quieras' : 'Instalá la app',
+      s: 'Sin instalar no llegan las notificaciones',
+      btn: 'Instalar',
+      accion: instalarApp,
+      btn2: 'Ahora no',
+      accion2: ahoraNoInstalo,
     },
     { done: push, ic: 'notifications', t: 'Activá las notificaciones', s: 'Recibí avisos de perdidos y encontrados', btn: 'Activar', accion: () => onIrSeccion('notificaciones') },
     { done: compartir, ic: 'share', t: 'Compartí Chicho', s: 'Cuanta más gente, más rápido vuelven a casa', btn: 'Compartir', accion: compartirApp },

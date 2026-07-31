@@ -1,12 +1,15 @@
 import { useRef, useState } from 'react'
-import { provinciasOrdenadas } from '../lib/localidades.js'
 
-// Lista de provincias donde ya está Chicho, en prosa ("A, B y C"). Se arma sola
-// de los datos, así no se queda vieja al sumar provincias.
-const PROVS = provinciasOrdenadas()
-const PROVINCIAS_TXT = PROVS.length > 1 ? PROVS.slice(0, -1).join(', ') + ' y ' + PROVS[PROVS.length - 1] : PROVS[0]
-
-// Recorrido de bienvenida (carrusel). Se muestra la primera vez y desde el menú "Guía".
+// Bienvenida del SITIO: la ve una sola vez quien llega navegando a chicho.ar. Dentro de
+// la app ya no hay "Guía" — ahí se guía haciendo, con los banners del feed y el checklist
+// de Primeros pasos. Por eso esto es corto: cuatro pantallas, y la primera deja entrar.
+//
+// Eran siete y se recortaron a propósito. Se fue "Cerca tuyo" (en qué provincias está
+// Chicho): el botón ya dice "de mi zona", el feed abre en la ciudad de la persona y, si
+// está vacía, el propio feed la nombra. Lo de instalar se queda aunque BannerInstalar
+// diga casi lo mismo, porque los banners NO le llegan al que recién entra: el de avisos
+// pide estar logueado y tener la app instalada, y el de instalar no aparece en Android
+// hasta que el navegador ofrece el cartel.
 const PASOS = [
   {
     logo: true,
@@ -14,22 +17,10 @@ const PASOS = [
     d: 'Ayudamos a que las mascotas perdidas de tu ciudad vuelvan a casa. 🐾',
   },
   {
-    ic: 'place',
-    color: 'var(--coral)',
-    t: 'Cerca tuyo',
-    d: `Ya estamos en ${PROVINCIAS_TXT}, y sumando ciudades todo el tiempo.\n\n¿Tu localidad no aparece? Escribinos y la sumamos. 💜`,
-  },
-  {
-    ic: 'swap_horiz',
-    color: 'var(--navy)',
-    t: 'Perdido, Encontrado, Ya en casa',
-    d: '🔴 Perdido: su familia lo busca.\n🔵 Encontrado: alguien lo vio, o lo tiene a resguardo (en tránsito), y busca a su familia.\n🏠 Ya en casa: volvió con su familia. 🎉',
-  },
-  {
     ic: 'pets',
     color: 'var(--navy)',
     t: 'Publicá en un toque',
-    d: '¿Perdiste o encontraste una? Tocá 🐾 Perdí o 👁️ Encontré abajo para cargar tu aviso.',
+    d: '🔴 Perdido: su familia lo busca.\n🔵 Encontrado: alguien lo vio, o lo tiene a resguardo, y busca a su familia.\n🏠 Ya en casa: volvió con su familia. 🎉\n\n¿Perdiste o encontraste una? Tocá 🐾 Perdí o 👁️ Encontré abajo.',
   },
   {
     ic: 'visibility',
@@ -38,29 +29,22 @@ const PASOS = [
     d: 'Si cargás una que encontraste, Chicho te sugiere las perdidas que se parecen. 👀',
   },
   {
-    ic: 'notifications_active',
-    color: '#e0a300',
-    t: 'Te avisamos',
-    d: 'Activá las notificaciones: te aviso si aparece o si alguien la ve. Y compartí el aviso para llegar a más gente. 📢',
-  },
-  {
     ic: 'install_mobile',
     color: 'var(--navy)',
     t: 'Sumate a la red de tu zona 📲',
-    d: 'Instalá Chicho en tu inicio y recibí un aviso cuando se pierde o aparece una mascota cerca tuyo. Cuantos más seamos, más rápido vuelven a casa. 🔔\n\n📱 Android: menú ⋮ → «Instalar app».\n🍎 iPhone: en Safari, Compartir ↑ → «Agregar a inicio».\n\nSin instalar no llegan las notificaciones.',
+    d: 'Instalá Chicho y activá las notificaciones: te avisamos si aparece la tuya o si se pierde una cerca. 🔔\n\n📱 Android: menú ⋮ → «Instalar app».\n🍎 iPhone: Compartir ↑ → «Agregar a inicio».\n\nSin instalar no llegan las notificaciones.',
   },
 ]
 
-// `bienvenida` = es la primera visita (no la abrió a mano desde el menú "Guía").
-// En ese caso el primer paso es una PORTADA: la acción grande entra a la app y el
-// recorrido queda como opción. El que llega de un link viene a ver mascotas, no a
-// leer siete pantallas — antes el botón grande decía "Siguiente" y la única salida
-// era un "Saltar" gris y chiquito, así que muchos no llegaban nunca al feed.
-export default function WelcomeGuide({ onClose, bienvenida = false }) {
+// El primer paso es una PORTADA: la acción grande entra a la app y el recorrido queda
+// como opción. El que llega de un link viene a ver mascotas, no a leer — antes el botón
+// grande decía "Siguiente" y la única salida era un "Saltar" gris y chiquito, así que
+// muchos no llegaban nunca al feed.
+export default function WelcomeGuide({ onClose }) {
   const ref = useRef(null)
   const [paso, setPaso] = useState(0)
   const ultimo = paso >= PASOS.length - 1
-  const portada = bienvenida && paso === 0
+  const portada = paso === 0
 
   function irA(i) {
     const el = ref.current
@@ -97,9 +81,9 @@ export default function WelcomeGuide({ onClose, bienvenida = false }) {
                   // y es lo primero que pinta la app, así que el peso se nota.
                   <img src="/logo-boot.png" alt="Chicho" width="86" height="86" />
                 ) : (
-                  <span className="mi fill" style={{ fontSize: 66 }}>
-                    {p.ic}
-                  </span>
+                  // El tamaño va por CSS y no inline: en pantallas bajas hay que achicarlo
+                  // (media query) y un style inline le ganaría a la regla.
+                  <span className="mi fill guia-ico-mi">{p.ic}</span>
                 )}
               </div>
               <div className="guia-t">{p.t}</div>

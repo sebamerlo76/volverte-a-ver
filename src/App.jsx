@@ -278,10 +278,7 @@ export default function App() {
   useEffect(() => {
     const yaVista = localStorage.getItem('chicho_guia_vista')
     const esLinkDirecto = /^\/r\//.test(window.location.pathname)
-    // 'bienvenida' (y no true) para que la guía sepa que es la primera visita y muestre
-    // la portada con el botón que entra directo. Abierta desde el menú va true y arranca
-    // el recorrido de una: ahí la persona la pidió.
-    if (!yaVista && !esLinkDirecto) setGuiaAbierta('bienvenida')
+    if (!yaVista && !esLinkDirecto) setGuiaAbierta(true)
   }, [])
 
   // El push de una novedad lleva a /novedades: abrimos esa pantalla al entrar.
@@ -477,10 +474,6 @@ export default function App() {
   // --- Menú de la cara ---
   function irSeccion(sec) {
     setMenuAbierto(false)
-    if (sec === 'guia') {
-      setGuiaAbierta(true)
-      return
-    }
     if (sec === 'ayuda') {
       setSoporteAbierto(true)
       return
@@ -927,7 +920,7 @@ export default function App() {
         {/* Modales y hojas: fallback null — aparecen al instante siguiente sin tapar
             lo que se está viendo (son overlays, no reemplazan la pantalla). */}
         <Suspense fallback={null}>
-        {guiaAbierta && <WelcomeGuide onClose={cerrarGuia} bienvenida={guiaAbierta === 'bienvenida'} />}
+        {guiaAbierta && <WelcomeGuide onClose={cerrarGuia} />}
 
         {soporteAbierto && <Soporte onCerrar={() => setSoporteAbierto(false)} />}
 

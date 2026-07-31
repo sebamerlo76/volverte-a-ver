@@ -26,7 +26,7 @@ calendario del hilo de novedades. Acá van las mejoras nuevas, de ahí en adelan
   a los avisos había que pasarlas todas de a una o encontrar un "Saltar" chiquito y gris
   arriba. Ahora la primera pantalla tiene un botón grande que dice **"Ver las mascotas de
   mi zona"** y te lleva derecho al listado; el recorrido queda abajo como opción, para el
-  que lo quiera.
+  que lo quiera — y pasó de 7 pantallas a **4**, así el que lo mira lo termina.
 - Por qué le importa: el que llega desde un link compartido en un grupo de Facebook o por
   WhatsApp entra buscando si está su mascota, no a leer siete pantallas. Antes muchos se
   quedaban trabados ahí y no llegaban nunca a ver un aviso.
@@ -52,4 +52,20 @@ calendario del hilo de novedades. Acá van las mejoras nuevas, de ahí en adelan
   no hay avisos en …" con los botones **"Se me perdió"** y **"Encontré una"**. Si además
   tocás la pestaña **Perdidos**, el texto cambia y dice que estar vacío es una buena
   noticia. 🎉
+- [ ] push desde el panel    [ ] redes
+
+## Primeros pasos ahora te ayuda a instalar la app
+
+- commit: "Bienvenida de 4 pasos, sin Guía en la app, e instalar entra a Primeros pasos" · 31-jul-2026
+- Qué cambió: la lista de "Primeros pasos" sumó **Instalá la app**, con su botón. Es el
+  paso del que dependen todos los avisos: si Chicho no está instalado en el teléfono, las
+  notificaciones no llegan aunque estén activadas. Antes eso solo lo explicaba un cartel
+  del inicio que, si lo cerrabas una vez, no volvía nunca.
+- Por qué le importa: las notificaciones son lo que hace que una mascota aparezca en la
+  primera hora, que es cuando se encuentran. Quien no tenía la app instalada se quedaba
+  afuera de eso sin enterarse.
+- Dónde se ve: menú (la carita arriba a la izquierda) → **Primeros pasos**. Es el tercer
+  ítem de la lista, entre "Cargá tus mascotas" y "Activá las notificaciones", con el botón
+  **Instalar**. Si ya la tenés instalada aparece tildado solo. El contador de arriba ahora
+  dice 6 en vez de 5.
 - [ ] push desde el panel    [ ] redes
