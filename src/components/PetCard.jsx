@@ -1,4 +1,4 @@
-import { nombreMostrado, tiempoRelativo } from '../lib/formato.js'
+import { nombreMostrado, tiempoRelativo, textoReencuentro } from '../lib/formato.js'
 import { fotoOptimizada } from '../lib/foto.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { badgeEstado, subLinea } from '../lib/estados.js'
@@ -48,7 +48,11 @@ export default function PetCard({ r, onClick, posicion = 99, zonaVecina = false 
             </span>
           )
         })()}
-        <span className="time">{tiempoRelativo(r.creadoEn)}</span>
+        {/* En un reencuentro la fecha que importa es cuándo volvió, no cuándo se publicó
+            el aviso (que es cuándo se perdió, justo lo contrario de lo que se celebra).
+            Los resueltos antes de que existiera resuelto_en no la tienen: esos siguen
+            mostrando la de publicación, sin el "volvió", que sería mentira. */}
+        <span className="time">{resuelto && r.resueltoEn ? textoReencuentro(r.resueltoEn) : tiempoRelativo(r.creadoEn)}</span>
       </div>
       <div className="cbody">
         <div className="cname">{nombreMostrado(r)}</div>

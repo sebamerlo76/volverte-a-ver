@@ -72,3 +72,19 @@ calendario del hilo de novedades. Acá van las mejoras nuevas, de ahí en adelan
   solo. El contador de arriba dice 6 en vez de 5. Además la pantalla ya no parpadea al
   abrirse: antes mostraba un segundo todo sin completar y después se tildaba solo.
 - [ ] push desde el panel    [ ] redes
+
+## "Ya en casa" ahora dice cuándo volvió cada mascota
+
+- commit: "Ya en casa: la fecha que se muestra es la del reencuentro" · 31-jul-2026
+- Qué cambió: en la pestaña **Ya en casa** cada tarjeta decía "hace 6 días", y eso era
+  cuándo se había publicado el aviso — o sea cuándo se perdió, justo lo contrario de lo
+  que esa pantalla celebra. Ahora dice **"volvió hace 6 días"**, con la fecha del
+  reencuentro, y la lista se ordena por eso: arriba los que volvieron más recién.
+- Por qué le importa: esa pantalla es la prueba de que Chicho funciona. Con la fecha
+  vieja parecía una lista de mascotas perdidas hace mucho; ahora se lee como lo que es,
+  reencuentros frescos, uno atrás del otro.
+- Dónde se ve: en el inicio, pestaña **🏠 Ya en casa**. Cada tarjeta arriba a la derecha
+  dice "volvió hace 20 h", "volvió ayer", "volvió hace 4 días". Los reencuentros más
+  nuevos quedan primeros. (Los avisos cerrados hace mucho, antes de que se guardara esa
+  fecha, siguen mostrando la de publicación y no dicen "volvió".)
+- [ ] push desde el panel    [ ] redes

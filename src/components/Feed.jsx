@@ -204,6 +204,11 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
     }
   }, [verFinales, finales])
 
+  // Qué fecha manda para ordenar y para el filtro de tiempo (Hoy / Esta semana). En "Ya
+  // en casa" es la del reencuentro: filtrar por "Hoy" ahí tiene que traer los que
+  // volvieron hoy, no los avisos publicados hoy (que además casi nunca están resueltos).
+  const fechaQueImporta = (r) => (verFinales && r.resueltoEn) || r.creadoEn
+
   const filtrados = useMemo(() => {
     const texto = (filtros.q || '').trim().toLowerCase()
     const fuente = verFinales ? finales || [] : reportes
@@ -219,13 +224,26 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
       }
       if (filtros.especie && r.especie !== filtros.especie) return false
       if (filtros.zona && r.zona !== filtros.zona) return false
-      if (!dentroDeRango(r.creadoEn, filtros.tiempo)) return false
+      if (!dentroDeRango(fechaQueImporta(r), filtros.tiempo)) return false
       if (texto && !coincideBusqueda(r, texto)) return false
       return true
     })
-    // La fuente ya viene más nuevos primero; "antiguos" la da vuelta (los que más
-    // tiempo llevan buscando, arriba).
-    if (filtros.orden === 'antiguos') arr.sort((a, b) => (a.creadoEn > b.creadoEn ? 1 : -1))
+    if (verFinales) {
+      // Los reencuentros se ordenan por CUÁNDO VOLVIÓ, acá sí siempre a mano: la fuente
+      // viene del servidor con ese orden, pero los que no tienen resuelto_en (resueltos
+      // antes del trigger) caen a la fecha de publicación, y eso el servidor no lo sabe.
+      // Ordenando siempre acá, el criterio es uno solo y no quedan mezclas.
+      arr.sort((a, b) => {
+        const fa = fechaQueImporta(a)
+        const fb = fechaQueImporta(b)
+        if (fa === fb) return 0
+        return (fa > fb ? 1 : -1) * (filtros.orden === 'antiguos' ? 1 : -1)
+      })
+    } else if (filtros.orden === 'antiguos') {
+      // La fuente ya viene más nuevos primero; "antiguos" la da vuelta (los que más
+      // tiempo llevan buscando, arriba).
+      arr.sort((a, b) => (a.creadoEn > b.creadoEn ? 1 : -1))
+    }
     return arr
   }, [reportes, finales, verFinales, filtros])
 

@@ -11,6 +11,11 @@ export function nombreMostrado(r) {
 
 // "hace 2 h", "ayer", "hace 5 días"... a partir de la fecha de creación.
 export function tiempoRelativo(iso) {
+  // Sin el corte de arriba, un null se colaba: new Date(null) NO es fecha inválida, es
+  // el 1/1/1970, así que pasaba el isNaN y la tarjeta terminaba diciendo "31 dic" (1969).
+  // Lo encontró el test de textoReencuentro; nunca se vio en la app porque quien llama
+  // ya chequeaba el dato, pero era una bomba silenciosa para el próximo que lo usara.
+  if (!iso) return ''
   const ahora = new Date()
   const antes = new Date(iso)
   const min = Math.round((ahora - antes) / 60000)
@@ -26,6 +31,18 @@ export function tiempoRelativo(iso) {
   if (sem === 1) return 'hace 1 semana'
   if (sem < 5) return `hace ${sem} semanas`
   return antes.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })
+}
+
+// "volvió hace 3 días" / "volvió ayer" / "volvió el 12 mar".
+//
+// En la pestaña "Ya en casa" un "hace 6 días" pelado se lee como si fuera cuándo se
+// perdió, que es lo contrario de lo que esa pantalla cuenta. Con el verbo adelante el
+// dato se explica solo. El "el" va únicamente cuando tiempoRelativo devuelve una fecha
+// (pasado un mes deja de decir "hace ..."): "volvió 12 mar" no se entiende.
+export function textoReencuentro(iso) {
+  const t = tiempoRelativo(iso)
+  if (!t) return ''
+  return /^(hace|ayer|recién)/.test(t) ? `volvió ${t}` : `volvió el ${t}`
 }
 
 // Fecha legible: "28 jun 2026".

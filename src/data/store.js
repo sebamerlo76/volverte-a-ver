@@ -509,7 +509,12 @@ export async function getMisReportes(userId) {
     .sort((a, b) => (a.creadoEn < b.creadoEn ? 1 : -1))
 }
 
-// Reencontrados (reencuentros): avisos ya resueltos, más nuevo primero.
+// Reencontrados (reencuentros): avisos ya resueltos, el que volvió más recién primero.
+//
+// Ordena por resuelto_en y NO por creado_en, y el motivo no es solo estético: con el
+// límite de 50, ordenar por publicación dejaba afuera un reencuentro de ayer sobre un
+// aviso viejo. Los resueltos antes de que existiera resuelto_en lo tienen en null:
+// nullsFirst falso los manda al fondo (el front los ordena por fecha de publicación).
 export async function getReencontrados() {
   if (supabaseConfigurado) {
     const { data, error } = await supabase
@@ -518,6 +523,7 @@ export async function getReencontrados() {
       .eq('estado', 'resuelto')
       .eq('oculto', false)
       .eq('bloqueado', false)
+      .order('resuelto_en', { ascending: false, nullsFirst: false })
       .order('creado_en', { ascending: false })
       .limit(50)
     if (error) throw error
@@ -525,7 +531,7 @@ export async function getReencontrados() {
   }
   return leerLocal()
     .filter((r) => r.estado === 'resuelto')
-    .sort((a, b) => (a.creadoEn < b.creadoEn ? 1 : -1))
+    .sort((a, b) => ((a.resueltoEn || a.creadoEn) < (b.resueltoEn || b.creadoEn) ? 1 : -1))
 }
 
 // Crea un reporte nuevo. Devuelve el reporte creado.
