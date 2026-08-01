@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { hayPrompt, instalar } from '../lib/instalar.js'
 import { activarPush } from '../lib/push.js'
 import { marcarOfrecido, marcarBasta } from '../lib/avisos-push.js'
+import { pixelEvento } from '../lib/pixel.js'
 
 // Cartel que aparece justo después de SEGUIR un aviso: es el momento de máxima
 // intención (la persona acaba de pedir que le avisen) y hasta ahora le dábamos una
@@ -14,8 +15,16 @@ export default function PedirAvisos({ modo, onCerrar, onToast }) {
   const [busy, setBusy] = useState(false)
   const activarModo = modo === 'activar'
 
+  // Este cartel y el banner del feed cuentan al mismo embudo (AvisosOfrecidos →
+  // Activados/Rechazados): lo que se quiere saber es cuántos llegaron a ver el pedido,
+  // no por cuál de los dos caminos. Si algún día importa distinguirlos, se separan ahí.
+  useEffect(() => {
+    if (activarModo) pixelEvento('AvisosOfrecidos')
+  }, [activarModo])
+
   function cerrar() {
     marcarOfrecido()
+    if (activarModo) pixelEvento('AvisosRechazados')
     onCerrar()
   }
 
@@ -24,7 +33,12 @@ export default function PedirAvisos({ modo, onCerrar, onToast }) {
     setBusy(true)
     try {
       const ok = await activarPush()
-      if (ok) onToast?.('🔔 ¡Listo! Te avisamos de las novedades')
+      if (ok) {
+        pixelEvento('AvisosActivados')
+        onToast?.('🔔 ¡Listo! Te avisamos de las novedades')
+      } else {
+        pixelEvento('AvisosRechazados')
+      }
       marcarBasta() // activado, o bloqueado en el navegador: en los dos casos no se repregunta
       onCerrar()
     } catch (e) {

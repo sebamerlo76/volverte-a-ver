@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { esStandalone, esIOS } from '../lib/instalar.js'
 import { soportado, estadoPermiso, yaSuscripto, activarPush } from '../lib/push.js'
+import { pixelEvento } from '../lib/pixel.js'
 
 // Banner "activá los avisos de tu zona": el push es el corazón de Chicho (avisar en
 // la primera hora, que es cuando se encuentran), pero activarlo estaba escondido en
@@ -64,6 +65,9 @@ export default function BannerNotifs({ logueado, onToast, onVisible = () => {} }
       if (vivo) {
         setVisible(true)
         onVisible(true)
+        // Sin esto no se puede saber si el número no sube porque no convence o porque
+        // ni siquiera se muestra — que fue exactamente lo que nos pasó con el 6%.
+        pixelEvento('AvisosOfrecidos')
       }
     }
     chequear()
@@ -81,6 +85,7 @@ export default function BannerNotifs({ logueado, onToast, onVisible = () => {} }
   }
   function cerrar() {
     guardar((leer().n || 0) + 1)
+    pixelEvento('AvisosRechazados')
     ocultar()
   }
   async function activar() {
@@ -89,10 +94,12 @@ export default function BannerNotifs({ logueado, onToast, onVisible = () => {} }
     try {
       const ok = await activarPush()
       if (ok) {
+        pixelEvento('AvisosActivados')
         onToast?.('🔔 ¡Listo! Te avisamos de las mascotas de tu zona')
         ocultar()
       } else {
         // Tocó "Bloquear" en el cartel del navegador: no vuelve a preguntar → no insistimos.
+        pixelEvento('AvisosRechazados')
         guardar(MAX_DESCARTES)
         ocultar()
       }

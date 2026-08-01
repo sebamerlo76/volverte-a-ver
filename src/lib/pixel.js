@@ -71,3 +71,17 @@ export function initPixel() {
       .catch(() => {})
   })
 }
+
+// Evento suelto, para lo que no se puede detectar desde acá (los avisos push, que los
+// disparan los componentes). No-op si el píxel no arrancó: en las visitas orgánicas
+// window.fbq directamente no existe, y así el que llama no tiene que preguntar nada.
+//
+// Los nombres van en el mismo idioma que el resto (AvisosOfrecidos, AvisosActivados),
+// para que en el panel de Meta el embudo se lea de corrido.
+export function pixelEvento(nombre) {
+  try {
+    if (typeof window !== 'undefined' && typeof window.fbq === 'function') window.fbq('trackCustom', nombre)
+  } catch (e) {
+    /* nunca romper la app por una métrica */
+  }
+}
