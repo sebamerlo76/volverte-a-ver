@@ -50,6 +50,8 @@ function desdeFila(row) {
     fotoReencuentro: row.foto_reencuentro || null, // la foto de "ya en casa" (la sube el dueño al resolver)
     resueltoEn: row.resuelto_en || null, // cuándo volvió a casa (lo estampa un trigger)
     recordatorioEn: row.recordatorio_en || null, // último recordatorio al dueño (panel admin)
+    difundidoEn: row.difundido_en || null, // última difusión hecha por el admin (IG, grupos)
+    difusiones: row.difusiones || 0, // cuántas veces se difundió
     // OJO: apoyos/aplausos NO van en haciaFila — solo los toca su RPC. Si entraran
     // en el update, cada edición del aviso pisaría el contador a 0.
   }
@@ -600,6 +602,22 @@ export async function resolverReporteAdmin(id) {
   if (!supabaseConfigurado || !id) return
   const { error } = await supabase.rpc('admin_resolver_reporte', { rid: id })
   if (error) throw error
+}
+
+// Marcar/desmarcar que el admin ya difundió un aviso (historias de IG, grupos). Ver
+// supabase/schema-difusion.sql. Devuelven el estado nuevo { difusiones, difundidoEn }
+// para que el panel se actualice sin volver a pedir la lista entera.
+export async function marcarDifundido(id) {
+  if (!supabaseConfigurado || !id) return null
+  const { data, error } = await supabase.rpc('admin_marcar_difundido', { rid: id })
+  if (error) throw error
+  return data || null
+}
+export async function desmarcarDifundido(id) {
+  if (!supabaseConfigurado || !id) return null
+  const { data, error } = await supabase.rpc('admin_desmarcar_difundido', { rid: id })
+  if (error) throw error
+  return data || null
 }
 
 // Usuarios para soporte (solo admin, ver schema-usuarios-admin.sql). Sirve sobre todo

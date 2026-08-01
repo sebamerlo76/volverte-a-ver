@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
-import { getAdminStats, getAdminStatsRango, getActividadReciente, getPerdidosParaEmpujar, getActivosPorProvincia, getReencuentros, getReportes, guardarEmbeddingAdmin, getNovedades, crearNovedad, borrarNovedad, getUsuariosAdmin, reenviarRecuperacion } from '../data/store.js'
+import { useEffect, useMemo, useState } from 'react'
+import { getAdminStats, getAdminStatsRango, getActividadReciente, getPerdidosParaEmpujar, getActivosPorProvincia, getReencuentros, getReportes, guardarEmbeddingAdmin, getNovedades, crearNovedad, borrarNovedad, getUsuariosAdmin, reenviarRecuperacion, marcarDifundido, desmarcarDifundido } from '../data/store.js'
 import { confirmar } from '../lib/confirmar.js'
 import { tiempoRelativo, nombreMostrado, fechaLegible, linkWhatsAppReencuentro, linkTel } from '../lib/formato.js'
 import { badgeEstado } from '../lib/estados.js'
 import { ubicacionTexto } from '../lib/localidades.js'
+import { ordenarEmpujon } from '../lib/empujon.js'
 
 const LS_ADM_SECS = 'chicho_admin_secs' // qué secciones del panel quedaron abiertas
 
@@ -62,6 +63,35 @@ function pieEmpujon(r) {
   return '🔕 Todavía sin avisar'
 }
 
+// Fila del empujón. No reusa AvisoRow porque ahí toda la fila es un <button> y adentro
+// no puede ir otro (HTML inválido, y el toque se lo comería el de afuera): acá el área
+// que abre el aviso y el botón de difundir son hermanos.
+function FilaEmpujon({ r, onOpen, onDifundir, busy }) {
+  const b = badgeEstado(r)
+  const veces = r.difusiones || 0
+  return (
+    <div className={'adm-emp' + (veces ? ' hecho' : '')}>
+      <button className="adm-row adm-emp-main" onClick={() => onOpen && onOpen(r)}>
+        <span className={'adm-row-badge ' + b.clase}>{b.t}</span>
+        <div className="adm-row-txt">
+          <div className="adm-row-t">{nombreMostrado(r)}</div>
+          <div className="adm-row-s">{ubicacionTexto(r.localidad, r.zona)}</div>
+          <div className="adm-row-pie">{pieEmpujon(r)}</div>
+          <div className="adm-row-pie">
+            {veces
+              ? `📢 Empujado ${tiempoRelativo(r.difundidoEn)}${veces > 1 ? ` · ${veces} veces` : ''}`
+              : '◻️ Sin empujar todavía'}
+          </div>
+        </div>
+        <span className="adm-row-time">{tiempoRelativo(r.creadoEn)}</span>
+      </button>
+      <button className={'adm-emp-btn' + (veces ? ' off' : '')} onClick={() => onDifundir(r, veces > 0)} disabled={busy}>
+        {veces ? '↩︎ Deshacer' : '📢 Lo empujé'}
+      </button>
+    </div>
+  )
+}
+
 export default function Admin({ onVolver, onOpen, stats }) {
   const [s, setS] = useState(stats || null)
   const [error, setError] = useState('')
@@ -103,6 +133,30 @@ export default function Admin({ onVolver, onOpen, stats }) {
     getActivosPorProvincia().then(setPorProv).catch(() => setPorProv([]))
     getReencuentros().then(setReencuentros).catch(() => setReencuentros([]))
   }, [])
+
+  // --- Empujón: marcar qué avisos ya se difundieron (historias de IG, grupos) ---
+  const [difBusy, setDifBusy] = useState(null) // id en curso, para no tocar dos veces
+
+  // Sin empujar primero, y entre los ya empujados el más antiguo arriba: así se trabaja
+  // de arriba hacia abajo sin pensar cuál sigue. Se ordena acá y no en la consulta
+  // porque cambia al tocar el botón, sin volver a pedir la lista.
+  const empujarOrdenados = useMemo(() => ordenarEmpujon(empujar), [empujar])
+
+  async function difundir(r, deshacer) {
+    if (difBusy) return
+    setDifBusy(r.id)
+    try {
+      const res = deshacer ? await desmarcarDifundido(r.id) : await marcarDifundido(r.id)
+      // Se actualiza sólo esa fila en memoria: volver a pedir la lista la reordenaría de
+      // golpe bajo el dedo, justo mientras la estás recorriendo.
+      setEmpujar((arr) => (arr || []).map((x) => (x.id === r.id ? { ...x, difusiones: res?.difusiones ?? 0, difundidoEn: res?.difundidoEn || null } : x)))
+    } catch (e) {
+      console.error('difundir', e)
+      setError('No se pudo marcar la difusión. ¿Está corrido supabase/schema-difusion.sql?')
+    } finally {
+      setDifBusy(null)
+    }
+  }
 
   // Recalcula la huella visual de todos los activos con foto, desde el RECORTE del
   // feed (r.foto). Corre acá, en el navegador del admin: baja el modelo una vez y va
@@ -298,8 +352,8 @@ export default function Admin({ onVolver, onOpen, stats }) {
                 <div className="adm-nota" style={{ marginTop: 0 }}>✅ Ninguno pendiente — todo al día.</div>
               ) : (
                 <div className="adm-lista">
-                  {empujar.map((r) => (
-                    <AvisoRow key={r.id} r={r} onOpen={onOpen} pie={pieEmpujon(r)} />
+                  {empujarOrdenados.map((r) => (
+                    <FilaEmpujon key={r.id} r={r} onOpen={onOpen} onDifundir={difundir} busy={difBusy === r.id} />
                   ))}
                 </div>
               )}
