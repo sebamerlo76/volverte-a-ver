@@ -139,6 +139,33 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
   **Cómo verificar (importante):** el 58 del lab casi no se va a mover — el número a mirar
   es el **LCP de campo**, y la ventana de PageSpeed son 28 días, así que recién se ve a los
   20-30 días. No sacar conclusiones a las 48 h.
+- [ ] **Ver el recorrido de la gente dentro de la app** (1-ago-2026, diferido). Surgió
+  mirando el embudo de la campaña: sabemos cuántos llegan y cuántos activan los avisos,
+  pero no **qué hacen en el medio ni dónde se caen**.
+  **Lo que ya hay, para no re-descubrirlo**: `@vercel/analytics` en src/main.jsx (visitas,
+  países, dispositivos de TODO el tráfico — se mira en Vercel → Analytics) y el píxel de
+  Meta en src/lib/pixel.js, que da el embudo completo pero **sólo de quien viene de un
+  anuncio**: PageView → EntroConSesion → AvisosOfrecidos → AvisosActivados.
+  **Por qué ninguno sirve para el recorrido**: Chicho es una sola página. Abrir un aviso,
+  ir al mapa o publicar no cambian la URL, así que todo lo que mida "páginas vistas" ve
+  una sola pantalla. Los eventos personalizados de Vercel Analytics son de plan pago.
+  **Recomendación (mía, para discutir al retomar): propio sobre Supabase.** Una tabla de
+  eventos y un insert por acción — no pesa (el cliente ya está cargado), no suma terceros
+  al rendimiento que tanto costó, los datos quedan en casa y el panel de Admin ya existe
+  para mostrarlos. La alternativa es GA4: trae el diagrama de rutas hecho, pero son ~50 KB
+  de terceros y en un SPA hay que mandarle los eventos a mano igual, así que no ahorra
+  trabajo — sólo cambia el destino.
+  **Los pasos que interesan**: entró → miró un aviso → tocó Perdí/Encontré → se registró →
+  publicó → siguió un aviso → activó avisos.
+  **Dos cosas que hay que resolver ANTES de escribir código**:
+  1. **Actualizar la política de privacidad** (public/privacidad/index.html): hoy declara
+     el píxel de Meta y nada más. Guardar qué hace la gente se declara, aunque no haya
+     datos personales. Estamos en vivo.
+  2. **Decidir anónimo o con `user_id`.** Anónimo alcanza para el embudo y evita que la
+     base sea un registro de qué hizo cada vecino; con user_id es más potente para
+     soporte. Se puede empezar anónimo y agregar después — al revés no.
+  Ver también la nota de límites en ESCALA.md: cada evento es una fila, y conviene
+  decidir de entrada cada cuánto se borran los viejos (¿90 días?).
 - [ ] **Fotitos de raza** (grilla visual curada) — más adelante, con imágenes con licencia.
 - [ ] **Recalcular huellas visuales viejas** (26-jul-2026): desde hoy la huella (embedding
   CLIP) se calcula sobre el RECORTE del feed (menos fondo → mejores parecidos), pero los
