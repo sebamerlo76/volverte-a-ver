@@ -5,6 +5,8 @@ import { tiempoRelativo, nombreMostrado, fechaLegible, linkWhatsAppReencuentro, 
 import { badgeEstado } from '../lib/estados.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 
+const LS_ADM_SECS = 'chicho_admin_secs' // qué secciones del panel quedaron abiertas
+
 function Card({ n, label, color }) {
   return (
     <div className="adm-card">
@@ -14,8 +16,8 @@ function Card({ n, label, color }) {
   )
 }
 
-// Sección plegable del panel. Arriba lo que se ACCIONA (abierto), abajo los números
-// (cerrado): el panel se hizo largo y había que scrollear todo para llegar a lo útil.
+// Sección plegable del panel. El panel se hizo largo: cerradas, las cabeceras funcionan
+// como índice —cada una con su contador— y se abre solo lo que se va a usar.
 function Sec({ id, titulo, n, sub, abierta, onToggle, children }) {
   return (
     <div className={'adm-sec' + (abierta ? ' abierta' : '')}>
@@ -71,9 +73,29 @@ export default function Admin({ onVolver, onOpen, stats }) {
   const [empujar, setEmpujar] = useState(null)
   const [porProv, setPorProv] = useState(null)
   const [reencuentros, setReencuentros] = useState(null)
-  // Qué secciones arrancan abiertas: las accionables. Los números, cerrados.
-  const [abiertas, setAbiertas] = useState({ empujon: true, reencuentros: true })
-  const toggle = (id) => setAbiertas((a) => ({ ...a, [id]: !a[id] }))
+  // Qué secciones están abiertas. Antes arrancaban abiertas "empujón" y "reencuentros"
+  // por ser las accionables, pero son justo las de listas largas: entrabas al panel y
+  // había que cerrarlas a mano para llegar a lo de abajo. Ahora abre todo cerrado —cada
+  // encabezado ya muestra su contador, así que de un vistazo ves dónde hay algo sin
+  // desplegar nada— y se recuerda lo que dejes abierto, para que el panel se acomode a
+  // cómo lo usás en vez de imponer un orden.
+  const [abiertas, setAbiertas] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(LS_ADM_SECS) || '{}') || {}
+    } catch (e) {
+      return {} // storage bloqueado: arranca todo cerrado, no es grave
+    }
+  })
+  const toggle = (id) =>
+    setAbiertas((a) => {
+      const prox = { ...a, [id]: !a[id] }
+      try {
+        localStorage.setItem(LS_ADM_SECS, JSON.stringify(prox))
+      } catch (e) {
+        /* storage bloqueado: sigue andando, solo no se recuerda */
+      }
+      return prox
+    })
 
   useEffect(() => {
     getActividadReciente(15).then(setRecientes).catch(() => setRecientes([]))
@@ -261,7 +283,7 @@ export default function Admin({ onVolver, onOpen, stats }) {
               </div>
             )}
 
-            {/* ---- Para hacer (abiertas) ---- */}
+            {/* ---- Para hacer: primero lo accionable, después los números ---- */}
             <Sec
               id="empujon"
               titulo="🔔 Perdidos que necesitan empujón"
