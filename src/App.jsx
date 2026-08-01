@@ -47,6 +47,29 @@ import { scopeFeedGuardado, provinciaDe, recordarLocalidad, avisoEnZona } from '
 import { confirmar } from './lib/confirmar.js'
 import { compartirFlyer } from './lib/flyer.js'
 import { decidirModo as decidirModoAvisos } from './lib/avisos-push.js'
+import { pixelEvento } from './lib/pixel.js'
+
+// Escalón del embudo que faltaba medir. El banner de avisos EXIGE sesión, así que si la
+// gente que llega de una campaña no se registra, no importa cuánto mejoremos el banner:
+// no lo ve nadie. Comparando PageView con EntroConSesion sale qué parte del tráfico
+// llega a tener cuenta, y ahí se ve si el cuello está antes o después.
+const LS_CUENTA_MEDIDA = 'chicho_cuenta_medida'
+
+function medirSesion(user) {
+  pixelEvento('EntroConSesion')
+  try {
+    if (localStorage.getItem(LS_CUENTA_MEDIDA)) return
+    localStorage.setItem(LS_CUENTA_MEDIDA, '1')
+    // Cuenta nueva = creada recién. Se mira la antigüedad y no el signUp porque con
+    // Google hay redirect: la página se recarga y el momento del alta se pierde. La
+    // ventana es holgada a propósito, que el ida y vuelta del OAuth tarda.
+    const creada = new Date(user?.created_at || 0).getTime()
+    if (creada && Date.now() - creada < 5 * 60000) pixelEvento('CuentaCreada')
+  } catch (e) {
+    /* storage bloqueado: se pierde la medición, no la sesión */
+  }
+}
+
 const FestejoReencuentro = lazy(() => import('./components/FestejoReencuentro.jsx'))
 const PedirAvisos = lazy(() => import('./components/PedirAvisos.jsx'))
 const CompartiAhora = lazy(() => import('./components/CompartiAhora.jsx'))
@@ -323,6 +346,7 @@ export default function App() {
     if (user && !contadoRef.current) {
       contadoRef.current = true
       contarLogin()
+      medirSesion(user)
     }
     setNudge(!!user && logins() >= 2 && !pasosOk())
   }, [user])
