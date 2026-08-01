@@ -40,6 +40,9 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
   const [ciudadSheet, setCiudadSheet] = useState(false)
   const [irPunto, setIrPunto] = useState(null) // punto para "cómo llegar"
   const [qBarrio, setQBarrio] = useState('') // búsqueda de barrio en el filtro (ciudades grandes)
+  // ¿Va el banner de notificaciones? null = todavía lo está decidiendo. El de instalar
+  // espera esa respuesta: son excluyentes y el de avisos tiene prioridad.
+  const [notifsVisible, setNotifsVisible] = useState(null)
   const bodyRef = useRef(null) // contenedor scrolleable de la lista, para recordar la posición
   const [dirSlide, setDirSlide] = useState(0) // de dónde entra el contenido al cambiar de pestaña: 1 = swipe a la izq, -1 = a la der, 0 = tap
 
@@ -549,10 +552,14 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
             key={filtros.estado}
             data-slide={dirSlide === 0 ? undefined : dirSlide === 1 ? 'der' : 'izq'}
           >
-          {/* Excluyentes por diseño: el de instalar sale si NO está instalada, el de
-              avisos si SÍ. Nunca se ven los dos juntos. */}
-          {!verFinales && <BannerInstalar />}
-          {!verFinales && <BannerNotifs logueado={logueado} onToast={onToast} />}
+          {/* Siguen siendo excluyentes, pero cambió cuál manda: primero se ofrecen las
+              NOTIFICACIONES (que es lo que hace que Chicho sirva con el teléfono en el
+              bolsillo) y sólo si ese banner no va, se ofrece instalar. Antes era al
+              revés y salía carísimo: instalar era un peaje que casi nadie pagaba.
+              notifsVisible arranca en null = todavía decidiendo (es asíncrono), y el de
+              instalar espera esa respuesta para no aparecer y desaparecer. */}
+          {!verFinales && <BannerNotifs logueado={logueado} onToast={onToast} onVisible={setNotifsVisible} />}
+          {!verFinales && notifsVisible === false && <BannerInstalar />}
           {cargando && !verFinales ? (
             <div className="empty">Cargando avisos… 🐾</div>
           ) : verFinales && finales === null ? (

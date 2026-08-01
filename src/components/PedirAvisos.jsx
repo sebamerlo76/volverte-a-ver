@@ -8,7 +8,8 @@ import { marcarOfrecido, marcarBasta } from '../lib/avisos-push.js'
 // tarea — "activá la campana en Mi cuenta" — en vez de un botón.
 //
 // El `modo` ya viene decidido por lib/avisos-push.js (App lo calcula antes de abrir
-// esta capa): 'activar' si la app está instalada, 'instalar' si falta ese paso previo.
+// esta capa): 'activar' casi siempre —el push anda en el navegador, sin instalar nada—
+// e 'instalar' sólo en iPhone sin agregar a inicio, donde Apple lo exige de verdad.
 export default function PedirAvisos({ modo, onCerrar, onToast }) {
   const [busy, setBusy] = useState(false)
   const activarModo = modo === 'activar'

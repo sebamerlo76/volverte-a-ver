@@ -73,6 +73,22 @@ calendario del hilo de novedades. Acá van las mejoras nuevas, de ahí en adelan
   abrirse: antes mostraba un segundo todo sin completar y después se tildaba solo.
 - [ ] push desde el panel    [ ] redes
 
+## Ahora podés recibir los avisos sin instalar nada
+
+- commit: "Los avisos no necesitan que instales la app (salvo en iPhone)" · 1-ago-2026
+- Qué cambió: para que te llegaran los avisos de mascotas perdidas cerca tuyo, antes había
+  que instalar Chicho en el teléfono. Ahora se activan directo desde el navegador, en un
+  toque. Te llegan igual con Chicho cerrado. En iPhone sigue haciendo falta agregarlo a
+  inicio, pero eso es una exigencia de Apple, no nuestra.
+- Por qué le importa: los avisos son lo que hace que una mascota aparezca en la primera
+  hora, que es cuando se encuentran. Pedir instalar antes era un paso que la mayoría no
+  daba, y esa gente se quedaba sin enterarse de nada aunque quisiera ayudar. Ahora el
+  vecino que entra una vez puede quedar sumado a la red sin instalar nada.
+- Dónde se ve: entrá a chicho.ar con tu cuenta desde el celular (sin la app instalada).
+  En el inicio, arriba de los avisos, aparece el cartel **"Activá los avisos de tu zona"**
+  con el botón. Tocándolo el navegador pide permiso y ya está.
+- [ ] push desde el panel    [ ] redes
+
 ## "Ya en casa" ahora dice cuándo volvió cada mascota
 
 - commit: "Ya en casa: la fecha que se muestra es la del reencuentro" · 31-jul-2026

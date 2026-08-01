@@ -5,7 +5,7 @@
 //
 // Insistencia: máximo 3 veces y nunca dos veces el mismo día. El disparador es una
 // acción intencional del usuario, así que no hace falta más freno que eso.
-import { esStandalone, esIOS, hayPrompt } from './instalar.js'
+import { esStandalone, esIOS } from './instalar.js'
 import { soportado, estadoPermiso, yaSuscripto } from './push.js'
 
 const CLAVE = 'chicho_pedir_avisos' // { n: veces mostrado/descartado, t: ms de la última }
@@ -45,9 +45,12 @@ export async function decidirModo() {
     if (n >= MAX) return null
     if (t && Date.now() - t < HORAS * 3600000) return null
     if (await yaSuscripto()) return null // ya le llegan: nada que pedir
-    if (esStandalone()) return 'activar'
-    if (hayPrompt() || esIOS()) return 'instalar' // sin instalar no hay push en iPhone
-    return null
+    // iPhone sin instalar: Apple exige "agregar a inicio" para que exista el push, así
+    // que ahí el paso previo es real. En Android/escritorio no: el push anda en el
+    // navegador solo, y pedir instalar primero era un peaje que casi nadie pagaba (de
+    // 177 visitas de campaña, 5 instalaron). Se pide lo que de verdad importa.
+    if (esIOS() && !esStandalone()) return 'instalar'
+    return 'activar'
   } catch (e) {
     return null
   }
