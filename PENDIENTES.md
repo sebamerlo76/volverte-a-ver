@@ -87,13 +87,20 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
   botón "Editar como admin" en Detalle que abra el formulario normal + un RPC security
   definer gateado por `es_admin()` para poder guardar avisos de otros (RLS solo deja lo
   propio) — mismo patrón que `admin_embedding` en supabase/schema-huellas-admin.sql.
-- [ ] **Extender `fotoOptimizada()` al resto de las miniaturas** (30-jul-2026): ya está en
-  el feed (PetCard), el buscador y las coincidencias del wizard. Faltan las de Mis
-  mascotas, ElegirMascota, el thumb de los aportes en Detalle, Moderación, PerfilPublico
-  y la miniatura de reencuentros del Admin — todas de 40-140 px sirviendo la foto entera.
-  Impacto menor (1-3 fotos por pantalla) pero es una línea en cada una. Ver src/lib/foto.js.
-  El hero del Detalle y el Lightbox se dejaron SIN transformar a propósito: ahí hace falta
-  ver bien al animal (y el Lightbox tiene zoom).
+- [x] **Extender `fotoOptimizada()` al resto de las miniaturas** ✅ (1-ago-2026). Se
+  auditaron las 31 `<img>` de la app y se cubrieron todas las que faltaban, con el ancho
+  que cada una necesita: 200 para las de 44-64 px (panel de reencuentros, Moderación,
+  ElegirMascota, el thumb de un aporte, el globito del mapa, GestionAviso) y 800 para la
+  vista previa de una coincidencia y la foto del perfil del QR.
+  Siguen SIN transformar a propósito: el hero del Detalle y el Lightbox (ahí hace falta
+  ver bien al animal, y el Lightbox tiene zoom), la foto que se está por subir (todavía es
+  local) y el avatar de Google (otra CDN — `fotoOptimizada` la devuelve intacta).
+  **Lo caro del día fue el bug que apareció en el camino**: la transformación de Supabase
+  usa `cover` por defecto, así que pasarle sólo `width` RECORTA en vez de escalar (con el
+  recorte del feed de 800x400, pedir 300 devolvía 300x400 — una franja vertical). En el
+  feed no se veía porque 800 coincide con el original. Se arregló agregando
+  `resize=contain` en src/lib/foto.js: **si algún día se toca esa función, ese parámetro
+  no se saca**.
 - [x] **Bajar el LCP de campo: 4 cambios chicos** ✅ (los 4 hechos el 31-jul-2026; falta
   que la ventana de 28 días de PageSpeed los refleje — **no sacar conclusiones antes de
   fines de agosto**). Efecto ya visible en laboratorio: LCP **10,7 s → 9,1 s**, bloqueo de
