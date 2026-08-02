@@ -19,8 +19,16 @@ const TRANSFORMA = '/storage/v1/render/image/public/'
 
 // Ancho por defecto: la tarjeta del feed mide ~333 px CSS; 800 cubre pantallas
 // retina (DPR 2-2.4) y a calidad 62 pesa ~20 KB.
+//
+// resize=contain NO es opcional: el modo por defecto de Supabase es `cover`, y como sólo
+// le mandamos `width`, toma la ALTURA ORIGINAL como destino y recorta en vez de escalar.
+// Con una foto de 800x400 (el recorte del feed), pedirle 300 devolvía 300x400 — una
+// franja vertical del centro. En el feed no se notaba porque 800 coincide con el
+// original, pero las miniaturas de 300 (coincidencias de "Encontré" y el buscador)
+// mostraban un pedazo de piso en vez de la mascota. Verificado midiendo la misma foto:
+// width=800 → 800x400 · width=300 → 300x400 (mal) · con contain → 300x150 (bien).
 export function fotoOptimizada(url, ancho = 800, calidad = 62) {
   if (!url || typeof url !== 'string') return url
   if (!url.includes(MARCA)) return url // data URL (modo local), otra CDN, o ya transformada
-  return `${url.replace(MARCA, TRANSFORMA)}?width=${ancho}&quality=${calidad}`
+  return `${url.replace(MARCA, TRANSFORMA)}?width=${ancho}&quality=${calidad}&resize=contain`
 }

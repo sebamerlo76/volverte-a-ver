@@ -73,6 +73,21 @@ calendario del hilo de novedades. Acá van las mejoras nuevas, de ahí en adelan
   abrirse: antes mostraba un segundo todo sin completar y después se tildaba solo.
 - [ ] push desde el panel    [ ] redes
 
+## Se ven bien las fotitos de las mascotas parecidas
+
+- commit: "Las fotos chicas mostraban un pedazo: Supabase recortaba en vez de achicar" · 1-ago-2026
+- Qué cambió: en "Encontré una", cuando Chicho te muestra las mascotas perdidas que se
+  parecen, las fotitos salían mal recortadas — se veía un pedazo del piso o de una pared
+  en lugar del animal. Lo mismo pasaba en los resultados del buscador. Ahora se ven
+  completas, igual que en el listado principal.
+- Por qué le importa: esa lista existe para que reconozcas de un vistazo a la mascota que
+  encontraste. Con la foto cortada no se reconocía nada, y alguien podía pasar de largo
+  justo el aviso de la familia que la está buscando.
+- Dónde se ve: tocá **👁️ Encontré** abajo, elegí Perro o Gato, y mirá la lista de
+  "**¿Alguno es este?**": cada fila tiene su foto. También en la **lupa** de arriba,
+  buscando cualquier cosa (por ejemplo "perro"), las fotitos de los resultados.
+- [ ] push desde el panel    [ ] redes
+
 ## Ahora podés recibir los avisos sin instalar nada
 
 - commit: "Los avisos no necesitan que instales la app (salvo en iPhone)" · 1-ago-2026
