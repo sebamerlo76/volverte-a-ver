@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getMisMascotas } from '../data/store.js'
+import { fotoOptimizada } from '../lib/foto.js'
 
 const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
 
@@ -43,7 +44,7 @@ export default function ElegirMascota({ user, onElegir, onOtra, onVolver }) {
                   <div className="masc-info" style={{ pointerEvents: 'none' }}>
                     <div className="masc-foto">
                       {m.foto ? (
-                        <img src={m.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
+                        <img src={fotoOptimizada(m.foto, 200)} alt="" onError={(e) => (e.target.style.display = 'none')} />
                       ) : (
                         <span className="mi fill" style={{ fontSize: 26, color: '#c9a58f' }}>
                           pets

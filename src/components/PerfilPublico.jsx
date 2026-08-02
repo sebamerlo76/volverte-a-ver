@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getPerfilPublico, addAvistamiento } from '../data/store.js'
 import { numeroWa } from '../lib/formato.js'
+import { fotoOptimizada } from '../lib/foto.js'
 
 const ESPECIE_LBL = { perro: 'Perro', gato: 'Gato', otro: 'Otro' }
 
@@ -118,7 +119,7 @@ export default function PerfilPublico({ id }) {
 
           <div className="pub-foto">
             {m.foto ? (
-              <img src={m.foto} alt={nombre} onError={(e) => (e.target.style.display = 'none')} />
+              <img src={fotoOptimizada(m.foto)} alt={nombre} onError={(e) => (e.target.style.display = 'none')} />
             ) : (
               <span className="mi fill" style={{ fontSize: 90, color: 'rgba(255,255,255,.7)' }}>
                 pets

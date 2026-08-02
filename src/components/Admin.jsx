@@ -5,6 +5,7 @@ import { tiempoRelativo, nombreMostrado, fechaLegible, linkWhatsAppReencuentro, 
 import { badgeEstado } from '../lib/estados.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { ordenarEmpujon } from '../lib/empujon.js'
+import { fotoOptimizada } from '../lib/foto.js'
 
 const LS_ADM_SECS = 'chicho_admin_secs' // qué secciones del panel quedaron abiertas
 
@@ -378,7 +379,7 @@ export default function Admin({ onVolver, onOpen, stats }) {
                   {reencuentros.map((r) => (
                     <div className="adm-reenc" key={r.id}>
                       {r.fotoReencuentro ? (
-                        <img className="adm-reenc-foto" src={r.fotoReencuentro} alt="" loading="lazy" onError={(e) => (e.target.style.display = 'none')} />
+                        <img className="adm-reenc-foto" src={fotoOptimizada(r.fotoReencuentro, 200)} alt="" loading="lazy" onError={(e) => (e.target.style.display = 'none')} />
                       ) : null}
                       <div className="adm-row-txt">
                         <div className="adm-row-t">

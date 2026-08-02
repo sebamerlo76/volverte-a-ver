@@ -11,6 +11,7 @@ import { puntoDeReporte } from '../lib/parana.js'
 import { TABS_ESTADO, textoTipo } from '../lib/estados.js'
 import { coincideBusqueda } from '../lib/buscar.js'
 import ComoLlegarSheet from './ComoLlegarSheet.jsx'
+import { fotoOptimizada } from '../lib/foto.js'
 
 const ESPECIE_LBL = { perro: 'Perros', gato: 'Gatos', otro: 'Otros' }
 const TIEMPOS = [
@@ -506,7 +507,7 @@ export default function Feed({ reportes, cargando, onOpen, onToast, authActivo, 
             <div className="mcard">
               <button className="mcard-info" onClick={() => onOpen(seleccionado)}>
                 {seleccionado.foto ? (
-                  <img src={seleccionado.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
+                  <img src={fotoOptimizada(seleccionado.foto, 200)} alt="" onError={(e) => (e.target.style.display = 'none')} />
                 ) : (
                   <div className="noimg" />
                 )}

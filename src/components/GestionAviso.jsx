@@ -3,6 +3,7 @@ import { getReportePorToken, resolverPorToken, borrarPorToken } from '../data/st
 import { ubicacionTexto } from '../lib/localidades.js'
 import { textoTipo } from '../lib/estados.js'
 import { confirmar } from '../lib/confirmar.js'
+import { fotoOptimizada } from '../lib/foto.js'
 
 // Página para gestionar un aviso publicado SIN cuenta (link chicho.ar/g/<token>).
 // Deja cerrarlo ("ya volvió a casa") o borrarlo, sin login.
@@ -70,7 +71,7 @@ export default function GestionAviso({ token }) {
 
               <div className="gest-card">
                 {r.foto ? (
-                  <img src={r.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
+                  <img src={fotoOptimizada(r.foto, 200)} alt="" onError={(e) => (e.target.style.display = 'none')} />
                 ) : (
                   <div className="gest-noimg">
                     <span className="mi fill" style={{ fontSize: 30, color: '#c9a58f' }}>pets</span>

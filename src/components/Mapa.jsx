@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import MapaLeaflet from './MapaLazy.jsx'
 import { PARANA_CENTER, coordsDeBarrio } from '../lib/parana.js'
 import { nombreMostrado, tiempoRelativo } from '../lib/formato.js'
+import { fotoOptimizada } from '../lib/foto.js'
 
 export default function Mapa({ reportes, onAbrir, onToast }) {
   const [sel, setSel] = useState(reportes[0]?.id || null)
@@ -74,7 +75,7 @@ export default function Mapa({ reportes, onAbrir, onToast }) {
         {seleccionado ? (
           <button className="mcard" onClick={() => onAbrir(seleccionado)}>
             {seleccionado.foto ? (
-              <img src={seleccionado.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
+              <img src={fotoOptimizada(seleccionado.foto, 200)} alt="" onError={(e) => (e.target.style.display = 'none')} />
             ) : (
               <div className="noimg" />
             )}

@@ -3,6 +3,7 @@ import { getModeracion, desbloquearReporte, borrarReporteAdmin, banearUsuario, d
 import { tiempoRelativo } from '../lib/formato.js'
 import { textoTipo } from '../lib/estados.js'
 import { confirmar } from '../lib/confirmar.js'
+import { fotoOptimizada } from '../lib/foto.js'
 
 export default function Moderacion({ onVolver, data: dataProp }) {
   const [data, setData] = useState(dataProp || null)
@@ -63,7 +64,7 @@ export default function Moderacion({ onVolver, data: dataProp }) {
                   <div className="mod-top">
                     <div className="mod-foto">
                       {a.foto ? (
-                        <img src={a.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
+                        <img src={fotoOptimizada(a.foto, 200)} alt="" onError={(e) => (e.target.style.display = 'none')} />
                       ) : (
                         <span className="mi fill" style={{ fontSize: 22, color: '#c9a58f' }}>
                           pets

@@ -79,7 +79,9 @@ calendario del hilo de novedades. Acá van las mejoras nuevas, de ahí en adelan
 - Qué cambió: en "Encontré una", cuando Chicho te muestra las mascotas perdidas que se
   parecen, las fotitos salían mal recortadas — se veía un pedazo del piso o de una pared
   en lugar del animal. Lo mismo pasaba en los resultados del buscador. Ahora se ven
-  completas, igual que en el listado principal.
+  completas, igual que en el listado principal. Y de paso todas las fotos chicas de la
+  app (el globito del mapa, tus mascotas, el perfil del QR) pesan bastante menos, así que
+  las pantallas abren más rápido con datos móviles.
 - Por qué le importa: esa lista existe para que reconozcas de un vistazo a la mascota que
   encontraste. Con la foto cortada no se reconocía nada, y alguien podía pasar de largo
   justo el aviso de la familia que la está buscando.

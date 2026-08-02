@@ -715,7 +715,7 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
               }}
             >
               {matchPreview.foto ? (
-                <img src={matchPreview.foto} alt="" onError={(e) => (e.target.style.display = 'none')} />
+                <img src={fotoOptimizada(matchPreview.foto)} alt="" onError={(e) => (e.target.style.display = 'none')} />
               ) : (
                 <span className="mi fill" style={{ fontSize: 46, color: '#c9a58f' }}>
                   pets
