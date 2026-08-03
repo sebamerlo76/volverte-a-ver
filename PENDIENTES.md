@@ -173,6 +173,20 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
      soporte. Se puede empezar anónimo y agregar después — al revés no.
   Ver también la nota de límites en ESCALA.md: cada evento es una fila, y conviene
   decidir de entrada cada cuánto se borran los viejos (¿90 días?).
+- [ ] **Buscar parecidos con TODAS las fotos, no sólo la primera** (1-ago-2026, diferido a
+  pedido de Sebastián). Hoy en "Encontré" se pueden subir hasta 3 fotos, pero la huella
+  visual se calcula sólo sobre `fotos[0]` (EncontreWizard.jsx, el efecto que depende de
+  `fotos[0]?.url`). Las otras se guardan y se ven en el carrusel, pero no buscan. Si la
+  primera salió movida o es de lomo, el parecido se calcula con esa aunque la segunda sea
+  mucho mejor — y dos ángulos distintos encuentran cosas que uno solo no.
+  **Cómo**: calcular la huella de cada foto y quedarse con el MEJOR parecido de todas
+  contra cada perdido (máximo, no promedio: el promedio castiga tener una foto mala).
+  **Lo que hay que medir antes**: cuánto tarda. Hoy el modelo (DINOv2, ~24 MB) analiza una
+  foto en el celu; con tres son tres pasadas y el paso 2 ya tiene un "Analizando…". Si se
+  siente lento, se puede analizar la primera y dejar las otras en segundo plano,
+  refrescando la lista cuando terminen.
+  Relacionado: la idea de guardar varias huellas por aviso (el lado del que publica) —
+  eso necesita columna nueva y más cómputo al publicar.
 - [ ] **Fotitos de raza** (grilla visual curada) — más adelante, con imágenes con licencia.
 - [ ] **Recalcular huellas visuales viejas** (26-jul-2026): desde hoy la huella (embedding
   CLIP) se calcula sobre el RECORTE del feed (menos fondo → mejores parecidos), pero los

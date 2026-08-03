@@ -73,6 +73,23 @@ calendario del hilo de novedades. Acá van las mejoras nuevas, de ahí en adelan
   abrirse: antes mostraba un segundo todo sin completar y después se tildaba solo.
 - [ ] push desde el panel    [ ] redes
 
+## "Encontré" busca en tu ciudad y alrededores, no en toda la provincia
+
+- commit: "Encontré: buscar los parecidos en tu zona, no en toda la provincia" · 1-ago-2026
+- Qué cambió: cuando cargás una mascota que encontraste, Chicho te muestra los perdidos
+  que se le parecen. Antes buscaba en **toda la provincia**, así que te podía mostrar uno
+  de una ciudad a 300 km. Ahora busca donde dice el cartel: **tu ciudad y lo que esté a
+  menos de 20 km**. Y si tocás "Cambiar" y elegís otra ciudad, ahora sí se actualiza la
+  lista (antes no cambiaba nada).
+- Por qué le importa: encontraste un perro en tu barrio y necesitás saber si alguien
+  cerca lo está buscando. Que se cuelen avisos de la otra punta de la provincia entre los
+  cuatro que te muestra significa perder lugares que le correspondían a los de tu zona —
+  justo a los que sí podrían ser.
+- Dónde se ve: tocá **👁️ Encontré**, elegí Perro o Gato y mirá el cartel gris que dice
+  "**Buscando en … y alrededores**". Tocá **Cambiar**, elegí una ciudad lejana (por
+  ejemplo Neuquén si estás en Paraná) y vas a ver que la lista de abajo cambia.
+- [ ] push desde el panel    [ ] redes
+
 ## Se ven bien las fotitos de las mascotas parecidas
 
 - commit: "Las fotos chicas mostraban un pedazo: Supabase recortaba en vez de achicar" · 1-ago-2026

@@ -4,7 +4,7 @@ import SelectChips from './SelectChips.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 import FechaPicker from './FechaPicker.jsx'
 import SelectorBarrio from './SelectorBarrio.jsx'
-import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad, ubicacionTexto, provinciaDe } from '../lib/localidades.js'
+import { NOMBRES_LOCALIDADES, nombresBarriosDe, coordsDeBarrioEn, localidadGuardada, recordarLocalidad, ubicacionTexto, avisoEnZona } from '../lib/localidades.js'
 import SelectorCiudad from './SelectorCiudad.jsx'
 import BuscarDireccion from './BuscarDireccion.jsx'
 import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib/opciones.js'
@@ -157,21 +157,25 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
     setPaso(Math.min(TOTAL, paso + 1))
   }
 
+  // ¿Este perdido entra en la búsqueda? Tu ciudad + lo que esté a <= 20 km, la MISMA
+  // regla que el feed y las notificaciones (avisoEnZona, src/lib/localidades.js).
+  //
+  // Antes el ámbito era la provincia entera, y eso hacía dos cosas mal: mostraba como
+  // "parecido" un perdido de Villaguay a alguien que encontró un perro en Paraná, y
+  // dejaba mentiroso el cartel de "Buscando en Paraná y alrededores" — de paso, tocar
+  // "Cambiar" y elegir otra ciudad de la misma provincia no cambiaba nada, porque la
+  // lista nunca había dependido de la ciudad. Con esto el cartel dice la verdad y
+  // cambiar de ciudad se nota. Además es coherente: si un aviso no te aparece en el
+  // feed ni te llega por notificación, tampoco tiene por qué salir acá.
+  const enAmbito = (r) => avisoEnZona(r, localidad)
+
   // Los embeddings (huella visual) NO vienen en el feed (pesan mucho y frenaban el
   // LCP). Al llegar al paso de la foto los pedimos on-demand, sólo de los candidatos
-  // (perdidos activos de la especie, en la provincia).
+  // (perdidos activos de la especie, dentro del alcance).
   const [embeddings, setEmbeddings] = useState({})
   const idsFoto = useMemo(() => {
     if (paso < 2 || !especie) return [] // desde el paso de la foto en adelante
-    return reportes
-      .filter(
-        (r) =>
-          r.tipo === 'perdido' &&
-          r.estado === 'activo' &&
-          r.especie === especie &&
-          provinciaDe(r.localidad || 'Paraná') === provinciaDe(localidad),
-      )
-      .map((r) => r.id)
+    return reportes.filter((r) => r.tipo === 'perdido' && r.estado === 'activo' && r.especie === especie && enAmbito(r)).map((r) => r.id)
   }, [reportes, especie, localidad, paso])
   useEffect(() => {
     if (!idsFoto.length) return
@@ -193,13 +197,10 @@ export default function EncontreWizard({ reportes = [], telefonoGuardado = '', o
       if (!r[campo]) return true // si el otro no especificó, no lo descarto
       return r[campo] === valor
     }
-    // Ámbito: la provincia de la ciudad donde lo encontraste. No la del feed:
-    // el filtro del feed es para mirar, no dice nada de dónde apareció este
-    // animal, y cuando difería solo servía para buscar en la provincia
-    // equivocada. La ciudad sola tampoco alcanza (se perdían los vecinos del
-    // ejido, a 10 cuadras pero del otro lado del límite) y el país entero sería
-    // puro ruido: un perdido en Neuquén no es coincidencia de uno de Paraná.
-    const enAmbito = (r) => provinciaDe(r.localidad || 'Paraná') === provinciaDe(localidad)
+    // El ámbito (tu ciudad + 20 km) está definido arriba, en enAmbito: lo comparten
+    // esta lista y la carga de huellas, y así no pueden desincronizarse. Se usa la
+    // ciudad donde lo encontraste y NO el filtro del feed: ese es para mirar y no dice
+    // nada de dónde apareció este animal.
     let arr = reportes.filter((r) => r.tipo === 'perdido' && r.estado === 'activo' && r.especie === especie && enAmbito(r))
     // Paso 2 (foto): ordenamos por parecido visual a la foto cargada. Sin
     // porcentaje a la vista (se probó y no quedaba bien): el orden ya lo dice.
