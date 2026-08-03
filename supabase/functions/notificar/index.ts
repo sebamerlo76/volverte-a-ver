@@ -131,6 +131,23 @@ async function prefsDe(userIds: string[]) {
   return map
 }
 
+// Foto de Storage → ícono cuadrado de 192 px por la CDN de transformación de Supabase.
+//
+// OJO, va cover con width Y height a propósito: Android muestra el ícono en un cuadrado
+// (o círculo), y la foto del aviso es apaisada 2:1. Pidiendo los dos lados, Supabase
+// recorta el centro —donde está el animal— en vez de dejar bandas. Y pasar sólo `width`
+// haría lo contrario de lo que parece: el modo por defecto es cover, así que tomaría la
+// altura original y devolvería una franja vertical (nos pasó en el front, ver
+// src/lib/foto.js, que por eso usa resize=contain).
+//
+// Duplicado de src/lib/foto.js a la fuerza: una Edge Function no puede importar del
+// front. Si cambia el endpoint de transformaciones, hay que tocar los DOS.
+const MARCA_STORAGE = '/storage/v1/object/public/'
+function iconoDeFoto(url: string): string | null {
+  if (!url || typeof url !== 'string' || !url.includes(MARCA_STORAGE)) return null
+  return `${url.replace(MARCA_STORAGE, '/storage/v1/render/image/public/')}?width=192&height=192&resize=cover&quality=70`
+}
+
 async function enviarAUsuarios(userIds: string[], payload: any, meta: any = {}) {
   const ids = [...new Set(userIds.filter(Boolean))]
   if (!ids.length) return 0
@@ -140,6 +157,12 @@ async function enviarAUsuarios(userIds: string[], payload: any, meta: any = {}) 
   // siempre en el feed — la notificación decía "Fido volvió a casa" y no te llevaba
   // a Fido. Sin reporteId (no pasa hoy), el service worker cae a '/'.
   if (meta.reporteId) payload = { ...payload, url: `/r/${meta.reporteId}` }
+  // Y la CARA de la mascota como ícono, en vez del logo de Chicho. En la pantalla de
+  // bloqueo la diferencia es entre "otro aviso de una app" y ver al perro perdido. El
+  // service worker ya lo soportaba (`data.icon || '/icon-192.png'`): sólo faltaba
+  // mandarlo. Sin foto, cae al logo como siempre.
+  const icono = meta.foto ? iconoDeFoto(meta.foto) : null
+  if (icono) payload = { ...payload, icon: icono }
   // Guardar en el "inbox" de cada usuario, aunque no tenga push activado.
   try {
     const { error } = await sb.from('notificaciones').insert(
@@ -212,7 +235,7 @@ async function manejarReporte(nuevo: any) {
         title: '🐾 ¿Será el tuyo?',
         body: `Apareció un ${ESP[nuevo.especie] || 'animal'} parecido en ${lugarDe(nuevo)}.`,
       },
-      { reporteId: nuevo.id, tipo: 'match' },
+      { reporteId: nuevo.id, tipo: 'match', foto: nuevo.foto },
     )
   }
 
@@ -278,7 +301,7 @@ async function manejarReporte(nuevo: any) {
           title: '📍 Nuevo aviso cerca tuyo',
           body: `Un ${ESP[nuevo.especie] || 'animal'} ${tipoTxt} en ${lugarDe(nuevo)}.`,
         },
-        { reporteId: nuevo.id, tipo: 'cerca' },
+        { reporteId: nuevo.id, tipo: 'cerca', foto: nuevo.foto },
       )
     }
   }
@@ -358,7 +381,7 @@ async function manejarAvistamiento(rec: any) {
       await enviarAUsuarios(
         [rep.user_id],
         { title: t.dueno.title, body: cuerpo(t.dueno.body) },
-        { reporteId: rec.reporte_id, tipo: 'avistamiento' },
+        { reporteId: rec.reporte_id, tipo: 'avistamiento', foto: rep.foto },
       )
     }
   }
@@ -369,7 +392,7 @@ async function manejarAvistamiento(rec: any) {
     await enviarAUsuarios(
       segs,
       { title: t.segs.title, body: cuerpo(t.segs.body) },
-      { reporteId: rec.reporte_id, tipo: 'avistamiento' },
+      { reporteId: rec.reporte_id, tipo: 'avistamiento', foto: rep.foto },
     )
   }
 }
@@ -392,7 +415,7 @@ async function manejarReporteUpdate(rec: any, old: any) {
   if (old?.estado === 'activo' && rec.estado === 'resuelto') {
     const segs = (await seguidoresDe(rec.id)).filter((u: string) => u !== rec.user_id)
     if (segs.length) {
-      await enviarAUsuarios(segs, { title: '🎉 ¡Apareció!', body: `${nombre} volvió a casa. 🏠` }, { reporteId: rec.id, tipo: 'aparecio' })
+      await enviarAUsuarios(segs, { title: '🎉 ¡Apareció!', body: `${nombre} volvió a casa. 🏠` }, { reporteId: rec.id, tipo: 'aparecio', foto: rec.foto_reencuentro || rec.foto })
     }
     // Aviso al admin: cada reencuentro (son pocos y son la mejor noticia).
     const lugar = [rec.zona, rec.localidad].filter(Boolean).join(', ')
@@ -423,7 +446,7 @@ async function manejarReporteUpdate(rec: any, old: any) {
         title: `📝 Novedad de ${nombre}`,
         body: 'La familia actualizó el aviso. Tocá para ver.',
       },
-      { reporteId: rec.id, tipo: 'novedad' },
+      { reporteId: rec.id, tipo: 'novedad', foto: rec.foto },
     )
   }
 }
