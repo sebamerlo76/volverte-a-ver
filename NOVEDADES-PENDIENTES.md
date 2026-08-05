@@ -73,6 +73,20 @@ calendario del hilo de novedades. Acá van las mejoras nuevas, de ahí en adelan
   abrirse: antes mostraba un segundo todo sin completar y después se tildaba solo.
 - [ ] push desde el panel    [ ] redes
 
+## Los puntitos de las fotos ahora se tocan
+
+- commit: "Detalle: los puntitos del carrusel ahora cambian de foto al tocarlos" · 3-ago-2026
+- Qué cambió: en un aviso con varias fotos, los puntitos de abajo sólo indicaban en cuál
+  estabas: había que deslizar sí o sí. Ahora tocás el puntito y va a esa foto. Además el
+  área que responde al dedo es mucho más grande que el punto (se ve igual, pero ya no hay
+  que apuntarle a algo de 7 píxeles).
+- Por qué le importa: tocar el puntito es lo primero que la gente intenta, y como no
+  pasaba nada, muchos se quedaban viendo sólo la primera foto — justo donde a veces está
+  la seña que la identifica (una mancha, el collar, la cola).
+- Dónde se ve: abrí cualquier aviso que tenga **más de una foto**; abajo de la foto
+  aparecen los puntitos. Tocá el de la derecha y la foto cambia.
+- [ ] push desde el panel    [ ] redes
+
 ## "Encontré" busca en tu ciudad y alrededores, no en toda la provincia
 
 - commit: "Encontré: buscar los parecidos en tu zona, no en toda la provincia" · 1-ago-2026

@@ -882,15 +882,32 @@ select {
 }
 .dhero-dots {
   position: absolute;
-  bottom: 12px;
+  /* bottom 0 y no 12: ahora cada punto vive dentro de un botón de 34px de alto, y el
+     punto queda en su centro — o sea a 17px del borde, exactamente donde estaba. */
+  bottom: 0;
   left: 0;
   right: 0;
   display: flex;
   justify-content: center;
-  gap: 6px;
+  gap: 0; /* la separación la da el ancho del botón (14px = lo que había con gap 6) */
   z-index: 2;
 }
+/* El punto que se VE es el ::before (7px). El botón que lo envuelve es mucho más grande
+   —14x34— porque es lo que recibe el dedo: 7px es imposible de acertar. Se ve idéntico
+   a antes, sólo que ahora se puede tocar. */
 .ddot {
+  width: 14px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ddot::before {
+  content: '';
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -898,7 +915,7 @@ select {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   transition: 0.15s;
 }
-.ddot.on {
+.ddot.on::before {
   background: #fff;
   width: 9px;
   height: 9px;
@@ -3735,10 +3752,12 @@ select {
   gap: 7px;
   z-index: 2;
 }
-.lb-dots .ddot {
+/* En el lightbox los puntos son <span> (ahí se navega con las flechas y el swipe), así
+   que el color va al ::before igual que en el hero — si no, se pintaría el botón entero. */
+.lb-dots .ddot::before {
   background: rgba(255, 255, 255, 0.45);
 }
-.lb-dots .ddot.on {
+.lb-dots .ddot.on::before {
   background: #fff;
 }
 

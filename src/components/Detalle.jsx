@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import MapaLeaflet from './MapaLazy.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { ubicacionTexto } from '../lib/localidades.js'
@@ -112,6 +112,14 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, onResolverAd
   }
   const [avist, setAvist] = useState([])
   const [fotoActiva, setFotoActiva] = useState(0)
+  const carruselRef = useRef(null)
+  // Tocar un puntito lleva a esa foto. El scroll suave dispara el onScroll del carrusel,
+  // que es quien actualiza fotoActiva: no hace falta setearlo acá y así no puede quedar
+  // el punto marcando una foto distinta a la que se ve.
+  function irAFoto(i) {
+    const el = carruselRef.current
+    if (el) el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' })
+  }
   const [apoyos, setApoyos] = useState(r?.apoyos || 0)
   const [apoyado, setApoyado] = useState(false)
   const { aplausos, aplaudido, aplaudir } = useAplauso(r) // 👏 reencuentro (mismo hook que la tarjeta del feed)
@@ -227,6 +235,7 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, onResolverAd
           {fotos.length > 0 ? (
             <div
               className="dhero-carrusel"
+              ref={carruselRef}
               onScroll={(e) => {
                 const el = e.currentTarget
                 const i = Math.round(el.scrollLeft / el.clientWidth)
@@ -249,10 +258,20 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, onResolverAd
               pets
             </span>
           )}
+          {/* Los puntitos se pueden tocar: eran <span> y sólo decían en qué foto estabas.
+              Deslizar ya andaba, pero tocar el punto es lo que la gente intenta primero.
+              El área que responde al dedo es bastante más grande que el punto que se ve
+              (ver .ddot en styles.css). */}
           {fotos.length > 1 && (
             <div className="dhero-dots">
               {fotos.map((_, i) => (
-                <span key={i} className={'ddot' + (i === fotoActiva ? ' on' : '')} />
+                <button
+                  key={i}
+                  type="button"
+                  className={'ddot' + (i === fotoActiva ? ' on' : '')}
+                  onClick={() => irAFoto(i)}
+                  aria-label={`Ver la foto ${i + 1} de ${fotos.length}`}
+                />
               ))}
             </div>
           )}
