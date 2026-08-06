@@ -28,19 +28,30 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(title, options))
 })
 
-// Toca la notificación → enfocamos la app (o la abrimos) en la url indicada.
+// Toca la notificación → la app pasa al frente, en el aviso que corresponde.
+//
+// Con la app ABIERTA se le manda un mensaje para que navegue por dentro, y NO se usa
+// client.navigate(). Ese era el bug: navigate() devuelve una promesa que acá se
+// descartaba, y cuando fallaba —pasa seguido si la ventana no quedó controlada por el
+// service worker, y dentro de la app de Play es lo habitual— el focus() traía la app al
+// frente igual, mostrando donde estabas. Resultado: la notificación abría Chicho pero no
+// el aviso. Las de novedades parecían andar sólo porque solían tocarse con la app cerrada,
+// que es el otro camino (openWindow) y ese sí navega.
+//
+// De paso el mensaje es mejor que navegar: no recarga la app, así que abre al instante.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
   const url = (event.notification.data && event.notification.data.url) || '/'
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
-      for (const c of list) {
-        if ('focus' in c) {
-          c.navigate(url)
-          return c.focus()
-        }
+    (async () => {
+      const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+      const cliente = list.find((c) => 'focus' in c)
+      if (cliente) {
+        cliente.postMessage({ chicho: 'abrir', url })
+        return cliente.focus()
       }
+      // App cerrada: se abre directo en la url (este camino siempre funcionó).
       if (self.clients.openWindow) return self.clients.openWindow(url)
-    })
+    })(),
   )
 })

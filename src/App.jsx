@@ -511,6 +511,37 @@ export default function App() {
     }
   }
 
+  // A dónde lleva una url interna, navegando por dentro (sin recargar). La usa el toque
+  // en una notificación cuando la app YA está abierta: el service worker manda el aviso
+  // por postMessage y acá se abre lo que corresponda. No toca el historial a propósito —
+  // de eso ya se encarga el sistema de capas al cambiar de vista.
+  function irAUrl(url) {
+    const path = String(url || '/').replace(/^https?:\/\/[^/]+/, '') || '/'
+    const m = path.match(/^\/r\/([\w-]+)/)
+    if (m) {
+      getReportePorId(m[1])
+        .then((r) => r && abrirDetalle(r, 'feed'))
+        .catch(() => {})
+      return
+    }
+    if (/^\/novedades\/?$/.test(path)) return setVista('novedades')
+    resetInicio()
+  }
+  // En un ref para que el listener se registre UNA vez y aun así llame siempre a la
+  // versión actual: irAUrl usa estado (user, notifs) que cambia en cada render.
+  const irAUrlRef = useRef(null)
+  irAUrlRef.current = irAUrl
+
+  // El service worker avisa qué notificación se tocó.
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return
+    const alMensaje = (e) => {
+      if (e.data && e.data.chicho === 'abrir') irAUrlRef.current?.(e.data.url)
+    }
+    navigator.serviceWorker.addEventListener('message', alMensaje)
+    return () => navigator.serviceWorker.removeEventListener('message', alMensaje)
+  }, [])
+
   // --- Menú de la cara ---
   function irSeccion(sec) {
     setMenuAbierto(false)
