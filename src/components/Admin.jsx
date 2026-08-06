@@ -5,6 +5,7 @@ import { tiempoRelativo, nombreMostrado, fechaLegible, linkWhatsAppReencuentro, 
 import { badgeEstado } from '../lib/estados.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { ordenarEmpujon } from '../lib/empujon.js'
+import BuscarPorFoto from './BuscarPorFoto.jsx'
 import { fotoOptimizada } from '../lib/foto.js'
 
 const LS_ADM_SECS = 'chicho_admin_secs' // qué secciones del panel quedaron abiertas
@@ -655,6 +656,19 @@ export default function Admin({ onVolver, onOpen, stats }) {
               <div className="adm-nota">
                 "Apoyos" = veces que tocaron "Me sumo a difundir". Los compartidos directos por WhatsApp no se registran.
               </div>
+            </Sec>
+
+            {/* Se monta sólo al abrir la sección: adentro carga el modelo de huellas
+                (24 MB) apenas se elige la primera foto, y no tiene por qué pesar en el
+                panel de quien viene a mirar los números. */}
+            <Sec
+              id="buscarfoto"
+              titulo="🔎 ¿Esta mascota está en Chicho?"
+              sub="Para las que aparecen en grupos: subís la foto y te digo si coincide con un aviso. No se guarda nada."
+              abierta={!!abiertas.buscarfoto}
+              onToggle={toggle}
+            >
+              {abiertas.buscarfoto && <BuscarPorFoto onOpen={onOpen} onToast={setError} />}
             </Sec>
 
             <Sec id="herramientas" titulo="🛠️ Herramientas" abierta={!!abiertas.herramientas} onToggle={toggle}>

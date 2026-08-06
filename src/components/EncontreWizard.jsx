@@ -11,7 +11,7 @@ import { COLORES, SEXOS, COLLAR, TAMANOS, RAZAS_PERRO, RAZAS_GATO } from '../lib
 import { addReporte, addMascota, subirFotos, subirFotoFeed, publicarGestion, nuevoTokenGestion, getEmbeddingsDe } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, linkWhatsApp } from '../lib/formato.js'
 import { SITIO_URL } from '../lib/sitio.js'
-import { similitud } from '../lib/vector.js'
+import { similitud, SIM_PISO } from '../lib/vector.js'
 import { fotoOptimizada } from '../lib/foto.js'
 import { tieneGroseria } from '../lib/moderacion.js'
 
@@ -24,12 +24,6 @@ function ultimoWhatsapp() {
 }
 
 const TOTAL = 5
-// Piso de parecido visual: la lista es un "top 4 de lo que haya", y con pocos
-// perdidos en la zona los últimos puestos se llenaban con cualquiera (un negro
-// contra uno marrón). Por debajo del piso no entra aunque sobre lugar.
-// Calibrado para DINOv2 con el A/B de avisos reales (el mismo animal puntúa
-// 0.40-0.83; con CLIP era 0.65). Ajustar con el log [parecidos] de la consola.
-const SIM_PISO = 0.4
 // La foto va ANTES que "cómo es": con la foto el buscador visual ya ordena por
 // parecido, y los datos del paso siguiente afinan. Al revés obligaba a cargar todo
 // a mano antes de que la foto hiciera su magia.
