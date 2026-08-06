@@ -187,6 +187,17 @@ En vivo: https://chicho.ar · Código: https://github.com/sebamerlo76/volverte-a
   refrescando la lista cuando terminen.
   Relacionado: la idea de guardar varias huellas por aviso (el lado del que publica) —
   eso necesita columna nueva y más cómputo al publicar.
+- [ ] **Abrir el buscador por foto a los usuarios** (3-ago-2026). Hoy está en el panel
+  (sección "🔎 ¿Esta mascota está en Chicho?", src/components/BuscarPorFoto.jsx) y es sólo
+  de admin **a propósito**: sirve para ver cuánto acierta con fotos de grupos, que vienen
+  mucho peores que las que se suben a la app (capturas de pantalla, recortes, marcas de
+  agua, fotos de fotos). Cuando haya evidencia de que anda bien con eso, el paso natural
+  es que cualquiera pueda tirar una foto y preguntar "¿está publicada?" sin tener que
+  empezar el asistente de Encontré ni crear cuenta.
+  **Antes de abrirlo, decidir**: si se limita por zona (el asistente compara con la ciudad
+  + 20 km; el panel compara con todos, que para grupos es lo correcto), y si se muestra el
+  puntaje (en la app se sacó a propósito, ver el historial del wizard).
+  Ojo: el modelo son ~24 MB para quien lo use. Hoy sólo lo baja el que entra a Encontré.
 - [ ] **Fotitos de raza** (grilla visual curada) — más adelante, con imágenes con licencia.
 - [ ] **Recalcular huellas visuales viejas** (26-jul-2026): desde hoy la huella (embedding
   CLIP) se calcula sobre el RECORTE del feed (menos fondo → mejores parecidos), pero los
