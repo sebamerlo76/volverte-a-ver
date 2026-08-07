@@ -127,9 +127,20 @@ export function linkWhatsApp(r) {
 
 // Link de WhatsApp para el admin: pedir permiso de publicar el reencuentro en el IG
 // (+ invitar a contar la experiencia). Mismo manejo del número que linkWhatsApp.
+// Dos mensajes, según si la familia ya subió la foto del reencuentro. Antes era uno solo
+// que pedía permiso para Instagram y de paso preguntaba "cómo fue tu experiencia": pedir
+// dos cosas a la vez suele conseguir ninguna, y el testimonio vale mucho menos que la
+// foto. La foto es la prueba social que sostiene el muro de "Ya en casa" — es lo que ve
+// el que todavía está buscando.
+//
+// Al que NO la subió se le pide la foto (el festejo ya se la ofreció al marcar el
+// reencuentro: esta es la segunda oportunidad, y sin culpa). Al que SÍ, no tiene sentido
+// pedírsela de nuevo: se le agradece y se le pide sólo el permiso para Instagram.
 export function linkWhatsAppReencuentro(r) {
   const nombre = nombreMostrado(r)
-  const texto = `¡Hola! Te escribo de Chicho 🐾 Vi que ${nombre} volvió a casa, ¡qué alegría! ¿Nos das permiso para compartir el reencuentro en nuestro Instagram (@chicho.ar)? Y si tenés un minuto, nos encantaría saber cómo fue tu experiencia con la app 🙏`
+  const texto = r?.fotoReencuentro
+    ? `¡Hola! Te escribo de Chicho 🐾 Vi que ${nombre} volvió a casa, ¡qué alegría! Y gracias por subir la foto 💛 ¿Nos das permiso para compartirla en el Instagram de Chicho (@chicho.ar)?`
+    : `¡Hola! Te escribo de Chicho 🐾 Vi que ${nombre} volvió a casa, ¡qué alegría! ¿Nos mandás una foto de ${nombre} ya en casa? La sumamos al muro de reencuentros de la app: es lo que le da esperanza a la gente que todavía está buscando a la suya 💛`
   const numero = numeroWa(r.whatsapp)
   const base = numero ? `https://wa.me/${numero}` : 'https://wa.me/'
   return `${base}?text=${encodeURIComponent(texto)}`
