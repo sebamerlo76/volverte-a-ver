@@ -126,7 +126,26 @@
         var u = '%VITE_SUPABASE_URL%'
         var k = '%VITE_SUPABASE_ANON_KEY%'
         // Sin variables de entorno (el demo) Vite deja el literal con %: no precargamos.
-        if (u.indexOf('%') !== -1 || k.indexOf('%') !== -1) return
+        if (u.indexOf('%') !== -1 || k.indexOf('%') !== -1) {
+          // Y de paso lo sacamos de Google. El demo (chicho-demo.vercel.app, donde se
+          // graban los tutoriales sin mandarle avisos falsos a nadie) sirve el mismo
+          // robots.txt que dice "indexá todo", así que sin esto puede aparecer en las
+          // búsquedas un Chicho VACÍO —cada visitante ve su propio localStorage—
+          // compitiendo con el real.
+          //
+          // Se agrega acá y no al revés (noindex fijo que producción borra) a propósito:
+          // así, si este script falla, lo peor que pasa es que se indexe el demo. Con la
+          // lógica invertida, un error dejaría a chicho.ar fuera de Google.
+          try {
+            var m = document.createElement('meta')
+            m.name = 'robots'
+            m.content = 'noindex, nofollow'
+            document.head.appendChild(m)
+          } catch (e) {
+            /* que nunca rompa el arranque */
+          }
+          return
+        }
         var cols =
           'id,tipo,especie,nombre,zona,referencia,color,tamano,raza,descripcion,foto,fotos,whatsapp,autor,fecha_evento,creado_en,estado,user_id,mascota_id,sexo,edad,collar,recompensa,lat,lng,en_custodia,localidad,apoyos,aplausos,resuelto_en,recordatorio_en'
         var url =
