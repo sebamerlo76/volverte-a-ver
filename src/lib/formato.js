@@ -1,4 +1,5 @@
 // Utilidades de presentación.
+import { SITIO_URL } from './sitio.js'
 
 // Nombre a mostrar cuando la mascota no tiene nombre cargado.
 export function nombreMostrado(r) {
@@ -133,14 +134,17 @@ export function linkWhatsApp(r) {
 // foto. La foto es la prueba social que sostiene el muro de "Ya en casa" — es lo que ve
 // el que todavía está buscando.
 //
-// Al que NO la subió se le pide la foto (el festejo ya se la ofreció al marcar el
-// reencuentro: esta es la segunda oportunidad, y sin culpa). Al que SÍ, no tiene sentido
-// pedírsela de nuevo: se le agradece y se le pide sólo el permiso para Instagram.
+// Al que NO la subió se lo invita a subirla EN LA APP, no a mandarla por WhatsApp: si la
+// manda por acá hay que subirla a mano y encima queda sin atar al aviso. Subiéndola ella
+// entra sola al muro. Por eso el mensaje trae el camino exacto (menú → Avisos → "Subir
+// foto"): hoy ese botón vive sólo ahí, no en el aviso, así que sin la indicación se pierde.
+// Al que SÍ la subió no tiene sentido pedírsela de nuevo: se le agradece y se le pide
+// sólo el permiso para Instagram.
 export function linkWhatsAppReencuentro(r) {
   const nombre = nombreMostrado(r)
   const texto = r?.fotoReencuentro
     ? `¡Hola! Te escribo de Chicho 🐾 Vi que ${nombre} volvió a casa, ¡qué alegría! Y gracias por subir la foto 💛 ¿Nos das permiso para compartirla en el Instagram de Chicho (@chicho.ar)?`
-    : `¡Hola! Te escribo de Chicho 🐾 Vi que ${nombre} volvió a casa, ¡qué alegría! ¿Nos mandás una foto de ${nombre} ya en casa? La sumamos al muro de reencuentros de la app: es lo que le da esperanza a la gente que todavía está buscando a la suya 💛`
+    : `¡Hola! Te escribo de Chicho 🐾 Vi que ${nombre} volvió a casa, ¡qué alegría! ¿Nos das una mano? Entrá a ${SITIO_URL}, tocá tu foto arriba a la izquierda → Avisos, y ahí te va a aparecer el botón "Subir foto" para poner una de ${nombre} ya en casa. Va al muro de reencuentros: es lo que le da esperanza a la gente que todavía está buscando a la suya 💛`
   const numero = numeroWa(r.whatsapp)
   const base = numero ? `https://wa.me/${numero}` : 'https://wa.me/'
   return `${base}?text=${encodeURIComponent(texto)}`
