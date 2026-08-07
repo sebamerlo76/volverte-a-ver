@@ -240,9 +240,15 @@ export async function generarFlyer(r) {
 // Genera el flyer y abre el menú de compartir (o lo descarga si no se puede).
 export async function compartirFlyer(r, onToast) {
   try {
-    const estado = r.estado === 'resuelto' ? 'apareció' : textoTipo(r.tipo, r.enCustodia)
     const link = r.id ? `https://chicho.ar/r/${r.id}` : 'https://chicho.ar'
-    const texto = `${nombreMostrado(r)} — ${estado} en ${ubicacionTexto(r.localidad, r.zona)}. Mirá y ayudá 🐾\n${link}`
+    const lugar = ubicacionTexto(r.localidad, r.zona)
+    // Un reencuentro NO pide ayuda: ya está en casa. Decía "Mirá y ayudá" igual que un
+    // perdido, que es pedirle a la gente que busque a una mascota que apareció. Compartir
+    // un reencuentro es para celebrar y para que el que todavía busca vea que pasa.
+    const texto =
+      r.estado === 'resuelto'
+        ? `🎉 ${nombreMostrado(r)} volvió a casa — apareció en ${lugar}.\n${link}`
+        : `${nombreMostrado(r)} — ${textoTipo(r.tipo, r.enCustodia)} en ${lugar}. Mirá y ayudá 🐾\n${link}`
 
     // Copiamos el texto+link PRIMERO, antes de generar la imagen. Es clave que sea
     // acá: writeText necesita el "permiso del toque" (la activación transitoria), y
