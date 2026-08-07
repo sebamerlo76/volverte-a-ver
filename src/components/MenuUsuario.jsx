@@ -7,6 +7,8 @@ const ITEMS = [
   { k: 'ubicaciones', ic: 'location_on', t: 'Mis ubicaciones' },
   { k: 'notificaciones', ic: 'notifications', t: 'Notificaciones' },
   { k: 'avisos', ic: 'campaign', t: 'Avisos' },
+  // 'reencuentros' se suma en el componente: sólo aparece si la persona tiene alguno,
+  // así el menú no crece con una sección vacía para quien nunca perdió una mascota.
   { k: 'cuenta', ic: 'person', t: 'Mi cuenta' },
   // Sin "Guía": el recorrido de slides quedó como bienvenida del sitio, para el que
   // llega navegando. Adentro se guía haciendo — los banners del feed y Primeros pasos.
@@ -14,13 +16,16 @@ const ITEMS = [
   { k: 'ayuda', ic: 'support_agent', t: 'Ayuda / Soporte' },
 ]
 
-export default function MenuUsuario({ user, esAdmin, hayNudge, onSeccion, onLogout, onCerrar }) {
+export default function MenuUsuario({ user, esAdmin, hayNudge, reencuentros = 0, onSeccion, onLogout, onCerrar }) {
   const nombre = nombreUsuario(user)
   const email = user?.email || 'Tu cuenta'
   const avatar = avatarDe(user)
+  // "Volvieron a casa" sólo para quien tiene alguno: al que nunca perdió una mascota no
+  // le sirve de nada, y peor, le nombra algo que no le pasó.
+  const base = reencuentros > 0 ? ITEMS.flatMap((i) => (i.k === 'avisos' ? [i, { k: 'reencuentros', ic: 'home', t: 'Volvieron a casa', n: reencuentros }] : [i])) : ITEMS
   const items = esAdmin
-    ? [{ k: 'admin', ic: 'insights', t: 'Panel (admin)' }, { k: 'moderacion', ic: 'shield', t: 'Moderación' }, ...ITEMS]
-    : ITEMS
+    ? [{ k: 'admin', ic: 'insights', t: 'Panel (admin)' }, { k: 'moderacion', ic: 'shield', t: 'Moderación' }, ...base]
+    : base
 
   return (
     <div className="menu-overlay" onClick={onCerrar}>
@@ -47,6 +52,7 @@ export default function MenuUsuario({ user, esAdmin, hayNudge, onSeccion, onLogo
               <span className="mi menu-ico">{it.ic}</span>
               {it.t}
               {hayNudge && it.k === 'primeros-pasos' && <span className="menu-dot" />}
+              {it.n > 0 && <span className="menu-n">{it.n}</span>}
               <span className="mi menu-arrow">chevron_right</span>
             </button>
           ))}

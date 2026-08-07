@@ -495,6 +495,33 @@ export async function getReportesPorIds(ids) {
 }
 
 // Trae SOLO los avisos de un usuario (activos y resueltos), más nuevo primero.
+// Historial de reencuentros del usuario (ver supabase/schema-historial-reencuentros.sql).
+// Es PRIVADO: la RLS ya filtra por dueño, el user_id de acá es sólo para no pedir nada
+// cuando no hay sesión. Devuelve [] si la tabla todavía no existe, así la pantalla no se
+// rompe antes de correr el SQL — pero se deja el aviso en consola para no fallar mudo.
+export async function getMisReencuentros(userId) {
+  if (!userId || !supabaseConfigurado) return []
+  const { data, error } = await supabase.from('reencuentros').select('*').order('volvio_en', { ascending: false })
+  if (error) {
+    console.warn('reencuentros:', error.message, '— ¿falta correr schema-historial-reencuentros.sql?')
+    return []
+  }
+  return (data || []).map((f) => ({
+    id: f.id,
+    reporteId: f.reporte_id,
+    mascotaId: f.mascota_id,
+    nombre: f.nombre,
+    especie: f.especie,
+    tipo: f.tipo,
+    localidad: f.localidad,
+    zona: f.zona,
+    foto: f.foto || f.foto_aviso, // la del reencuentro; si no la subieron, la del aviso
+    tieneFotoReencuentro: !!f.foto,
+    dias: f.dias,
+    volvioEn: f.volvio_en,
+  }))
+}
+
 export async function getMisReportes(userId) {
   if (!userId) return []
   if (supabaseConfigurado) {

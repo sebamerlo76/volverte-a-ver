@@ -8,6 +8,7 @@ import { supabase, supabaseConfigurado } from '../lib/supabase.js'
 import NotifPrefs from './NotifPrefs.jsx'
 import MisUbicaciones from './MisUbicaciones.jsx'
 import PrimerosPasos from './PrimerosPasos.jsx'
+import MisReencuentros from './MisReencuentros.jsx'
 import { confirmar } from '../lib/confirmar.js'
 import { pasoHecho, marcarPaso } from '../lib/pasos.js'
 import { fotoOptimizada } from '../lib/foto.js'
@@ -26,6 +27,7 @@ const TITULOS = {
   ubicaciones: 'Mis ubicaciones',
   notificaciones: 'Notificaciones',
   avisos: 'Avisos',
+  reencuentros: 'Volvieron a casa',
   cuenta: 'Mi cuenta',
   'primeros-pasos': 'Primeros pasos',
 }
@@ -646,6 +648,8 @@ export default function MiCuenta({
 
         {/* ---------------- Mis ubicaciones ---------------- */}
         {seccion === 'ubicaciones' && <MisUbicaciones user={user} onToast={onToast} />}
+
+        {seccion === 'reencuentros' && <MisReencuentros user={user} />}
 
         <div style={{ height: 'calc(24px + env(safe-area-inset-bottom))' }} />
       </div>
