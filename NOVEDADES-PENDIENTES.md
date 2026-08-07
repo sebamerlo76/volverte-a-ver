@@ -73,6 +73,21 @@ calendario del hilo de novedades. Acá van las mejoras nuevas, de ahí en adelan
   abrirse: antes mostraba un segundo todo sin completar y después se tildaba solo.
 - [ ] push desde el panel    [ ] redes
 
+## Subir la foto del reencuentro, desde el aviso
+
+- commit: "La foto del reencuentro se sube desde el propio aviso" · 7-ago-2026
+- Qué cambió: cuando tu mascota vuelve a casa, Chicho te invita a subir una foto de ella
+  ya en casa. Antes ese botón estaba sólo en Mi cuenta → Avisos, a tres toques y en otra
+  pantalla; ahora aparece en el aviso mismo, que es donde uno lo busca. La foto se ve al
+  instante, sin recargar nada.
+- Por qué le importa: esas fotos arman el muro de **Ya en casa**, que es lo que ve la
+  gente que todavía está buscando a la suya. Cada reencuentro que se cuenta con una foto
+  es alguien que sigue buscando un rato más.
+- Dónde se ve: entrá a un aviso **tuyo** que ya hayas marcado como "Ya en casa" y que no
+  tenga foto del reencuentro. Abajo de la foto principal aparece el cartel ámbar
+  "**¿Tenés una foto de … ya en casa?**" con el botón para subirla.
+- [ ] push desde el panel    [ ] redes
+
 ## Los puntitos de las fotos ahora se tocan
 
 - commit: "Detalle: los puntitos del carrusel ahora cambian de foto al tocarlos" · 3-ago-2026
