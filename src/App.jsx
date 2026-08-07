@@ -857,6 +857,12 @@ export default function App() {
             onAvistar={() => setVista('avistamiento')}
             onMaximizar={() => setVista('recorrido')}
             onVerFotos={(fotos, i) => setFotosVer({ fotos, i })}
+            onFotoReencuentro={(url) => {
+              // Se refleja al instante en el aviso abierto y en el feed que quedó atrás,
+              // sin volver a pedir nada: la foto ya se guardó, sólo falta que se vea.
+              setSelReporte((x) => (x ? { ...x, fotoReencuentro: url } : x))
+              setReportes((arr) => arr.map((x) => (x.id === seleccionado?.id ? { ...x, fotoReencuentro: url } : x)))
+            }}
           />
         )}
         {vista === 'avistamiento' && seleccionado && (

@@ -3,11 +3,12 @@ import MapaLeaflet from './MapaLazy.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { badgeEstado, subLinea, textoTipo } from '../lib/estados.js'
-import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero, getContactoReporte } from '../data/store.js'
+import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero, getContactoReporte, subirFoto, guardarFotoReencuentro } from '../data/store.js'
 import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel } from '../lib/formato.js'
 import { tipoAporte, aporteEnMapa } from '../lib/aportes.js'
 import { compartirFlyer } from '../lib/flyer.js'
 import { useAplauso } from '../lib/useAplauso.js'
+import PhotoPicker from './PhotoPicker.jsx'
 
 // Escapa texto del usuario para meterlo seguro en el HTML del globito.
 function esc(s = '') {
@@ -95,7 +96,7 @@ function marcarReporteNum(w) {
   }
 }
 
-export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, onResolverAdmin, puedeSeguir, siguiendo, onSeguir, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar, onVerFotos }) {
+export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, onResolverAdmin, puedeSeguir, siguiendo, onSeguir, onVolver, onToast, onEditar, onBorrar, onResuelto, onReactivar, onAvistar, onMaximizar, onVerFotos, onFotoReencuentro }) {
   // Contacto de quien publicó (solo admin, a pedido: no lo cargamos siempre)
   const [contacto, setContacto] = useState(null)
   const [cargandoContacto, setCargandoContacto] = useState(false)
@@ -113,6 +114,30 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, onResolverAd
   const [avist, setAvist] = useState([])
   const [fotoActiva, setFotoActiva] = useState(0)
   const carruselRef = useRef(null)
+  const [pidiendoFoto, setPidiendoFoto] = useState(false)
+  const [subiendoFoto, setSubiendoFoto] = useState(false)
+
+  // Foto del reencuentro, subida desde el propio aviso. Misma mecánica que en Mi cuenta:
+  // se guarda el RECORTE (it.thumb), que es lo que se ve en el feed y en el muro.
+  async function subirFotoReenc(arr) {
+    const it = arr && arr[0]
+    if (!it || subiendoFoto) return
+    setSubiendoFoto(true)
+    try {
+      const url = await subirFoto(it.thumb)
+      await guardarFotoReencuentro(r.id, url)
+      // Se avisa hacia arriba para que el aviso y el feed muestren la foto YA, sin
+      // recargar: si no, subís la foto y no pasa nada visible hasta volver a entrar.
+      onFotoReencuentro?.(url)
+      setPidiendoFoto(false)
+      onToast?.('📸 ¡Gracias! Ya está en el muro de Ya en casa 💛')
+    } catch (e) {
+      console.error('foto reencuentro', e)
+      onToast?.('No se pudo subir la foto. Probá de nuevo 🔄')
+    } finally {
+      setSubiendoFoto(false)
+    }
+  }
   // Tocar un puntito lleva a esa foto. El scroll suave dispara el onScroll del carrusel,
   // que es quien actualiza fotoActiva: no hace falta setearlo acá y así no puede quedar
   // el punto marcando una foto distinta a la que se ve.
@@ -629,6 +654,33 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, onResolverAd
               Cancelar
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Subir la foto del reencuentro desde el propio aviso. Estaba sólo en Mi cuenta →
+          Avisos, o sea a tres toques y en otra pantalla: el que entra a ver a su mascota
+          que volvió lo busca acá. Y es a donde lleva el link de la notificación y el que
+          le mandamos por WhatsApp para pedírsela. */}
+      {esMio && resuelto && !r.fotoReencuentro && (
+        <div className="reenc-pide">
+          {!pidiendoFoto ? (
+            <button className="reenc-pide-btn" onClick={() => setPidiendoFoto(true)}>
+              <span className="mi" style={{ fontSize: 19 }}>
+                add_a_photo
+              </span>
+              <span>
+                <b>¿Tenés una foto de {nombreMostrado(r)} ya en casa?</b>
+                <small>Subila y va al muro de reencuentros 💛</small>
+              </span>
+            </button>
+          ) : (
+            <>
+              <PhotoPicker value={[]} max={1} onChange={subirFotoReenc} />
+              <div className="reenc-pide-pie">
+                {subiendoFoto ? 'Subiendo la foto…' : <button onClick={() => setPidiendoFoto(false)}>Cancelar</button>}
+              </div>
+            </>
+          )}
         </div>
       )}
 

@@ -2945,6 +2945,60 @@ select {
 .adm-row-s { font-size: 12px; font-weight: 700; color: #8a807a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .adm-row-time { flex: none; font-size: 11px; font-weight: 800; color: var(--faint); }
 
+/* "¿Tenés una foto de X ya en casa?" dentro del aviso resuelto (sólo el dueño). En ámbar
+   como el resto de "Ya en casa", para que se lea como celebración y no como una tarea. */
+.reenc-pide {
+  margin: 12px 16px 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: #fff8e6;
+  border: 1.5px solid #ffe4a1;
+}
+.reenc-pide-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--navy);
+}
+.reenc-pide-btn .mi {
+  flex: none;
+  color: var(--amber);
+}
+.reenc-pide-btn b {
+  display: block;
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 14.5px;
+}
+.reenc-pide-btn small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--faint);
+}
+.reenc-pide-pie {
+  margin-top: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.reenc-pide-pie button {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 /* Buscador por foto del panel: una fila por foto subida, con sus coincidencias al lado. */
 .bpf-chips {
   display: flex;
