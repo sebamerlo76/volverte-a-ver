@@ -1053,6 +1053,7 @@ export default function App() {
             onCerrar={() => setFestejo(null)}
             onToast={mostrarToast}
             onFotoSubida={() => cargar()}
+            onMascotaGuardada={() => cargar()}
           />
         )}
 

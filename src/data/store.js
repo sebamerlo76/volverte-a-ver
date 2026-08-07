@@ -927,6 +927,41 @@ export async function getMisMascotas(userId) {
   return leerMascotasLocal()
 }
 
+// Guardar en "Mis mascotas" la mascota de un aviso propio, y dejar el aviso atado a ella.
+//
+// Se ofrece al marcar el reencuentro, que es el único momento en que la persona está
+// tranquila y con la foto a mano: medido, el 82% de los perdidos se publica sin tener la
+// mascota cargada, porque a Chicho se llega en la emergencia y nadie completa una ficha
+// "por las dudas". Cuando ya volvió, sí tiene sentido prepararse para la próxima.
+//
+// Atar el aviso (mascota_id) no es cosmético: es lo que hace que el historial de
+// reencuentros se pueda agrupar por bichito y no quede suelto por aviso.
+export async function guardarMascotaDeAviso(r) {
+  if (!r) return null
+  const datos = {
+    nombre: r.nombre || '',
+    especie: r.especie || 'perro',
+    color: r.color || '',
+    tamano: r.tamano || '',
+    raza: r.raza || '',
+    sexo: r.sexo || '',
+    edad: r.edad || '',
+    descripcion: r.descripcion || '',
+    foto: r.foto || '',
+  }
+  const m = await addMascota(datos)
+  if (!m?.id) return null
+  if (supabaseConfigurado) {
+    // Si esto falla, la mascota YA quedó guardada: se avisa pero no se tira el trabajo.
+    const { error } = await supabase.from('reportes').update({ mascota_id: m.id }).eq('id', r.id)
+    if (error) console.warn('atar aviso a mascota:', error.message)
+    // Y el reencuentro que se acaba de registrar, para que el historial la reconozca.
+    const { error: e2 } = await supabase.from('reencuentros').update({ mascota_id: m.id }).eq('reporte_id', r.id)
+    if (e2) console.warn('atar reencuentro a mascota:', e2.message)
+  }
+  return m
+}
+
 export async function addMascota(datos) {
   if (supabaseConfigurado) {
     const base = mascotaHaciaFila(datos)

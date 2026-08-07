@@ -2945,6 +2945,44 @@ select {
 .adm-row-s { font-size: 12px; font-weight: 700; color: #8a807a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .adm-row-time { flex: none; font-size: 11px; font-weight: 800; color: var(--faint); }
 
+/* "Guardar a X en Mis mascotas", dentro del festejo del reencuentro. Secundario respecto
+   de compartir: es una buena idea, pero no es lo que la persona vino a hacer. */
+.festejo-guardar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  margin: 4px 0 10px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  background: #f6efe9;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  color: var(--navy);
+}
+.festejo-guardar:disabled {
+  opacity: 0.6;
+}
+.festejo-guardar .mi {
+  flex: none;
+  color: var(--coral);
+}
+.festejo-guardar b {
+  display: block;
+  font-family: Fredoka, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.25;
+}
+.festejo-guardar small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--faint);
+}
+
 /* Historial de reencuentros (Mi cuenta → Volvieron a casa). Privado. */
 .reenc-hist {
   display: flex;

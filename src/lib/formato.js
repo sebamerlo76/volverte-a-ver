@@ -136,15 +136,18 @@ export function linkWhatsApp(r) {
 //
 // Al que NO la subió se lo invita a subirla EN LA APP, no a mandarla por WhatsApp: si la
 // manda por acá hay que subirla a mano y encima queda sin atar al aviso. Subiéndola ella
-// entra sola al muro. Por eso el mensaje trae el camino exacto (menú → Avisos → "Subir
-// foto"): hoy ese botón vive sólo ahí, no en el aviso, así que sin la indicación se pierde.
+// entra sola al muro. El mensaje lleva DIRECTO a su aviso, donde ahora está el botón —
+// antes explicaba un camino de tres pasos (menú → Avisos → Subir foto) porque el botón
+// vivía sólo en Mi cuenta. Un link que abre justo donde hay que tocar convierte mucho
+// mejor que una instrucción.
 // Al que SÍ la subió no tiene sentido pedírsela de nuevo: se le agradece y se le pide
 // sólo el permiso para Instagram.
 export function linkWhatsAppReencuentro(r) {
   const nombre = nombreMostrado(r)
+  const aviso = r?.id ? `${SITIO_URL}/r/${r.id}` : SITIO_URL
   const texto = r?.fotoReencuentro
     ? `¡Hola! Te escribo de Chicho 🐾 Vi que ${nombre} volvió a casa, ¡qué alegría! Y gracias por subir la foto 💛 ¿Nos das permiso para compartirla en el Instagram de Chicho (@chicho.ar)?`
-    : `¡Hola! Te escribo de Chicho 🐾 Vi que ${nombre} volvió a casa, ¡qué alegría! ¿Nos das una mano? Entrá a ${SITIO_URL}, tocá tu foto arriba a la izquierda → Avisos, y ahí te va a aparecer el botón "Subir foto" para poner una de ${nombre} ya en casa. Va al muro de reencuentros: es lo que le da esperanza a la gente que todavía está buscando a la suya 💛`
+    : `¡Hola! Te escribo de Chicho 🐾 Vi que ${nombre} volvió a casa, ¡qué alegría! ¿Nos das una mano? Entrá acá 👉 ${aviso} y vas a ver el botón para subir una foto de ${nombre} ya en casa. Va al muro de reencuentros: es lo que le da esperanza a la gente que todavía está buscando a la suya 💛`
   const numero = numeroWa(r.whatsapp)
   const base = numero ? `https://wa.me/${numero}` : 'https://wa.me/'
   return `${base}?text=${encodeURIComponent(texto)}`
