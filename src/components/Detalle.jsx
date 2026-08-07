@@ -670,7 +670,9 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, onResolverAd
               </span>
               <span>
                 <b>¿Tenés una foto de {nombreMostrado(r)} ya en casa?</b>
-                <small>Subila y va al muro de reencuentros 💛</small>
+                {/* "acá" a propósito: sin eso se lee como un anuncio y no como algo que
+                    se toca — y si no parece tocable, nadie sube la foto. */}
+                <small>Subila acá y va al muro de reencuentros 💛</small>
               </span>
             </button>
           ) : (

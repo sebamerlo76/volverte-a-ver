@@ -744,12 +744,19 @@ export async function reactivarReporte(id) {
   if (supabaseConfigurado) {
     const { error } = await supabase
       .from('reportes')
-      .update({ estado: 'activo', creado_en: ahora, preaviso_en: null, pausado_en: null })
+      // Se limpia la foto del reencuentro: si la mascota volvió a perderse, la foto de
+      // "ya en casa" de la vez pasada ya no corresponde. Si no se borra, cuando vuelva a
+      // aparecer el aviso NO ofrece subir la nueva (la condición es "todavía sin foto") y
+      // el muro de Ya en casa termina mostrando la foto del reencuentro anterior como si
+      // fuera de ahora. La fecha ya la limpiaba el trigger (supabase/resuelto-en.sql);
+      // esta columna se le había escapado, y ahí también quedó cubierta.
+      .update({ estado: 'activo', creado_en: ahora, preaviso_en: null, pausado_en: null, foto_reencuentro: null })
       .eq('id', id)
     if (error) throw error
     return
   }
-  const reportes = leerLocal().map((r) => (r.id === id ? { ...r, estado: 'activo', creadoEn: ahora } : r))
+  // Mismo criterio que arriba: al reabrir el aviso, el reencuentro anterior se olvida.
+  const reportes = leerLocal().map((r) => (r.id === id ? { ...r, estado: 'activo', creadoEn: ahora, fotoReencuentro: null } : r))
   guardarLocal(reportes)
 }
 
