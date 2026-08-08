@@ -2983,72 +2983,47 @@ select {
   color: var(--faint);
 }
 
-/* Historial de reencuentros (Mi cuenta → Volvieron a casa). Privado. */
+/* Historia de un aviso: las veces que esa mascota volvió a casa. Sólo la ve su familia.
+   Compacto y sin fotos: la del reencuentro ya está arriba, en el carrusel. */
 .reenc-hist {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 0 16px;
-}
-.reenc-item {
-  display: flex;
-  gap: 12px;
-  padding: 10px;
+  margin: 12px 16px 0;
+  padding: 11px 13px;
   border-radius: 14px;
-  background: #fff;
-  border: 1px solid #eee3d8;
+  background: #fff8e6;
+  border: 1.5px solid #ffe4a1;
 }
-.reenc-item-foto {
-  flex: none;
-  width: 84px;
-  height: 84px;
-  border-radius: 12px;
-  object-fit: cover;
-  background: #f3ece1;
-}
-.reenc-item-sinfoto {
+.reenc-hist-t {
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: #c9a58f;
-}
-.reenc-item-txt {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 3px;
-}
-.reenc-item-t {
+  gap: 7px;
   font-family: Fredoka, sans-serif;
   font-weight: 600;
-  font-size: 17px;
+  font-size: 14.5px;
   color: var(--navy);
 }
-.reenc-item-s {
-  font-size: 13px;
-  font-weight: 800;
+.reenc-hist-t .mi {
   color: var(--amber);
 }
-.reenc-item-d {
+.reenc-hist-l {
+  display: flex;
+  gap: 8px;
+  margin-top: 7px;
+  padding-left: 2px;
   font-size: 12.5px;
   font-weight: 700;
   color: var(--faint);
-  line-height: 1.4;
+  line-height: 1.45;
 }
-/* Contador al lado de una sección del menú (hoy: cuántas veces volvieron a casa). */
-.menu-n {
-  margin-left: auto;
-  padding: 1px 8px;
-  border-radius: 999px;
-  background: #fff3d6;
-  color: #9a6b00;
+.reenc-hist-f {
+  flex: none;
+  color: var(--slate);
+}
+/* Cuántas veces volvió, en la tarjeta de Mis mascotas. */
+.masc-volvio {
+  margin-top: 3px;
   font-size: 12px;
   font-weight: 800;
-}
-.menu-n + .menu-arrow {
-  margin-left: 6px;
+  color: var(--amber);
 }
 
 /* "¿Tenés una foto de X ya en casa?" dentro del aviso resuelto (sólo el dueño). En ámbar

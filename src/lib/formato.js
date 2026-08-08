@@ -34,6 +34,15 @@ export function tiempoRelativo(iso) {
   return antes.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })
 }
 
+// Cuánto estuvo afuera, para la historia de un reencuentro. Es lo que convierte una
+// lista de fechas en un relato: no es lo mismo "volvió" que "estuvo nueve días afuera".
+// En minúscula porque va detrás de la fecha ("12 mar · estuvo 9 días afuera").
+export function textoDias(dias) {
+  if (dias == null) return ''
+  if (dias <= 0) return 'volvió el mismo día 🙌'
+  return dias === 1 ? 'estuvo 1 día afuera' : `estuvo ${dias} días afuera`
+}
+
 // "volvió hace 3 días" / "volvió ayer" / "volvió el 12 mar".
 //
 // En la pestaña "Ya en casa" un "hace 6 días" pelado se lee como si fuera cuándo se

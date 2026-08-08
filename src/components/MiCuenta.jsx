@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import PetCard from './PetCard.jsx'
-import { getMisReportes, getMisMascotas, getReportesPorIds, marcarResuelto, renovarReporte, reactivarReporte, desactivarCuenta, reactivarCuenta, subirFoto, guardarFotoReencuentro } from '../data/store.js'
+import { getMisReportes, getMisMascotas, getReportesPorIds, marcarResuelto, renovarReporte, reactivarReporte, desactivarCuenta, reactivarCuenta, subirFoto, guardarFotoReencuentro, getMisReencuentros } from '../data/store.js'
 import PhotoPicker from './PhotoPicker.jsx'
 import { avatarDe, nombreUsuario } from '../lib/formato.js'
 import { soportado as pushSoportado, yaSuscripto, activarPush, desactivarPush } from '../lib/push.js'
@@ -8,7 +8,6 @@ import { supabase, supabaseConfigurado } from '../lib/supabase.js'
 import NotifPrefs from './NotifPrefs.jsx'
 import MisUbicaciones from './MisUbicaciones.jsx'
 import PrimerosPasos from './PrimerosPasos.jsx'
-import MisReencuentros from './MisReencuentros.jsx'
 import { confirmar } from '../lib/confirmar.js'
 import { pasoHecho, marcarPaso } from '../lib/pasos.js'
 import { fotoOptimizada } from '../lib/foto.js'
@@ -27,7 +26,6 @@ const TITULOS = {
   ubicaciones: 'Mis ubicaciones',
   notificaciones: 'Notificaciones',
   avisos: 'Avisos',
-  reencuentros: 'Volvieron a casa',
   cuenta: 'Mi cuenta',
   'primeros-pasos': 'Primeros pasos',
 }
@@ -157,6 +155,20 @@ export default function MiCuenta({
   function avisoActivoDe(m) {
     return (mios || []).find((r) => r.mascotaId === m.id && r.estado === 'activo') || null
   }
+
+  // Cuántas veces volvió a casa cada mascota. UNA consulta para todas y se agrupa acá:
+  // una por tarjeta sería el mismo dato pedido cinco veces.
+  const [vueltas, setVueltas] = useState({})
+  useEffect(() => {
+    if (!user?.id) return
+    getMisReencuentros(user.id)
+      .then((lista) => {
+        const porMascota = {}
+        for (const x of lista) if (x.mascotaId) porMascota[x.mascotaId] = (porMascota[x.mascotaId] || 0) + 1
+        setVueltas(porMascota)
+      })
+      .catch(() => setVueltas({}))
+  }, [user?.id])
   // Recibe el aviso entero: App lo necesita para armar el festejo (la pantalla que
   // ofrece compartir el reencuentro). Antes acá se marcaba resuelto a mano y sólo
   // salía un toast, así que cerrando desde Mi cuenta se perdía ese momento.
@@ -485,6 +497,11 @@ export default function MiCuenta({
                           {ESPECIE_LBL[m.especie] || 'Mascota'}
                           {m.color ? ` · ${m.color}` : ''}
                         </div>
+                        {/* Su historia, en chiquito. El detalle de cada vez está en el
+                            aviso; acá alcanza con que la familia vea que quedó registrado. */}
+                        {vueltas[m.id] > 0 && (
+                          <div className="masc-volvio">🏠 Volvió {vueltas[m.id] === 1 ? 'a casa' : `${vueltas[m.id]} veces`}</div>
+                        )}
                         {perdido ? (
                           <button className="masc-aparecio" onClick={() => aparecio(aviso)}>
                             <span className="mi" style={{ fontSize: 17 }}>celebration</span>
@@ -648,8 +665,6 @@ export default function MiCuenta({
 
         {/* ---------------- Mis ubicaciones ---------------- */}
         {seccion === 'ubicaciones' && <MisUbicaciones user={user} onToast={onToast} />}
-
-        {seccion === 'reencuentros' && <MisReencuentros user={user} />}
 
         <div style={{ height: 'calc(24px + env(safe-area-inset-bottom))' }} />
       </div>

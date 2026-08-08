@@ -73,6 +73,22 @@ calendario del hilo de novedades. Acá van las mejoras nuevas, de ahí en adelan
   abrirse: antes mostraba un segundo todo sin completar y después se tildaba solo.
 - [ ] push desde el panel    [ ] redes
 
+## Tu aviso guarda todas las veces que volvió a casa
+
+- commit: "El historial de reencuentros vive en el aviso" · 8-ago-2026
+- Qué cambió: si una mascota se pierde más de una vez, cada vuelta a casa queda guardada.
+  Entrás a tu aviso y ves su historia: **"Volvió a casa 2 veces"**, con la fecha de cada
+  vez y cuántos días estuvo afuera. Antes eso no se guardaba en ningún lado: al reabrir un
+  aviso, el reencuentro anterior se perdía.
+- Por qué le importa: es parte de la vida de la mascota. Y para la familia que ya pasó por
+  esto, ver "la otra vez volvió a los 2 días" en el peor momento vale más que cualquier
+  cosa que le podamos decir nosotros.
+- Dónde se ve: entrá a un aviso **tuyo** que hayas marcado como "Ya en casa". Abajo
+  aparece el cartel ámbar **"🏠 Volvió a casa"** con la fecha y los días. Si además tenés
+  la mascota cargada en **Mis mascotas**, en su tarjeta figura **"🏠 Volvió 2 veces"**.
+  (Esto lo ve solamente su familia: no es público.)
+- [ ] push desde el panel    [ ] redes
+
 ## Subir la foto del reencuentro, desde el aviso
 
 - commit: "La foto del reencuentro se sube desde el propio aviso" · 7-ago-2026

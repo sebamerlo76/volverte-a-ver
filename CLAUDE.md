@@ -27,6 +27,31 @@ también.
 Si no sabés cuál sos, preguntá antes de escribir un archivo. Dos chats tocando el
 mismo repo en vivo es la forma más rápida de romper algo.
 
+## Los dos deploys: producción y el demo
+
+El mismo repo está publicado dos veces, y `git push` actualiza los dos:
+
+- **chicho.ar** — producción. Base real, usuarios reales, notificaciones reales.
+- **chicho-demo.vercel.app** — el mismo código **sin las variables de Supabase**. Corre
+  en modo local (localStorage): cada visitante ve su propio contenido, arranca vacío y
+  **no toca la base**. Ahí Sebastián graba los tutoriales de Instagram, para no dispararle
+  avisos falsos a la gente.
+
+**Cómo distinguirlos de verdad**: mirar `var u = '%VITE_SUPABASE_URL%'` en el HTML servido.
+Si el literal quedó **sin reemplazar**, es el demo. **NO alcanza con mirar el
+`<link rel="preconnect">` a Supabase: está escrito a mano en `index.html` y aparece igual
+en los dos.** Ese error ya se cometió una vez y llevó a afirmar que el demo escribía en
+producción y a recomendar borrarlo.
+
+En el demo no anda nada que necesite la base (~31 funciones del store): panel de admin,
+push, seguir avisos, historial de reencuentros, link de gestión sin cuenta y las huellas
+visuales guardadas. **Es esperable, no un bug.** Sí andan publicar, editar, marcar
+reencuentro, mascotas, avistamientos, ubicaciones, mapa y filtros.
+
+Desde el 7-ago el demo se saca solo de Google: `index.html` inyecta `noindex` cuando
+detecta que faltan las variables (si no, aparecería en las búsquedas un Chicho vacío
+compitiendo con el real).
+
 ## Estamos EN VIVO
 
 Hay usuarios reales y avisos de mascotas perdidas de verdad. Lo que sale, la gente lo

@@ -3,8 +3,8 @@ import MapaLeaflet from './MapaLazy.jsx'
 import { puntoDeReporte } from '../lib/parana.js'
 import { ubicacionTexto } from '../lib/localidades.js'
 import { badgeEstado, subLinea, textoTipo } from '../lib/estados.js'
-import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero, getContactoReporte, subirFoto, guardarFotoReencuentro } from '../data/store.js'
-import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel } from '../lib/formato.js'
+import { getAvistamientos, sumarApoyo, denunciarReporte, reportarNumero, reportesDeNumero, getContactoReporte, subirFoto, guardarFotoReencuentro, getHistorialDe } from '../data/store.js'
+import { nombreMostrado, tiempoRelativo, fechaLegible, fechaHora, linkWhatsApp, linkWhatsAppAvist, linkTel, textoDias } from '../lib/formato.js'
 import { tipoAporte, aporteEnMapa } from '../lib/aportes.js'
 import { compartirFlyer } from '../lib/flyer.js'
 import { useAplauso } from '../lib/useAplauso.js'
@@ -116,6 +116,20 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, onResolverAd
   const carruselRef = useRef(null)
   const [pidiendoFoto, setPidiendoFoto] = useState(false)
   const [subiendoFoto, setSubiendoFoto] = useState(false)
+
+  // La historia de esta mascota: cada vez que volvió a casa. Es PRIVADA (la RLS sólo
+  // devuelve las del dueño), por eso ni se pide si el aviso no es propio.
+  const [historial, setHistorial] = useState([])
+  useEffect(() => {
+    if (!esMio || !r?.id) return setHistorial([])
+    let vivo = true
+    getHistorialDe({ reporteId: r.id, mascotaId: r.mascotaId })
+      .then((h) => vivo && setHistorial(h))
+      .catch(() => vivo && setHistorial([]))
+    return () => {
+      vivo = false
+    }
+  }, [esMio, r?.id, r?.mascotaId])
 
   // Foto del reencuentro, subida desde el propio aviso. Misma mecánica que en Mi cuenta:
   // se guarda el RECORTE (it.thumb), que es lo que se ve en el feed y en el muro.
@@ -661,6 +675,28 @@ export default function Detalle({ r, esMio, esAdmin, onBorrarAdmin, onResolverAd
           Avisos, o sea a tres toques y en otra pantalla: el que entra a ver a su mascota
           que volvió lo busca acá. Y es a donde lleva el link de la notificación y el que
           le mandamos por WhatsApp para pedírsela. */}
+      {/* La historia de la mascota, adentro del aviso: es donde uno la busca, y no en una
+          sección aparte del menú. Si la mascota está cargada, incluye los reencuentros de
+          sus otros avisos — es el mismo bichito aunque el aviso sea otro. */}
+      {esMio && historial.length > 0 && (
+        <div className="reenc-hist">
+          <div className="reenc-hist-t">
+            <span className="mi fill" style={{ fontSize: 19 }}>
+              home
+            </span>
+            {historial.length === 1 ? 'Volvió a casa' : `Volvió a casa ${historial.length} veces`}
+          </div>
+          {/* Al revés que la consulta (que trae lo más nuevo primero): una historia se
+              lee de la primera vez a la última, no como una lista de novedades. */}
+          {[...historial].reverse().map((h) => (
+            <div key={h.id} className="reenc-hist-l">
+              <span className="reenc-hist-f">{fechaLegible(h.volvioEn)} ·</span>
+              <span>{textoDias(h.dias)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {esMio && resuelto && !r.fotoReencuentro && (
         <div className="reenc-pide">
           {!pidiendoFoto ? (

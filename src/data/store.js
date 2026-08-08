@@ -495,18 +495,10 @@ export async function getReportesPorIds(ids) {
 }
 
 // Trae SOLO los avisos de un usuario (activos y resueltos), más nuevo primero.
-// Historial de reencuentros del usuario (ver supabase/schema-historial-reencuentros.sql).
-// Es PRIVADO: la RLS ya filtra por dueño, el user_id de acá es sólo para no pedir nada
-// cuando no hay sesión. Devuelve [] si la tabla todavía no existe, así la pantalla no se
-// rompe antes de correr el SQL — pero se deja el aviso en consola para no fallar mudo.
-export async function getMisReencuentros(userId) {
-  if (!userId || !supabaseConfigurado) return []
-  const { data, error } = await supabase.from('reencuentros').select('*').order('volvio_en', { ascending: false })
-  if (error) {
-    console.warn('reencuentros:', error.message, '— ¿falta correr schema-historial-reencuentros.sql?')
-    return []
-  }
-  return (data || []).map((f) => ({
+// Historial de reencuentros (ver supabase/schema-historial-reencuentros.sql). Es PRIVADO:
+// la RLS filtra por dueño, así que no hace falta pasar el user_id a la consulta.
+function reencuentroDesdeFila(f) {
+  return {
     id: f.id,
     reporteId: f.reporte_id,
     mascotaId: f.mascota_id,
@@ -519,7 +511,40 @@ export async function getMisReencuentros(userId) {
     tieneFotoReencuentro: !!f.foto,
     dias: f.dias,
     volvioEn: f.volvio_en,
-  }))
+  }
+}
+// Devuelve [] si la tabla todavía no existe, así nada se rompe antes de correr el SQL —
+// pero deja el aviso en consola para no fallar mudo.
+async function pedirReencuentros(filtrar) {
+  if (!supabaseConfigurado) return []
+  let q = supabase.from('reencuentros').select('*').order('volvio_en', { ascending: false })
+  if (filtrar) q = filtrar(q)
+  const { data, error } = await q
+  if (error) {
+    // La pista del SQL sólo si el error ES que falta la tabla. Antes se agregaba siempre,
+    // así que un id mal formado decía "¿falta correr el SQL?" y mandaba a buscar al lugar
+    // equivocado — justo lo que uno no necesita cuando algo no anda.
+    const faltaTabla = /schema cache|does not exist|relation .* does not exist/i.test(error.message)
+    console.warn('reencuentros:', error.message, faltaTabla ? '— ¿falta correr schema-historial-reencuentros.sql?' : '')
+    return []
+  }
+  return (data || []).map(reencuentroDesdeFila)
+}
+
+// Todos los del usuario. Se usa para pintar "volvió N veces" en las tarjetas de Mis
+// mascotas: UNA consulta y se agrupa en memoria, en vez de una por tarjeta.
+export async function getMisReencuentros(userId) {
+  if (!userId) return []
+  return pedirReencuentros()
+}
+
+// Los de UN aviso, para mostrar su historia adentro. Si la mascota está cargada, se suman
+// los de sus otros avisos: es la misma mascota aunque el aviso sea otro — que es
+// exactamente lo que Sebastián quería ver, "la vida del bichito".
+export async function getHistorialDe({ reporteId, mascotaId } = {}) {
+  if (!reporteId && !mascotaId) return []
+  const filtro = mascotaId && reporteId ? `reporte_id.eq.${reporteId},mascota_id.eq.${mascotaId}` : mascotaId ? `mascota_id.eq.${mascotaId}` : `reporte_id.eq.${reporteId}`
+  return pedirReencuentros((q) => q.or(filtro))
 }
 
 export async function getMisReportes(userId) {

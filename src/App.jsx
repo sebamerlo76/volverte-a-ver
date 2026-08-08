@@ -39,7 +39,7 @@ const NotifPanel = lazy(() => import('./components/NotifPanel.jsx'))
 const MenuUsuario = lazy(() => import('./components/MenuUsuario.jsx'))
 const Soporte = lazy(() => import('./components/Soporte.jsx'))
 const Lightbox = lazy(() => import('./components/Lightbox.jsx'))
-import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, borrarReporteAdmin, resolverReporteAdmin, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte, getUbicaciones, marcarCompartido, getMisReencuentros } from './data/store.js'
+import { getReportes, getReportePorId, marcarResuelto, reactivarReporte, eliminarReporte, borrarReporteAdmin, resolverReporteAdmin, seguirReporte, dejarDeSeguir, getSeguidos, getNotificaciones, marcarNotifLeida, marcarTodasLeidas, marcarLeidasDeReporte, getUbicaciones, marcarCompartido } from './data/store.js'
 import { supabase, supabaseConfigurado } from './lib/supabase.js'
 import { contarLogin, logins, pasosOk } from './lib/pasos.js'
 import { nombreMostrado } from './lib/formato.js'
@@ -379,16 +379,6 @@ export default function App() {
       if (t != null) clearTimeout(t)
     }
   }, [])
-
-  // Cuántas veces volvió a casa alguna de sus mascotas. Sólo el CONTEO, para decidir si
-  // el menú muestra la sección: la lista se pide recién al abrirla.
-  const [misReencuentros, setMisReencuentros] = useState(0)
-  useEffect(() => {
-    if (!user?.id) return setMisReencuentros(0)
-    getMisReencuentros(user.id)
-      .then((l) => setMisReencuentros(l.length))
-      .catch(() => setMisReencuentros(0))
-  }, [user?.id])
 
   // Avisos que sigue el usuario (para el botón Seguir / Siguiendo).
   useEffect(() => {
@@ -1012,7 +1002,7 @@ export default function App() {
         {soporteAbierto && <Soporte onCerrar={() => setSoporteAbierto(false)} />}
 
         {menuAbierto && (
-          <MenuUsuario user={user} esAdmin={esAdmin} hayNudge={nudge} reencuentros={misReencuentros} onSeccion={irSeccion} onLogout={salir} onCerrar={() => setMenuAbierto(false)} />
+          <MenuUsuario user={user} esAdmin={esAdmin} hayNudge={nudge} onSeccion={irSeccion} onLogout={salir} onCerrar={() => setMenuAbierto(false)} />
         )}
 
         {notifsAbierto && (
